@@ -33,8 +33,20 @@ export interface IOrder extends Document {
     status: 'pending' | 'preparing' | 'prepared' | 'served';
   }>;
   subtotal: number;
-  taxAmount: number;
-  taxPercentage: number;
+
+  // UPDATED: Changed from single tax to multiple taxes array
+  taxes: Array<{
+    taxId: Types.ObjectId; // Reference to Tax document
+    name: string; // Denormalized for historical record (e.g., "CGST", "SGST")
+    taxType: 'percentage' | 'fixed';
+    value: number; // The rate/amount at time of order
+    calculatedAmount: number; // Actual tax amount calculated
+    applicableOn: 'subtotal' | 'item_total' | 'after_other_taxes';
+    category: 'food_tax' | 'service_tax' | 'room_tax' | 'luxury_tax' | 'other';
+    groupName?: string; // For grouped display (e.g., "GST")
+  }>;
+  totalTaxAmount: number; // Sum of all tax amounts
+
   serviceChargeAmount: number;
   serviceChargePercentage: number;
   discountAmount: number;
@@ -184,15 +196,55 @@ const orderSchema = new Schema<IOrder>(
       required: true,
       min: 0,
     },
-    taxAmount: {
+    // UPDATED: Changed from taxAmount and taxPercentage to taxes array
+    taxes: [
+      {
+        taxId: {
+          type: Schema.Types.ObjectId,
+          ref: 'Tax',
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        taxType: {
+          type: String,
+          enum: ['percentage', 'fixed'],
+          required: true,
+        },
+        value: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        calculatedAmount: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        applicableOn: {
+          type: String,
+          enum: ['subtotal', 'item_total', 'after_other_taxes'],
+          required: true,
+        },
+        category: {
+          type: String,
+          enum: ['food_tax', 'service_tax', 'room_tax', 'luxury_tax', 'other'],
+          required: true,
+        },
+        groupName: {
+          type: String,
+          trim: true,
+        },
+      },
+    ],
+    totalTaxAmount: {
       type: Number,
       required: true,
       min: 0,
-    },
-    taxPercentage: {
-      type: Number,
-      required: true,
-      min: 0,
+      default: 0,
     },
     serviceChargeAmount: {
       type: Number,

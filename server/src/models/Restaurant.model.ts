@@ -1,5 +1,5 @@
 // src/models/Restaurant.model.ts
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IRestaurant extends Document {
   name: string;
@@ -31,7 +31,7 @@ export interface IRestaurant extends Document {
   };
   defaultSettings: {
     currency: string;
-    taxPercentage: number;
+    defaultTaxIds: Types.ObjectId[]; // UPDATED: Array of Tax references
     serviceChargePercentage: number;
     allowBranchOverride: boolean;
   };
@@ -140,10 +140,13 @@ const restaurantSchema = new Schema<IRestaurant>(
         type: String,
         default: 'USD',
       },
-      taxPercentage: {
-        type: Number,
-        default: 0,
-      },
+      // UPDATED: Changed from taxPercentage to defaultTaxIds (array of Tax references)
+      defaultTaxIds: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'Tax',
+        },
+      ],
       serviceChargePercentage: {
         type: Number,
         default: 0,
