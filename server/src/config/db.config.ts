@@ -1,7 +1,7 @@
 // src/config/db.config.ts
 import mongoose from 'mongoose';
 
-const connectDB = async (): Promise<void> => {
+export const connectDB = async (): Promise<void> => {
   try {
     const mongoUri = process.env.MONGO_URI;
 
@@ -18,5 +18,3 @@ const connectDB = async (): Promise<void> => {
     process.exit(1);
   }
 };
-
-export default connectDB;

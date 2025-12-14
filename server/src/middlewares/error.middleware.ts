@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '@/utils/AppError';
+import { AppError } from '@/utils';
 
 export const globalErrorHandler = (
   err: any,
@@ -7,35 +7,33 @@ export const globalErrorHandler = (
   res: Response,
   _next: NextFunction
 ) => {
-  err.statusCode = err.statusCode || 500;
-  err.message = err.message || 'Something went wrong';
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Something went wrong';
 
-  // DEV error response
+  // DEV
   if (process.env.NODE_ENV === 'development') {
     console.error('💥 ERROR:', err);
 
-    return res.status(err.statusCode).json({
-      status: err.status || 'error',
-      message: err.message,
+    return res.status(statusCode).json({
+      success: false,
+      message,
       stack: err.stack,
     });
   }
 
-  // PROD error response
+  // PROD
   if (process.env.NODE_ENV === 'production') {
-    // Operational errors → send clean message
     if (err.isOperational) {
-      return res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message,
+      return res.status(statusCode).json({
+        success: false,
+        message,
       });
     }
 
-    // Programming / unknown errors
     console.error('💥 UNEXPECTED ERROR:', err);
 
     return res.status(500).json({
-      status: 'error',
+      success: false,
       message: 'Something went very wrong!',
     });
   }

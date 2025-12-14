@@ -1,8 +1,8 @@
 import express from 'express';
 import apiV1Routes from '@/routes';
-import { requestLogger } from '@/config/morgan.config';
-import { AppError } from '@/utils/AppError';
-import { globalErrorHandler } from '@/middlewares/error.middleware';
+import { requestLogger } from '@/config';
+import { AppError } from '@/utils';
+import { globalErrorHandler } from '@/middlewares';
 
 const app = express();
 
