@@ -8,7 +8,8 @@
     "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "prettier": "prettier --write \"src/**/*.{ts,json}\""
+    "prettier": "prettier --write \"src/**/*.{ts,json}\"",
+    "tree": "npx tree-node-cli -I \"node_modules|dist\" -S > structure.txt"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,7 @@
     "@types/node": "^25.0.2",
     "nodemon": "^3.1.11",
     "prettier": "^3.7.4",
+    "tree-cli": "^0.6.7",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
