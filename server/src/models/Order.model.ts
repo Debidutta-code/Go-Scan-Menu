@@ -40,7 +40,7 @@ export interface IOrder extends Document {
   discountAmount: number;
   totalAmount: number;
   status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
-  orderType: 'dine-in' | 'takeaway' | 'delivery';
+  orderType: 'dine-in' | 'takeaway';
   paymentStatus: 'pending' | 'paid' | 'failed';
   paymentMethod?: 'cash' | 'card' | 'upi' | 'wallet' | 'online';
   specialInstructions?: string;
@@ -221,7 +221,7 @@ const orderSchema = new Schema<IOrder>(
     },
     orderType: {
       type: String,
-      enum: ['dine-in', 'takeaway', 'delivery'],
+      enum: ['dine-in', 'takeaway'],
       default: 'dine-in',
     },
     paymentStatus: {
