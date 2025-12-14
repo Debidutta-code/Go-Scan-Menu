@@ -15,7 +15,9 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "@types/node": "^25.0.1",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.0.2",
     "nodemon": "^3.1.11",
     "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
@@ -23,6 +25,9 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "mongoose": "^9.0.1"
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.0.1",
+    "morgan": "^1.10.1"
   }
 }
