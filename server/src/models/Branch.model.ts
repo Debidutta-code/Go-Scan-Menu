@@ -49,134 +49,134 @@ const branchSchema = new Schema<IBranch>(
     restaurantId: {
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
-      required: true
+      required: true,
     },
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     code: {
       type: String,
       required: true,
       trim: true,
-      uppercase: true
+      uppercase: true,
     },
     email: {
       type: String,
       required: true,
       lowercase: true,
-      trim: true
+      trim: true,
     },
     phone: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     address: {
       street: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
       },
       city: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
       },
       state: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
       },
       zipCode: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
       },
       country: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
       },
       coordinates: {
         latitude: {
           type: Number,
-          required: true
+          required: true,
         },
         longitude: {
           type: Number,
-          required: true
-        }
-      }
+          required: true,
+        },
+      },
     },
     manager: {
       staffId: {
         type: Schema.Types.ObjectId,
-        ref: 'Staff'
+        ref: 'Staff',
       },
       name: String,
       email: String,
-      phone: String
+      phone: String,
     },
     settings: {
       currency: {
         type: String,
-        default: 'USD'
+        default: 'USD',
       },
       taxPercentage: {
         type: Number,
-        default: 0
+        default: 0,
       },
       serviceChargePercentage: {
         type: Number,
-        default: 0
+        default: 0,
       },
       acceptOrders: {
         type: Boolean,
-        default: true
+        default: true,
       },
       operatingHours: [
         {
           day: {
             type: String,
             enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-            required: true
+            required: true,
           },
           isOpen: {
             type: Boolean,
-            default: true
+            default: true,
           },
           openTime: {
             type: String,
-            default: '09:00'
+            default: '09:00',
           },
           closeTime: {
             type: String,
-            default: '22:00'
-          }
-        }
+            default: '22:00',
+          },
+        },
       ],
       minOrderAmount: {
         type: Number,
-        default: 0
+        default: 0,
       },
       deliveryAvailable: {
         type: Boolean,
-        default: false
+        default: false,
       },
       takeawayAvailable: {
         type: Boolean,
-        default: true
-      }
+        default: true,
+      },
     },
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

@@ -19,41 +19,41 @@ const categorySchema = new Schema<ICategory>(
     restaurantId: {
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
-      required: true
+      required: true,
     },
     branchId: {
       type: Schema.Types.ObjectId,
-      ref: 'Branch'
+      ref: 'Branch',
     },
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     description: {
       type: String,
-      trim: true
+      trim: true,
     },
     image: {
       type: String,
-      trim: true
+      trim: true,
     },
     displayOrder: {
       type: Number,
-      default: 0
+      default: 0,
     },
     scope: {
       type: String,
       enum: ['restaurant', 'branch'],
-      default: 'restaurant'
+      default: 'restaurant',
     },
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

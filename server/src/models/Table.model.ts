@@ -19,46 +19,46 @@ const tableSchema = new Schema<ITable>(
     restaurantId: {
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
-      required: true
+      required: true,
     },
     branchId: {
       type: Schema.Types.ObjectId,
       ref: 'Branch',
-      required: true
+      required: true,
     },
     tableNumber: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     qrCode: {
       type: String,
       required: true,
       unique: true,
-      trim: true
+      trim: true,
     },
     capacity: {
       type: Number,
       required: true,
-      min: 1
+      min: 1,
     },
     location: {
       type: String,
       enum: ['indoor', 'outdoor', 'balcony', 'rooftop', 'private room'],
-      default: 'indoor'
+      default: 'indoor',
     },
     status: {
       type: String,
       enum: ['available', 'occupied', 'reserved', 'maintenance'],
-      default: 'available'
+      default: 'available',
     },
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

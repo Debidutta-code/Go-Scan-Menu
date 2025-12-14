@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
-import * as path from "path";
+import * as path from 'path';
 
 export default ({ mode }: any) => {
   // load env variables based on current mode (development, production, etc)
@@ -18,20 +18,20 @@ export default ({ mode }: any) => {
       react(),
       ...(shouldAnalyze
         ? [
-          visualizer({
-            open: true,
-            filename: './dist/stats.html',
-            gzipSize: true,
-            brotliSize: true,
-          }),
-        ]
+            visualizer({
+              open: true,
+              filename: './dist/stats.html',
+              gzipSize: true,
+              brotliSize: true,
+            }),
+          ]
         : []),
     ],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "src")
-      }
+        '@': path.resolve(__dirname, 'src'),
+      },
     },
-    server: {}
+    server: {},
   });
 };

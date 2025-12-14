@@ -15,27 +15,27 @@ const superAdminSchema = new Schema<ISuperAdmin>(
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
-      trim: true
+      trim: true,
     },
     password: {
       type: String,
-      required: true
+      required: true,
     },
     role: {
       type: String,
       default: 'super_admin',
-      immutable: true
-    }
+      immutable: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

@@ -63,192 +63,192 @@ const orderSchema = new Schema<IOrder>(
     restaurantId: {
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
-      required: true
+      required: true,
     },
     branchId: {
       type: Schema.Types.ObjectId,
       ref: 'Branch',
-      required: true
+      required: true,
     },
     tableId: {
       type: Schema.Types.ObjectId,
       ref: 'Table',
-      required: true
+      required: true,
     },
     tableNumber: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     orderNumber: {
       type: String,
       required: true,
       unique: true,
-      trim: true
+      trim: true,
     },
     customerName: {
       type: String,
-      trim: true
+      trim: true,
     },
     customerPhone: {
       type: String,
-      trim: true
+      trim: true,
     },
     customerEmail: {
       type: String,
       lowercase: true,
-      trim: true
+      trim: true,
     },
     items: [
       {
         menuItemId: {
           type: Schema.Types.ObjectId,
           ref: 'MenuItem',
-          required: true
+          required: true,
         },
         name: {
           type: String,
           required: true,
-          trim: true
+          trim: true,
         },
         image: {
           type: String,
-          trim: true
+          trim: true,
         },
         quantity: {
           type: Number,
           required: true,
-          min: 1
+          min: 1,
         },
         price: {
           type: Number,
           required: true,
-          min: 0
+          min: 0,
         },
         variant: {
           name: {
             type: String,
-            trim: true
+            trim: true,
           },
           price: {
             type: Number,
-            min: 0
-          }
+            min: 0,
+          },
         },
         addons: [
           {
             name: {
               type: String,
               required: true,
-              trim: true
+              trim: true,
             },
             price: {
               type: Number,
               required: true,
-              min: 0
-            }
-          }
+              min: 0,
+            },
+          },
         ],
         customizations: [
           {
             name: {
               type: String,
               required: true,
-              trim: true
+              trim: true,
             },
             value: {
               type: String,
               required: true,
-              trim: true
-            }
-          }
+              trim: true,
+            },
+          },
         ],
         specialInstructions: {
           type: String,
-          trim: true
+          trim: true,
         },
         itemTotal: {
           type: Number,
           required: true,
-          min: 0
+          min: 0,
         },
         status: {
           type: String,
           enum: ['pending', 'preparing', 'prepared', 'served'],
-          default: 'pending'
-        }
-      }
+          default: 'pending',
+        },
+      },
     ],
     subtotal: {
       type: Number,
       required: true,
-      min: 0
+      min: 0,
     },
     taxAmount: {
       type: Number,
       required: true,
-      min: 0
+      min: 0,
     },
     taxPercentage: {
       type: Number,
       required: true,
-      min: 0
+      min: 0,
     },
     serviceChargeAmount: {
       type: Number,
       required: true,
-      min: 0
+      min: 0,
     },
     serviceChargePercentage: {
       type: Number,
       required: true,
-      min: 0
+      min: 0,
     },
     discountAmount: {
       type: Number,
       default: 0,
-      min: 0
+      min: 0,
     },
     totalAmount: {
       type: Number,
       required: true,
-      min: 0
+      min: 0,
     },
     status: {
       type: String,
       enum: ['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed', 'cancelled'],
-      default: 'pending'
+      default: 'pending',
     },
     orderType: {
       type: String,
       enum: ['dine-in', 'takeaway', 'delivery'],
-      default: 'dine-in'
+      default: 'dine-in',
     },
     paymentStatus: {
       type: String,
       enum: ['pending', 'paid', 'failed'],
-      default: 'pending'
+      default: 'pending',
     },
     paymentMethod: {
       type: String,
-      enum: ['cash', 'card', 'upi', 'wallet', 'online']
+      enum: ['cash', 'card', 'upi', 'wallet', 'online'],
     },
     specialInstructions: {
       type: String,
-      trim: true
+      trim: true,
     },
     assignedStaffId: {
       type: Schema.Types.ObjectId,
-      ref: 'Staff'
+      ref: 'Staff',
     },
     assignedStaffName: {
       type: String,
-      trim: true
+      trim: true,
     },
     orderTime: {
       type: Date,
       required: true,
-      default: Date.now
+      default: Date.now,
     },
     confirmedAt: Date,
     preparingAt: Date,
@@ -258,11 +258,11 @@ const orderSchema = new Schema<IOrder>(
     cancelledAt: Date,
     cancellationReason: {
       type: String,
-      trim: true
-    }
+      trim: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

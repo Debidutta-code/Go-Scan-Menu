@@ -29,92 +29,92 @@ const analyticsSchema = new Schema<IAnalytics>(
     restaurantId: {
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
-      required: true
+      required: true,
     },
     branchId: {
       type: Schema.Types.ObjectId,
-      ref: 'Branch'
+      ref: 'Branch',
     },
     date: {
       type: Date,
-      required: true
+      required: true,
     },
     totalOrders: {
       type: Number,
       required: true,
       default: 0,
-      min: 0
+      min: 0,
     },
     completedOrders: {
       type: Number,
       required: true,
       default: 0,
-      min: 0
+      min: 0,
     },
     cancelledOrders: {
       type: Number,
       required: true,
       default: 0,
-      min: 0
+      min: 0,
     },
     totalRevenue: {
       type: Number,
       required: true,
       default: 0,
-      min: 0
+      min: 0,
     },
     averageOrderValue: {
       type: Number,
       required: true,
       default: 0,
-      min: 0
+      min: 0,
     },
     topSellingItems: [
       {
         menuItemId: {
           type: Schema.Types.ObjectId,
           ref: 'MenuItem',
-          required: true
+          required: true,
         },
         name: {
           type: String,
           required: true,
-          trim: true
+          trim: true,
         },
         quantity: {
           type: Number,
           required: true,
-          min: 0
+          min: 0,
         },
         revenue: {
           type: Number,
           required: true,
-          min: 0
-        }
-      }
+          min: 0,
+        },
+      },
     ],
     tableUtilization: [
       {
         tableId: {
           type: Schema.Types.ObjectId,
           ref: 'Table',
-          required: true
+          required: true,
         },
         tableNumber: {
           type: String,
           required: true,
-          trim: true
+          trim: true,
         },
         ordersServed: {
           type: Number,
           required: true,
-          min: 0
-        }
-      }
-    ]
+          min: 0,
+        },
+      },
+    ],
   },
   {
-    timestamps: { createdAt: true, updatedAt: false }
+    timestamps: { createdAt: true, updatedAt: false },
   }
 );
 

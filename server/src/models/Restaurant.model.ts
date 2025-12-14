@@ -49,127 +49,127 @@ const restaurantSchema = new Schema<IRestaurant>(
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     slug: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
-      trim: true
+      trim: true,
     },
     type: {
       type: String,
       enum: ['single', 'chain'],
-      required: true
+      required: true,
     },
     owner: {
       name: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
       },
       email: {
         type: String,
         required: true,
         unique: true,
         lowercase: true,
-        trim: true
+        trim: true,
       },
       phone: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
       },
       password: {
         type: String,
-        required: true
-      }
+        required: true,
+      },
     },
     subscription: {
       plan: {
         type: String,
         enum: ['trial', 'basic', 'premium', 'enterprise'],
-        default: 'trial'
+        default: 'trial',
       },
       startDate: {
         type: Date,
-        required: true
+        required: true,
       },
       endDate: {
         type: Date,
-        required: true
+        required: true,
       },
       isActive: {
         type: Boolean,
-        default: true
+        default: true,
       },
       maxBranches: {
         type: Number,
-        required: true
+        required: true,
       },
       currentBranches: {
         type: Number,
-        default: 0
-      }
+        default: 0,
+      },
     },
     theme: {
       primaryColor: {
         type: String,
-        default: '#3498db'
+        default: '#3498db',
       },
       secondaryColor: {
         type: String,
-        default: '#95a5a6'
+        default: '#95a5a6',
       },
       accentColor: {
         type: String,
-        default: '#e74c3c'
+        default: '#e74c3c',
       },
       logo: String,
       favicon: String,
       font: {
         type: String,
-        default: 'Roboto'
+        default: 'Roboto',
       },
       bannerImage: String,
-      customCSS: String
+      customCSS: String,
     },
     defaultSettings: {
       currency: {
         type: String,
-        default: 'USD'
+        default: 'USD',
       },
       taxPercentage: {
         type: Number,
-        default: 0
+        default: 0,
       },
       serviceChargePercentage: {
         type: Number,
-        default: 0
+        default: 0,
       },
       allowBranchOverride: {
         type: Boolean,
-        default: false
-      }
+        default: false,
+      },
     },
     menuSettings: {
       centralizedMenu: {
         type: Boolean,
-        default: true
+        default: true,
       },
       allowBranchSpecificItems: {
         type: Boolean,
-        default: false
-      }
+        default: false,
+      },
     },
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

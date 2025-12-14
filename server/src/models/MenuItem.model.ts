@@ -50,166 +50,166 @@ const menuItemSchema = new Schema<IMenuItem>(
     restaurantId: {
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
-      required: true
+      required: true,
     },
     branchId: {
       type: Schema.Types.ObjectId,
-      ref: 'Branch'
+      ref: 'Branch',
     },
     categoryId: {
       type: Schema.Types.ObjectId,
       ref: 'Category',
-      required: true
+      required: true,
     },
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     description: {
       type: String,
-      trim: true
+      trim: true,
     },
     image: {
       type: String,
-      trim: true
+      trim: true,
     },
     images: [
       {
         type: String,
-        trim: true
-      }
+        trim: true,
+      },
     ],
     price: {
       type: Number,
       required: true,
-      min: 0
+      min: 0,
     },
     discountPrice: {
       type: Number,
-      min: 0
+      min: 0,
     },
     scope: {
       type: String,
       enum: ['restaurant', 'branch'],
-      default: 'restaurant'
+      default: 'restaurant',
     },
     branchPricing: [
       {
         branchId: {
           type: Schema.Types.ObjectId,
           ref: 'Branch',
-          required: true
+          required: true,
         },
         price: {
           type: Number,
           required: true,
-          min: 0
+          min: 0,
         },
         discountPrice: {
           type: Number,
-          min: 0
+          min: 0,
         },
         isAvailable: {
           type: Boolean,
-          default: true
-        }
-      }
+          default: true,
+        },
+      },
     ],
     preparationTime: {
       type: Number,
-      min: 0
+      min: 0,
     },
     calories: {
       type: Number,
-      min: 0
+      min: 0,
     },
     spiceLevel: {
       type: String,
-      enum: ['mild', 'medium', 'hot', 'extra_hot']
+      enum: ['mild', 'medium', 'hot', 'extra_hot'],
     },
     tags: [
       {
         type: String,
-        trim: true
-      }
+        trim: true,
+      },
     ],
     allergens: [
       {
         type: String,
-        trim: true
-      }
+        trim: true,
+      },
     ],
     variants: [
       {
         name: {
           type: String,
           required: true,
-          trim: true
+          trim: true,
         },
         price: {
           type: Number,
           required: true,
-          min: 0
+          min: 0,
         },
         isDefault: {
           type: Boolean,
-          default: false
-        }
-      }
+          default: false,
+        },
+      },
     ],
     addons: [
       {
         name: {
           type: String,
           required: true,
-          trim: true
+          trim: true,
         },
         price: {
           type: Number,
           required: true,
-          min: 0
-        }
-      }
+          min: 0,
+        },
+      },
     ],
     customizations: [
       {
         name: {
           type: String,
           required: true,
-          trim: true
+          trim: true,
         },
         options: [
           {
             type: String,
-            trim: true
-          }
+            trim: true,
+          },
         ],
         isRequired: {
           type: Boolean,
-          default: false
-        }
-      }
+          default: false,
+        },
+      },
     ],
     isAvailable: {
       type: Boolean,
-      default: true
+      default: true,
     },
     availableQuantity: {
       type: Number,
-      min: 0
+      min: 0,
     },
     isActive: {
       type: Boolean,
-      default: true
+      default: true,
     },
     displayOrder: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

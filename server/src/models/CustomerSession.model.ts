@@ -21,51 +21,51 @@ const customerSessionSchema = new Schema<ICustomerSession>(
     restaurantId: {
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
-      required: true
+      required: true,
     },
     branchId: {
       type: Schema.Types.ObjectId,
       ref: 'Branch',
-      required: true
+      required: true,
     },
     tableId: {
       type: Schema.Types.ObjectId,
       ref: 'Table',
-      required: true
+      required: true,
     },
     sessionId: {
       type: String,
       required: true,
       unique: true,
-      trim: true
+      trim: true,
     },
     themePreference: {
       type: String,
       enum: ['light', 'dark'],
-      default: 'light'
+      default: 'light',
     },
     activeOrderId: {
       type: Schema.Types.ObjectId,
-      ref: 'Order'
+      ref: 'Order',
     },
     startTime: {
       type: Date,
       required: true,
-      default: Date.now
+      default: Date.now,
     },
     lastActivityTime: {
       type: Date,
       required: true,
-      default: Date.now
+      default: Date.now,
     },
     endTime: Date,
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
@@ -73,4 +73,7 @@ const customerSessionSchema = new Schema<ICustomerSession>(
 customerSessionSchema.index({ sessionId: 1 }, { unique: true });
 customerSessionSchema.index({ branchId: 1, tableId: 1, isActive: 1 });
 
-export const CustomerSession = mongoose.model<ICustomerSession>('CustomerSession', customerSessionSchema);
+export const CustomerSession = mongoose.model<ICustomerSession>(
+  'CustomerSession',
+  customerSessionSchema
+);

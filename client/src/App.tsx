@@ -1,9 +1,11 @@
-import Example from "@/pages/Example";
+import Example from '@/pages/Example';
 
 function App() {
-  return <>
-    <Example />
-  </>;
+  return (
+    <>
+      <Example />
+    </>
+  );
 }
 
-export default App; 
+export default App;

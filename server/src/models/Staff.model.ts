@@ -29,81 +29,81 @@ const staffSchema = new Schema<IStaff>(
     restaurantId: {
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
-      required: true
+      required: true,
     },
     branchId: {
       type: Schema.Types.ObjectId,
-      ref: 'Branch'
+      ref: 'Branch',
     },
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     email: {
       type: String,
       required: true,
       lowercase: true,
-      trim: true
+      trim: true,
     },
     phone: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     password: {
       type: String,
-      required: true
+      required: true,
     },
     role: {
       type: String,
       enum: ['owner', 'branch_manager', 'manager', 'waiter', 'kitchen_staff', 'cashier'],
-      required: true
+      required: true,
     },
     accessLevel: {
       type: String,
       enum: ['single_branch', 'all_branches'],
-      default: 'single_branch'
+      default: 'single_branch',
     },
     allowedBranchIds: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Branch'
-      }
+        ref: 'Branch',
+      },
     ],
     permissions: {
       canViewOrders: {
         type: Boolean,
-        default: false
+        default: false,
       },
       canUpdateOrders: {
         type: Boolean,
-        default: false
+        default: false,
       },
       canManageMenu: {
         type: Boolean,
-        default: false
+        default: false,
       },
       canManageStaff: {
         type: Boolean,
-        default: false
+        default: false,
       },
       canViewReports: {
         type: Boolean,
-        default: false
+        default: false,
       },
       canManageSettings: {
         type: Boolean,
-        default: false
-      }
+        default: false,
+      },
     },
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
