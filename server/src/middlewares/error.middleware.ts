@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '@/utils';
+import { sendResponse } from '@/utils/apiResponse';
 
 export const globalErrorHandler = (
   err: any,
@@ -10,31 +11,17 @@ export const globalErrorHandler = (
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Something went wrong';
 
-  // DEV
   if (process.env.NODE_ENV === 'development') {
     console.error('💥 ERROR:', err);
+  }
 
-    return res.status(statusCode).json({
-      success: false,
+  if (err instanceof AppError) {
+    return sendResponse(res, statusCode, {
       message,
-      stack: err.stack,
     });
   }
 
-  // PROD
-  if (process.env.NODE_ENV === 'production') {
-    if (err.isOperational) {
-      return res.status(statusCode).json({
-        success: false,
-        message,
-      });
-    }
-
-    console.error('💥 UNEXPECTED ERROR:', err);
-
-    return res.status(500).json({
-      success: false,
-      message: 'Something went very wrong!',
-    });
-  }
+  return sendResponse(res, 500, {
+    message: 'Internal server error',
+  });
 };
