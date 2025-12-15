@@ -1,10 +1,10 @@
 // src/config/db.config.ts
 import mongoose from 'mongoose';
+import { envConfig } from '@/config';
 
 export const connectDB = async (): Promise<void> => {
   try {
-    const mongoUri = process.env.MONGO_URI;
-
+    const mongoUri = envConfig.mongoUri;
     if (!mongoUri) {
       throw new Error('MONGO_URI is not defined in environment variables');
     }
