@@ -19,7 +19,7 @@ export class SuperAdminAuthMiddleware {
         return ResponseUtil.error(res, 'Access denied. Super admin privileges required.', 403);
       }
 
-      req.user = {
+      (req as any).user = {
         id: decoded.id,
         email: decoded.email,
         role: decoded.role

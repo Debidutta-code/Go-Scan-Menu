@@ -54,7 +54,7 @@ export class SuperAdminAuthController {
 
   getProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user?.id;
+      const userId = (req as any).user?.id;
 
       if (!userId) {
         return ResponseUtil.error(res, 'Unauthorized', 401);
@@ -73,7 +73,7 @@ export class SuperAdminAuthController {
 
   updateProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user?.id;
+      const userId = (req as any).user?.id;
       const { name, email } = req.body;
 
       if (!userId) {
@@ -96,7 +96,7 @@ export class SuperAdminAuthController {
 
   changePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user?.id;
+      const userId = (req as any).user?.id;
       const { currentPassword, newPassword } = req.body;
 
       if (!userId) {
