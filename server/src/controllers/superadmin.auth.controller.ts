@@ -1,7 +1,7 @@
-// FILE 10: src/controllers/superadmin.auth.controller.ts
+// FILE: src/controllers/superadmin.auth.controller.ts
 import { Request, Response, NextFunction } from 'express';
-import { SuperAdminAuthService } from '../services/superadmin.auth.service';
-import { ResponseUtil } from '../utils/response.util';
+import { SuperAdminAuthService } from '@/services';
+import { sendResponse } from '@/utils';
 
 export class SuperAdminAuthController {
   private service: SuperAdminAuthService;
@@ -15,19 +15,26 @@ export class SuperAdminAuthController {
       const { name, email, password } = req.body;
 
       if (!name || !email || !password) {
-        return ResponseUtil.error(res, 'Please provide name, email, and password', 400);
+        return sendResponse(res, 400, {
+          message: 'Please provide name, email, and password'
+        });
       }
 
       if (password.length < 6) {
-        return ResponseUtil.error(res, 'Password must be at least 6 characters long', 400);
+        return sendResponse(res, 400, {
+          message: 'Password must be at least 6 characters long'
+        });
       }
 
       const result = await this.service.register({ name, email, password });
 
-      return ResponseUtil.success(res, 'Super admin registered successfully', result, 201);
+      return sendResponse(res, 201, {
+        message: 'Super admin registered successfully',
+        data: result
+      });
     } catch (error: any) {
       if (error.message === 'Super admin with this email already exists') {
-        return ResponseUtil.error(res, error.message, 400);
+        return sendResponse(res, 400, { message: error.message });
       }
       next(error);
     }
@@ -38,15 +45,20 @@ export class SuperAdminAuthController {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return ResponseUtil.error(res, 'Please provide email and password', 400);
+        return sendResponse(res, 400, {
+          message: 'Please provide email and password'
+        });
       }
 
       const result = await this.service.login({ email, password });
 
-      return ResponseUtil.success(res, 'Login successful', result);
+      return sendResponse(res, 200, {
+        message: 'Login successful',
+        data: result
+      });
     } catch (error: any) {
       if (error.message === 'Invalid email or password') {
-        return ResponseUtil.error(res, error.message, 401);
+        return sendResponse(res, 401, { message: error.message });
       }
       next(error);
     }
@@ -57,15 +69,18 @@ export class SuperAdminAuthController {
       const userId = (req as any).user?.id;
 
       if (!userId) {
-        return ResponseUtil.error(res, 'Unauthorized', 401);
+        return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
       const superAdmin = await this.service.getProfile(userId);
 
-      return ResponseUtil.success(res, 'Profile fetched successfully', superAdmin);
+      return sendResponse(res, 200, {
+        message: 'Profile fetched successfully',
+        data: superAdmin
+      });
     } catch (error: any) {
       if (error.message === 'Super admin not found') {
-        return ResponseUtil.error(res, error.message, 404);
+        return sendResponse(res, 404, { message: error.message });
       }
       next(error);
     }
@@ -77,18 +92,21 @@ export class SuperAdminAuthController {
       const { name, email } = req.body;
 
       if (!userId) {
-        return ResponseUtil.error(res, 'Unauthorized', 401);
+        return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
       const superAdmin = await this.service.updateProfile(userId, { name, email });
 
-      return ResponseUtil.success(res, 'Profile updated successfully', superAdmin);
+      return sendResponse(res, 200, {
+        message: 'Profile updated successfully',
+        data: superAdmin
+      });
     } catch (error: any) {
       if (error.message === 'Email already in use') {
-        return ResponseUtil.error(res, error.message, 400);
+        return sendResponse(res, 400, { message: error.message });
       }
       if (error.message === 'Super admin not found') {
-        return ResponseUtil.error(res, error.message, 404);
+        return sendResponse(res, 404, { message: error.message });
       }
       next(error);
     }
@@ -100,15 +118,19 @@ export class SuperAdminAuthController {
       const { currentPassword, newPassword } = req.body;
 
       if (!userId) {
-        return ResponseUtil.error(res, 'Unauthorized', 401);
+        return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
       if (!currentPassword || !newPassword) {
-        return ResponseUtil.error(res, 'Please provide current and new password', 400);
+        return sendResponse(res, 400, {
+          message: 'Please provide current and new password'
+        });
       }
 
       if (newPassword.length < 6) {
-        return ResponseUtil.error(res, 'New password must be at least 6 characters long', 400);
+        return sendResponse(res, 400, {
+          message: 'New password must be at least 6 characters long'
+        });
       }
 
       const result = await this.service.changePassword(userId, {
@@ -116,13 +138,15 @@ export class SuperAdminAuthController {
         newPassword
       });
 
-      return ResponseUtil.success(res, result.message);
+      return sendResponse(res, 200, {
+        message: result.message
+      });
     } catch (error: any) {
       if (error.message === 'Current password is incorrect') {
-        return ResponseUtil.error(res, error.message, 401);
+        return sendResponse(res, 401, { message: error.message });
       }
       if (error.message === 'Super admin not found') {
-        return ResponseUtil.error(res, error.message, 404);
+        return sendResponse(res, 404, { message: error.message });
       }
       next(error);
     }

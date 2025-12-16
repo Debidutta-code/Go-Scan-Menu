@@ -1,7 +1,7 @@
 // FILE 12: src/routes/superadmin.auth.route.ts
 import { Router } from 'express';
-import { SuperAdminAuthController } from '../controllers/superadmin.auth.controller';
-import { SuperAdminAuthMiddleware } from '../middlewares/superadmin.auth.middleware';
+import { SuperAdminAuthController } from '@/controllers';
+import { SuperAdminAuthMiddleware } from '@/middlewares';
 
 const router = Router();
 const controller = new SuperAdminAuthController();

@@ -1,5 +1,5 @@
 // FILE 8: src/repositories/superadmin.auth.repository.ts
-import { SuperAdmin, ISuperAdmin } from '../models/SuperAdmin.model';
+import { SuperAdmin, ISuperAdmin } from '@/models';
 
 export class SuperAdminAuthRepository {
   async findByEmail(email: string): Promise<ISuperAdmin | null> {
