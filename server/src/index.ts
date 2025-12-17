@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import app from '@/app';
 import { connectDB, envConfig } from '@/config';
+import '@/types';
 
 const PORT = envConfig.PORT;
 

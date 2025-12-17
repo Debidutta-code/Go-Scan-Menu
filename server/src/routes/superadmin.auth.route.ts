@@ -1,18 +1,34 @@
-// FILE 12: src/routes/superadmin.auth.route.ts
+// FILE 4: src/routes/superadmin.auth.route.ts
 import { Router } from 'express';
-import { SuperAdminAuthController } from '@/controllers';
-import { SuperAdminAuthMiddleware } from '@/middlewares';
+import * as SuperAdminAuthController from '@/controllers/';
+import { AuthMiddleware } from '@/middlewares';
 
 const router = Router();
-const controller = new SuperAdminAuthController();
 
 // Public routes
-router.post('/register', controller.register);
-router.post('/login', controller.login);
+router.post('/register', SuperAdminAuthController.register);
+router.post('/login', SuperAdminAuthController.login);
 
-// Protected routes
-router.get('/profile', SuperAdminAuthMiddleware.authenticate, controller.getProfile);
-router.put('/profile', SuperAdminAuthMiddleware.authenticate, controller.updateProfile);
-router.put('/change-password', SuperAdminAuthMiddleware.authenticate, controller.changePassword);
+// Protected routes (Super Admin only)
+router.get(
+  '/profile',
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorizeRoles('super_admin'),
+  SuperAdminAuthController.getProfile
+);
+
+router.put(
+  '/profile',
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorizeRoles('super_admin'),
+  SuperAdminAuthController.updateProfile
+);
+
+router.put(
+  '/change-password',
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorizeRoles('super_admin'),
+  SuperAdminAuthController.changePassword
+);
 
 export default router;
