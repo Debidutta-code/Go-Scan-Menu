@@ -18,7 +18,7 @@ export const registerSuperAdmin = async (data: {
     throw new Error('Super admin with this email already exists');
   }
 
-  const hashedPassword = await BcryptUtil.hashPassword(data.password);
+  const hashedPassword = await BcryptUtil.hash(data.password);
 
   const superAdmin = await createSuperAdmin({
     name: data.name,
@@ -29,7 +29,15 @@ export const registerSuperAdmin = async (data: {
   const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
-    role: 'super_admin'
+    role: 'super_admin',
+    permissions: {
+      canViewOrders: true,
+      canUpdateOrders: true,
+      canManageMenu: true,
+      canManageStaff: true,
+      canViewReports: true,
+      canManageSettings: true
+    }
   });
 
   return {
@@ -49,7 +57,7 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
     throw new Error('Invalid email or password');
   }
 
-  const isPasswordValid = await BcryptUtil.comparePassword(data.password, superAdmin.password);
+  const isPasswordValid = await BcryptUtil.compare(data.password, superAdmin.password);
   if (!isPasswordValid) {
     throw new Error('Invalid email or password');
   }
@@ -57,7 +65,15 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
   const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
-    role: 'super_admin'
+    role: 'super_admin',
+    permissions: {
+      canViewOrders: true,
+      canUpdateOrders: true,
+      canManageMenu: true,
+      canManageStaff: true,
+      canViewReports: true,
+      canManageSettings: true
+    }
   });
 
   return {
@@ -109,7 +125,7 @@ export const changeSuperAdminPassword = async (
     throw new Error('Super admin not found');
   }
 
-  const isPasswordValid = await BcryptUtil.comparePassword(
+  const isPasswordValid = await BcryptUtil.compare(
     data.currentPassword,
     superAdmin.password
   );
@@ -118,7 +134,7 @@ export const changeSuperAdminPassword = async (
     throw new Error('Current password is incorrect');
   }
 
-  const hashedPassword = await BcryptUtil.hashPassword(data.newPassword);
+  const hashedPassword = await BcryptUtil.hash(data.newPassword);
   await updateSuperAdminById(userId, { password: hashedPassword });
 
   return { message: 'Password changed successfully' };

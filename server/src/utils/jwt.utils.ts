@@ -1,6 +1,7 @@
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import type { StringValue } from 'ms';
 import { envConfig as config } from '@/config';
+import { IStaff } from '@/models';
 
 export interface JWTPayload {
   id: string;
@@ -17,6 +18,7 @@ export interface JWTPayload {
   branchId?: string;
   accessLevel?: 'single_branch' | 'all_branches';
   allowedBranchIds?: string[];
+  permissions: IStaff['permissions'];
 }
 
 export class JWTUtil {

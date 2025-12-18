@@ -1,15 +1,13 @@
+// src/routes/index.ts
 import { Router } from 'express';
-import authRoutes from './auth.routes';
-import superadminAuthRoutes from './superadmin.auth.route';
+import superAdminAuthRoutes from './superadmin.auth.route';
+import restaurantRoutes from './restaurant.routes';
+import staffRoutes from './staff.routes';
 
 const router = Router();
 
-/**
- * /api/v1/auth
- * /api/v1/menu
- */
-router.use('/auth', authRoutes);
-// router.use('/menu', menuRoutes);
-router.use('/superadmin', superadminAuthRoutes);
+router.use('/super-admin/auth', superAdminAuthRoutes);
+router.use('/restaurants', restaurantRoutes);
+router.use('/staff', staffRoutes);
 
 export default router;
