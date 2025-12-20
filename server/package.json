@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/index.ts",
-    "build": "tsc",
+    "dev": "nodemon --watch src --ext ts,json --exec ts-node -r tsconfig-paths/register --project tsconfig.json src/index.ts",
     "start": "node dist/index.js",
     "prettier": "prettier --write \"src/**/*.{ts,json}\"",
     "tree": "npx tree-node-cli -I \"node_modules|dist\" -S > structure.txt"
