@@ -85,11 +85,7 @@ export class CategoryService {
     return this.categoryRepo.findByRestaurant(restaurantId, scope, page, limit);
   }
 
-  async getCategoriesByBranch(
-    branchId: string,
-    page: number = 1,
-    limit: number = 50
-  ) {
+  async getCategoriesByBranch(branchId: string, page: number = 1, limit: number = 50) {
     return this.categoryRepo.findByBranch(branchId, page, limit);
   }
 

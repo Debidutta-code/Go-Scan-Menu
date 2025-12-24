@@ -19,42 +19,22 @@ const canManageMenu = [
 ];
 
 // Create menu item
-router.post(
-  '/',
-  ...canManageMenu,
-  menuItemController.createMenuItem
-);
+router.post('/', ...canManageMenu, menuItemController.createMenuItem);
 
 // Get all menu items by restaurant
-router.get(
-  '/',
-  menuItemController.getMenuItemsByRestaurant
-);
+router.get('/', menuItemController.getMenuItemsByRestaurant);
 
 // Get all menu items by category
-router.get(
-  '/category/:categoryId',
-  menuItemController.getMenuItemsByCategory
-);
+router.get('/category/:categoryId', menuItemController.getMenuItemsByCategory);
 
 // Get all menu items by branch
-router.get(
-  '/branch/:branchId',
-  menuItemController.getMenuItemsByBranch
-);
+router.get('/branch/:branchId', menuItemController.getMenuItemsByBranch);
 
 // Get single menu item
-router.get(
-  '/:id',
-  menuItemController.getMenuItem
-);
+router.get('/:id', menuItemController.getMenuItem);
 
 // Update menu item
-router.put(
-  '/:id',
-  ...canManageMenu,
-  menuItemController.updateMenuItem
-);
+router.put('/:id', ...canManageMenu, menuItemController.updateMenuItem);
 
 // Update availability (managers and waiters can do this)
 router.patch(
@@ -71,10 +51,6 @@ router.put(
 );
 
 // Delete menu item
-router.delete(
-  '/:id',
-  ...canManageMenu,
-  menuItemController.deleteMenuItem
-);
+router.delete('/:id', ...canManageMenu, menuItemController.deleteMenuItem);
 
 export default router;

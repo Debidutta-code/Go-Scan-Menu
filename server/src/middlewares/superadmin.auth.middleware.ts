@@ -9,7 +9,7 @@ export class SuperAdminAuthMiddleware {
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return sendResponse(res, 401, {
-          message: 'No token provided. Access denied.'
+          message: 'No token provided. Access denied.',
         });
       }
 
@@ -18,20 +18,20 @@ export class SuperAdminAuthMiddleware {
 
       if (decoded.role !== 'super_admin') {
         return sendResponse(res, 403, {
-          message: 'Access denied. Super admin privileges required.'
+          message: 'Access denied. Super admin privileges required.',
         });
       }
 
       (req as any).user = {
         id: decoded.id,
         email: decoded.email,
-        role: decoded.role
+        role: decoded.role,
       };
 
       next();
     } catch (error: any) {
       return sendResponse(res, 401, {
-        message: 'Authentication failed'
+        message: 'Authentication failed',
       });
     }
   };

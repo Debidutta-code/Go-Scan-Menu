@@ -21,7 +21,7 @@ export class MenuItemController {
     }
 
     const menuItem = await this.menuItemService.createMenuItem(restaurantId, req.body);
-    
+
     sendResponse(res, 201, {
       message: 'Menu item created successfully',
       data: menuItem,
@@ -30,7 +30,7 @@ export class MenuItemController {
 
   getMenuItem = catchAsync(async (req: Request, res: Response) => {
     const menuItem = await this.menuItemService.getMenuItem(req.params.id);
-    
+
     sendResponse(res, 200, {
       message: 'Menu item retrieved successfully',
       data: menuItem,
@@ -43,7 +43,7 @@ export class MenuItemController {
     const limit = parseInt(req.query.limit as string) || 50;
 
     const result = await this.menuItemService.getMenuItemsByCategory(categoryId, page, limit);
-    
+
     sendResponse(res, 200, {
       message: 'Menu items retrieved successfully',
       data: result,
@@ -54,7 +54,7 @@ export class MenuItemController {
     const restaurantId = req.params.restaurantId || req.user?.restaurantId;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
-    
+
     const filter: any = {};
     if (req.query.scope) filter.scope = req.query.scope;
     if (req.query.isAvailable) filter.isAvailable = req.query.isAvailable === 'true';
@@ -65,7 +65,7 @@ export class MenuItemController {
       page,
       limit
     );
-    
+
     sendResponse(res, 200, {
       message: 'Menu items retrieved successfully',
       data: result,
@@ -78,7 +78,7 @@ export class MenuItemController {
     const limit = parseInt(req.query.limit as string) || 50;
 
     const result = await this.menuItemService.getMenuItemsByBranch(branchId, page, limit);
-    
+
     sendResponse(res, 200, {
       message: 'Menu items retrieved successfully',
       data: result,
@@ -89,11 +89,8 @@ export class MenuItemController {
     const restaurantId = req.params.restaurantId || req.user?.restaurantId;
     const branchId = req.query.branchId as string | undefined;
 
-    const menuItems = await this.menuItemService.getAllMenuItemsForMenu(
-      restaurantId!,
-      branchId
-    );
-    
+    const menuItems = await this.menuItemService.getAllMenuItemsForMenu(restaurantId!, branchId);
+
     sendResponse(res, 200, {
       message: 'Menu items retrieved successfully',
       data: menuItems,
@@ -107,7 +104,7 @@ export class MenuItemController {
       restaurantId!,
       req.body
     );
-    
+
     sendResponse(res, 200, {
       message: 'Menu item updated successfully',
       data: menuItem,
@@ -130,7 +127,7 @@ export class MenuItemController {
       restaurantId!,
       isAvailable
     );
-    
+
     sendResponse(res, 200, {
       message: 'Availability updated successfully',
       data: menuItem,
@@ -155,7 +152,7 @@ export class MenuItemController {
       branchId,
       { price, discountPrice, isAvailable }
     );
-    
+
     sendResponse(res, 200, {
       message: 'Branch pricing updated successfully',
       data: menuItem,
@@ -164,11 +161,8 @@ export class MenuItemController {
 
   deleteMenuItem = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const menuItem = await this.menuItemService.deleteMenuItem(
-      req.params.id,
-      restaurantId!
-    );
-    
+    const menuItem = await this.menuItemService.deleteMenuItem(req.params.id, restaurantId!);
+
     sendResponse(res, 200, {
       message: 'Menu item deleted successfully',
       data: menuItem,

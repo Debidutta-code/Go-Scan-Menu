@@ -5,7 +5,7 @@ import {
   loginSuperAdmin,
   getSuperAdminProfile,
   updateSuperAdminProfile,
-  changeSuperAdminPassword
+  changeSuperAdminPassword,
 } from '@/services/superadmin.auth.service';
 import { sendResponse } from '@/utils';
 
@@ -15,13 +15,13 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
     if (!name || !email || !password) {
       return sendResponse(res, 400, {
-        message: 'Please provide name, email, and password'
+        message: 'Please provide name, email, and password',
       });
     }
 
     if (password.length < 6) {
       return sendResponse(res, 400, {
-        message: 'Password must be at least 6 characters long'
+        message: 'Password must be at least 6 characters long',
       });
     }
 
@@ -29,7 +29,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
     return sendResponse(res, 201, {
       message: 'Super admin registered successfully',
-      data: result
+      data: result,
     });
   } catch (error: any) {
     if (error.message === 'Super admin with this email already exists') {
@@ -45,7 +45,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     if (!email || !password) {
       return sendResponse(res, 400, {
-        message: 'Please provide email and password'
+        message: 'Please provide email and password',
       });
     }
 
@@ -53,7 +53,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     return sendResponse(res, 200, {
       message: 'Login successful',
-      data: result
+      data: result,
     });
   } catch (error: any) {
     if (error.message === 'Invalid email or password') {
@@ -75,7 +75,7 @@ export const getProfile = async (req: Request, res: Response, next: NextFunction
 
     return sendResponse(res, 200, {
       message: 'Profile fetched successfully',
-      data: superAdmin
+      data: superAdmin,
     });
   } catch (error: any) {
     if (error.message === 'Super admin not found') {
@@ -98,7 +98,7 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
 
     return sendResponse(res, 200, {
       message: 'Profile updated successfully',
-      data: superAdmin
+      data: superAdmin,
     });
   } catch (error: any) {
     if (error.message === 'Email already in use') {
@@ -122,23 +122,23 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
 
     if (!currentPassword || !newPassword) {
       return sendResponse(res, 400, {
-        message: 'Please provide current and new password'
+        message: 'Please provide current and new password',
       });
     }
 
     if (newPassword.length < 6) {
       return sendResponse(res, 400, {
-        message: 'New password must be at least 6 characters long'
+        message: 'New password must be at least 6 characters long',
       });
     }
 
     const result = await changeSuperAdminPassword(userId, {
       currentPassword,
-      newPassword
+      newPassword,
     });
 
     return sendResponse(res, 200, {
-      message: result.message
+      message: result.message,
     });
   } catch (error: any) {
     if (error.message === 'Current password is incorrect') {

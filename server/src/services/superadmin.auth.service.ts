@@ -4,7 +4,7 @@ import {
   findSuperAdminById,
   createSuperAdmin,
   updateSuperAdminById,
-  checkSuperAdminEmailExists
+  checkSuperAdminEmailExists,
 } from '@/repositories/superadmin.auth.repository';
 import { JWTUtil, BcryptUtil } from '@/utils';
 
@@ -23,7 +23,7 @@ export const registerSuperAdmin = async (data: {
   const superAdmin = await createSuperAdmin({
     name: data.name,
     email: data.email,
-    password: hashedPassword
+    password: hashedPassword,
   });
 
   const token = JWTUtil.generateToken({
@@ -36,8 +36,8 @@ export const registerSuperAdmin = async (data: {
       canManageMenu: true,
       canManageStaff: true,
       canViewReports: true,
-      canManageSettings: true
-    }
+      canManageSettings: true,
+    },
   });
 
   return {
@@ -45,9 +45,9 @@ export const registerSuperAdmin = async (data: {
       id: superAdmin._id,
       name: superAdmin.name,
       email: superAdmin.email,
-      role: superAdmin.role
+      role: superAdmin.role,
     },
-    token
+    token,
   };
 };
 
@@ -72,8 +72,8 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
       canManageMenu: true,
       canManageStaff: true,
       canViewReports: true,
-      canManageSettings: true
-    }
+      canManageSettings: true,
+    },
   });
 
   return {
@@ -81,9 +81,9 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
       id: superAdmin._id,
       name: superAdmin.name,
       email: superAdmin.email,
-      role: superAdmin.role
+      role: superAdmin.role,
     },
-    token
+    token,
   };
 };
 
@@ -125,10 +125,7 @@ export const changeSuperAdminPassword = async (
     throw new Error('Super admin not found');
   }
 
-  const isPasswordValid = await BcryptUtil.compare(
-    data.currentPassword,
-    superAdmin.password
-  );
+  const isPasswordValid = await BcryptUtil.compare(data.currentPassword, superAdmin.password);
 
   if (!isPasswordValid) {
     throw new Error('Current password is incorrect');

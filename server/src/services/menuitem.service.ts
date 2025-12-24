@@ -114,11 +114,7 @@ export class MenuItemService {
     return menuItem;
   }
 
-  async getMenuItemsByCategory(
-    categoryId: string,
-    page: number = 1,
-    limit: number = 50
-  ) {
+  async getMenuItemsByCategory(categoryId: string, page: number = 1, limit: number = 50) {
     return this.menuItemRepo.findByCategory(categoryId, page, limit);
   }
 

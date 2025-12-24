@@ -70,12 +70,7 @@ export class TableService {
     return table;
   }
 
-  async getTablesByBranch(
-    branchId: string,
-    page: number = 1,
-    limit: number = 10,
-    filter?: any
-  ) {
+  async getTablesByBranch(branchId: string, page: number = 1, limit: number = 10, filter?: any) {
     return this.tableRepo.findByBranch(branchId, filter, page, limit);
   }
 
@@ -88,11 +83,7 @@ export class TableService {
     return this.tableRepo.findByRestaurant(restaurantId, filter, page, limit);
   }
 
-  async updateTable(
-    id: string,
-    restaurantId: string,
-    data: Partial<ITable>
-  ): Promise<ITable> {
+  async updateTable(id: string, restaurantId: string, data: Partial<ITable>): Promise<ITable> {
     const table = await this.tableRepo.findById(id);
     if (!table || !table.isActive) {
       throw new AppError('Table not found', 404);
@@ -121,10 +112,7 @@ export class TableService {
     return updatedTable;
   }
 
-  async updateTableStatus(
-    id: string,
-    status: ITable['status']
-  ): Promise<ITable> {
+  async updateTableStatus(id: string, status: ITable['status']): Promise<ITable> {
     const table = await this.tableRepo.findById(id);
     if (!table || !table.isActive) {
       throw new AppError('Table not found', 404);
@@ -167,7 +155,7 @@ export class TableService {
     }
 
     const newQrCode = `${restaurantId}-${table.branchId.toString()}-${nanoid(10)}`;
-    
+
     const updatedTable = await this.tableRepo.update(id, { qrCode: newQrCode });
     if (!updatedTable) {
       throw new AppError('Failed to regenerate QR code', 500);

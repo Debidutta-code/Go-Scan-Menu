@@ -23,8 +23,8 @@ export class BranchController {
     const restaurantId = req.params.restaurantId || (req as any).user.restaurantId;
     const branch = await this.branchService.getBranch(req.params.id, restaurantId);
     sendResponse(res, 200, {
-        data: branch,
-        message: ''
+      data: branch,
+      message: '',
     });
   });
 
@@ -35,8 +35,8 @@ export class BranchController {
 
     const result = await this.branchService.getBranchesByRestaurant(restaurantId, page, limit);
     sendResponse(res, 200, {
-        data: result,
-        message: ''
+      data: result,
+      message: '',
     });
   });
 
@@ -51,7 +51,11 @@ export class BranchController {
 
   updateBranchSettings = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = req.params.restaurantId || (req as any).user.restaurantId;
-    const branch = await this.branchService.updateBranchSettings(req.params.id, restaurantId, req.body);
+    const branch = await this.branchService.updateBranchSettings(
+      req.params.id,
+      restaurantId,
+      req.body
+    );
     sendResponse(res, 200, {
       message: 'Branch settings updated successfully',
       data: branch,

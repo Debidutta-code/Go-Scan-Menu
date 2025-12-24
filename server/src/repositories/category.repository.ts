@@ -22,10 +22,7 @@ export class CategoryRepository {
     const query = { restaurantId, scope, isActive: true };
 
     const [categories, total] = await Promise.all([
-      Category.find(query)
-        .skip(skip)
-        .limit(limit)
-        .sort({ displayOrder: 1, name: 1 }),
+      Category.find(query).skip(skip).limit(limit).sort({ displayOrder: 1, name: 1 }),
       Category.countDocuments(query),
     ]);
 
@@ -40,11 +37,7 @@ export class CategoryRepository {
     };
   }
 
-  async findByBranch(
-    branchId: string,
-    page: number = 1,
-    limit: number = 50
-  ) {
+  async findByBranch(branchId: string, page: number = 1, limit: number = 50) {
     const skip = (page - 1) * limit;
     const query = { branchId, scope: 'branch', isActive: true };
 
@@ -73,9 +66,7 @@ export class CategoryRepository {
     const query: any = {
       restaurantId,
       isActive: true,
-      $or: [
-        { scope: 'restaurant', branchId: { $exists: false } },
-      ],
+      $or: [{ scope: 'restaurant', branchId: { $exists: false } }],
     };
 
     if (branchId) {

@@ -19,36 +19,19 @@ const canManageTables = [
 ];
 
 // Create table
-router.post(
-  '/',
-  ...canManageTables,
-  tableController.createTable
-);
+router.post('/', ...canManageTables, tableController.createTable);
 
 // Get all tables by branch
-router.get(
-  '/branch/:branchId',
-  tableController.getTablesByBranch
-);
+router.get('/branch/:branchId', tableController.getTablesByBranch);
 
 // Get all tables by restaurant
-router.get(
-  '/',
-  tableController.getTablesByRestaurant
-);
+router.get('/', tableController.getTablesByRestaurant);
 
 // Get single table
-router.get(
-  '/:id',
-  tableController.getTable
-);
+router.get('/:id', tableController.getTable);
 
 // Update table
-router.put(
-  '/:id',
-  ...canManageTables,
-  tableController.updateTable
-);
+router.put('/:id', ...canManageTables, tableController.updateTable);
 
 // Update table status (waiters can do this)
 router.patch(
@@ -58,17 +41,9 @@ router.patch(
 );
 
 // Regenerate QR code
-router.post(
-  '/:id/regenerate-qr',
-  ...canManageTables,
-  tableController.regenerateQrCode
-);
+router.post('/:id/regenerate-qr', ...canManageTables, tableController.regenerateQrCode);
 
 // Delete table
-router.delete(
-  '/:id',
-  ...canManageTables,
-  tableController.deleteTable
-);
+router.delete('/:id', ...canManageTables, tableController.deleteTable);
 
 export default router;

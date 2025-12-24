@@ -19,49 +19,24 @@ const canManageMenu = [
 ];
 
 // Create category
-router.post(
-  '/',
-  ...canManageMenu,
-  categoryController.createCategory
-);
+router.post('/', ...canManageMenu, categoryController.createCategory);
 
 // Get all categories by restaurant
-router.get(
-  '/',
-  categoryController.getCategoriesByRestaurant
-);
+router.get('/', categoryController.getCategoriesByRestaurant);
 
 // Get all categories by branch
-router.get(
-  '/branch/:branchId',
-  categoryController.getCategoriesByBranch
-);
+router.get('/branch/:branchId', categoryController.getCategoriesByBranch);
 
 // Get single category
-router.get(
-  '/:id',
-  categoryController.getCategory
-);
+router.get('/:id', categoryController.getCategory);
 
 // Update category
-router.put(
-  '/:id',
-  ...canManageMenu,
-  categoryController.updateCategory
-);
+router.put('/:id', ...canManageMenu, categoryController.updateCategory);
 
 // Update display order
-router.patch(
-  '/:id/display-order',
-  ...canManageMenu,
-  categoryController.updateDisplayOrder
-);
+router.patch('/:id/display-order', ...canManageMenu, categoryController.updateDisplayOrder);
 
 // Delete category
-router.delete(
-  '/:id',
-  ...canManageMenu,
-  categoryController.deleteCategory
-);
+router.delete('/:id', ...canManageMenu, categoryController.deleteCategory);
 
 export default router;

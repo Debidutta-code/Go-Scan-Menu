@@ -12,7 +12,7 @@ export class ResponseUtil {
     return res.status(statusCode).json({
       success: true,
       message,
-      data
+      data,
     });
   }
 
@@ -20,7 +20,7 @@ export class ResponseUtil {
     return res.status(statusCode).json({
       success: false,
       message,
-      error
+      error,
     });
   }
 }

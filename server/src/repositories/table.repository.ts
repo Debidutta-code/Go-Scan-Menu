@@ -16,12 +16,7 @@ export class TableRepository {
     return Table.findOne({ qrCode }).populate('restaurantId').populate('branchId');
   }
 
-  async findByBranch(
-    branchId: string,
-    filter: any = {},
-    page: number = 1,
-    limit: number = 10
-  ) {
+  async findByBranch(branchId: string, filter: any = {}, page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit;
     const query = { branchId, isActive: true, ...filter };
 
@@ -60,7 +55,7 @@ export class TableRepository {
         .populate('branchId')
         .skip(skip)
         .limit(limit)
-        .sort({ 'branchId': 1, tableNumber: 1 }),
+        .sort({ branchId: 1, tableNumber: 1 }),
       Table.countDocuments(query),
     ]);
 
@@ -75,10 +70,7 @@ export class TableRepository {
     };
   }
 
-  async findByTableNumber(
-    branchId: string,
-    tableNumber: string
-  ): Promise<ITable | null> {
+  async findByTableNumber(branchId: string, tableNumber: string): Promise<ITable | null> {
     return Table.findOne({ branchId, tableNumber });
   }
 

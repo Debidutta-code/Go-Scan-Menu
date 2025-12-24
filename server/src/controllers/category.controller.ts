@@ -21,7 +21,7 @@ export class CategoryController {
     }
 
     const category = await this.categoryService.createCategory(restaurantId, req.body);
-    
+
     sendResponse(res, 201, {
       message: 'Category created successfully',
       data: category,
@@ -30,7 +30,7 @@ export class CategoryController {
 
   getCategory = catchAsync(async (req: Request, res: Response) => {
     const category = await this.categoryService.getCategory(req.params.id);
-    
+
     sendResponse(res, 200, {
       message: 'Category retrieved successfully',
       data: category,
@@ -49,7 +49,7 @@ export class CategoryController {
       page,
       limit
     );
-    
+
     sendResponse(res, 200, {
       message: 'Categories retrieved successfully',
       data: result,
@@ -62,7 +62,7 @@ export class CategoryController {
     const limit = parseInt(req.query.limit as string) || 50;
 
     const result = await this.categoryService.getCategoriesByBranch(branchId, page, limit);
-    
+
     sendResponse(res, 200, {
       message: 'Categories retrieved successfully',
       data: result,
@@ -73,11 +73,8 @@ export class CategoryController {
     const restaurantId = req.params.restaurantId || req.user?.restaurantId;
     const branchId = req.query.branchId as string | undefined;
 
-    const categories = await this.categoryService.getAllCategoriesForMenu(
-      restaurantId!,
-      branchId
-    );
-    
+    const categories = await this.categoryService.getAllCategoriesForMenu(restaurantId!, branchId);
+
     sendResponse(res, 200, {
       message: 'Categories retrieved successfully',
       data: categories,
@@ -91,7 +88,7 @@ export class CategoryController {
       restaurantId!,
       req.body
     );
-    
+
     sendResponse(res, 200, {
       message: 'Category updated successfully',
       data: category,
@@ -114,7 +111,7 @@ export class CategoryController {
       restaurantId!,
       displayOrder
     );
-    
+
     sendResponse(res, 200, {
       message: 'Display order updated successfully',
       data: category,
@@ -123,11 +120,8 @@ export class CategoryController {
 
   deleteCategory = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const category = await this.categoryService.deleteCategory(
-      req.params.id,
-      restaurantId!
-    );
-    
+    const category = await this.categoryService.deleteCategory(req.params.id, restaurantId!);
+
     sendResponse(res, 200, {
       message: 'Category deleted successfully',
       data: category,

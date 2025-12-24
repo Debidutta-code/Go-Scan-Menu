@@ -23,7 +23,7 @@ export const updateSuperAdminById = async (
 ): Promise<ISuperAdmin | null> => {
   return SuperAdmin.findByIdAndUpdate(id, data, {
     new: true,
-    runValidators: true
+    runValidators: true,
   }).select('-password');
 };
 

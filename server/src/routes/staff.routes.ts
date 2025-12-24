@@ -10,11 +10,7 @@ const staffController = new StaffController();
 router.post('/login', staffController.login);
 
 // Protected routes
-router.get(
-  '/me',
-  AuthMiddleware.authenticate,
-  staffController.getCurrentUser
-);
+router.get('/me', AuthMiddleware.authenticate, staffController.getCurrentUser);
 
 router.post(
   '/',
@@ -24,11 +20,7 @@ router.post(
   staffController.createStaff
 );
 
-router.get(
-  '/:id',
-  AuthMiddleware.authenticate,
-  staffController.getStaff
-);
+router.get('/:id', AuthMiddleware.authenticate, staffController.getStaff);
 
 router.get(
   '/restaurant/:restaurantId',

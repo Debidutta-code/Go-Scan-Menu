@@ -15,11 +15,7 @@ export class MenuItemRepository {
       .populate('categoryId');
   }
 
-  async findByCategory(
-    categoryId: string,
-    page: number = 1,
-    limit: number = 50
-  ) {
+  async findByCategory(categoryId: string, page: number = 1, limit: number = 50) {
     const skip = (page - 1) * limit;
     const query = { categoryId, isActive: true };
 
@@ -58,7 +54,7 @@ export class MenuItemRepository {
         .populate('branchId')
         .skip(skip)
         .limit(limit)
-        .sort({ 'categoryId': 1, displayOrder: 1, name: 1 }),
+        .sort({ categoryId: 1, displayOrder: 1, name: 1 }),
       MenuItem.countDocuments(query),
     ]);
 
@@ -73,12 +69,7 @@ export class MenuItemRepository {
     };
   }
 
-  async findByBranch(
-    branchId: string,
-    filter: any = {},
-    page: number = 1,
-    limit: number = 50
-  ) {
+  async findByBranch(branchId: string, filter: any = {}, page: number = 1, limit: number = 50) {
     const skip = (page - 1) * limit;
     const query = { branchId, scope: 'branch', isActive: true, ...filter };
 
@@ -87,7 +78,7 @@ export class MenuItemRepository {
         .populate('categoryId')
         .skip(skip)
         .limit(limit)
-        .sort({ 'categoryId': 1, displayOrder: 1, name: 1 }),
+        .sort({ categoryId: 1, displayOrder: 1, name: 1 }),
       MenuItem.countDocuments(query),
     ]);
 
@@ -107,9 +98,7 @@ export class MenuItemRepository {
       restaurantId,
       isActive: true,
       isAvailable: true,
-      $or: [
-        { scope: 'restaurant', branchId: { $exists: false } },
-      ],
+      $or: [{ scope: 'restaurant', branchId: { $exists: false } }],
     };
 
     if (branchId) {
@@ -118,7 +107,7 @@ export class MenuItemRepository {
 
     return MenuItem.find(query)
       .populate('categoryId')
-      .sort({ 'categoryId': 1, displayOrder: 1, name: 1 });
+      .sort({ categoryId: 1, displayOrder: 1, name: 1 });
   }
 
   async update(id: string, data: Partial<IMenuItem>): Promise<IMenuItem | null> {
@@ -141,9 +130,7 @@ export class MenuItemRepository {
     const item = await MenuItem.findById(id);
     if (!item) return null;
 
-    const existingIndex = item.branchPricing.findIndex(
-      (bp) => bp.branchId.toString() === branchId
-    );
+    const existingIndex = item.branchPricing.findIndex((bp) => bp.branchId.toString() === branchId);
 
     if (existingIndex >= 0) {
       // Update existing branch pricing

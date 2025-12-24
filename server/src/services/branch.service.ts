@@ -80,7 +80,12 @@ export class BranchService {
   }
 
   async getBranchesByRestaurant(restaurantId: string, page: number, limit: number, filter?: any) {
-    const result = await this.branchRepo.findAllByRestaurant(restaurantId, { isActive: true, ...filter }, page, limit);
+    const result = await this.branchRepo.findAllByRestaurant(
+      restaurantId,
+      { isActive: true, ...filter },
+      page,
+      limit
+    );
     return result;
   }
 
@@ -95,7 +100,11 @@ export class BranchService {
     return branch;
   }
 
-  async updateBranchSettings(id: string, restaurantId: string, settings: Partial<IBranch['settings']>) {
+  async updateBranchSettings(
+    id: string,
+    restaurantId: string,
+    settings: Partial<IBranch['settings']>
+  ) {
     const branch = await this.branchRepo.updateSettings(id, settings);
     if (!branch || !branch.isActive) {
       throw new AppError('Branch not found', 404);
@@ -111,7 +120,9 @@ export class BranchService {
     restaurantId: string,
     manager: { staffId: string; name: string; email: string; phone: string } | null
   ) {
-    const managerData = manager ? { ...manager, staffId: new Types.ObjectId(manager.staffId) } : null;
+    const managerData = manager
+      ? { ...manager, staffId: new Types.ObjectId(manager.staffId) }
+      : null;
     const branch = await this.branchRepo.updateManager(id, managerData);
     if (!branch || !branch.isActive) {
       throw new AppError('Branch not found', 404);
@@ -137,7 +148,9 @@ export class BranchService {
   }
 
   private getDefaultOperatingHours() {
-    const days: Array<'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'> = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const days: Array<
+      'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
+    > = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     return days.map((day) => ({
       day,
       isOpen: true,

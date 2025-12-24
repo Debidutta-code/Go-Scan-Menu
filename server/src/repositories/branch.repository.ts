@@ -9,9 +9,7 @@ export class BranchRepository {
   }
 
   async findById(id: string): Promise<IBranch | null> {
-    return Branch.findById(id)
-      .populate('settings.taxIds')
-      .populate('manager.staffId');
+    return Branch.findById(id).populate('settings.taxIds').populate('manager.staffId');
   }
 
   async findByIdAndRestaurant(id: string, restaurantId: string): Promise<IBranch | null> {
@@ -74,8 +72,9 @@ export class BranchRepository {
     id: string,
     settings: Partial<IBranch['settings']>
   ): Promise<IBranch | null> {
-    return Branch.findByIdAndUpdate(id, { $set: { settings } }, { new: true })
-      .populate('settings.taxIds');
+    return Branch.findByIdAndUpdate(id, { $set: { settings } }, { new: true }).populate(
+      'settings.taxIds'
+    );
   }
 
   async softDelete(id: string): Promise<IBranch | null> {
