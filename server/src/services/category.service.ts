@@ -137,25 +137,4 @@ export class CategoryService {
 
     return updatedCategory;
   }
-
-  async deleteCategory(id: string, restaurantId: string): Promise<ICategory> {
-    const category = await this.categoryRepo.findById(id);
-    if (!category) {
-      throw new AppError('Category not found', 404);
-    }
-
-    if (category.restaurantId.toString() !== restaurantId) {
-      throw new AppError('Category does not belong to this restaurant', 403);
-    }
-
-    // TODO: Check if category has menu items before deleting
-    // For now, we'll just soft delete
-
-    const deletedCategory = await this.categoryRepo.softDelete(id);
-    if (!deletedCategory) {
-      throw new AppError('Failed to delete category', 500);
-    }
-
-    return deletedCategory;
-  }
 }

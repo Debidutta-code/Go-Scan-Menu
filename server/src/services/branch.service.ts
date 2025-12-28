@@ -4,14 +4,17 @@ import { RestaurantRepository } from '@/repositories/restaurant.repository';
 import { IBranch } from '@/models/Branch.model';
 import { AppError } from '@/utils/AppError';
 import { Types } from 'mongoose';
+import { TaxRepository } from '@/repositories/tax.repository';
 
 export class BranchService {
   private branchRepo: BranchRepository;
   private restaurantRepo: RestaurantRepository;
+  private taxRepo: TaxRepository;
 
   constructor() {
     this.branchRepo = new BranchRepository();
     this.restaurantRepo = new RestaurantRepository();
+    this.taxRepo = new TaxRepository();
   }
 
   async createBranch(
@@ -105,14 +108,42 @@ export class BranchService {
     restaurantId: string,
     settings: Partial<IBranch['settings']>
   ) {
-    const branch = await this.branchRepo.updateSettings(id, settings);
+    const branch = await this.branchRepo.findByIdAndRestaurant(id, restaurantId);
     if (!branch || !branch.isActive) {
       throw new AppError('Branch not found', 404);
     }
     if (branch.restaurantId.toString() !== restaurantId) {
       throw new AppError('Branch does not belong to this restaurant', 403);
     }
-    return branch;
+
+    // NEW: Validate taxIds if being updated
+    if (settings.taxIds && settings.taxIds.length > 0) {
+      // Verify all tax IDs exist and are active
+      const taxes = await this.taxRepo.findByIds(
+        settings.taxIds.map(id => id.toString())
+      );
+
+      if (taxes.length !== settings.taxIds.length) {
+        throw new AppError('One or more tax IDs are invalid or inactive', 400);
+      }
+
+      // Verify taxes belong to this restaurant or branch
+      const invalidTaxes = taxes.filter(
+        (tax: any) => tax.restaurantId.toString() !== restaurantId &&
+          (!tax.branchId || tax.branchId.toString() !== id)
+      );
+
+      if (invalidTaxes.length > 0) {
+        throw new AppError('Some taxes do not belong to this restaurant or branch', 403);
+      }
+    }
+
+    const updatedBranch = await this.branchRepo.updateSettings(id, settings);
+    if (!updatedBranch) {
+      throw new AppError('Failed to update branch settings', 500);
+    }
+
+    return updatedBranch;
   }
 
   async assignManager(

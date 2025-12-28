@@ -93,21 +93,59 @@ export class MenuItemRepository {
     };
   }
 
+  /**
+ * Find all menu items for customer-facing menu
+ * Includes restaurant-wide items + branch-specific items
+ * Applies branch pricing overrides where applicable
+ */
   async findAllForMenu(restaurantId: string, branchId?: string) {
     const query: any = {
       restaurantId,
       isActive: true,
       isAvailable: true,
-      $or: [{ scope: 'restaurant', branchId: { $exists: false } }],
+      $or: [
+        // Restaurant-wide items (no branchId)
+        { scope: 'restaurant', branchId: { $exists: false } }
+      ],
     };
 
+    // If querying for a specific branch, include branch-specific items
     if (branchId) {
       query.$or.push({ scope: 'branch', branchId });
     }
 
-    return MenuItem.find(query)
+    const items = await MenuItem.find(query)
       .populate('categoryId')
-      .sort({ categoryId: 1, displayOrder: 1, name: 1 });
+      .sort({ categoryId: 1, displayOrder: 1, name: 1 })
+      .lean(); // Use lean() for performance since we're transforming the data
+
+    // If branchId provided, apply branch pricing overrides to restaurant-wide items
+    if (branchId) {
+      return items.map((item: any) => {
+        // Only process restaurant-scoped items (branch-scoped items already have correct price)
+        if (item.scope === 'restaurant' && item.branchPricing && item.branchPricing.length > 0) {
+          const branchOverride = item.branchPricing.find(
+            (bp: any) => bp.branchId.toString() === branchId
+          );
+
+          if (branchOverride) {
+            return {
+              ...item,
+              price: branchOverride.price,
+              discountPrice: branchOverride.discountPrice,
+              isAvailable: branchOverride.isAvailable,
+              // Keep original branchPricing for admin purposes
+              _hasBranchOverride: true,
+              _originalPrice: item.price
+            };
+          }
+        }
+
+        return item;
+      });
+    }
+
+    return items;
   }
 
   async update(id: string, data: Partial<IMenuItem>): Promise<IMenuItem | null> {
@@ -165,5 +203,76 @@ export class MenuItemRepository {
 
   async countByCategory(categoryId: string): Promise<number> {
     return MenuItem.countDocuments({ categoryId, isActive: true });
+  }
+
+  /**
+ * Check if any menu items belong to a category
+ * Used for cascade delete validation
+ */
+  async existsByCategory(categoryId: string): Promise<boolean> {
+    const count = await this.countByCategory(categoryId);
+    return count > 0;
+  }
+
+  /**
+   * Reassign all items from one category to another
+   * Used when merging or reorganizing categories
+   */
+  async reassignCategory(oldCategoryId: string, newCategoryId: string): Promise<number> {
+    const result = await MenuItem.updateMany(
+      { categoryId: oldCategoryId, isActive: true },
+      { $set: { categoryId: new Types.ObjectId(newCategoryId) } }
+    );
+    return result.modifiedCount;
+  }
+
+  /**
+ * Get menu item with correct branch-specific pricing for order validation
+ * Returns null if item is not available for the given branch
+ */
+  async findByIdForBranch(itemId: string, branchId: string): Promise<any | null> {
+    const item = await MenuItem.findById(itemId)
+      .populate('categoryId')
+      .lean();
+
+    if (!item || !item.isActive) {
+      return null;
+    }
+
+    // Branch-scoped item: must match branchId and be available
+    if (item.scope === 'branch') {
+      if (item.branchId?.toString() !== branchId || !item.isAvailable) {
+        return null;
+      }
+      return item;
+    }
+
+    // Restaurant-scoped item: check for branch override
+    if (item.scope === 'restaurant') {
+      const branchOverride = item.branchPricing?.find(
+        (bp: any) => bp.branchId.toString() === branchId
+      );
+
+      if (branchOverride) {
+        // Use branch-specific availability and pricing
+        if (!branchOverride.isAvailable) {
+          return null;
+        }
+        return {
+          ...item,
+          price: branchOverride.price,
+          discountPrice: branchOverride.discountPrice || branchOverride.price,
+          isAvailable: branchOverride.isAvailable
+        };
+      }
+
+      // No branch override, use base item (if available)
+      if (!item.isAvailable) {
+        return null;
+      }
+      return item;
+    }
+
+    return null;
   }
 }

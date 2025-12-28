@@ -51,21 +51,37 @@ export class MenuItemService {
       throw new AppError('Restaurant not found or inactive', 404);
     }
 
-    // Verify category exists
+    // Verify category exists and check scope compatibility
     const category = await this.categoryRepo.findById(data.categoryId);
     if (!category || !category.isActive) {
       throw new AppError('Category not found or inactive', 404);
     }
 
-    // If scope is branch, verify branch exists
+    // Enforce scope rules
     if (data.scope === 'branch') {
       if (!data.branchId) {
         throw new AppError('Branch ID is required for branch-specific items', 400);
       }
 
+      // Category must be branch-scoped with same branchId
+      if (category.scope !== 'branch' || category.branchId?.toString() !== data.branchId) {
+        throw new AppError('Branch-specific items must belong to a branch-specific category in the same branch', 400);
+      }
+
+      // Verify branch exists
       const branch = await this.branchRepo.findByIdAndRestaurant(data.branchId, restaurantId);
       if (!branch || !branch.isActive) {
         throw new AppError('Branch not found or inactive', 404);
+      }
+    } else {
+      // Restaurant-scoped items
+      if (category.scope !== 'restaurant') {
+        throw new AppError('Restaurant-wide items must belong to a restaurant-wide category', 400);
+      }
+
+      // Should not have branchId
+      if (data.branchId) {
+        throw new AppError('Restaurant-wide items cannot have a branchId', 400);
       }
     }
 
@@ -87,7 +103,7 @@ export class MenuItemService {
       price: data.price,
       discountPrice: data.discountPrice,
       scope: data.scope,
-      branchPricing: [],
+      branchPricing: [], // Always start with empty array, use updateBranchPricing to add overrides
       preparationTime: data.preparationTime,
       calories: data.calories,
       spiceLevel: data.spiceLevel,
@@ -231,6 +247,19 @@ export class MenuItemService {
     const branch = await this.branchRepo.findByIdAndRestaurant(branchId, restaurantId);
     if (!branch || !branch.isActive) {
       throw new AppError('Branch not found or inactive', 404);
+    }
+
+    // Validate pricing
+    if (pricing.price < 0) {
+      throw new AppError('Price cannot be negative', 400);
+    }
+
+    if (pricing.discountPrice !== undefined && pricing.discountPrice < 0) {
+      throw new AppError('Discount price cannot be negative', 400);
+    }
+
+    if (pricing.discountPrice !== undefined && pricing.discountPrice > pricing.price) {
+      throw new AppError('Discount price cannot be higher than regular price', 400);
     }
 
     const updatedMenuItem = await this.menuItemRepo.updateBranchPricing(id, branchId, pricing);

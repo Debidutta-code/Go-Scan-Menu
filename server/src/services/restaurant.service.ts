@@ -5,14 +5,17 @@ import { IRestaurant } from '@/models/Restaurant.model';
 import { BcryptUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
 import { defaultSettings, defaultTheme } from '@/constants';
+import { TaxRepository } from '@/repositories/tax.repository';
 
 export class RestaurantService {
   private restaurantRepo: RestaurantRepository;
   private staffRepo: StaffRepository;
+  private taxRepo: TaxRepository;
 
   constructor() {
     this.restaurantRepo = new RestaurantRepository();
     this.staffRepo = new StaffRepository();
+    this.taxRepo = new TaxRepository(); // ADD THIS
   }
 
   async createRestaurant(data: {
@@ -146,6 +149,26 @@ export class RestaurantService {
   }
 
   async updateDefaultSettings(id: string, settings: Partial<IRestaurant['defaultSettings']>) {
+    // NEW: Validate defaultTaxIds if being updated
+    if (settings.defaultTaxIds && settings.defaultTaxIds.length > 0) {
+      const taxes = await this.taxRepo.findByIds(
+        settings.defaultTaxIds.map(id => id.toString())
+      );
+
+      if (taxes.length !== settings.defaultTaxIds.length) {
+        throw new AppError('One or more default tax IDs are invalid or inactive', 400);
+      }
+
+      // Verify taxes belong to this restaurant (restaurant-scoped only)
+      const invalidTaxes = taxes.filter(
+        tax => tax.restaurantId.toString() !== id || tax.scope !== 'restaurant'
+      );
+
+      if (invalidTaxes.length > 0) {
+        throw new AppError('Default taxes must be restaurant-scoped and belong to this restaurant', 403);
+      }
+    }
+
     const restaurant = await this.restaurantRepo.updateDefaultSettings(id, settings);
     if (!restaurant) {
       throw new AppError('Restaurant not found', 404);

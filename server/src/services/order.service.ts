@@ -8,6 +8,7 @@ import { TaxRepository } from '@/repositories/tax.repository';
 import { IOrder } from '@/models/Order.model';
 import { AppError } from '@/utils/AppError';
 import { Types } from 'mongoose';
+import { ITax } from '@/models/Tax.model';
 
 export class OrderService {
   private orderRepo: OrderRepository;
@@ -65,27 +66,62 @@ export class OrderService {
     }
 
     // Process order items
+    // Process order items with correct branch pricing
     const processedItems = await Promise.all(
       data.items.map(async (item) => {
-        const menuItem = await this.menuItemRepo.findById(item.menuItemId);
-        if (!menuItem || !menuItem.isActive || !menuItem.isAvailable) {
-          throw new AppError(`Menu item ${item.menuItemId} not available`, 400);
+        // Fetch item with branch-specific pricing applied
+        const menuItem = await this.menuItemRepo.findByIdForBranch(
+          item.menuItemId,
+          data.branchId
+        );
+
+        if (!menuItem) {
+          throw new AppError(
+            `Menu item ${item.menuItemId} not found or not available for this branch`,
+            400
+          );
         }
 
-        let itemPrice = menuItem.price;
+        // Use the price returned by findByIdForBranch (already has branch override applied)
+        let itemPrice = menuItem.discountPrice || menuItem.price;
         let variant = undefined;
 
         // Handle variants
         if (item.variantName && menuItem.variants && menuItem.variants.length > 0) {
-          const selectedVariant = menuItem.variants.find((v) => v.name === item.variantName);
+          const selectedVariant = menuItem.variants.find((v: any) => v.name === item.variantName);
           if (selectedVariant) {
             itemPrice = selectedVariant.price;
             variant = { name: selectedVariant.name, price: selectedVariant.price };
+          } else {
+            throw new AppError(
+              `Variant "${item.variantName}" not found for item ${menuItem.name}`,
+              400
+            );
           }
         }
 
-        // Calculate addons total
+        // Validate and calculate addons
         const addons = item.addons || [];
+        if (addons.length > 0) {
+          // Verify all addons exist in the menu item
+          for (const addon of addons) {
+            const validAddon = menuItem.addons?.find((a: any) => a.name === addon.name);
+            if (!validAddon) {
+              throw new AppError(
+                `Addon "${addon.name}" not found for item ${menuItem.name}`,
+                400
+              );
+            }
+            // Verify price matches (prevent price tampering)
+            if (validAddon.price !== addon.price) {
+              throw new AppError(
+                `Invalid price for addon "${addon.name}"`,
+                400
+              );
+            }
+          }
+        }
+
         const addonsTotal = addons.reduce((sum, addon) => sum + addon.price, 0);
 
         // Calculate item total
@@ -110,45 +146,77 @@ export class OrderService {
     // Calculate subtotal
     const subtotal = processedItems.reduce((sum, item) => sum + item.itemTotal, 0);
 
-    // Get applicable taxes
-    const applicableTaxes = await this.taxRepo.findApplicableTaxes(restaurantId, data.branchId);
+    // Get branch-configured taxes (respecting branch settings)
+    let applicableTaxes: ITax[];
 
-    // Calculate taxes
+    if (branch.settings.taxIds && branch.settings.taxIds.length > 0) {
+      // Use taxes explicitly configured for this branch
+      applicableTaxes = await this.taxRepo.findByIds(
+        branch.settings.taxIds.map(id => id.toString())
+      );
+    } else {
+      // Fallback: use restaurant's default taxes if branch hasn't configured any
+      const restaurant = await this.restaurantRepo.findById(restaurantId);
+      if (restaurant?.defaultSettings.defaultTaxIds && restaurant.defaultSettings.defaultTaxIds.length > 0) {
+        applicableTaxes = await this.taxRepo.findByIds(
+          restaurant.defaultSettings.defaultTaxIds.map(id => id.toString())
+        );
+      } else {
+        // No taxes configured at any level
+        applicableTaxes = [];
+      }
+    }
+
+    // Filter taxes based on conditions (orderType, minAmount, maxAmount, etc.)
+    const filteredTaxes = applicableTaxes.filter((tax) => {
+      if (!tax.conditions) return true;
+
+      // Check order type condition
+      if (
+        tax.conditions.orderType &&
+        tax.conditions.orderType.length > 0 &&
+        !tax.conditions.orderType.includes(data.orderType)
+      ) {
+        return false;
+      }
+
+      // Check minimum order amount
+      if (tax.conditions.minOrderAmount && subtotal < tax.conditions.minOrderAmount) {
+        return false;
+      }
+
+      // Check maximum order amount
+      if (tax.conditions.maxOrderAmount && subtotal > tax.conditions.maxOrderAmount) {
+        return false;
+      }
+
+      // TODO: Add item-specific and category-specific tax logic here if needed
+      // For now, we'll skip specificItems and specificCategories filtering
+
+      return true;
+    });
+
+    // Calculate taxes in proper sequence
     let currentBase = subtotal;
     const taxes = [];
     let totalTaxAmount = 0;
 
-    for (const tax of applicableTaxes) {
-      // Check conditions
-      if (tax.conditions) {
-        if (
-          tax.conditions.orderType &&
-          tax.conditions.orderType.length > 0 &&
-          !tax.conditions.orderType.includes(data.orderType)
-        ) {
-          continue;
-        }
-
-        if (tax.conditions.minOrderAmount && subtotal < tax.conditions.minOrderAmount) {
-          continue;
-        }
-
-        if (tax.conditions.maxOrderAmount && subtotal > tax.conditions.maxOrderAmount) {
-          continue;
-        }
-      }
-
+    for (const tax of filteredTaxes) {
       let taxBase = currentBase;
+
+      // Determine what this tax applies to
       if (tax.applicableOn === 'subtotal') {
         taxBase = subtotal;
       } else if (tax.applicableOn === 'item_total') {
         taxBase = subtotal;
       }
+      // 'after_other_taxes' uses currentBase (which includes previous taxes)
 
       let calculatedAmount = 0;
       if (tax.taxType === 'percentage') {
         calculatedAmount = (taxBase * tax.value) / 100;
       } else {
+        // fixed amount
         calculatedAmount = tax.value;
       }
 
@@ -165,6 +233,7 @@ export class OrderService {
 
       totalTaxAmount += calculatedAmount;
 
+      // If this tax is cumulative (after_other_taxes), add it to base for next tax
       if (tax.applicableOn === 'after_other_taxes') {
         currentBase += calculatedAmount;
       }
