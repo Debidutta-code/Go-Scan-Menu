@@ -118,13 +118,13 @@ export class CategoryController {
     });
   });
 
-  deleteCategory = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const category = await this.categoryService.deleteCategory(req.params.id, restaurantId!);
+  // deleteCategory = catchAsync(async (req: Request, res: Response) => {
+  //   const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+  //   const category = await this.categoryService.deleteCategory(req.params.id, restaurantId!);
 
-    sendResponse(res, 200, {
-      message: 'Category deleted successfully',
-      data: category,
-    });
-  });
+  //   sendResponse(res, 200, {
+  //     message: 'Category deleted successfully',
+  //     data: category,
+  //   });
+  // });
 }

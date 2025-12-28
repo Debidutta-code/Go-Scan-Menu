@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import { TableService } from '@/services/table.service';
 import { catchAsync, sendResponse } from '@/utils';
+import QRCode from 'qrcode';
 
 export class TableController {
   private tableService: TableService;
@@ -127,5 +128,40 @@ export class TableController {
       message: 'QR code regenerated successfully',
       data: table,
     });
+  });
+
+  getQrCodeData = catchAsync(async (req: Request, res: Response) => {
+    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    const qrUrl = await this.tableService.getQrCodeData(req.params.id, restaurantId!);
+
+    sendResponse(res, 200, {
+      message: 'QR code data retrieved successfully',
+      data: {
+        qrUrl,
+        // Frontend can use this URL to generate QR code image using libraries like qrcode.js
+        // Or backend can generate image if needed
+      },
+    });
+  });
+
+  // this will generate qr code image in the backend
+  generateQrCodeImage = catchAsync(async (req: Request, res: Response) => {
+    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    const qrUrl = await this.tableService.getQrCodeData(req.params.id, restaurantId!);
+
+    // Generate QR code as PNG buffer
+    const qrCodeBuffer = await QRCode.toBuffer(qrUrl, {
+      errorCorrectionLevel: 'H',
+      type: 'png',
+      width: 300,
+      margin: 2,
+    });
+
+    // Set response headers
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', `attachment; filename="table-qr-${req.params.id}.png"`);
+
+    // Send image
+    res.send(qrCodeBuffer);
   });
 }

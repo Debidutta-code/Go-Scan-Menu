@@ -5,14 +5,17 @@ import { ITable } from '@/models/Table.model';
 import { AppError } from '@/utils/AppError';
 import { Types } from 'mongoose';
 import { nanoid } from 'nanoid';
+import { RestaurantRepository } from '@/repositories/restaurant.repository';
 
 export class TableService {
   private tableRepo: TableRepository;
   private branchRepo: BranchRepository;
+  private restaurantRepo: RestaurantRepository;
 
   constructor() {
     this.tableRepo = new TableRepository();
     this.branchRepo = new BranchRepository();
+    this.restaurantRepo = new RestaurantRepository();
   }
 
   async createTable(
@@ -162,5 +165,38 @@ export class TableService {
     }
 
     return updatedTable;
+  }
+
+  /**
+ * Generate QR code data URL for a table
+ * Returns the URL that should be encoded in the QR code
+ */
+  async getQrCodeData(id: string, restaurantId: string): Promise<string> {
+    const table = await this.tableRepo.findById(id);
+    if (!table || !table.isActive) {
+      throw new AppError('Table not found', 404);
+    }
+
+    if (table.restaurantId.toString() !== restaurantId) {
+      throw new AppError('Table does not belong to this restaurant', 403);
+    }
+
+    // Get branch to get branch code
+    const branch = await this.branchRepo.findById(table.branchId.toString());
+    if (!branch) {
+      throw new AppError('Branch not found', 404);
+    }
+
+    // Get restaurant to get slug
+    const restaurant = await this.restaurantRepo.findById(restaurantId);
+    if (!restaurant) {
+      throw new AppError('Restaurant not found', 404);
+    }
+
+    // Construct the URL that will be encoded in QR code
+    // Frontend will parse this URL to call the API
+    const qrUrl = `${process.env.FRONTEND_URL || 'https://yourdomain.com'}/menu/${restaurant.slug}/${branch.code}/${table.qrCode}`;
+
+    return qrUrl;
   }
 }

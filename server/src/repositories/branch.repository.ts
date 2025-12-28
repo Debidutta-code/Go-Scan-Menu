@@ -22,6 +22,12 @@ export class BranchRepository {
     return Branch.findOne({ code: code.toUpperCase(), restaurantId });
   }
 
+  async findByCode(code: string): Promise<IBranch | null> {
+    return Branch.findOne({ code: code.toUpperCase() })
+      .populate('settings.taxIds')
+      .populate('manager.staffId');
+  }
+
   async findAllByRestaurant(
     restaurantId: string,
     filter: any = {},

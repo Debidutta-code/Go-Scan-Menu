@@ -8,11 +8,13 @@ import branchRoutes from './branch.routes';
 import tableRoutes from './table.routes';
 import categoryRoutes from './category.routes';
 import menuItemRoutes from './menuitem.routes';
+import publicMenuRoutes from './public.menu.routes';
+import taxRoutes from './tax.routes';
 
 const router = Router();
 
 router.use('/health', healthRoutes);
-router.use('/super-admin/auth', superAdminAuthRoutes);
+router.use('/superadmin/auth', superAdminAuthRoutes);
 router.use('/restaurants', restaurantRoutes);
 router.use('/staff', staffRoutes);
 router.use('/:restaurantId/branches', branchRoutes);
@@ -26,5 +28,11 @@ router.use('/restaurants/:restaurantId/categories', categoryRoutes);
 
 // Menu Item Management (nested under restaurants)
 router.use('/restaurants/:restaurantId/menu-items', menuItemRoutes);
+
+// Create Tex
+router.use('/restaurants/:restaurantId/taxes', taxRoutes);
+
+// Register public routes (no auth required)
+router.use('/public', publicMenuRoutes);
 
 export default router;

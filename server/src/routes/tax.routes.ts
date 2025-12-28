@@ -15,7 +15,7 @@ router.use(AuthMiddleware.authenticate);
 // Authorization helpers
 const canManageTaxes = [
   AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager'),
-  AuthMiddleware.authorizePermission('canManageSettings'),
+  // AuthMiddleware.authorizePermission('canManageSettings'),
 ];
 
 // Create tax
@@ -23,6 +23,9 @@ router.post('/', ...canManageTaxes, taxController.createTax);
 
 // Get all taxes by restaurant
 router.get('/', taxController.getTaxesByRestaurant);
+
+// 6950eacd17e23a7a41696359 sgst
+// CGST 6950ea1117e23a7a41696356
 
 // Get all taxes by branch
 router.get('/branch/:branchId', taxController.getTaxesByBranch);

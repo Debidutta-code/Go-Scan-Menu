@@ -37,6 +37,6 @@ router.put('/:id', ...canManageMenu, categoryController.updateCategory);
 router.patch('/:id/display-order', ...canManageMenu, categoryController.updateDisplayOrder);
 
 // Delete category
-router.delete('/:id', ...canManageMenu, categoryController.deleteCategory);
+// router.delete('/:id', ...canManageMenu, categoryController.deleteCategory);
 
 export default router;

@@ -43,6 +43,12 @@ router.patch(
 // Regenerate QR code
 router.post('/:id/regenerate-qr', ...canManageTables, tableController.regenerateQrCode);
 
+// Get QR code data URL
+router.get('/:id/qr-data', ...canManageTables, tableController.getQrCodeData);
+
+// Generate QR code image (PNG)
+router.get('/:id/qr-image', ...canManageTables, tableController.generateQrCodeImage);
+
 // Delete table
 router.delete('/:id', ...canManageTables, tableController.deleteTable);
 
