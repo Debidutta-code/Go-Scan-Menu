@@ -9,6 +9,7 @@ import { IOrder } from '@/models/Order.model';
 import { AppError } from '@/utils/AppError';
 import { Types } from 'mongoose';
 import { ITax } from '@/models/Tax.model';
+import { CustomerSessionRepository } from '@/repositories/customersession.repository';
 
 export class OrderService {
   private orderRepo: OrderRepository;
@@ -17,6 +18,7 @@ export class OrderService {
   private tableRepo: TableRepository;
   private menuItemRepo: MenuItemRepository;
   private taxRepo: TaxRepository;
+  private sessionRepo: CustomerSessionRepository;
 
   constructor() {
     this.orderRepo = new OrderRepository();
@@ -25,6 +27,7 @@ export class OrderService {
     this.tableRepo = new TableRepository();
     this.menuItemRepo = new MenuItemRepository();
     this.taxRepo = new TaxRepository();
+    this.sessionRepo = new CustomerSessionRepository();
   }
 
   async createOrder(
@@ -59,16 +62,36 @@ export class OrderService {
       throw new AppError('Branch not found or inactive', 404);
     }
 
+    // Validate branch readiness (operating hours, acceptOrders flag)
+    await this.validateBranchReadiness(branch);
+
     // Verify table exists
     const table = await this.tableRepo.findById(data.tableId);
     if (!table || !table.isActive) {
       throw new AppError('Table not found or inactive', 404);
     }
 
-    // Process order items
+    // Verify table belongs to the branch
+    if (table.branchId.toString() !== data.branchId) {
+      throw new AppError('Table does not belong to this branch', 400);
+    }
+
+    // Validate table is available for new order
+    await this.validateTableAvailability(data.tableId);
+
+    // Validate items array is not empty
+    if (!data.items || data.items.length === 0) {
+      throw new AppError('Order must contain at least one item', 400);
+    }
+
     // Process order items with correct branch pricing
     const processedItems = await Promise.all(
       data.items.map(async (item) => {
+        // Validate quantity
+        if (item.quantity <= 0) {
+          throw new AppError('Item quantity must be greater than 0', 400);
+        }
+
         // Fetch item with branch-specific pricing applied
         const menuItem = await this.menuItemRepo.findByIdForBranch(
           item.menuItemId,
@@ -78,6 +101,14 @@ export class OrderService {
         if (!menuItem) {
           throw new AppError(
             `Menu item ${item.menuItemId} not found or not available for this branch`,
+            400
+          );
+        }
+
+        // Check stock if availableQuantity is set
+        if (menuItem.availableQuantity !== undefined && menuItem.availableQuantity < item.quantity) {
+          throw new AppError(
+            `Insufficient stock for ${menuItem.name}. Available: ${menuItem.availableQuantity}`,
             400
           );
         }
@@ -103,7 +134,6 @@ export class OrderService {
         // Validate and calculate addons
         const addons = item.addons || [];
         if (addons.length > 0) {
-          // Verify all addons exist in the menu item
           for (const addon of addons) {
             const validAddon = menuItem.addons?.find((a: any) => a.name === addon.name);
             if (!validAddon) {
@@ -112,7 +142,6 @@ export class OrderService {
                 400
               );
             }
-            // Verify price matches (prevent price tampering)
             if (validAddon.price !== addon.price) {
               throw new AppError(
                 `Invalid price for addon "${addon.name}"`,
@@ -123,8 +152,6 @@ export class OrderService {
         }
 
         const addonsTotal = addons.reduce((sum, addon) => sum + addon.price, 0);
-
-        // Calculate item total
         const itemTotal = (itemPrice + addonsTotal) * item.quantity;
 
         return {
@@ -146,32 +173,30 @@ export class OrderService {
     // Calculate subtotal
     const subtotal = processedItems.reduce((sum, item) => sum + item.itemTotal, 0);
 
-    // Get branch-configured taxes (respecting branch settings)
-    let applicableTaxes: ITax[];
+    // Validate minimum order amount
+    this.validateMinimumOrder(subtotal, branch.settings.minOrderAmount);
+
+    // Get branch-configured taxes (from Phase 1 refactoring)
+    let applicableTaxes: any[];
 
     if (branch.settings.taxIds && branch.settings.taxIds.length > 0) {
-      // Use taxes explicitly configured for this branch
       applicableTaxes = await this.taxRepo.findByIds(
-        branch.settings.taxIds.map(id => id.toString())
+        branch.settings.taxIds.map((id: any) => id.toString())
       );
     } else {
-      // Fallback: use restaurant's default taxes if branch hasn't configured any
-      const restaurant = await this.restaurantRepo.findById(restaurantId);
-      if (restaurant?.defaultSettings.defaultTaxIds && restaurant.defaultSettings.defaultTaxIds.length > 0) {
+      if (restaurant.defaultSettings.defaultTaxIds && restaurant.defaultSettings.defaultTaxIds.length > 0) {
         applicableTaxes = await this.taxRepo.findByIds(
-          restaurant.defaultSettings.defaultTaxIds.map(id => id.toString())
+          restaurant.defaultSettings.defaultTaxIds.map((id: any) => id.toString())
         );
       } else {
-        // No taxes configured at any level
         applicableTaxes = [];
       }
     }
 
-    // Filter taxes based on conditions (orderType, minAmount, maxAmount, etc.)
+    // Filter taxes based on conditions
     const filteredTaxes = applicableTaxes.filter((tax) => {
       if (!tax.conditions) return true;
 
-      // Check order type condition
       if (
         tax.conditions.orderType &&
         tax.conditions.orderType.length > 0 &&
@@ -180,23 +205,18 @@ export class OrderService {
         return false;
       }
 
-      // Check minimum order amount
       if (tax.conditions.minOrderAmount && subtotal < tax.conditions.minOrderAmount) {
         return false;
       }
 
-      // Check maximum order amount
       if (tax.conditions.maxOrderAmount && subtotal > tax.conditions.maxOrderAmount) {
         return false;
       }
 
-      // TODO: Add item-specific and category-specific tax logic here if needed
-      // For now, we'll skip specificItems and specificCategories filtering
-
       return true;
     });
 
-    // Calculate taxes in proper sequence
+    // Calculate taxes
     let currentBase = subtotal;
     const taxes = [];
     let totalTaxAmount = 0;
@@ -204,19 +224,16 @@ export class OrderService {
     for (const tax of filteredTaxes) {
       let taxBase = currentBase;
 
-      // Determine what this tax applies to
       if (tax.applicableOn === 'subtotal') {
         taxBase = subtotal;
       } else if (tax.applicableOn === 'item_total') {
         taxBase = subtotal;
       }
-      // 'after_other_taxes' uses currentBase (which includes previous taxes)
 
       let calculatedAmount = 0;
       if (tax.taxType === 'percentage') {
         calculatedAmount = (taxBase * tax.value) / 100;
       } else {
-        // fixed amount
         calculatedAmount = tax.value;
       }
 
@@ -233,7 +250,6 @@ export class OrderService {
 
       totalTaxAmount += calculatedAmount;
 
-      // If this tax is cumulative (after_other_taxes), add it to base for next tax
       if (tax.applicableOn === 'after_other_taxes') {
         currentBase += calculatedAmount;
       }
@@ -273,7 +289,21 @@ export class OrderService {
       orderTime: new Date(),
     };
 
+    // Create order
     const order = await this.orderRepo.create(orderData);
+
+    // Update table status to occupied
+    await this.tableRepo.updateStatus(data.tableId, 'occupied');
+
+    // Link order to customer session if one exists
+    const activeSession = await this.sessionRepo.findActiveSessionByTable(data.tableId);
+    if (activeSession) {
+      await this.sessionRepo.update(activeSession.sessionId, {
+        activeOrderId: order._id,
+        lastActivityTime: new Date(),
+      });
+    }
+
     return order;
   }
 
@@ -309,6 +339,17 @@ export class OrderService {
     if (!order) {
       throw new AppError('Order not found', 404);
     }
+
+    // Validate status transition
+    this.validateStatusTransition(order.status, status);
+
+    // Special validation for completion
+    if (status === 'completed') {
+      if (order.paymentStatus !== 'paid') {
+        throw new AppError('Cannot complete order: payment is not confirmed', 400);
+      }
+    }
+
     const updateData: any = { status };
 
     // Set timestamps based on status
@@ -327,6 +368,17 @@ export class OrderService {
         break;
       case 'completed':
         updateData.completedAt = new Date();
+        // Reset table status to available
+        await this.tableRepo.updateStatus(order.tableId.toString(), 'available');
+        // End customer session if exists
+        const session = await this.sessionRepo.findActiveSessionByTable(order.tableId.toString());
+        if (session) {
+          await this.sessionRepo.update(session.sessionId, {
+            activeOrderId: undefined,
+            endTime: new Date(),
+            isActive: false,
+          });
+        }
         break;
     }
 
@@ -395,9 +447,9 @@ export class OrderService {
     if (!order) {
       throw new AppError('Order not found', 404);
     }
-    if (order.status === 'completed' || order.status === 'cancelled') {
-      throw new AppError('Cannot cancel completed or already cancelled order', 400);
-    }
+
+    // Validate cancellation is allowed
+    this.validateCancellation(order);
 
     const updatedOrder = await this.orderRepo.update(id, {
       status: 'cancelled',
@@ -409,8 +461,114 @@ export class OrderService {
       throw new AppError('Failed to cancel order', 500);
     }
 
+    // Reset table status to available
+    await this.tableRepo.updateStatus(order.tableId.toString(), 'available');
+
     return updatedOrder;
   }
+
+  /**
+ * Validate branch is ready to accept orders
+ */
+  private async validateBranchReadiness(branch: any): Promise<void> {
+    if (!branch.settings.acceptOrders) {
+      throw new AppError('This branch is not currently accepting orders', 400);
+    }
+
+    // Check operating hours
+    const now = new Date();
+    const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as
+      'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+
+    const todayHours = branch.settings.operatingHours.find(
+      (oh: any) => oh.day === currentDay
+    );
+
+    if (!todayHours || !todayHours.isOpen) {
+      throw new AppError('Branch is closed today', 400);
+    }
+
+    // Check current time is within operating hours
+    const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
+    if (currentTime < todayHours.openTime || currentTime > todayHours.closeTime) {
+      throw new AppError(
+        `Branch is closed. Operating hours: ${todayHours.openTime} - ${todayHours.closeTime}`,
+        400
+      );
+    }
+  }
+
+  /**
+   * Validate minimum order amount
+   */
+  private validateMinimumOrder(subtotal: number, minAmount: number): void {
+    if (minAmount > 0 && subtotal < minAmount) {
+      throw new AppError(
+        `Minimum order amount is ${minAmount}. Current subtotal: ${subtotal}`,
+        400
+      );
+    }
+  }
+
+  /**
+ * Validate table is available for new order
+ */
+  private async validateTableAvailability(tableId: string): Promise<void> {
+    // Use repository method instead of direct query
+    const hasActiveOrder = await this.orderRepo.hasActiveOrders(tableId);
+
+    if (hasActiveOrder) {
+      throw new AppError('This table already has an active order', 400);
+    }
+  }
+
+  /**
+   * Validate status transition is allowed
+   */
+  private validateStatusTransition(
+    currentStatus: IOrder['status'],
+    newStatus: IOrder['status']
+  ): void {
+    const allowedTransitions: Record<IOrder['status'], IOrder['status'][]> = {
+      pending: ['confirmed', 'cancelled'],
+      confirmed: ['preparing', 'cancelled'],
+      preparing: ['ready', 'cancelled'],
+      ready: ['served', 'cancelled'],
+      served: ['completed'],
+      completed: [], // Cannot transition from completed
+      cancelled: [], // Cannot transition from cancelled
+    };
+
+    const allowed = allowedTransitions[currentStatus] || [];
+
+    if (!allowed.includes(newStatus)) {
+      throw new AppError(
+        `Cannot transition from ${currentStatus} to ${newStatus}`,
+        400
+      );
+    }
+  }
+
+  /**
+   * Validate order can be cancelled
+   */
+  private validateCancellation(order: IOrder): void {
+    if (order.status === 'completed') {
+      throw new AppError('Cannot cancel completed order', 400);
+    }
+
+    if (order.status === 'cancelled') {
+      throw new AppError('Order is already cancelled', 400);
+    }
+
+    if (order.paymentStatus === 'paid') {
+      throw new AppError(
+        'Cannot cancel paid order. Please process refund first.',
+        400
+      );
+    }
+  }
+
   private async generateOrderNumber(branchId: string): Promise<string> {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');

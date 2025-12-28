@@ -130,4 +130,48 @@ export class OrderRepository {
   async delete(id: string): Promise<IOrder | null> {
     return Order.findByIdAndDelete(id);
   }
+
+  /**
+ * Find active orders for a table (not completed or cancelled)
+ */
+  async findActiveOrdersByTable(tableId: string): Promise<IOrder[]> {
+    return Order.find({
+      tableId,
+      status: { $nin: ['completed', 'cancelled'] }
+    })
+      .populate('branchId')
+      .populate('assignedStaffId')
+      .sort({ orderTime: -1 });
+  }
+
+  /**
+   * Count orders by status for a branch (for analytics later)
+   */
+  async countByBranchAndStatus(
+    branchId: string,
+    status: IOrder['status'],
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<number> {
+    const query: any = { branchId, status };
+
+    if (startDate || endDate) {
+      query.orderTime = {};
+      if (startDate) query.orderTime.$gte = startDate;
+      if (endDate) query.orderTime.$lte = endDate;
+    }
+
+    return Order.countDocuments(query);
+  }
+
+  /**
+   * Check if table has any active orders
+   */
+  async hasActiveOrders(tableId: string): Promise<boolean> {
+    const count = await Order.countDocuments({
+      tableId,
+      status: { $nin: ['completed', 'cancelled'] }
+    });
+    return count > 0;
+  }
 }

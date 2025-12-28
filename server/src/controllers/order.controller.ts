@@ -93,6 +93,15 @@ export class OrderController {
       return;
     }
 
+    // Validate status value
+    const validStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      sendResponse(res, 400, {
+        message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+      });
+      return;
+    }
+
     const order = await this.orderService.updateOrderStatus(id, status);
 
     sendResponse(res, 200, {
@@ -129,6 +138,26 @@ export class OrderController {
         message: 'Payment status is required',
       });
       return;
+    }
+
+    // Validate payment status
+    const validPaymentStatuses = ['pending', 'paid', 'failed'];
+    if (!validPaymentStatuses.includes(paymentStatus)) {
+      sendResponse(res, 400, {
+        message: `Invalid payment status. Must be one of: ${validPaymentStatuses.join(', ')}`,
+      });
+      return;
+    }
+
+    // Validate payment method if provided
+    if (paymentMethod) {
+      const validPaymentMethods = ['cash', 'card', 'upi', 'wallet', 'online'];
+      if (!validPaymentMethods.includes(paymentMethod)) {
+        sendResponse(res, 400, {
+          message: `Invalid payment method. Must be one of: ${validPaymentMethods.join(', ')}`,
+        });
+        return;
+      }
     }
 
     const order = await this.orderService.updatePaymentStatus(id, paymentStatus, paymentMethod);
