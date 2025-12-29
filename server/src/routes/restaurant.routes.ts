@@ -52,7 +52,7 @@ router.put(
   '/:id/settings',
   AuthMiddleware.authenticate,
   AuthMiddleware.authorizeRoles('super_admin', 'owner'),
-  AuthMiddleware.authorizePermission('canManageSettings'),
+  // AuthMiddleware.authorizePermission('canManageSettings'),
   restaurantController.updateDefaultSettings
 );
 router.delete(

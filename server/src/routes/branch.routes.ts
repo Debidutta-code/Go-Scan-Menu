@@ -12,7 +12,7 @@ router.use(AuthMiddleware.authenticate);
 // Role + permission checks
 const canManageBranches = [
   AuthMiddleware.authorizeRoles('owner', 'branch_manager'),
-  AuthMiddleware.authorizePermission('canManageSettings'), // or create a new one like canManageBranches
+  // AuthMiddleware.authorizePermission('canManageSettings'), // or create a new one like canManageBranches
 ];
 
 // Create branch

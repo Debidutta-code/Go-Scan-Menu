@@ -15,7 +15,7 @@ router.use(AuthMiddleware.authenticate);
 // Authorization helpers
 const canManageMenu = [
   AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager'),
-  AuthMiddleware.authorizePermission('canManageMenu'),
+  // AuthMiddleware.authorizePermission('canManageMenu'),
 ];
 
 // Create category

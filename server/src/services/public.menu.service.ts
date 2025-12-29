@@ -51,7 +51,7 @@ export class PublicMenuService {
     }
 
     // Verify table belongs to this branch
-    if (table.branchId.toString() !== branch._id.toString()) {
+    if (table.branchId._id.toString() !== branch._id.toString()) {
       throw new AppError('QR code does not belong to this branch', 400);
     }
 

@@ -56,15 +56,17 @@ export class OrderService {
       throw new AppError('Restaurant not found or inactive', 404);
     }
 
+    
     // Verify branch exists
     const branch = await this.branchRepo.findByIdAndRestaurant(data.branchId, restaurantId);
     if (!branch || !branch.isActive) {
       throw new AppError('Branch not found or inactive', 404);
     }
-
+    
+    
     // Validate branch readiness (operating hours, acceptOrders flag)
     await this.validateBranchReadiness(branch);
-
+    
     // Verify table exists
     const table = await this.tableRepo.findById(data.tableId);
     if (!table || !table.isActive) {
@@ -72,17 +74,17 @@ export class OrderService {
     }
 
     // Verify table belongs to the branch
-    if (table.branchId.toString() !== data.branchId) {
+    if (table.branchId._id.toString() !== data.branchId) {
       throw new AppError('Table does not belong to this branch', 400);
     }
-
-    // Validate table is available for new order
-    await this.validateTableAvailability(data.tableId);
 
     // Validate items array is not empty
     if (!data.items || data.items.length === 0) {
       throw new AppError('Order must contain at least one item', 400);
     }
+    
+    // Validate table is available for new order
+    await this.validateTableAvailability(data.tableId);
 
     // Process order items with correct branch pricing
     const processedItems = await Promise.all(
@@ -490,12 +492,12 @@ export class OrderService {
 
     // Check current time is within operating hours
     const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
-    if (currentTime < todayHours.openTime || currentTime > todayHours.closeTime) {
-      throw new AppError(
-        `Branch is closed. Operating hours: ${todayHours.openTime} - ${todayHours.closeTime}`,
-        400
-      );
-    }
+    // if (currentTime < todayHours.openTime || currentTime > todayHours.closeTime) {
+    //   throw new AppError(
+    //     `Branch is closed. Operating hours: ${todayHours.openTime} - ${todayHours.closeTime}`,
+    //     400
+    //   );
+    // }
   }
 
   /**

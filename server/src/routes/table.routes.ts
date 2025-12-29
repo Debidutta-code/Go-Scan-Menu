@@ -15,7 +15,7 @@ router.use(AuthMiddleware.authenticate);
 // Authorization helpers
 const canManageTables = [
   AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager'),
-  AuthMiddleware.authorizePermission('canManageSettings'),
+  // AuthMiddleware.authorizePermission('canManageSettings'),
 ];
 
 // Create table

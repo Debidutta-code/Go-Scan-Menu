@@ -16,6 +16,8 @@ export class PublicMenuController {
   getMenuByQrCode = catchAsync(async (req: Request, res: Response) => {
     const { restaurantSlug, branchCode, qrCode } = req.params;
 
+    console.log('Received params:', { restaurantSlug, branchCode, qrCode });
+
     const menuData = await this.menuService.getCompleteMenuByQrCode(
       restaurantSlug,
       branchCode,

@@ -10,6 +10,7 @@ import categoryRoutes from './category.routes';
 import menuItemRoutes from './menuitem.routes';
 import publicMenuRoutes from './public.menu.routes';
 import taxRoutes from './tax.routes';
+import orderRoutes from './order.routes';
 
 const router = Router();
 
@@ -31,6 +32,9 @@ router.use('/restaurants/:restaurantId/menu-items', menuItemRoutes);
 
 // Create Tex
 router.use('/restaurants/:restaurantId/taxes', taxRoutes);
+
+// Order Management (nested under restaurants)
+router.use('/restaurants/:restaurantId/orders', orderRoutes);
 
 // Register public routes (no auth required)
 router.use('/public', publicMenuRoutes);

@@ -177,12 +177,15 @@ export class TableService {
       throw new AppError('Table not found', 404);
     }
 
-    if (table.restaurantId.toString() !== restaurantId) {
+    console.log('Table restaurantId:', table.restaurantId._id.toString());
+    console.log('Provided restaurantId:', restaurantId);
+
+    if (table.restaurantId._id.toString() !== restaurantId) {
       throw new AppError('Table does not belong to this restaurant', 403);
     }
 
     // Get branch to get branch code
-    const branch = await this.branchRepo.findById(table.branchId.toString());
+    const branch = await this.branchRepo.findById(table.branchId._id.toString());
     if (!branch) {
       throw new AppError('Branch not found', 404);
     }
