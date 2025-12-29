@@ -244,8 +244,7 @@ menuItemSchema.pre('save', async function (this: IMenuItem) {
 
     if (
       item.scope === 'branch' &&
-      (category.scope !== 'branch' ||
-        category.branchId?.toString() !== item.branchId?.toString())
+      (category.scope !== 'branch' || category.branchId?.toString() !== item.branchId?.toString())
     ) {
       throw new Error(
         'Branch-scoped items must belong to a branch-scoped category in the same branch'
@@ -253,13 +252,9 @@ menuItemSchema.pre('save', async function (this: IMenuItem) {
     }
 
     if (item.scope === 'restaurant' && category.scope !== 'restaurant') {
-      throw new Error(
-        'Restaurant-scoped items must belong to a restaurant-scoped category'
-      );
+      throw new Error('Restaurant-scoped items must belong to a restaurant-scoped category');
     }
   }
 });
-
-
 
 export const MenuItem = mongoose.model<IMenuItem>('MenuItem', menuItemSchema);

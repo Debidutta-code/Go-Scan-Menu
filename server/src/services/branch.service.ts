@@ -119,9 +119,7 @@ export class BranchService {
     // NEW: Validate taxIds if being updated
     if (settings.taxIds && settings.taxIds.length > 0) {
       // Verify all tax IDs exist and are active
-      const taxes = await this.taxRepo.findByIds(
-        settings.taxIds.map(id => id.toString())
-      );
+      const taxes = await this.taxRepo.findByIds(settings.taxIds.map((id) => id.toString()));
 
       if (taxes.length !== settings.taxIds.length) {
         throw new AppError('One or more tax IDs are invalid or inactive', 400);
@@ -129,7 +127,8 @@ export class BranchService {
 
       // Verify taxes belong to this restaurant or branch
       const invalidTaxes = taxes.filter(
-        (tax: any) => tax.restaurantId.toString() !== restaurantId &&
+        (tax: any) =>
+          tax.restaurantId.toString() !== restaurantId &&
           (!tax.branchId || tax.branchId.toString() !== id)
       );
 

@@ -24,11 +24,7 @@ export class PublicMenuService {
    * Get complete menu data when customer scans QR code
    * Returns everything needed to display menu and start ordering
    */
-  async getCompleteMenuByQrCode(
-    restaurantSlug: string,
-    branchCode: string,
-    qrCode: string
-  ) {
+  async getCompleteMenuByQrCode(restaurantSlug: string, branchCode: string, qrCode: string) {
     // 1. Get restaurant by slug
     const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
     if (!restaurant || !restaurant.isActive) {
@@ -61,10 +57,7 @@ export class PublicMenuService {
     }
 
     // 4. Get menu (categories + items) grouped by category
-    const menu = await this.getGroupedMenu(
-      restaurant._id.toString(),
-      branch._id.toString()
-    );
+    const menu = await this.getGroupedMenu(restaurant._id.toString(), branch._id.toString());
 
     // 5. Return complete data
     return {
@@ -118,10 +111,7 @@ export class PublicMenuService {
     }
 
     // 3. Get menu
-    const menu = await this.getGroupedMenu(
-      restaurant._id.toString(),
-      branch._id.toString()
-    );
+    const menu = await this.getGroupedMenu(restaurant._id.toString(), branch._id.toString());
 
     // 4. Return data (without table info)
     return {
@@ -212,6 +202,6 @@ export class PublicMenuService {
     });
 
     // Filter out empty categories (categories with no available items)
-    return menuByCategory.filter(cat => cat.items.length > 0);
+    return menuByCategory.filter((cat) => cat.items.length > 0);
   }
 }

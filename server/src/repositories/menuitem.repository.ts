@@ -94,10 +94,10 @@ export class MenuItemRepository {
   }
 
   /**
- * Find all menu items for customer-facing menu
- * Includes restaurant-wide items + branch-specific items
- * Applies branch pricing overrides where applicable
- */
+   * Find all menu items for customer-facing menu
+   * Includes restaurant-wide items + branch-specific items
+   * Applies branch pricing overrides where applicable
+   */
   async findAllForMenu(restaurantId: string, branchId?: string) {
     const query: any = {
       restaurantId,
@@ -105,7 +105,7 @@ export class MenuItemRepository {
       isAvailable: true,
       $or: [
         // Restaurant-wide items (no branchId)
-        { scope: 'restaurant', branchId: { $exists: false } }
+        { scope: 'restaurant', branchId: { $exists: false } },
       ],
     };
 
@@ -136,7 +136,7 @@ export class MenuItemRepository {
               isAvailable: branchOverride.isAvailable,
               // Keep original branchPricing for admin purposes
               _hasBranchOverride: true,
-              _originalPrice: item.price
+              _originalPrice: item.price,
             };
           }
         }
@@ -206,9 +206,9 @@ export class MenuItemRepository {
   }
 
   /**
- * Check if any menu items belong to a category
- * Used for cascade delete validation
- */
+   * Check if any menu items belong to a category
+   * Used for cascade delete validation
+   */
   async existsByCategory(categoryId: string): Promise<boolean> {
     const count = await this.countByCategory(categoryId);
     return count > 0;
@@ -227,13 +227,11 @@ export class MenuItemRepository {
   }
 
   /**
- * Get menu item with correct branch-specific pricing for order validation
- * Returns null if item is not available for the given branch
- */
+   * Get menu item with correct branch-specific pricing for order validation
+   * Returns null if item is not available for the given branch
+   */
   async findByIdForBranch(itemId: string, branchId: string): Promise<any | null> {
-    const item = await MenuItem.findById(itemId)
-      .populate('categoryId')
-      .lean();
+    const item = await MenuItem.findById(itemId).populate('categoryId').lean();
 
     if (!item || !item.isActive) {
       return null;
@@ -262,7 +260,7 @@ export class MenuItemRepository {
           ...item,
           price: branchOverride.price,
           discountPrice: branchOverride.discountPrice || branchOverride.price,
-          isAvailable: branchOverride.isAvailable
+          isAvailable: branchOverride.isAvailable,
         };
       }
 

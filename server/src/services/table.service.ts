@@ -168,9 +168,9 @@ export class TableService {
   }
 
   /**
- * Generate QR code data URL for a table
- * Returns the URL that should be encoded in the QR code
- */
+   * Generate QR code data URL for a table
+   * Returns the URL that should be encoded in the QR code
+   */
   async getQrCodeData(id: string, restaurantId: string): Promise<string> {
     const table = await this.tableRepo.findById(id);
     if (!table || !table.isActive) {

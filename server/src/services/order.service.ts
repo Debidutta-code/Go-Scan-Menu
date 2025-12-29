@@ -56,17 +56,15 @@ export class OrderService {
       throw new AppError('Restaurant not found or inactive', 404);
     }
 
-    
     // Verify branch exists
     const branch = await this.branchRepo.findByIdAndRestaurant(data.branchId, restaurantId);
     if (!branch || !branch.isActive) {
       throw new AppError('Branch not found or inactive', 404);
     }
-    
-    
+
     // Validate branch readiness (operating hours, acceptOrders flag)
     await this.validateBranchReadiness(branch);
-    
+
     // Verify table exists
     const table = await this.tableRepo.findById(data.tableId);
     if (!table || !table.isActive) {
@@ -82,7 +80,7 @@ export class OrderService {
     if (!data.items || data.items.length === 0) {
       throw new AppError('Order must contain at least one item', 400);
     }
-    
+
     // Validate table is available for new order
     await this.validateTableAvailability(data.tableId);
 
@@ -95,10 +93,7 @@ export class OrderService {
         }
 
         // Fetch item with branch-specific pricing applied
-        const menuItem = await this.menuItemRepo.findByIdForBranch(
-          item.menuItemId,
-          data.branchId
-        );
+        const menuItem = await this.menuItemRepo.findByIdForBranch(item.menuItemId, data.branchId);
 
         if (!menuItem) {
           throw new AppError(
@@ -108,7 +103,10 @@ export class OrderService {
         }
 
         // Check stock if availableQuantity is set
-        if (menuItem.availableQuantity !== undefined && menuItem.availableQuantity < item.quantity) {
+        if (
+          menuItem.availableQuantity !== undefined &&
+          menuItem.availableQuantity < item.quantity
+        ) {
           throw new AppError(
             `Insufficient stock for ${menuItem.name}. Available: ${menuItem.availableQuantity}`,
             400
@@ -139,16 +137,10 @@ export class OrderService {
           for (const addon of addons) {
             const validAddon = menuItem.addons?.find((a: any) => a.name === addon.name);
             if (!validAddon) {
-              throw new AppError(
-                `Addon "${addon.name}" not found for item ${menuItem.name}`,
-                400
-              );
+              throw new AppError(`Addon "${addon.name}" not found for item ${menuItem.name}`, 400);
             }
             if (validAddon.price !== addon.price) {
-              throw new AppError(
-                `Invalid price for addon "${addon.name}"`,
-                400
-              );
+              throw new AppError(`Invalid price for addon "${addon.name}"`, 400);
             }
           }
         }
@@ -186,7 +178,10 @@ export class OrderService {
         branch.settings.taxIds.map((id: any) => id.toString())
       );
     } else {
-      if (restaurant.defaultSettings.defaultTaxIds && restaurant.defaultSettings.defaultTaxIds.length > 0) {
+      if (
+        restaurant.defaultSettings.defaultTaxIds &&
+        restaurant.defaultSettings.defaultTaxIds.length > 0
+      ) {
         applicableTaxes = await this.taxRepo.findByIds(
           restaurant.defaultSettings.defaultTaxIds.map((id: any) => id.toString())
         );
@@ -470,8 +465,8 @@ export class OrderService {
   }
 
   /**
- * Validate branch is ready to accept orders
- */
+   * Validate branch is ready to accept orders
+   */
   private async validateBranchReadiness(branch: any): Promise<void> {
     if (!branch.settings.acceptOrders) {
       throw new AppError('This branch is not currently accepting orders', 400);
@@ -480,11 +475,15 @@ export class OrderService {
     // Check operating hours
     const now = new Date();
     const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as
-      'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+      | 'monday'
+      | 'tuesday'
+      | 'wednesday'
+      | 'thursday'
+      | 'friday'
+      | 'saturday'
+      | 'sunday';
 
-    const todayHours = branch.settings.operatingHours.find(
-      (oh: any) => oh.day === currentDay
-    );
+    const todayHours = branch.settings.operatingHours.find((oh: any) => oh.day === currentDay);
 
     if (!todayHours || !todayHours.isOpen) {
       throw new AppError('Branch is closed today', 400);
@@ -513,8 +512,8 @@ export class OrderService {
   }
 
   /**
- * Validate table is available for new order
- */
+   * Validate table is available for new order
+   */
   private async validateTableAvailability(tableId: string): Promise<void> {
     // Use repository method instead of direct query
     const hasActiveOrder = await this.orderRepo.hasActiveOrders(tableId);
@@ -544,10 +543,7 @@ export class OrderService {
     const allowed = allowedTransitions[currentStatus] || [];
 
     if (!allowed.includes(newStatus)) {
-      throw new AppError(
-        `Cannot transition from ${currentStatus} to ${newStatus}`,
-        400
-      );
+      throw new AppError(`Cannot transition from ${currentStatus} to ${newStatus}`, 400);
     }
   }
 
@@ -564,10 +560,7 @@ export class OrderService {
     }
 
     if (order.paymentStatus === 'paid') {
-      throw new AppError(
-        'Cannot cancel paid order. Please process refund first.',
-        400
-      );
+      throw new AppError('Cannot cancel paid order. Please process refund first.', 400);
     }
   }
 

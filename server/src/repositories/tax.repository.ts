@@ -127,13 +127,13 @@ export class TaxRepository {
   }
 
   /**
- * Find taxes by their IDs and verify they're active
- * Used when branch has configured specific taxes
- */
+   * Find taxes by their IDs and verify they're active
+   * Used when branch has configured specific taxes
+   */
   async findByIds(taxIds: string[]): Promise<ITax[]> {
     return Tax.find({
       _id: { $in: taxIds },
-      isActive: true
+      isActive: true,
     })
       .populate('conditions.specificItems')
       .populate('conditions.specificCategories')

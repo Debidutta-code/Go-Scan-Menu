@@ -132,12 +132,12 @@ export class OrderRepository {
   }
 
   /**
- * Find active orders for a table (not completed or cancelled)
- */
+   * Find active orders for a table (not completed or cancelled)
+   */
   async findActiveOrdersByTable(tableId: string): Promise<IOrder[]> {
     return Order.find({
       tableId,
-      status: { $nin: ['completed', 'cancelled'] }
+      status: { $nin: ['completed', 'cancelled'] },
     })
       .populate('branchId')
       .populate('assignedStaffId')
@@ -170,7 +170,7 @@ export class OrderRepository {
   async hasActiveOrders(tableId: string): Promise<boolean> {
     const count = await Order.countDocuments({
       tableId,
-      status: { $nin: ['completed', 'cancelled'] }
+      status: { $nin: ['completed', 'cancelled'] },
     });
     return count > 0;
   }

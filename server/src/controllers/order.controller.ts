@@ -94,7 +94,15 @@ export class OrderController {
     }
 
     // Validate status value
-    const validStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed', 'cancelled'];
+    const validStatuses = [
+      'pending',
+      'confirmed',
+      'preparing',
+      'ready',
+      'served',
+      'completed',
+      'cancelled',
+    ];
     if (!validStatuses.includes(status)) {
       sendResponse(res, 400, {
         message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`,

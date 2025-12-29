@@ -37,10 +37,7 @@ export class PublicMenuController {
   getMenuByBranch = catchAsync(async (req: Request, res: Response) => {
     const { restaurantSlug, branchCode } = req.params;
 
-    const menuData = await this.menuService.getCompleteMenuByBranch(
-      restaurantSlug,
-      branchCode
-    );
+    const menuData = await this.menuService.getCompleteMenuByBranch(restaurantSlug, branchCode);
 
     sendResponse(res, 200, {
       message: 'Menu retrieved successfully',

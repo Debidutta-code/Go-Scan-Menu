@@ -151,9 +151,7 @@ export class RestaurantService {
   async updateDefaultSettings(id: string, settings: Partial<IRestaurant['defaultSettings']>) {
     // NEW: Validate defaultTaxIds if being updated
     if (settings.defaultTaxIds && settings.defaultTaxIds.length > 0) {
-      const taxes = await this.taxRepo.findByIds(
-        settings.defaultTaxIds.map(id => id.toString())
-      );
+      const taxes = await this.taxRepo.findByIds(settings.defaultTaxIds.map((id) => id.toString()));
 
       if (taxes.length !== settings.defaultTaxIds.length) {
         throw new AppError('One or more default tax IDs are invalid or inactive', 400);
@@ -161,11 +159,14 @@ export class RestaurantService {
 
       // Verify taxes belong to this restaurant (restaurant-scoped only)
       const invalidTaxes = taxes.filter(
-        tax => tax.restaurantId.toString() !== id || tax.scope !== 'restaurant'
+        (tax) => tax.restaurantId.toString() !== id || tax.scope !== 'restaurant'
       );
 
       if (invalidTaxes.length > 0) {
-        throw new AppError('Default taxes must be restaurant-scoped and belong to this restaurant', 403);
+        throw new AppError(
+          'Default taxes must be restaurant-scoped and belong to this restaurant',
+          403
+        );
       }
     }
 

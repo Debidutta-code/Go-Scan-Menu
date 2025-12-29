@@ -9,7 +9,7 @@ export class RestaurantRepository {
   }
 
   async findById(id: string): Promise<IRestaurant | null> {
-    return Restaurant.findById(id)
+    return Restaurant.findById(id);
     // .populate('defaultSettings.defaultTaxIds');
   }
 

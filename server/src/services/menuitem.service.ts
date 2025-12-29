@@ -65,7 +65,10 @@ export class MenuItemService {
 
       // Category must be branch-scoped with same branchId
       if (category.scope !== 'branch' || category.branchId?.toString() !== data.branchId) {
-        throw new AppError('Branch-specific items must belong to a branch-specific category in the same branch', 400);
+        throw new AppError(
+          'Branch-specific items must belong to a branch-specific category in the same branch',
+          400
+        );
       }
 
       // Verify branch exists
