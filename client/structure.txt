@@ -19,7 +19,13 @@ client
 |   |   |   |-- Input.tsx
 |   |   |   |-- Loader.tsx
 |   |   |   |-- Modal.tsx
-|   |   |   `-- index.ts
+|   |   |   |-- index.ts
+|   |   |   `-- styles
+|   |   |       |-- Button.css
+|   |   |       |-- Card.css
+|   |   |       |-- Input.css
+|   |   |       |-- Loader.css
+|   |   |       `-- Modal.css
 |   |   |-- index.ts
 |   |   |-- layout
 |   |   |   |-- AdminLayout.tsx
@@ -63,6 +69,7 @@ client
 |   |-- index.css
 |   |-- main.tsx
 |   |-- pages
+|   |   |-- Example.css
 |   |   |-- Example.tsx
 |   |   |-- NotFound.tsx
 |   |   |-- admin

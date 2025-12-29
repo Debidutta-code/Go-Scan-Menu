@@ -1,0 +1,99 @@
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    min-height: 48px;
+    width: auto;
+}
+
+.button-primary {
+    background-color: #ff6b35;
+    color: white;
+}
+
+.button-primary:hover {
+    background-color: #e55a2b;
+    transform: translateY(-2px);
+}
+
+.button-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.button-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.button-small {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    min-height: 40px;
+}
+
+.button-large {
+    padding: 16px 32px;
+    font-size: 1.125rem;
+    min-height: 56px;
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.button-loading {
+    opacity: 0.8;
+    cursor: wait;
+}
+
+/* Form button row */
+.form-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+/* Buttons share space equally */
+.form-buttons .button {
+    flex: 1;
+    width: auto; /* override mobile full-width rule */
+}
+
+/* ONLY on small screens → stack */
+@media (max-width: 480px) {
+    .form-buttons {
+        flex-direction: column;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .button {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+        min-height: 44px;
+        width: 100%;
+        /* Full-width buttons on mobile for better tap targets */
+    }
+
+    .button-large {
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .button {
+        font-size: 0.9rem;
+    }
+}
