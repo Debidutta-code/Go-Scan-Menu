@@ -23,3 +23,5 @@ structure.txt
 *.njsproj
 *.sln
 *.sw?
+.env
+structure.txt
