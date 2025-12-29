@@ -407,16 +407,31 @@ export class OrderService {
         break;
       case 'completed':
         updateData.completedAt = new Date();
-        // Reset table status to available
-        await this.tableRepo.updateStatus(order.tableId.toString(), 'available');
-        // End customer session if exists
-        const session = await this.sessionRepo.findActiveSessionByTable(order.tableId.toString());
-        if (session) {
-          await this.sessionRepo.update(session.sessionId, {
-            activeOrderId: undefined,
-            endTime: new Date(),
-            isActive: false,
-          });
+
+        // CRITICAL FIX: Extract string ID safely from populated tableId
+        const tableIdStr = order.tableId?._id?.toString();
+        if (!tableIdStr) {
+          console.error('Table ID missing on order:', order._id);
+          throw new AppError('Cannot complete order: invalid table reference', 500);
+        }
+
+        try {
+          // Reset table status to available
+          await this.tableRepo.updateStatus(tableIdStr, 'available');
+
+          // End customer session if exists
+          const session = await this.sessionRepo.findActiveSessionByTable(tableIdStr);
+          if (session) {
+            await this.sessionRepo.update(session.sessionId, {
+              activeOrderId: undefined,
+              endTime: new Date(),
+              isActive: false,
+            });
+          }
+        } catch (sessionError) {
+          console.error('Failed to end session or free table on order completion:', sessionError);
+          // Do NOT fail the status update just because session/table cleanup failed
+          // But log it for debugging
         }
         break;
     }
@@ -428,6 +443,7 @@ export class OrderService {
 
     return updatedOrder;
   }
+
   async updateItemStatus(
     orderId: string,
     itemId: string,
@@ -490,6 +506,11 @@ export class OrderService {
     // Validate cancellation is allowed
     this.validateCancellation(order);
 
+    const tableIdStr = order.tableId?._id?.toString();
+    if (!tableIdStr) {
+      throw new AppError('Cannot cancel order: invalid table reference', 500);
+    }
+
     const updatedOrder = await this.orderRepo.update(id, {
       status: 'cancelled',
       cancelledAt: new Date(),
@@ -500,8 +521,13 @@ export class OrderService {
       throw new AppError('Failed to cancel order', 500);
     }
 
-    // Reset table status to available
-    await this.tableRepo.updateStatus(order.tableId.toString(), 'available');
+    try {
+      // Reset table status to available
+      await this.tableRepo.updateStatus(tableIdStr, 'available');
+    } catch (tableError) {
+      console.error('Failed to free table on cancellation:', tableError);
+      // Non-critical — order is already cancelled
+    }
 
     return updatedOrder;
   }
@@ -533,12 +559,12 @@ export class OrderService {
 
     // Check current time is within operating hours
     const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
-    // if (currentTime < todayHours.openTime || currentTime > todayHours.closeTime) {
-    //   throw new AppError(
-    //     `Branch is closed. Operating hours: ${todayHours.openTime} - ${todayHours.closeTime}`,
-    //     400
-    //   );
-    // }
+    if (currentTime < todayHours.openTime || currentTime > todayHours.closeTime) {
+      throw new AppError(
+        `Branch is closed. Operating hours: ${todayHours.openTime} - ${todayHours.closeTime}`,
+        400
+      );
+    }
   }
 
   /**

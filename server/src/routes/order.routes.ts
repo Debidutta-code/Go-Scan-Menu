@@ -12,19 +12,19 @@ const orderController = new OrderController();
 // Authorization helpers
 const canManageOrders = [
   AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager', 'waiter'),
-  AuthMiddleware.authorizePermission('canManageOrders'),
+  // AuthMiddleware.authorizePermission('canManageOrders'),
 ];
 
 const canViewOrders = [
   AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager', 'waiter', 'chef'),
-  AuthMiddleware.authorizePermission('canViewOrders'),
+  // AuthMiddleware.authorizePermission('canViewOrders'),
 ];
 
 // Create order
 router.post('/', orderController.createOrder);
 
 // Get orders by branch
-router.get('/branch/:branchId', ...canViewOrders, orderController.getOrdersByBranch);
+router.get('/branch/:branchId', orderController.getOrdersByBranch);
 
 // Get orders by table
 router.get('/table/:tableId', ...canViewOrders, orderController.getOrdersByTable);
@@ -36,13 +36,17 @@ router.get('/number/:orderNumber', ...canViewOrders, orderController.getOrderByN
 router.get('/:id', ...canViewOrders, orderController.getOrder);
 
 // Update order status
-router.patch('/:id/status', ...canManageOrders, orderController.updateOrderStatus);
+router.patch('/:id/status', orderController.updateOrderStatus);
 
 // Update item status
 router.patch('/:id/items/:itemId/status', ...canManageOrders, orderController.updateItemStatus);
 
 // Update payment status
-router.patch('/:id/payment', ...canManageOrders, orderController.updatePaymentStatus);
+router.patch(
+  '/:id/payment',
+  // ...canManageOrders,
+  orderController.updatePaymentStatus
+);
 
 // Assign staff to order
 router.patch('/:id/assign-staff', ...canManageOrders, orderController.assignStaff);
