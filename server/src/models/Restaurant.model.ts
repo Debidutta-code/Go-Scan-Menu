@@ -1,10 +1,11 @@
 // src/models/Restaurant.model.ts
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IRestaurant extends Document {
   name: string;
   slug: string;
   type: 'single' | 'chain';
+  ownerId?: Types.ObjectId; // Reference to Staff model
   owner: {
     name: string;
     email: string;
@@ -31,7 +32,7 @@ export interface IRestaurant extends Document {
   };
   defaultSettings: {
     currency: string;
-    taxPercentage: number;
+    defaultTaxIds: Types.ObjectId[];
     serviceChargePercentage: number;
     allowBranchOverride: boolean;
   };
@@ -62,6 +63,10 @@ const restaurantSchema = new Schema<IRestaurant>(
       type: String,
       enum: ['single', 'chain'],
       required: true,
+    },
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Staff',
     },
     owner: {
       name: {
@@ -140,10 +145,12 @@ const restaurantSchema = new Schema<IRestaurant>(
         type: String,
         default: 'USD',
       },
-      taxPercentage: {
-        type: Number,
-        default: 0,
-      },
+      defaultTaxIds: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'Tax',
+        },
+      ],
       serviceChargePercentage: {
         type: Number,
         default: 0,
@@ -176,5 +183,6 @@ const restaurantSchema = new Schema<IRestaurant>(
 // Indexes
 restaurantSchema.index({ slug: 1 }, { unique: true });
 restaurantSchema.index({ 'owner.email': 1 }, { unique: true });
+restaurantSchema.index({ ownerId: 1 });
 
 export const Restaurant = mongoose.model<IRestaurant>('Restaurant', restaurantSchema);

@@ -1,5 +1,6 @@
 // src/models/MenuItem.model.ts
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import { NextFunction } from 'express';
 
 export interface IMenuItem extends Document {
   restaurantId: Types.ObjectId;
@@ -216,5 +217,44 @@ const menuItemSchema = new Schema<IMenuItem>(
 // Indexes
 menuItemSchema.index({ restaurantId: 1, categoryId: 1, scope: 1, isActive: 1 });
 menuItemSchema.index({ branchId: 1, isAvailable: 1 });
+
+// Validation: Ensure scope consistency and pricing logic
+menuItemSchema.pre('save', async function (this: IMenuItem) {
+  const item = this;
+
+  if (item.scope === 'branch' && !item.branchId) {
+    throw new Error('Branch-scoped menu items must have a branchId');
+  }
+
+  if (item.scope === 'restaurant' && item.branchId) {
+    throw new Error('Restaurant-scoped menu items cannot have a branchId');
+  }
+
+  if (item.scope === 'branch' && item.branchPricing?.length) {
+    throw new Error('Branch-scoped items should not have branchPricing array');
+  }
+
+  if (item.isModified('categoryId') || item.isModified('scope') || item.isNew) {
+    const Category = mongoose.model('Category');
+    const category: any = await Category.findById(item.categoryId);
+
+    if (!category) {
+      throw new Error('Category not found');
+    }
+
+    if (
+      item.scope === 'branch' &&
+      (category.scope !== 'branch' || category.branchId?.toString() !== item.branchId?.toString())
+    ) {
+      throw new Error(
+        'Branch-scoped items must belong to a branch-scoped category in the same branch'
+      );
+    }
+
+    if (item.scope === 'restaurant' && category.scope !== 'restaurant') {
+      throw new Error('Restaurant-scoped items must belong to a restaurant-scoped category');
+    }
+  }
+});
 
 export const MenuItem = mongoose.model<IMenuItem>('MenuItem', menuItemSchema);

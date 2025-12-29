@@ -26,7 +26,7 @@ export interface IBranch extends Document {
   };
   settings: {
     currency: string;
-    taxPercentage: number;
+    taxIds: Types.ObjectId[]; // UPDATED: Array of Tax references
     serviceChargePercentage: number;
     acceptOrders: boolean;
     operatingHours: Array<{
@@ -124,10 +124,13 @@ const branchSchema = new Schema<IBranch>(
         type: String,
         default: 'USD',
       },
-      taxPercentage: {
-        type: Number,
-        default: 0,
-      },
+      // UPDATED: Changed from taxPercentage to taxIds (array of Tax references)
+      taxIds: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'Tax',
+        },
+      ],
       serviceChargePercentage: {
         type: Number,
         default: 0,

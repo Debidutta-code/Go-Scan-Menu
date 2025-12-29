@@ -6,6 +6,4 @@ import morgan from 'morgan';
  * POST /api/login 201 35 ms
  */
 export const requestLogger =
-    process.env.NODE_ENV === 'production'
-        ? morgan('combined')
-        : morgan('dev');
+  process.env.NODE_ENV === 'production' ? morgan('combined') : morgan('dev');

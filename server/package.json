@@ -5,29 +5,43 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/index.ts",
-    "build": "tsc",
+    "dev": "nodemon --watch src --ext ts,json --exec ts-node -r tsconfig-paths/register --project tsconfig.json src/index.ts",
     "start": "node dist/index.js",
-    "prettier": "prettier --write \"src/**/*.{ts,json}\""
+    "prettier": "prettier --write \"src/**/*.{ts,json}\"",
+    "tree": "npx tree-node-cli -I \"node_modules|dist\" -S > structure.txt",
+    "build": "rimraf dist && tsc -p tsconfig.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.0.2",
+    "@types/qrcode": "^1.5.6",
+    "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.11",
     "prettier": "^3.7.4",
+    "tree-cli": "^0.6.7",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.0.1",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "nanoid": "^3.3.7",
+    "qrcode": "^1.5.4",
+    "uuid": "^13.0.0"
   }
 }

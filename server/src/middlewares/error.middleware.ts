@@ -2,12 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AppError } from '@/utils';
 import { sendResponse } from '@/utils/apiResponse';
 
-export const globalErrorHandler = (
-  err: any,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
+export const globalErrorHandler = (err: any, _req: Request, res: Response, _next: NextFunction) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Something went wrong';
 
