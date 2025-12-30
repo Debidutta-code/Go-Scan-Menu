@@ -15,8 +15,8 @@ export class StaffRepository {
       .populate('allowedBranchIds');
   }
 
-  async findByEmail(email: string, restaurantId: string): Promise<IStaff | null> {
-    return Staff.findOne({ email, restaurantId })
+  async findByEmail(email: string): Promise<IStaff | null> {
+    return Staff.findOne({ email })
       .populate('restaurantId')
       .populate('branchId')
       .populate('allowedBranchIds');

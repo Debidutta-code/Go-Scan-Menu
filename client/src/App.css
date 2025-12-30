@@ -1,66 +1,63 @@
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
+}
+
+body {
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    'Oxygen',
+    'Ubuntu',
+    'Cantarell',
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
   min-height: 100vh;
 }
 
-.app-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-.main-content {
-  flex: 1;
-  padding-bottom: 80px; /* Space for mobile floating cart */
+/* Global Utilities */
+.text-center {
+  text-align: center;
 }
 
-/* Floating Cart Button (Mobile) */
-.floating-cart-btn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background-color: var(--primary-color);
-  color: var(--white);
-  border: none;
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  cursor: pointer;
-  z-index: var(--z-fixed);
-  transition: all var(--transition-base);
+.mb-1 {
+  margin-bottom: 8px;
 }
 
-.floating-cart-btn:hover {
-  transform: scale(1.1);
-  background-color: var(--primary-hover);
+.mb-2 {
+  margin-bottom: 16px;
 }
 
-.floating-cart-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: var(--danger-color);
-  color: var(--white);
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 600;
+.mb-3 {
+  margin-bottom: 24px;
 }
 
-@media (min-width: 768px) {
-  .floating-cart-btn {
-    display: none;
-  }
+.mt-1 {
+  margin-top: 8px;
+}
+
+.mt-2 {
+  margin-top: 16px;
+}
+
+.mt-3 {
+  margin-top: 24px;
 }

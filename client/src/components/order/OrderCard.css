@@ -153,11 +153,11 @@
     align-items: stretch;
     gap: var(--spacing-3);
   }
-  
+
   .order-card-actions {
     width: 100%;
   }
-  
+
   .order-card-actions button {
     flex: 1;
   }

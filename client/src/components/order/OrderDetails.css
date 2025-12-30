@@ -154,11 +154,11 @@
   .order-details-actions {
     flex-direction: column;
   }
-  
+
   .order-details-item {
     flex-direction: column;
   }
-  
+
   .order-details-item-image {
     width: 100%;
     height: 150px;

@@ -164,7 +164,7 @@
   .branch-management-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .branch-management-header {
     flex-direction: column;
     align-items: stretch;

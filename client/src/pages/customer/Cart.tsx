@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import apiClient from '../../lib/api';
-import './Cart.css';
+import { orderService } from '../../services/order.service';
+import { MenuItem } from '../../types/menu.types';
 import { Navbar } from '@/components/ui/Navbar/Navbar';
 import { Button, Card, Input, Loader, Modal } from '@/components/common';
+import './Cart.css';
 
-interface CartItem {
-  _id: string;
-  name: string;
-  price: number;
-  image?: string;
+interface CartItem extends MenuItem {
   quantity: number;
-  isVeg: boolean;
+  selectedVariant?: { name: string; price: number };
+  selectedAddons: Array<{ name: string; price: number }>;
+  selectedCustomizations: Array<{ name: string; value: string }>;
+  specialInstructions?: string;
+  itemTotal: number;
 }
 
 const Cart: React.FC = () => {
@@ -21,7 +22,8 @@ const Cart: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [specialInstructions, setSpecialInstructions] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [orderSpecialInstructions, setOrderSpecialInstructions] = useState('');
 
   useEffect(() => {
     loadCart();
@@ -34,37 +36,49 @@ const Cart: React.FC = () => {
     }
   };
 
-  const updateQuantity = (itemId: string, delta: number) => {
-    const newCart = cart
-      .map((item) => {
-        if (item._id === itemId) {
-          const newQuantity = Math.max(0, item.quantity + delta);
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      })
-      .filter((item) => item.quantity > 0);
+  const updateQuantity = (index: number, delta: number) => {
+    const newCart = [...cart];
+    const newQuantity = Math.max(0, newCart[index].quantity + delta);
+
+    if (newQuantity === 0) {
+      newCart.splice(index, 1);
+    } else {
+      newCart[index].quantity = newQuantity;
+      // Recalculate itemTotal
+      const item = newCart[index];
+      let basePrice = item.selectedVariant?.price || item.price;
+      item.selectedAddons.forEach((addon) => {
+        basePrice += addon.price;
+      });
+      newCart[index].itemTotal = basePrice * newQuantity;
+    }
 
     setCart(newCart);
     localStorage.setItem('cart', JSON.stringify(newCart));
   };
 
-  const removeItem = (itemId: string) => {
-    const newCart = cart.filter((item) => item._id !== itemId);
+  const removeItem = (index: number) => {
+    const newCart = cart.filter((_, i) => i !== index);
     setCart(newCart);
     localStorage.setItem('cart', JSON.stringify(newCart));
   };
 
   const getSubtotal = () => {
-    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return cart.reduce((sum, item) => sum + item.itemTotal, 0);
   };
 
   const getTax = () => {
-    return getSubtotal() * 0.05; // 5% tax
+    // Simple 5% GST for demo - in real app, this would come from backend
+    return getSubtotal() * 0.05;
+  };
+
+  const getServiceCharge = () => {
+    // Simple 10% service charge for demo
+    return getSubtotal() * 0.1;
   };
 
   const getTotal = () => {
-    return getSubtotal() + getTax();
+    return getSubtotal() + getTax() + getServiceCharge();
   };
 
   const handleCheckout = async () => {
@@ -83,26 +97,24 @@ const Cart: React.FC = () => {
         tableNumber: tableInfo.tableNumber,
         customerName,
         customerPhone,
-        specialInstructions,
+        customerEmail: customerEmail || undefined,
+        specialInstructions: orderSpecialInstructions || undefined,
         items: cart.map((item) => ({
           menuItemId: item._id,
           name: item.name,
           quantity: item.quantity,
-          price: item.price,
+          price: item.selectedVariant?.price || item.price,
           image: item.image,
-          addons: [],
-          customizations: [],
-          itemTotal: item.price * item.quantity,
+          variant: item.selectedVariant,
+          addons: item.selectedAddons,
+          customizations: item.selectedCustomizations,
+          specialInstructions: item.specialInstructions,
+          itemTotal: item.itemTotal,
         })),
-        orderType: 'dine-in',
+        orderType: 'dine-in' as const,
       };
 
-      const response = await apiClient.post(
-        `/restaurants/${tableInfo.restaurantId}/orders`,
-        orderData
-      );
-
-      const order = response.data.data;
+      const order = await orderService.createOrder(tableInfo.restaurantId, orderData);
 
       // Clear cart
       localStorage.removeItem('cart');
@@ -111,9 +123,9 @@ const Cart: React.FC = () => {
 
       // Navigate to order tracking
       navigate(`/order-tracking/${order.orderNumber}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating order:', error);
-      alert('Failed to create order. Please try again.');
+      alert(error.response?.data?.message || 'Failed to create order. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -139,31 +151,58 @@ const Cart: React.FC = () => {
 
       <div className="cart-container container">
         <div className="cart-items">
-          {cart.map((item) => (
-            <Card key={item._id} className="cart-item">
+          {cart.map((item, index) => (
+            <Card key={`${item._id}-${index}`} className="cart-item">
               {item.image && <img src={item.image} alt={item.name} className="cart-item-image" />}
               <div className="cart-item-details">
                 <div className="cart-item-header">
-                  <h3 className="cart-item-name">
-                    <span className={`veg-indicator ${item.isVeg ? 'veg' : 'non-veg'}`}>•</span>
-                    {item.name}
-                  </h3>
+                  <h3 className="cart-item-name">{item.name}</h3>
                   <button
                     className="cart-item-remove"
-                    onClick={() => removeItem(item._id)}
+                    onClick={() => removeItem(index)}
                     aria-label="Remove item"
                   >
                     ×
                   </button>
                 </div>
+
+                {item.selectedVariant && (
+                  <p className="cart-item-variant">{item.selectedVariant.name}</p>
+                )}
+
+                {item.selectedAddons.length > 0 && (
+                  <div className="cart-item-addons">
+                    <span className="addon-label">Add-ons:</span>
+                    {item.selectedAddons.map((addon, i) => (
+                      <span key={i} className="addon-item">
+                        {addon.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {item.selectedCustomizations.length > 0 && (
+                  <div className="cart-item-customizations">
+                    {item.selectedCustomizations.map((custom, i) => (
+                      <span key={i} className="custom-item">
+                        {custom.name}: {custom.value}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {item.specialInstructions && (
+                  <p className="cart-item-instructions">📝 {item.specialInstructions}</p>
+                )}
+
                 <div className="cart-item-footer">
-                  <span className="cart-item-price">₹{item.price * item.quantity}</span>
+                  <span className="cart-item-price">₹{item.itemTotal.toFixed(2)}</span>
                   <div className="quantity-controls">
-                    <button className="quantity-btn" onClick={() => updateQuantity(item._id, -1)}>
+                    <button className="quantity-btn" onClick={() => updateQuantity(index, -1)}>
                       −
                     </button>
                     <span className="quantity-value">{item.quantity}</span>
-                    <button className="quantity-btn" onClick={() => updateQuantity(item._id, 1)}>
+                    <button className="quantity-btn" onClick={() => updateQuantity(index, 1)}>
                       +
                     </button>
                   </div>
@@ -181,9 +220,14 @@ const Cart: React.FC = () => {
               <span>₹{getSubtotal().toFixed(2)}</span>
             </div>
             <div className="summary-row">
-              <span>Tax (5%)</span>
+              <span>GST (5%)</span>
               <span>₹{getTax().toFixed(2)}</span>
             </div>
+            <div className="summary-row">
+              <span>Service Charge (10%)</span>
+              <span>₹{getServiceCharge().toFixed(2)}</span>
+            </div>
+            <div className="summary-divider"></div>
             <div className="summary-row summary-total">
               <span>Total</span>
               <span>₹{getTotal().toFixed(2)}</span>
@@ -218,15 +262,28 @@ const Cart: React.FC = () => {
             placeholder="Enter your phone number"
             required
           />
+          <Input
+            label="Email (Optional)"
+            type="email"
+            value={customerEmail}
+            onChange={(e) => setCustomerEmail(e.target.value)}
+            placeholder="Enter your email"
+          />
           <div className="input-group">
             <label className="input-label">Special Instructions (Optional)</label>
             <textarea
               className="input"
-              value={specialInstructions}
-              onChange={(e) => setSpecialInstructions(e.target.value)}
-              placeholder="Any special requests?"
+              value={orderSpecialInstructions}
+              onChange={(e) => setOrderSpecialInstructions(e.target.value)}
+              placeholder="Any special requests for your order?"
               rows={3}
             />
+          </div>
+          <div className="checkout-summary">
+            <div className="checkout-row">
+              <span>Total Amount:</span>
+              <span className="checkout-total">₹{getTotal().toFixed(2)}</span>
+            </div>
           </div>
           <div className="checkout-actions">
             <Button

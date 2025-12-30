@@ -170,11 +170,11 @@
     align-items: stretch;
     gap: var(--spacing-4);
   }
-  
+
   .staff-management-table {
     overflow-x: auto;
   }
-  
+
   .staff-table {
     min-width: 800px;
   }

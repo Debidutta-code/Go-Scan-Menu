@@ -21,7 +21,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -60,15 +61,15 @@
   .not-found-icon {
     font-size: 5rem;
   }
-  
+
   .not-found-title {
     font-size: var(--font-size-4xl);
   }
-  
+
   .not-found-subtitle {
     font-size: var(--font-size-xl);
   }
-  
+
   .not-found-actions {
     flex-direction: column;
   }

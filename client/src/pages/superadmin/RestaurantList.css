@@ -84,17 +84,17 @@
   .restaurant-list-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .restaurant-list-header {
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-4);
   }
-  
+
   .restaurant-list-filters {
     flex-direction: column;
   }
-  
+
   .restaurant-list-search {
     min-width: 100%;
   }

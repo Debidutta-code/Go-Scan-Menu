@@ -1,27 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { orderService } from '../../services/order.service';
 import { socketService } from '../../lib/socket';
 import './KitchenDisplay.css';
 import { Navbar } from '@/components/ui/Navbar/Navbar';
 import { Button, Card } from '@/components/common';
-
-interface KitchenOrder {
-  _id: string;
-  orderNumber: string;
-  tableNumber: string;
-  items: Array<{
-    name: string;
-    quantity: number;
-    status: string;
-    specialInstructions?: string;
-  }>;
-  orderTime: string;
-  status: string;
-}
+import { Order } from '../../types/order.types';
 
 const KitchenDisplay: React.FC = () => {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState<KitchenOrder[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -30,49 +19,68 @@ const KitchenDisplay: React.FC = () => {
       return;
     }
 
-    // Mock data
-    setOrders([
-      {
-        _id: '1',
-        orderNumber: 'ORD-001',
-        tableNumber: 'T-5',
-        items: [
-          { name: 'Butter Chicken', quantity: 2, status: 'preparing' },
-          { name: 'Naan', quantity: 4, status: 'preparing', specialInstructions: 'Extra butter' },
-        ],
-        orderTime: new Date(Date.now() - 5 * 60000).toISOString(),
-        status: 'preparing',
-      },
-      {
-        _id: '2',
-        orderNumber: 'ORD-002',
-        tableNumber: 'T-3',
-        items: [{ name: 'Paneer Tikka', quantity: 1, status: 'pending' }],
-        orderTime: new Date(Date.now() - 2 * 60000).toISOString(),
-        status: 'confirmed',
-      },
-    ]);
-
+    fetchKitchenOrders();
     setupWebSocket();
   }, []);
 
+  const fetchKitchenOrders = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const allOrders = await orderService.getOrdersByBranch(user.restaurantId, user.branchId);
+
+      // Filter only active orders for kitchen
+      const kitchenOrders = allOrders.filter((o) =>
+        ['confirmed', 'preparing', 'ready'].includes(o.status)
+      );
+
+      setOrders(kitchenOrders);
+    } catch (error) {
+      console.error('Error fetching kitchen orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const setupWebSocket = () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const socket = socketService.connect();
+    socketService.connect();
 
     if (user.restaurantId && user.branchId) {
       socketService.joinKitchen(user.restaurantId, user.branchId);
     }
 
     socketService.onOrderCreated((order) => {
-      setOrders((prev) => [order, ...prev]);
+      if (['confirmed', 'preparing'].includes(order.status)) {
+        setOrders((prev) => [order, ...prev]);
+      }
     });
 
     socketService.onOrderStatusUpdate((updatedOrder) => {
-      setOrders((prev) =>
-        prev.map((order) => (order._id === updatedOrder._id ? updatedOrder : order))
-      );
+      setOrders((prev) => {
+        // Remove if order is no longer active
+        if (!['confirmed', 'preparing', 'ready'].includes(updatedOrder.status)) {
+          return prev.filter((o) => o._id !== updatedOrder._id);
+        }
+        // Update if exists, add if new
+        const index = prev.findIndex((o) => o._id === updatedOrder._id);
+        if (index >= 0) {
+          const newOrders = [...prev];
+          newOrders[index] = updatedOrder;
+          return newOrders;
+        }
+        return [updatedOrder, ...prev];
+      });
     });
+  };
+
+  const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      await orderService.updateOrderStatus(user.restaurantId, orderId, { status: newStatus });
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      alert('Failed to update order status');
+    }
   };
 
   const getTimeSinceOrder = (orderTime: string) => {
@@ -124,6 +132,17 @@ const KitchenDisplay: React.FC = () => {
                       <span className="item-quantity">{item.quantity}x</span>
                       <span className="item-name">{item.name}</span>
                     </div>
+                    {item.variant && <div className="item-variant">🎯 {item.variant.name}</div>}
+                    {item.addons.length > 0 && (
+                      <div className="item-addons">
+                        + {item.addons.map((a) => a.name).join(', ')}
+                      </div>
+                    )}
+                    {item.customizations.length > 0 && (
+                      <div className="item-customizations">
+                        {item.customizations.map((c) => `${c.name}: ${c.value}`).join(', ')}
+                      </div>
+                    )}
                     {item.specialInstructions && (
                       <div className="item-instructions">📝 {item.specialInstructions}</div>
                     )}
@@ -131,16 +150,35 @@ const KitchenDisplay: React.FC = () => {
                 ))}
               </div>
 
+              {order.specialInstructions && (
+                <div className="order-special-instructions">
+                  📝 Order Notes: {order.specialInstructions}
+                </div>
+              )}
+
               <div className="kitchen-actions">
                 {order.status === 'confirmed' && (
-                  <Button fullWidth size="lg" variant="primary">
+                  <Button
+                    fullWidth
+                    size="lg"
+                    variant="primary"
+                    onClick={() => updateOrderStatus(order._id, 'preparing')}
+                  >
                     Start Preparing
                   </Button>
                 )}
                 {order.status === 'preparing' && (
-                  <Button fullWidth size="lg" variant="primary">
+                  <Button
+                    fullWidth
+                    size="lg"
+                    variant="primary"
+                    onClick={() => updateOrderStatus(order._id, 'ready')}
+                  >
                     Mark Ready
                   </Button>
+                )}
+                {order.status === 'ready' && (
+                  <div className="ready-badge">✅ Ready for Service</div>
                 )}
               </div>
             </Card>

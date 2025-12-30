@@ -140,7 +140,7 @@
   .restaurant-form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .restaurant-form-actions {
     flex-direction: column;
   }

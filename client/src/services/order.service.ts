@@ -1,111 +1,78 @@
-import { apiService } from './api.service';
-import { API_ENDPOINTS } from '@/config/api.config';
+import apiClient from '../lib/api';
+import type {
+  Order,
+  CreateOrderRequest,
+  UpdateOrderStatusRequest,
+  UpdatePaymentStatusRequest,
+} from '../types/order.types';
+import type { ApiResponse } from '../types/api.types';
 
-export interface OrderItem {
-  menuItemId: string;
-  name: string;
-  image?: string;
-  quantity: number;
-  price: number;
-  variant?: {
-    name: string;
-    price: number;
-  };
-  addons: Array<{
-    name: string;
-    price: number;
-  }>;
-  customizations: Array<{
-    name: string;
-    value: string;
-  }>;
-  specialInstructions?: string;
-  itemTotal: number;
-}
-
-export interface CreateOrderData {
-  branchId: string;
-  tableId: string;
-  tableNumber: string;
-  items: OrderItem[];
-  customerName?: string;
-  customerPhone?: string;
-  customerEmail?: string;
-  orderType: 'dine-in' | 'takeaway';
-  specialInstructions?: string;
-}
-
-class OrderService {
-  async createOrder(restaurantId: string, data: CreateOrderData) {
-    return await apiService.post(
-      API_ENDPOINTS.PUBLIC.ORDER,
-      {
-        restaurantId,
-        ...data,
-      }
+export const orderService = {
+  // Create order
+  createOrder: async (restaurantId: string, data: CreateOrderRequest): Promise<Order> => {
+    const response = await apiClient.post<ApiResponse<Order>>(
+      `/restaurants/${restaurantId}/orders`,
+      data
     );
-  }
+    return response.data.data;
+  },
 
-  async getOrderByNumber(orderNumber: string) {
-    return await apiService.get(`/orders/by-number/${orderNumber}`);
-  }
-
-  async getOrdersByBranch(restaurantId: string, branchId: string, params?: any) {
-    return await apiService.get(
-      `${API_ENDPOINTS.ORDERS(restaurantId)}/branch/${branchId}`,
-      params
+  // Get orders by branch
+  getOrdersByBranch: async (restaurantId: string, branchId: string): Promise<Order[]> => {
+    const response = await apiClient.get<ApiResponse<Order[]>>(
+      `/restaurants/${restaurantId}/orders/branch/${branchId}`
     );
-  }
+    return response.data.data;
+  },
 
-  async getOrderById(restaurantId: string, orderId: string) {
-    return await apiService.get(`${API_ENDPOINTS.ORDERS(restaurantId)}/${orderId}`);
-  }
-
-  async updateOrderStatus(restaurantId: string, orderId: string, status: string) {
-    return await apiService.patch(
-      `${API_ENDPOINTS.ORDERS(restaurantId)}/${orderId}/status`,
-      { status }
+  // Get order by ID
+  getOrderById: async (restaurantId: string, orderId: string): Promise<Order> => {
+    const response = await apiClient.get<ApiResponse<Order>>(
+      `/restaurants/${restaurantId}/orders/${orderId}`
     );
-  }
+    return response.data.data;
+  },
 
-  async updatePaymentStatus(
+  // Get order by order number
+  getOrderByNumber: async (restaurantId: string, orderNumber: string): Promise<Order> => {
+    const response = await apiClient.get<ApiResponse<Order>>(
+      `/restaurants/${restaurantId}/orders/number/${orderNumber}`
+    );
+    return response.data.data;
+  },
+
+  // Update order status
+  updateOrderStatus: async (
     restaurantId: string,
     orderId: string,
-    paymentStatus: string,
-    paymentMethod?: string
-  ) {
-    return await apiService.patch(
-      `${API_ENDPOINTS.ORDERS(restaurantId)}/${orderId}/payment`,
-      { paymentStatus, paymentMethod }
+    data: UpdateOrderStatusRequest
+  ): Promise<Order> => {
+    const response = await apiClient.patch<ApiResponse<Order>>(
+      `/restaurants/${restaurantId}/orders/${orderId}/status`,
+      data
     );
-  }
+    return response.data.data;
+  },
 
-  async updateItemStatus(
+  // Update payment status
+  updatePaymentStatus: async (
     restaurantId: string,
     orderId: string,
-    itemId: string,
-    status: string
-  ) {
-    return await apiService.patch(
-      `${API_ENDPOINTS.ORDERS(restaurantId)}/${orderId}/items/${itemId}/status`,
-      { status }
+    data: UpdatePaymentStatusRequest
+  ): Promise<Order> => {
+    const response = await apiClient.patch<ApiResponse<Order>>(
+      `/restaurants/${restaurantId}/orders/${orderId}/payment`,
+      data
     );
-  }
+    return response.data.data;
+  },
 
-  async assignStaff(restaurantId: string, orderId: string, staffId: string, staffName: string) {
-    return await apiService.patch(
-      `${API_ENDPOINTS.ORDERS(restaurantId)}/${orderId}/assign-staff`,
-      { staffId, staffName }
+  // Cancel order
+  cancelOrder: async (restaurantId: string, orderId: string, reason: string): Promise<Order> => {
+    const response = await apiClient.patch<ApiResponse<Order>>(
+      `/restaurants/${restaurantId}/orders/${orderId}/cancel`,
+      { cancellationReason: reason }
     );
-  }
-
-  async cancelOrder(restaurantId: string, orderId: string, cancellationReason?: string) {
-    return await apiService.patch(
-      `${API_ENDPOINTS.ORDERS(restaurantId)}/${orderId}/cancel`,
-      { cancellationReason }
-    );
-  }
-}
-
-export const orderService = new OrderService();
-export default orderService;
+    return response.data.data;
+  },
+};

@@ -1,157 +1,307 @@
-/* src/pages/admin/Dashboard.css */
-
-.admin-dashboard-page {
+.admin-dashboard {
   min-height: 100vh;
-  background-color: var(--color-bg-primary);
+  background: #f8f9fa;
+  padding-bottom: 40px;
 }
 
-.admin-dashboard-content {
-  padding: var(--spacing-6) 0;
+.dashboard-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.admin-dashboard-welcome {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  color: var(--color-white);
-  padding: var(--spacing-8);
-  border-radius: var(--radius-xl);
-  margin-bottom: var(--spacing-8);
-  box-shadow: var(--shadow-lg);
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
-.admin-dashboard-welcome-title {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--spacing-2);
+.quick-action-btn {
+  padding: 24px 16px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
-.admin-dashboard-welcome-subtitle {
-  font-size: var(--font-size-lg);
+.quick-action-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.quick-action-btn.orders-btn:hover {
+  border-color: #ff6b35;
+  background: #fff5f2;
+}
+
+.quick-action-btn.menu-btn:hover {
+  border-color: #4caf50;
+  background: #f1f8f4;
+}
+
+.quick-action-btn.kitchen-btn:hover {
+  border-color: #9c27b0;
+  background: #f8f4fa;
+}
+
+.quick-action-btn.tables-btn:hover {
+  border-color: #2196f3;
+  background: #f3f8fe;
+}
+
+.action-icon {
+  font-size: 32px;
+}
+
+.action-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  font-size: 48px;
   opacity: 0.9;
 }
 
-.admin-dashboard-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-6);
-  margin-bottom: var(--spacing-8);
+.stat-content {
+  flex: 1;
 }
 
-.admin-dashboard-stat-card {
-  background-color: var(--color-white);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-6);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-base);
+.stat-value {
+  margin: 0 0 4px 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
 }
 
-.admin-dashboard-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+.stat-label {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
 }
 
-.admin-dashboard-stat-header {
+.stat-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.stat-primary .stat-value,
+.stat-primary .stat-label {
+  color: white;
+}
+
+.stat-success {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.stat-success .stat-value,
+.stat-success .stat-label {
+  color: white;
+}
+
+.stat-warning {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.stat-warning .stat-value,
+.stat-warning .stat-label {
+  color: white;
+}
+
+.stat-info {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+}
+
+.stat-info .stat-value,
+.stat-info .stat-label {
+  color: white;
+}
+
+.recent-orders-card {
+  padding: 24px;
+}
+
+.card-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--spacing-4);
-}
-
-.admin-dashboard-stat-icon {
-  font-size: var(--font-size-3xl);
-}
-
-.admin-dashboard-stat-trend {
-  font-size: var(--font-size-sm);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius-full);
-  font-weight: var(--font-weight-medium);
-}
-
-.admin-dashboard-stat-trend.up {
-  color: var(--color-success);
-  background-color: #d1fae5;
-}
-
-.admin-dashboard-stat-trend.down {
-  color: var(--color-error);
-  background-color: #fee2e2;
-}
-
-.admin-dashboard-stat-value {
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-gray-900);
-  margin-bottom: var(--spacing-2);
-}
-
-.admin-dashboard-stat-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-gray-600);
-  font-weight: var(--font-weight-medium);
-}
-
-.admin-dashboard-section {
-  margin-bottom: var(--spacing-8);
-}
-
-.admin-dashboard-section-header {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-6);
+  margin-bottom: 24px;
 }
 
-.admin-dashboard-section-title {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-gray-900);
+.card-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
 }
 
-.admin-dashboard-quick-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--spacing-4);
-}
-
-.admin-dashboard-action-card {
-  background-color: var(--color-white);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-5);
-  text-align: center;
+.view-all-btn {
+  padding: 8px 16px;
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  color: #666;
+  font-size: 14px;
   cursor: pointer;
-  transition: all var(--transition-base);
-  border: 2px solid transparent;
+  transition: all 0.2s;
 }
 
-.admin-dashboard-action-card:hover {
-  border-color: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+.view-all-btn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
 }
 
-.admin-dashboard-action-icon {
-  font-size: var(--font-size-4xl);
-  margin-bottom: var(--spacing-3);
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.admin-dashboard-action-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-gray-900);
-  margin-bottom: var(--spacing-2);
+.order-row {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
 }
 
-.admin-dashboard-action-description {
-  font-size: var(--font-size-sm);
-  color: var(--color-gray-600);
+.order-row:hover {
+  background: #e9ecef;
+}
+
+.order-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.order-number {
+  font-weight: 700;
+  color: #333;
+  font-size: 15px;
+}
+
+.order-table {
+  font-size: 14px;
+  color: #666;
+}
+
+.order-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-orange {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.status-blue {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-purple {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.status-green {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.status-gray {
+  background: #f5f5f5;
+  color: #757575;
+}
+
+.status-red {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.order-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.order-items {
+  font-size: 14px;
+  color: #666;
+}
+
+.order-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ff6b35;
+}
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
 }
 
 @media (max-width: 768px) {
-  .admin-dashboard-stats {
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid {
     grid-template-columns: 1fr;
   }
-  
-  .admin-dashboard-quick-actions {
+
+  .order-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .order-details {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+@media (max-width: 480px) {
+  .quick-actions {
     grid-template-columns: 1fr;
   }
 }

@@ -11,8 +11,8 @@ export class StaffController {
   }
 
   login = catchAsync(async (req: Request, res: Response) => {
-    const { email, password, restaurantId } = req.body;
-    const result = await this.staffService.login(email, password, restaurantId);
+    const { email, password } = req.body;
+    const result = await this.staffService.login(email, password);
     sendResponse(res, 200, {
       message: 'Login successful',
       data: result,

@@ -110,11 +110,11 @@
     flex-direction: column;
     gap: var(--spacing-4);
   }
-  
+
   .create-restaurant-progress::before {
     display: none;
   }
-  
+
   .create-restaurant-step {
     flex-direction: row;
     justify-content: flex-start;

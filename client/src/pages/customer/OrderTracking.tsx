@@ -1,25 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import apiClient from '../../lib/api';
+import { orderService } from '../../services/order.service';
 import './OrderTracking.css';
 import { Card, Loader } from '@/components/common';
 import { Navbar } from '@/components/ui/Navbar/Navbar';
 import { socketService } from '../../lib/socket';
-
-interface Order {
-  _id: string;
-  orderNumber: string;
-  status: string;
-  items: Array<{
-    name: string;
-    quantity: number;
-    price: number;
-    status: string;
-  }>;
-  tableNumber: string;
-  totalAmount: number;
-  orderTime: string;
-}
+import { Order } from '../../types/order.types';
 
 const OrderTracking: React.FC = () => {
   const { orderNumber } = useParams();
@@ -53,12 +40,16 @@ const OrderTracking: React.FC = () => {
 
   const fetchOrder = async () => {
     try {
-      const response = await apiClient.get(`/orders/number/${orderNumber}`);
-      setOrder(response.data.data);
+      const tableInfo = JSON.parse(localStorage.getItem('tableInfo') || '{}');
+      const fetchedOrder = await orderService.getOrderByNumber(
+        tableInfo.restaurantId,
+        orderNumber!
+      );
+      setOrder(fetchedOrder);
 
       // Join table room for real-time updates
-      if (response.data.data.tableId) {
-        socketService.joinTable(response.data.data.tableId);
+      if (fetchedOrder.tableId) {
+        socketService.joinTable(fetchedOrder.tableId);
       }
     } catch (error) {
       console.error('Error fetching order:', error);

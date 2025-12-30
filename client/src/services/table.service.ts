@@ -16,10 +16,7 @@ class TableService {
   }
 
   async updateTable(restaurantId: string, tableId: string, data: any) {
-    return await apiService.put(
-      `${API_ENDPOINTS.TABLES(restaurantId)}/${tableId}`,
-      data
-    );
+    return await apiService.put(`${API_ENDPOINTS.TABLES(restaurantId)}/${tableId}`, data);
   }
 
   async deleteTable(restaurantId: string, tableId: string) {
@@ -27,16 +24,13 @@ class TableService {
   }
 
   async updateTableStatus(restaurantId: string, tableId: string, status: string) {
-    return await apiService.patch(
-      `${API_ENDPOINTS.TABLES(restaurantId)}/${tableId}/status`,
-      { status }
-    );
+    return await apiService.patch(`${API_ENDPOINTS.TABLES(restaurantId)}/${tableId}/status`, {
+      status,
+    });
   }
 
   async generateQR(restaurantId: string, tableId: string) {
-    return await apiService.post(
-      `${API_ENDPOINTS.TABLES(restaurantId)}/${tableId}/qr-code`
-    );
+    return await apiService.post(`${API_ENDPOINTS.TABLES(restaurantId)}/${tableId}/qr-code`);
   }
 }
 

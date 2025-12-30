@@ -1,44 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'react-toastify';
-import { UtensilsCrossed, Loader2 } from 'lucide-react';
+import { authService } from '../../services/auth.service';
+import { Button, Input, Card } from '@/components/common';
 import './Login.css';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
-
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
 
-    if (!formData.email || !formData.password) {
-      toast.error('Please fill in all fields');
+    if (!email || !password) {
+      setError('Please fill in all fields');
       return;
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
-      await login(formData.email, formData.password);
-      toast.success('Login successful!');
+      const response = await authService.login({ email, password });
+
+      // Store token and user info
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+
+      // Redirect based on role
       navigate('/admin/dashboard');
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Login failed');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
@@ -47,78 +41,51 @@ const Login: React.FC = () => {
   return (
     <div className="login-page">
       <div className="login-container">
-        <div className="login-card">
+        <Card className="login-card">
           <div className="login-header">
-            <div className="login-icon-wrapper">
-              <UtensilsCrossed className="login-icon" />
-            </div>
-            <h2 className="login-title">Welcome Back</h2>
-            <p className="login-subtitle">
-              Sign in to manage your restaurant
-            </p>
+            <h1 className="login-title">🍴 Restaurant QR Menu</h1>
+            <p className="login-subtitle">Sign in to your account</p>
           </div>
 
+          {error && (
+            <div className="error-message">
+              <span>⚠️ {error}</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="login-form">
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="you@example.com"
-                required
-                data-testid="login-email-input"
-              />
-            </div>
+            <Input
+              label="Email Address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
 
-            <div className="form-group">
-              <label htmlFor="password" className="form-label">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="••••••••"
-                required
-                data-testid="login-password-input"
-              />
-            </div>
+            <Input
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+            />
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="login-button"
-              data-testid="login-submit-button"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="login-button-loader" />
-                  <span>Signing in...</span>
-                </>
-              ) : (
-                'Sign In'
-              )}
-            </button>
+            <Button type="submit" fullWidth size="lg" loading={loading} disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </Button>
           </form>
 
           <div className="login-footer">
-            <p className="login-footer-text">
-              Don&apos;t have an account?{' '}
-              <Link to="/register" className="login-footer-link">
-                Sign up
+            <p>
+              Don't have an account?{' '}
+              <Link to="/register" className="register-link">
+                Register here
               </Link>
             </p>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

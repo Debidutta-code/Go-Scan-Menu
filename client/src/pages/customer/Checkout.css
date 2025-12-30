@@ -147,7 +147,7 @@
   .checkout-form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .checkout-actions {
     flex-direction: column;
   }

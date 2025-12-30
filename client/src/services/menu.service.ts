@@ -1,70 +1,95 @@
-import { apiService } from './api.service';
-import { API_ENDPOINTS } from '@/config/api.config';
+import apiClient from '../lib/api';
+import type { MenuItem, Category, CreateMenuItemRequest } from '../types/menu.types';
+import type { ApiResponse } from '../types/api.types';
 
-class MenuService {
-  async getPublicMenu(restaurantSlug: string, branchCode: string) {
-    return await apiService.get(
-      API_ENDPOINTS.PUBLIC.MENU(restaurantSlug, branchCode)
+export const menuService = {
+  // Get menu by QR code
+  getMenuByQrCode: async (
+    restaurantSlug: string,
+    branchCode: string,
+    qrCode: string
+  ): Promise<any> => {
+    const response = await apiClient.get<ApiResponse<any>>(
+      `/public/menu/${restaurantSlug}/${branchCode}/${qrCode}`
     );
-  }
+    return response.data.data;
+  },
 
-  async getTableByQR(qrCode: string) {
-    return await apiService.get(API_ENDPOINTS.PUBLIC.TABLE(qrCode));
-  }
+  // Get menu by branch
+  getMenuByBranch: async (restaurantSlug: string, branchCode: string): Promise<any> => {
+    const response = await apiClient.get<ApiResponse<any>>(
+      `/public/menu/${restaurantSlug}/${branchCode}`
+    );
+    return response.data.data;
+  },
 
-  async getCategories(restaurantId: string) {
-    return await apiService.get(API_ENDPOINTS.CATEGORIES(restaurantId));
-  }
+  // Get categories
+  getCategories: async (restaurantId: string): Promise<Category[]> => {
+    const response = await apiClient.get<ApiResponse<Category[]>>(
+      `/restaurants/${restaurantId}/categories`
+    );
+    return response.data.data;
+  },
 
-  async getMenuItems(restaurantId: string, params?: any) {
-    return await apiService.get(API_ENDPOINTS.MENU_ITEMS(restaurantId), params);
-  }
-
-  async createCategory(restaurantId: string, data: any) {
-    return await apiService.post(API_ENDPOINTS.CATEGORIES(restaurantId), data);
-  }
-
-  async updateCategory(restaurantId: string, categoryId: string, data: any) {
-    return await apiService.put(
-      `${API_ENDPOINTS.CATEGORIES(restaurantId)}/${categoryId}`,
+  // Create category
+  createCategory: async (restaurantId: string, data: Partial<Category>): Promise<Category> => {
+    const response = await apiClient.post<ApiResponse<Category>>(
+      `/restaurants/${restaurantId}/categories`,
       data
     );
-  }
+    return response.data.data;
+  },
 
-  async deleteCategory(restaurantId: string, categoryId: string) {
-    return await apiService.delete(
-      `${API_ENDPOINTS.CATEGORIES(restaurantId)}/${categoryId}`
-    );
-  }
-
-  async createMenuItem(restaurantId: string, data: any) {
-    return await apiService.post(API_ENDPOINTS.MENU_ITEMS(restaurantId), data);
-  }
-
-  async updateMenuItem(restaurantId: string, itemId: string, data: any) {
-    return await apiService.put(
-      `${API_ENDPOINTS.MENU_ITEMS(restaurantId)}/${itemId}`,
+  // Update category
+  updateCategory: async (
+    restaurantId: string,
+    categoryId: string,
+    data: Partial<Category>
+  ): Promise<Category> => {
+    const response = await apiClient.patch<ApiResponse<Category>>(
+      `/restaurants/${restaurantId}/categories/${categoryId}`,
       data
     );
-  }
+    return response.data.data;
+  },
 
-  async deleteMenuItem(restaurantId: string, itemId: string) {
-    return await apiService.delete(
-      `${API_ENDPOINTS.MENU_ITEMS(restaurantId)}/${itemId}`
+  // Delete category
+  deleteCategory: async (restaurantId: string, categoryId: string): Promise<void> => {
+    await apiClient.delete(`/restaurants/${restaurantId}/categories/${categoryId}`);
+  },
+
+  // Get menu items
+  getMenuItems: async (restaurantId: string): Promise<MenuItem[]> => {
+    const response = await apiClient.get<ApiResponse<MenuItem[]>>(
+      `/restaurants/${restaurantId}/menu-items`
     );
-  }
+    return response.data.data;
+  },
 
-  async updateMenuItemAvailability(
+  // Create menu item
+  createMenuItem: async (restaurantId: string, data: CreateMenuItemRequest): Promise<MenuItem> => {
+    const response = await apiClient.post<ApiResponse<MenuItem>>(
+      `/restaurants/${restaurantId}/menu-items`,
+      data
+    );
+    return response.data.data;
+  },
+
+  // Update menu item
+  updateMenuItem: async (
     restaurantId: string,
     itemId: string,
-    isAvailable: boolean
-  ) {
-    return await apiService.patch(
-      `${API_ENDPOINTS.MENU_ITEMS(restaurantId)}/${itemId}/availability`,
-      { isAvailable }
+    data: Partial<MenuItem>
+  ): Promise<MenuItem> => {
+    const response = await apiClient.patch<ApiResponse<MenuItem>>(
+      `/restaurants/${restaurantId}/menu-items/${itemId}`,
+      data
     );
-  }
-}
+    return response.data.data;
+  },
 
-export const menuService = new MenuService();
-export default menuService;
+  // Delete menu item
+  deleteMenuItem: async (restaurantId: string, itemId: string): Promise<void> => {
+    await apiClient.delete(`/restaurants/${restaurantId}/menu-items/${itemId}`);
+  },
+};

@@ -1,27 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import apiClient from '../../lib/api';
+import { orderService } from '../../services/order.service';
 import { socketService } from '../../lib/socket';
 import './OrderManagement.css';
-import { Button, Card, Loader } from '@/components/common';
+import { Button, Card, Loader, Modal } from '@/components/common';
 import { Navbar } from '@/components/ui/Navbar/Navbar';
-
-interface Order {
-  _id: string;
-  orderNumber: string;
-  tableNumber: string;
-  customerName?: string;
-  items: Array<{ name: string; quantity: number; price: number }>;
-  totalAmount: number;
-  status: string;
-  orderTime: string;
-}
+import { Order } from '../../types/order.types';
 
 const OrderManagement: React.FC = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -35,7 +27,7 @@ const OrderManagement: React.FC = () => {
 
   const setupWebSocket = () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const socket = socketService.connect();
+    socketService.connect();
 
     if (user.branchId) {
       socketService.joinBranch(user.branchId);
@@ -49,39 +41,17 @@ const OrderManagement: React.FC = () => {
       setOrders((prev) =>
         prev.map((order) => (order._id === updatedOrder._id ? updatedOrder : order))
       );
+      if (selectedOrder?._id === updatedOrder._id) {
+        setSelectedOrder(updatedOrder);
+      }
     });
   };
 
   const fetchOrders = async () => {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      // Mock data for demo
-      const mockOrders: Order[] = [
-        {
-          _id: '1',
-          orderNumber: 'ORD-001',
-          tableNumber: 'T-5',
-          customerName: 'John Doe',
-          items: [
-            { name: 'Butter Chicken', quantity: 2, price: 350 },
-            { name: 'Naan', quantity: 4, price: 40 },
-          ],
-          totalAmount: 860,
-          status: 'preparing',
-          orderTime: new Date().toISOString(),
-        },
-        {
-          _id: '2',
-          orderNumber: 'ORD-002',
-          tableNumber: 'T-3',
-          customerName: 'Jane Smith',
-          items: [{ name: 'Paneer Tikka', quantity: 1, price: 280 }],
-          totalAmount: 280,
-          status: 'pending',
-          orderTime: new Date().toISOString(),
-        },
-      ];
-      setOrders(mockOrders);
+      const fetchedOrders = await orderService.getOrdersByBranch(user.restaurantId, user.branchId);
+      setOrders(fetchedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
@@ -89,11 +59,13 @@ const OrderManagement: React.FC = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
-      await apiClient.patch(`/orders/${orderId}/status`, { status: newStatus });
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      await orderService.updateOrderStatus(user.restaurantId, orderId, { status: newStatus });
     } catch (error) {
       console.error('Error updating order status:', error);
+      alert('Failed to update order status');
     }
   };
 
@@ -109,8 +81,15 @@ const OrderManagement: React.FC = () => {
       preparing: 'purple',
       ready: 'green',
       served: 'green',
+      completed: 'gray',
+      cancelled: 'red',
     };
     return colors[status] || 'gray';
+  };
+
+  const viewOrderDetails = (order: Order) => {
+    setSelectedOrder(order);
+    setShowDetailsModal(true);
   };
 
   if (loading) {
@@ -144,6 +123,12 @@ const OrderManagement: React.FC = () => {
             Pending
           </button>
           <button
+            className={`filter-tab ${filter === 'confirmed' ? 'active' : ''}`}
+            onClick={() => setFilter('confirmed')}
+          >
+            Confirmed
+          </button>
+          <button
             className={`filter-tab ${filter === 'preparing' ? 'active' : ''}`}
             onClick={() => setFilter('preparing')}
           >
@@ -165,6 +150,7 @@ const OrderManagement: React.FC = () => {
                 <div>
                   <h3 className="order-number">#{order.orderNumber}</h3>
                   <p className="order-table">Table: {order.tableNumber}</p>
+                  {order.customerName && <p className="order-customer">{order.customerName}</p>}
                 </div>
                 <span className={`order-status status-${getStatusColor(order.status)}`}>
                   {order.status}
@@ -172,26 +158,37 @@ const OrderManagement: React.FC = () => {
               </div>
 
               <div className="order-items">
-                {order.items.map((item, idx) => (
+                {order.items.slice(0, 3).map((item, idx) => (
                   <div key={idx} className="order-item-row">
                     <span>
                       {item.quantity}x {item.name}
                     </span>
-                    <span>₹{item.price * item.quantity}</span>
+                    <span>₹{item.itemTotal.toFixed(2)}</span>
                   </div>
                 ))}
+                {order.items.length > 3 && (
+                  <p className="more-items">+{order.items.length - 3} more items</p>
+                )}
               </div>
 
               <div className="order-footer">
                 <div className="order-total">
                   <span>Total:</span>
-                  <span className="total-amount">₹{order.totalAmount}</span>
+                  <span className="total-amount">₹{order.totalAmount.toFixed(2)}</span>
                 </div>
 
                 <div className="order-actions">
+                  <Button size="sm" variant="secondary" onClick={() => viewOrderDetails(order)}>
+                    View
+                  </Button>
                   {order.status === 'pending' && (
                     <Button size="sm" onClick={() => updateOrderStatus(order._id, 'confirmed')}>
                       Confirm
+                    </Button>
+                  )}
+                  {order.status === 'confirmed' && (
+                    <Button size="sm" onClick={() => updateOrderStatus(order._id, 'preparing')}>
+                      Start Preparing
                     </Button>
                   )}
                   {order.status === 'preparing' && (
@@ -212,10 +209,95 @@ const OrderManagement: React.FC = () => {
 
         {getFilteredOrders().length === 0 && (
           <div className="empty-state">
+            <div className="empty-icon">📋</div>
             <p>No orders found</p>
           </div>
         )}
       </div>
+
+      {/* Order Details Modal */}
+      <Modal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        title={`Order #${selectedOrder?.orderNumber}`}
+        size="lg"
+      >
+        {selectedOrder && (
+          <div className="order-details-modal">
+            <div className="detail-section">
+              <h3>Customer Information</h3>
+              <div className="detail-row">
+                <span>Name:</span>
+                <span>{selectedOrder.customerName || 'N/A'}</span>
+              </div>
+              <div className="detail-row">
+                <span>Phone:</span>
+                <span>{selectedOrder.customerPhone || 'N/A'}</span>
+              </div>
+              <div className="detail-row">
+                <span>Table:</span>
+                <span>{selectedOrder.tableNumber}</span>
+              </div>
+            </div>
+
+            <div className="detail-section">
+              <h3>Order Items</h3>
+              {selectedOrder.items.map((item, idx) => (
+                <div key={idx} className="detail-item">
+                  <div className="item-header-detail">
+                    <span className="item-name">
+                      {item.quantity}x {item.name}
+                    </span>
+                    <span className="item-price">₹{item.itemTotal.toFixed(2)}</span>
+                  </div>
+                  {item.variant && <p className="item-variant">Variant: {item.variant.name}</p>}
+                  {item.addons.length > 0 && (
+                    <p className="item-addons">
+                      Add-ons: {item.addons.map((a) => a.name).join(', ')}
+                    </p>
+                  )}
+                  {item.specialInstructions && (
+                    <p className="item-instructions">📝 {item.specialInstructions}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="detail-section">
+              <h3>Payment Summary</h3>
+              <div className="detail-row">
+                <span>Subtotal:</span>
+                <span>₹{selectedOrder.subtotal.toFixed(2)}</span>
+              </div>
+              <div className="detail-row">
+                <span>Tax:</span>
+                <span>₹{selectedOrder.totalTaxAmount.toFixed(2)}</span>
+              </div>
+              <div className="detail-row">
+                <span>Service Charge:</span>
+                <span>₹{selectedOrder.serviceChargeAmount.toFixed(2)}</span>
+              </div>
+              {selectedOrder.discountAmount > 0 && (
+                <div className="detail-row">
+                  <span>Discount:</span>
+                  <span>-₹{selectedOrder.discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="detail-row detail-total">
+                <span>Total:</span>
+                <span>₹{selectedOrder.totalAmount.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {selectedOrder.specialInstructions && (
+              <div className="detail-section">
+                <h3>Special Instructions</h3>
+                <p className="special-notes">{selectedOrder.specialInstructions}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

@@ -14,8 +14,8 @@ export class StaffService {
     this.restaurantRepo = new RestaurantRepository();
   }
 
-  async login(email: string, password: string, restaurantId: string) {
-    const staff = await this.staffRepo.findByEmail(email, restaurantId);
+  async login(email: string, password: string) {
+    const staff = await this.staffRepo.findByEmail(email);
 
     if (!staff || !staff.isActive) {
       throw new AppError('Invalid credentials', 401);
@@ -27,10 +27,10 @@ export class StaffService {
     }
 
     // Check restaurant subscription
-    const restaurant = await this.restaurantRepo.findById(restaurantId);
-    if (!restaurant || !restaurant.subscription.isActive) {
-      throw new AppError('Restaurant subscription is inactive', 403);
-    }
+    // const restaurant = await this.restaurantRepo.findById(restaurantId);
+    // if (!restaurant || !restaurant.subscription.isActive) {
+    //   throw new AppError('Restaurant subscription is inactive', 403);
+    // }
 
     const token = JWTUtil.generateToken({
       id: staff._id.toString(),
@@ -50,7 +50,6 @@ export class StaffService {
     // Check if email already exists for this restaurant
     const existingStaff = await this.staffRepo.findByEmail(
       data.email!,
-      data.restaurantId!.toString()
     );
     if (existingStaff) {
       throw new AppError('Staff with this email already exists', 400);

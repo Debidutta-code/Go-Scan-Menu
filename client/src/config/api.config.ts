@@ -30,7 +30,8 @@ export const API_ENDPOINTS = {
   ORDERS: (restaurantId: string) => `/restaurants/${restaurantId}/orders`,
   // Public Menu
   PUBLIC: {
-    MENU: (restaurantSlug: string, branchCode: string) => `/public/menu/${restaurantSlug}/${branchCode}`,
+    MENU: (restaurantSlug: string, branchCode: string) =>
+      `/public/menu/${restaurantSlug}/${branchCode}`,
     TABLE: (qrCode: string) => `/public/table/${qrCode}`,
     ORDER: '/public/order',
   },

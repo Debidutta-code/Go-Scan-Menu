@@ -15,10 +15,7 @@ class BranchService {
   }
 
   async updateBranch(restaurantId: string, branchId: string, data: any) {
-    return await apiService.put(
-      `${API_ENDPOINTS.BRANCHES(restaurantId)}/${branchId}`,
-      data
-    );
+    return await apiService.put(`${API_ENDPOINTS.BRANCHES(restaurantId)}/${branchId}`, data);
   }
 
   async deleteBranch(restaurantId: string, branchId: string) {
