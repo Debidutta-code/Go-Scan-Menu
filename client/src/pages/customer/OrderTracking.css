@@ -1,0 +1,228 @@
+.order-tracking {
+  min-height: 100vh;
+  background-color: var(--gray-50);
+  padding-bottom: var(--spacing-8);
+}
+
+.tracking-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-6) var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.order-header-card {
+  padding: var(--spacing-6);
+  text-align: center;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  color: var(--white);
+}
+
+.order-number {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-2);
+}
+
+.table-info {
+  font-size: var(--font-size-lg);
+  opacity: 0.9;
+  margin-bottom: var(--spacing-3);
+}
+
+.order-meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+}
+
+.status-timeline-card,
+.order-items-card {
+  padding: var(--spacing-6);
+}
+
+.section-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-6);
+  color: var(--gray-900);
+}
+
+.status-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.timeline-step {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+.timeline-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.marker-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--gray-200);
+  border: 3px solid var(--gray-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  color: var(--white);
+  font-weight: 700;
+  transition: all var(--transition-base);
+}
+
+.marker-circle.completed {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.marker-circle.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 107, 53, 0);
+  }
+}
+
+.marker-line {
+  width: 3px;
+  height: 40px;
+  background-color: var(--gray-300);
+  transition: all var(--transition-base);
+}
+
+.marker-line.completed {
+  background-color: var(--success-color);
+}
+
+.timeline-content {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-3) 0;
+}
+
+.step-label {
+  font-size: var(--font-size-lg);
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.step-label.active {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  padding: var(--spacing-4);
+  background-color: var(--gray-50);
+  border-radius: var(--radius-lg);
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.item-name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.item-status {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  text-transform: capitalize;
+  width: fit-content;
+}
+
+.status-gray {
+  background-color: var(--gray-200);
+  color: var(--gray-700);
+}
+
+.status-blue {
+  background-color: #DBEAFE;
+  color: #1E40AF;
+}
+
+.status-orange {
+  background-color: #FED7AA;
+  color: #C2410C;
+}
+
+.status-green {
+  background-color: #D1FAE5;
+  color: #065F46;
+}
+
+.status-red {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.item-price {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: var(--spacing-4);
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .order-number {
+    font-size: var(--font-size-2xl);
+  }
+
+  .order-meta {
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .order-meta span:nth-child(2) {
+    display: none;
+  }
+}

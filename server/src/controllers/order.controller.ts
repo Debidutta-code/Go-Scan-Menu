@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import { OrderService } from '@/services/order.service';
 import { catchAsync, sendResponse } from '@/utils';
+import { socketService } from '@/socket/socket.service';
 
 export class OrderController {
   private orderService: OrderService;
@@ -21,6 +22,9 @@ export class OrderController {
     }
 
     const order = await this.orderService.createOrder(restaurantId, req.body);
+
+    // Emit WebSocket event for real-time updates
+    socketService.emitOrderCreated(order);
 
     sendResponse(res, 201, {
       message: 'Order created successfully',
@@ -111,6 +115,9 @@ export class OrderController {
     }
 
     const order = await this.orderService.updateOrderStatus(id, status);
+
+    // Emit WebSocket event for real-time updates
+    socketService.emitOrderStatusUpdate(order);
 
     sendResponse(res, 200, {
       message: 'Order status updated successfully',
