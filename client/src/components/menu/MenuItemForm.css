@@ -1,0 +1,108 @@
+/* src/components/menu/MenuItemForm.css */
+
+.menu-item-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+.menu-item-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+}
+
+.menu-item-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.menu-item-form-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-700);
+}
+
+.menu-item-form-label-required::after {
+  content: '*';
+  color: var(--color-error);
+  margin-left: var(--spacing-1);
+}
+
+.menu-item-form-input,
+.menu-item-form-select,
+.menu-item-form-textarea {
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-base);
+  outline: none;
+}
+
+.menu-item-form-input:focus,
+.menu-item-form-select:focus,
+.menu-item-form-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-alpha);
+}
+
+.menu-item-form-textarea {
+  min-height: 100px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.menu-item-form-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.menu-item-form-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.menu-item-form-image-upload {
+  border: 2px dashed var(--color-gray-300);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.menu-item-form-image-upload:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-alpha);
+}
+
+.menu-item-form-image-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  margin-top: var(--spacing-3);
+}
+
+.menu-item-form-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--spacing-4);
+}
+
+.menu-item-form-error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  margin-top: var(--spacing-1);
+}
+
+@media (max-width: 768px) {
+  .menu-item-form-row {
+    grid-template-columns: 1fr;
+  }
+}

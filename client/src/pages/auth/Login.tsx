@@ -3,26 +3,30 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'react-toastify';
 import { UtensilsCrossed, Loader2 } from 'lucide-react';
+import './Login.css';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.email || !formData.password) {
       toast.error('Please fill in all fields');
       return;
@@ -34,27 +38,29 @@ const Login: React.FC = () => {
       toast.success('Login successful!');
       navigate('/admin/dashboard');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      toast.error(error?.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4">
-              <UtensilsCrossed className="w-8 h-8 text-white" />
+    <div className="login-page">
+      <div className="login-container">
+        <div className="login-card">
+          <div className="login-header">
+            <div className="login-icon-wrapper">
+              <UtensilsCrossed className="login-icon" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-            <p className="text-gray-600 mt-2">Sign in to manage your restaurant</p>
+            <h2 className="login-title">Welcome Back</h2>
+            <p className="login-subtitle">
+              Sign in to manage your restaurant
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">
                 Email Address
               </label>
               <input
@@ -63,15 +69,15 @@ const Login: React.FC = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                className="form-input"
                 placeholder="you@example.com"
                 required
                 data-testid="login-email-input"
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
                 Password
               </label>
               <input
@@ -80,7 +86,7 @@ const Login: React.FC = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                className="form-input"
                 placeholder="••••••••"
                 required
                 data-testid="login-password-input"
@@ -90,13 +96,13 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="login-button"
               data-testid="login-submit-button"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Signing in...
+                  <Loader2 className="login-button-loader" />
+                  <span>Signing in...</span>
                 </>
               ) : (
                 'Sign In'
@@ -104,10 +110,10 @@ const Login: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-indigo-600 font-semibold hover:text-indigo-700">
+          <div className="login-footer">
+            <p className="login-footer-text">
+              Don&apos;t have an account?{' '}
+              <Link to="/register" className="login-footer-link">
                 Sign up
               </Link>
             </p>

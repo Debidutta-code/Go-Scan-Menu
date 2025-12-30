@@ -1,0 +1,101 @@
+/* src/pages/superadmin/RestaurantList.css */
+
+.restaurant-list-page {
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.restaurant-list-container {
+  padding: var(--spacing-6) 0;
+}
+
+.restaurant-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-6);
+}
+
+.restaurant-list-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+}
+
+.restaurant-list-filters {
+  display: flex;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+}
+
+.restaurant-list-search {
+  flex: 1;
+  min-width: 300px;
+}
+
+.restaurant-list-search-input {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  padding-left: var(--spacing-12);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  outline: none;
+  transition: all var(--transition-base);
+}
+
+.restaurant-list-search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-alpha);
+}
+
+.restaurant-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-6);
+}
+
+.restaurant-list-empty {
+  text-align: center;
+  padding: var(--spacing-16) var(--spacing-4);
+}
+
+.restaurant-list-empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-4);
+  color: var(--color-gray-400);
+}
+
+.restaurant-list-empty-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-2);
+}
+
+.restaurant-list-empty-text {
+  font-size: var(--font-size-base);
+  color: var(--color-gray-600);
+  margin-bottom: var(--spacing-6);
+}
+
+@media (max-width: 768px) {
+  .restaurant-list-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .restaurant-list-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-4);
+  }
+  
+  .restaurant-list-filters {
+    flex-direction: column;
+  }
+  
+  .restaurant-list-search {
+    min-width: 100%;
+  }
+}

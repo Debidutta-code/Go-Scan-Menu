@@ -1,0 +1,119 @@
+/* src/components/order/OrderStatusBadge.css */
+
+.order-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.order-status-badge-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Status Variants */
+.order-status-badge.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.order-status-badge.pending .order-status-badge-icon {
+  background-color: #f59e0b;
+}
+
+.order-status-badge.confirmed {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.order-status-badge.confirmed .order-status-badge-icon {
+  background-color: #3b82f6;
+}
+
+.order-status-badge.preparing {
+  background-color: #f3e8ff;
+  color: #6b21a8;
+}
+
+.order-status-badge.preparing .order-status-badge-icon {
+  background-color: #a855f7;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.order-status-badge.ready {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.order-status-badge.ready .order-status-badge-icon {
+  background-color: #10b981;
+}
+
+.order-status-badge.served,
+.order-status-badge.completed {
+  background-color: #dcfce7;
+  color: #14532d;
+}
+
+.order-status-badge.served .order-status-badge-icon,
+.order-status-badge.completed .order-status-badge-icon {
+  background-color: #22c55e;
+}
+
+.order-status-badge.cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.order-status-badge.cancelled .order-status-badge-icon {
+  background-color: #ef4444;
+}
+
+.order-status-badge.on-hold {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.order-status-badge.on-hold .order-status-badge-icon {
+  background-color: #6b7280;
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Size Variants */
+.order-status-badge.small {
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: 0.65rem;
+}
+
+.order-status-badge.small .order-status-badge-icon {
+  width: 6px;
+  height: 6px;
+}
+
+.order-status-badge.large {
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--font-size-sm);
+}
+
+.order-status-badge.large .order-status-badge-icon {
+  width: 10px;
+  height: 10px;
+}

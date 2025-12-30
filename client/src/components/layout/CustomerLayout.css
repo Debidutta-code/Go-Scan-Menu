@@ -1,0 +1,25 @@
+/* src/components/layout/CustomerLayout.css */
+
+.customer-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-primary);
+}
+
+.customer-layout-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.customer-layout-main {
+  flex: 1;
+  width: 100%;
+}
+
+.customer-layout-footer {
+  margin-top: auto;
+}

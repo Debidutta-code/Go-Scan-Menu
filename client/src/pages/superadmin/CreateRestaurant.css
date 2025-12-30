@@ -1,0 +1,122 @@
+/* src/pages/superadmin/CreateRestaurant.css */
+
+.create-restaurant-page {
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.create-restaurant-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--spacing-8) var(--spacing-4);
+}
+
+.create-restaurant-header {
+  text-align: center;
+  margin-bottom: var(--spacing-8);
+}
+
+.create-restaurant-title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-3);
+}
+
+.create-restaurant-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-gray-600);
+}
+
+.create-restaurant-form {
+  background-color: var(--color-white);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-8);
+  box-shadow: var(--shadow-lg);
+}
+
+.create-restaurant-progress {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-8);
+  position: relative;
+}
+
+.create-restaurant-progress::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-gray-200);
+  z-index: 0;
+}
+
+.create-restaurant-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  position: relative;
+  z-index: 1;
+}
+
+.create-restaurant-step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-base);
+}
+
+.create-restaurant-step.active .create-restaurant-step-circle {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.create-restaurant-step.completed .create-restaurant-step-circle {
+  background-color: var(--color-success);
+  color: var(--color-white);
+}
+
+.create-restaurant-step-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-600);
+  text-align: center;
+}
+
+.create-restaurant-step.active .create-restaurant-step-label {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.create-restaurant-form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-8);
+  padding-top: var(--spacing-6);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+@media (max-width: 768px) {
+  .create-restaurant-progress {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+  
+  .create-restaurant-progress::before {
+    display: none;
+  }
+  
+  .create-restaurant-step {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+}
