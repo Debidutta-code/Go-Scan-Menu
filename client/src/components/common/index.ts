@@ -1,15 +1,15 @@
-export { default as Button } from './Button';
-export { default as Input } from './Input';
-export { default as Loader } from './Loader';
-export { default as Modal } from './Modal';
+// src/components/common/index.ts
+export { Button } from './Button';
+export type { ButtonProps } from './Button';
 
-/**
- * Card + sub-components
- */
-export { default as Card } from './Card';
-export {
-  CardHeader,
-  CardBody,
-  CardFooter,
-  CardImage,
-} from './Card';
+export { Input } from './Input';
+export type { InputProps } from './Input';
+
+export { Loader } from './Loader';
+export type { LoaderProps } from './Loader';
+
+export { Modal } from './Modal';
+export type { ModalProps } from './Modal';
+
+export { Card, CardHeader, CardBody, CardFooter } from './Card';
+export type { CardProps } from './Card';

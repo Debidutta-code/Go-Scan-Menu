@@ -1,54 +1,68 @@
+// src/components/common/Card.tsx
+
 import React from 'react';
 import './styles/Card.css';
 
-interface CardProps {
-    children: React.ReactNode;
-    className?: string;
-    compact?: boolean;
-    noShadow?: boolean;
-    onClick?: () => void;
+export interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+  variant?: 'default' | 'outlined' | 'elevated';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  hoverable?: boolean;
+  clickable?: boolean;
+  onClick?: () => void;
 }
 
-const Card: React.FC<CardProps> = ({
-    children,
-    className = '',
-    compact = false,
-    noShadow = false,
-    onClick,
+export const Card: React.FC<CardProps> = ({
+  children,
+  className = '',
+  variant = 'default',
+  padding = 'md',
+  hoverable = false,
+  clickable = false,
+  onClick,
 }) => {
-    const compactClass = compact ? 'card-compact' : '';
-    const shadowClass = noShadow ? 'card-no-shadow' : '';
+  const cardClasses = [
+    'card',
+    `card-${variant}`,
+    `card-padding-${padding}`,
+    hoverable && 'card-hoverable',
+    clickable && 'card-clickable',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
-    return (
-        <div
-            className={`card ${compactClass} ${shadowClass} ${className}`}
-            onClick={onClick}
-            role={onClick ? 'button' : undefined}
-            tabIndex={onClick ? 0 : undefined}
-        >
-            {children}
-        </div>
-    );
+  return (
+    <div className={cardClasses} onClick={onClick}>
+      {children}
+    </div>
+  );
 };
 
-export default Card;
+interface CardHeaderProps {
+  children: React.ReactNode;
+  className?: string;
+}
 
-// Optional sub-components for better structure
-export const CardHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({
-    children,
-    className = '',
-}) => <div className={`card-header ${className}`}>{children}</div>;
+export const CardHeader: React.FC<CardHeaderProps> = ({ children, className = '' }) => {
+  return <div className={`card-header ${className}`.trim()}>{children}</div>;
+};
 
-export const CardBody: React.FC<{ children: React.ReactNode; className?: string }> = ({
-    children,
-    className = '',
-}) => <div className={`card-body ${className}`}>{children}</div>;
+interface CardBodyProps {
+  children: React.ReactNode;
+  className?: string;
+}
 
-export const CardFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({
-    children,
-    className = '',
-}) => <div className={`card-footer ${className}`}>{children}</div>;
+export const CardBody: React.FC<CardBodyProps> = ({ children, className = '' }) => {
+  return <div className={`card-body ${className}`.trim()}>{children}</div>;
+};
 
-export const CardImage: React.FC<{ src: string; alt: string }> = ({ src, alt }) => (
-    <img src={src} alt={alt} className="card-image" />
-);
+interface CardFooterProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const CardFooter: React.FC<CardFooterProps> = ({ children, className = '' }) => {
+  return <div className={`card-footer ${className}`.trim()}>{children}</div>;
+};

@@ -1,0 +1,110 @@
+/* src/components/layout/styles/AdminLayout.css */
+
+.admin-layout {
+  min-height: 100vh;
+  background: var(--color-gray-50);
+  position: relative;
+}
+
+/* Mobile Overlay */
+.admin-layout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: calc(var(--z-fixed) - 1);
+  animation: overlay-fade-in var(--transition-fast);
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Sidebar Container */
+.admin-layout-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: var(--z-fixed);
+}
+
+@media (max-width: 768px) {
+  .admin-layout-sidebar {
+    transform: translateX(-100%);
+    transition: transform var(--transition-base);
+  }
+
+  .admin-layout-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+}
+
+/* Main Content Area */
+.admin-layout-main {
+  margin-left: var(--sidebar-width);
+  margin-top: var(--header-height);
+  min-height: calc(100vh - var(--header-height));
+  transition: margin-left var(--transition-base);
+  background: var(--color-bg-primary);
+}
+
+.sidebar-collapsed .admin-layout-main {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+@media (max-width: 768px) {
+  .admin-layout-main {
+    margin-left: 0;
+  }
+}
+
+.admin-layout-content {
+  padding: var(--spacing-6);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  animation: content-fade-in var(--transition-base);
+}
+
+@keyframes content-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-layout-content {
+    padding: var(--spacing-4);
+  }
+}
+
+/* Scrollbar for main content */
+.admin-layout-main::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-layout-main::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+}
+
+.admin-layout-main::-webkit-scrollbar-thumb {
+  background: var(--color-gray-400);
+  border-radius: var(--radius-full);
+}
+
+.admin-layout-main::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-500);
+}

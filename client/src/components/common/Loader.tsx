@@ -1,36 +1,75 @@
+// src/components/common/Loader.tsx
+
 import React from 'react';
 import './styles/Loader.css';
 
-interface LoaderProps {
-    size?: 'small' | 'large';
-    type?: 'spinner' | 'dots';
-    overlay?: boolean;
+export interface LoaderProps {
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  variant?: 'spinner' | 'dots' | 'pulse';
+  fullscreen?: boolean;
+  message?: string;
+  color?: 'primary' | 'secondary' | 'white';
 }
 
-const Loader: React.FC<LoaderProps> = ({
-    size = 'small',
-    type = 'spinner',
-    overlay = false,
+export const Loader: React.FC<LoaderProps> = ({
+  size = 'md',
+  variant = 'spinner',
+  fullscreen = false,
+  message,
+  color = 'primary',
 }) => {
-    if (overlay) {
-        return (
-            <div className="loader-overlay">
-                <div className={`loader loader-${size}`}></div>
-            </div>
-        );
-    }
+  const containerClasses = [
+    'loader-container',
+    fullscreen && 'loader-fullscreen',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
-    if (type === 'dots') {
-        return (
-            <div className="loader-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        );
-    }
+  const loaderClasses = [
+    'loader',
+    `loader-${variant}`,
+    `loader-${size}`,
+    `loader-${color}`,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
-    return <div className={`loader loader-${size}`}></div>;
+  const renderLoader = () => {
+    switch (variant) {
+      case 'spinner':
+        return (
+          <div className={loaderClasses}>
+            <div className="loader-spinner-circle" />
+          </div>
+        );
+
+      case 'dots':
+        return (
+          <div className={loaderClasses}>
+            <div className="loader-dot" />
+            <div className="loader-dot" />
+            <div className="loader-dot" />
+          </div>
+        );
+
+      case 'pulse':
+        return (
+          <div className={loaderClasses}>
+            <div className="loader-pulse-circle" />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className={containerClasses}>
+      <div className="loader-content">
+        {renderLoader()}
+        {message && <p className="loader-message">{message}</p>}
+      </div>
+    </div>
+  );
 };
-
-export default Loader;
