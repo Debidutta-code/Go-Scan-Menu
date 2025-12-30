@@ -77,23 +77,23 @@
 }
 
 .status-orange {
-  background-color: #FED7AA;
-  color: #C2410C;
+  background-color: #fed7aa;
+  color: #c2410c;
 }
 
 .status-blue {
-  background-color: #DBEAFE;
-  color: #1E40AF;
+  background-color: #dbeafe;
+  color: #1e40af;
 }
 
 .status-purple {
-  background-color: #E9D5FF;
-  color: #7C3AED;
+  background-color: #e9d5ff;
+  color: #7c3aed;
 }
 
 .status-green {
-  background-color: #D1FAE5;
-  color: #065F46;
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
 .order-items {

@@ -41,8 +41,8 @@
 
 .login-error {
   padding: var(--spacing-3) var(--spacing-4);
-  background-color: #FEE2E2;
-  color: #991B1B;
+  background-color: #fee2e2;
+  color: #991b1b;
   border-radius: var(--radius-lg);
   font-size: var(--font-size-sm);
   text-align: center;

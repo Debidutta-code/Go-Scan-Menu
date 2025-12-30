@@ -61,10 +61,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     <div className={`admin-layout ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       {/* Mobile Overlay */}
       {isMobileSidebarOpen && (
-        <div
-          className="admin-layout-overlay"
-          onClick={() => setIsMobileSidebarOpen(false)}
-        />
+        <div className="admin-layout-overlay" onClick={() => setIsMobileSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
@@ -92,9 +89,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
       {/* Main Content */}
       <main className="admin-layout-main">
-        <div className="admin-layout-content">
-          {children}
-        </div>
+        <div className="admin-layout-content">{children}</div>
       </main>
     </div>
   );

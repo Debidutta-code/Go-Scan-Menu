@@ -76,12 +76,15 @@ const CustomerMenu: React.FC = () => {
 
     setCart(newCart);
     localStorage.setItem('cart', JSON.stringify(newCart));
-    localStorage.setItem('tableInfo', JSON.stringify({
-      restaurantId: menuData?.restaurant._id,
-      branchId: menuData?.branch._id,
-      tableId: menuData?.table?._id,
-      tableNumber: menuData?.table?.tableNumber,
-    }));
+    localStorage.setItem(
+      'tableInfo',
+      JSON.stringify({
+        restaurantId: menuData?.restaurant._id,
+        branchId: menuData?.branch._id,
+        tableId: menuData?.table?._id,
+        tableNumber: menuData?.table?.tableNumber,
+      })
+    );
   };
 
   const getCartItemCount = () => {
@@ -155,9 +158,7 @@ const CustomerMenu: React.FC = () => {
               {item.image && (
                 <div className="menu-item-image">
                   <img src={item.image} alt={item.name} />
-                  <span className={`veg-badge ${item.isVeg ? 'veg' : 'non-veg'}`}>
-                    •
-                  </span>
+                  <span className={`veg-badge ${item.isVeg ? 'veg' : 'non-veg'}`}>•</span>
                 </div>
               )}
               <div className="menu-item-content">
@@ -165,11 +166,7 @@ const CustomerMenu: React.FC = () => {
                 <p className="menu-item-description">{item.description}</p>
                 <div className="menu-item-footer">
                   <span className="menu-item-price">₹{item.price}</span>
-                  <Button
-                    size="sm"
-                    disabled={!item.isAvailable}
-                    onClick={() => addToCart(item)}
-                  >
+                  <Button size="sm" disabled={!item.isAvailable} onClick={() => addToCart(item)}>
                     {item.isAvailable ? 'Add' : 'Unavailable'}
                   </Button>
                 </div>

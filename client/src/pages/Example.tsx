@@ -38,11 +38,19 @@ const Example: React.FC = () => {
           <h2 className="section-title">Buttons</h2>
           <div className="button-group">
             <Button variant="primary">Primary Button</Button>
-            <Button variant="primary" size="large">Large Primary</Button>
-            <Button variant="primary" size="small">Small Primary</Button>
+            <Button variant="primary" size="large">
+              Large Primary
+            </Button>
+            <Button variant="primary" size="small">
+              Small Primary
+            </Button>
             <Button variant="secondary">Secondary Button</Button>
-            <Button variant="primary" disabled>Disabled</Button>
-            <Button variant="primary" loading>Loading State</Button>
+            <Button variant="primary" disabled>
+              Disabled
+            </Button>
+            <Button variant="primary" loading>
+              Loading State
+            </Button>
           </div>
         </section>
 

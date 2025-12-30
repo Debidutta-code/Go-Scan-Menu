@@ -98,8 +98,8 @@
 }
 
 .btn-danger:hover:not(:disabled) {
-  background-color: #DC2626;
-  border-color: #DC2626;
+  background-color: #dc2626;
+  border-color: #dc2626;
   box-shadow: var(--shadow-md);
 }
 
@@ -150,4 +150,3 @@
 .btn-text {
   display: inline-block;
 }
-

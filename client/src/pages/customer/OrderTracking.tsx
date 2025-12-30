@@ -4,7 +4,7 @@ import apiClient from '../../lib/api';
 import './OrderTracking.css';
 import { Card, Loader } from '@/components/common';
 import { Navbar } from '@/components/ui/Navbar/Navbar';
-import {socketService} from '../../lib/socket';
+import { socketService } from '../../lib/socket';
 
 interface Order {
   _id: string;
@@ -144,15 +144,11 @@ const OrderTracking: React.FC = () => {
                     {step.completed && '✓'}
                   </div>
                   {index < getStatusSteps().length - 1 && (
-                    <div
-                      className={`marker-line ${step.completed ? 'completed' : ''}`}
-                    ></div>
+                    <div className={`marker-line ${step.completed ? 'completed' : ''}`}></div>
                   )}
                 </div>
                 <div className="timeline-content">
-                  <p className={`step-label ${step.active ? 'active' : ''}`}>
-                    {step.label}
-                  </p>
+                  <p className={`step-label ${step.active ? 'active' : ''}`}>{step.label}</p>
                 </div>
               </div>
             ))}
@@ -169,9 +165,7 @@ const OrderTracking: React.FC = () => {
                   <span className="item-name">
                     {item.quantity}x {item.name}
                   </span>
-                  <span
-                    className={`item-status status-${getStatusColor(item.status)}`}
-                  >
+                  <span className={`item-status status-${getStatusColor(item.status)}`}>
                     {item.status}
                   </span>
                 </div>

@@ -18,19 +18,11 @@ export const Loader: React.FC<LoaderProps> = ({
   message,
   color = 'primary',
 }) => {
-  const containerClasses = [
-    'loader-container',
-    fullscreen && 'loader-fullscreen',
-  ]
+  const containerClasses = ['loader-container', fullscreen && 'loader-fullscreen']
     .filter(Boolean)
     .join(' ');
 
-  const loaderClasses = [
-    'loader',
-    `loader-${variant}`,
-    `loader-${size}`,
-    `loader-${color}`,
-  ]
+  const loaderClasses = ['loader', `loader-${variant}`, `loader-${size}`, `loader-${color}`]
     .filter(Boolean)
     .join(' ');
 

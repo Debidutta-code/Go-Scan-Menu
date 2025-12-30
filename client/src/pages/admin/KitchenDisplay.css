@@ -52,7 +52,8 @@
 }
 
 @keyframes pulse-warning {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4);
   }
   50% {
@@ -61,7 +62,8 @@
 }
 
 @keyframes pulse-urgent {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
   }
   50% {
@@ -105,13 +107,13 @@
 }
 
 .priority-urgent .time-badge {
-  background-color: #FEE2E2;
-  color: #991B1B;
+  background-color: #fee2e2;
+  color: #991b1b;
 }
 
 .priority-warning .time-badge {
-  background-color: #FED7AA;
-  color: #C2410C;
+  background-color: #fed7aa;
+  color: #c2410c;
 }
 
 .kitchen-items {
@@ -153,8 +155,8 @@
 
 .item-instructions {
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: #FEF3C7;
-  color: #92400E;
+  background-color: #fef3c7;
+  color: #92400e;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   font-weight: 500;

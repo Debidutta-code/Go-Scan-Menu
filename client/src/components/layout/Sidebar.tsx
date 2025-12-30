@@ -76,7 +76,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
               {hasChildren && (
                 <span className={`sidebar-item-arrow ${isExpanded ? 'expanded' : ''}`}>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M6 4l4 4-4 4" />
                   </svg>
                 </span>
@@ -106,16 +113,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {!isCollapsed && <span className="sidebar-logo-text">RestaurantOS</span>}
         </div>
         <button className="sidebar-toggle" onClick={onToggle} aria-label="Toggle sidebar">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M3 7h14M3 13h14" />
           </svg>
         </button>
       </div>
 
       <nav className="sidebar-nav">
-        <div className="sidebar-items">
-          {items.map((item) => renderSidebarItem(item))}
-        </div>
+        <div className="sidebar-items">{items.map((item) => renderSidebarItem(item))}</div>
       </nav>
 
       {user && (

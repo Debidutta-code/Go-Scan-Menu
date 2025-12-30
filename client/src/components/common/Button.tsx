@@ -38,12 +38,7 @@ export const Button: React.FC<ButtonProps> = ({
     .join(' ');
 
   return (
-    <button
-      type={type}
-      className={buttonClasses}
-      disabled={disabled || loading}
-      {...props}
-    >
+    <button type={type} className={buttonClasses} disabled={disabled || loading} {...props}>
       {loading ? (
         <span className="btn-spinner" />
       ) : (

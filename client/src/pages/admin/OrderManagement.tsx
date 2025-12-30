@@ -47,9 +47,7 @@ const OrderManagement: React.FC = () => {
 
     socketService.onOrderStatusUpdate((updatedOrder) => {
       setOrders((prev) =>
-        prev.map((order) =>
-          order._id === updatedOrder._id ? updatedOrder : order
-        )
+        prev.map((order) => (order._id === updatedOrder._id ? updatedOrder : order))
       );
     });
   };
@@ -77,9 +75,7 @@ const OrderManagement: React.FC = () => {
           orderNumber: 'ORD-002',
           tableNumber: 'T-3',
           customerName: 'Jane Smith',
-          items: [
-            { name: 'Paneer Tikka', quantity: 1, price: 280 },
-          ],
+          items: [{ name: 'Paneer Tikka', quantity: 1, price: 280 }],
           totalAmount: 280,
           status: 'pending',
           orderTime: new Date().toISOString(),
@@ -194,26 +190,17 @@ const OrderManagement: React.FC = () => {
 
                 <div className="order-actions">
                   {order.status === 'pending' && (
-                    <Button
-                      size="sm"
-                      onClick={() => updateOrderStatus(order._id, 'confirmed')}
-                    >
+                    <Button size="sm" onClick={() => updateOrderStatus(order._id, 'confirmed')}>
                       Confirm
                     </Button>
                   )}
                   {order.status === 'preparing' && (
-                    <Button
-                      size="sm"
-                      onClick={() => updateOrderStatus(order._id, 'ready')}
-                    >
+                    <Button size="sm" onClick={() => updateOrderStatus(order._id, 'ready')}>
                       Mark Ready
                     </Button>
                   )}
                   {order.status === 'ready' && (
-                    <Button
-                      size="sm"
-                      onClick={() => updateOrderStatus(order._id, 'served')}
-                    >
+                    <Button size="sm" onClick={() => updateOrderStatus(order._id, 'served')}>
                       Mark Served
                     </Button>
                   )}

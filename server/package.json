@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "prettier": "prettier --write \"src/**/*.{ts,json}\"",
     "tree": "npx tree-node-cli -I \"node_modules|dist\" -S > structure.txt",
-    "build": "rimraf dist && tsc -p tsconfig.json"
+    "build": "rimraf dist && tsc -p tsconfig.json && tsc-alias -p tsconfig.json"
   },
   "keywords": [],
   "author": "",

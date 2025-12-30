@@ -47,9 +47,7 @@ const KitchenDisplay: React.FC = () => {
         _id: '2',
         orderNumber: 'ORD-002',
         tableNumber: 'T-3',
-        items: [
-          { name: 'Paneer Tikka', quantity: 1, status: 'pending' },
-        ],
+        items: [{ name: 'Paneer Tikka', quantity: 1, status: 'pending' }],
         orderTime: new Date(Date.now() - 2 * 60000).toISOString(),
         status: 'confirmed',
       },
@@ -72,9 +70,7 @@ const KitchenDisplay: React.FC = () => {
 
     socketService.onOrderStatusUpdate((updatedOrder) => {
       setOrders((prev) =>
-        prev.map((order) =>
-          order._id === updatedOrder._id ? updatedOrder : order
-        )
+        prev.map((order) => (order._id === updatedOrder._id ? updatedOrder : order))
       );
     });
   };
@@ -129,9 +125,7 @@ const KitchenDisplay: React.FC = () => {
                       <span className="item-name">{item.name}</span>
                     </div>
                     {item.specialInstructions && (
-                      <div className="item-instructions">
-                        📝 {item.specialInstructions}
-                      </div>
+                      <div className="item-instructions">📝 {item.specialInstructions}</div>
                     )}
                   </div>
                 ))}

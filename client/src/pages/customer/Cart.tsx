@@ -35,13 +35,15 @@ const Cart: React.FC = () => {
   };
 
   const updateQuantity = (itemId: string, delta: number) => {
-    const newCart = cart.map((item) => {
-      if (item._id === itemId) {
-        const newQuantity = Math.max(0, item.quantity + delta);
-        return { ...item, quantity: newQuantity };
-      }
-      return item;
-    }).filter(item => item.quantity > 0);
+    const newCart = cart
+      .map((item) => {
+        if (item._id === itemId) {
+          const newQuantity = Math.max(0, item.quantity + delta);
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      })
+      .filter((item) => item.quantity > 0);
 
     setCart(newCart);
     localStorage.setItem('cart', JSON.stringify(newCart));
@@ -139,9 +141,7 @@ const Cart: React.FC = () => {
         <div className="cart-items">
           {cart.map((item) => (
             <Card key={item._id} className="cart-item">
-              {item.image && (
-                <img src={item.image} alt={item.name} className="cart-item-image" />
-              )}
+              {item.image && <img src={item.image} alt={item.name} className="cart-item-image" />}
               <div className="cart-item-details">
                 <div className="cart-item-header">
                   <h3 className="cart-item-name">
@@ -159,17 +159,11 @@ const Cart: React.FC = () => {
                 <div className="cart-item-footer">
                   <span className="cart-item-price">₹{item.price * item.quantity}</span>
                   <div className="quantity-controls">
-                    <button
-                      className="quantity-btn"
-                      onClick={() => updateQuantity(item._id, -1)}
-                    >
+                    <button className="quantity-btn" onClick={() => updateQuantity(item._id, -1)}>
                       −
                     </button>
                     <span className="quantity-value">{item.quantity}</span>
-                    <button
-                      className="quantity-btn"
-                      onClick={() => updateQuantity(item._id, 1)}
-                    >
+                    <button className="quantity-btn" onClick={() => updateQuantity(item._id, 1)}>
                       +
                     </button>
                   </div>
@@ -250,7 +244,7 @@ const Cart: React.FC = () => {
         </div>
       </Modal>
 
-      {loading && <Loader/>}
+      {loading && <Loader />}
     </div>
   );
 };
