@@ -1,0 +1,109 @@
+/* src/components/ui/InputField.css */
+
+.input-field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.input-field-container {
+  position: relative;
+  width: 100%;
+}
+
+.input-field {
+  height: 56px;
+  width: 100%;
+  padding: 20px 16px 8px 16px; /* space for floating label */
+  font-size: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.input-field:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.input-field::placeholder {
+  color: transparent; /* hide default placeholder – we use floating label */
+}
+
+.input-field-floating-label {
+  position: absolute;
+  left: 16px;
+  top: 18px;
+  font-size: 1rem;
+  color: #9ca3af;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  transform-origin: left top;
+}
+
+.peer:focus ~ .input-field-floating-label,
+.peer:not(:placeholder-shown) ~ .input-field-floating-label {
+  top: 8px;
+  font-size: 0.75rem;
+  color: #6366f1;
+  font-weight: 500;
+}
+
+.input-field.has-error {
+  border-color: #ef4444;
+}
+
+.input-field.has-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.input-field.has-error ~ .input-field-floating-label {
+  color: #ef4444;
+}
+
+.input-field-error {
+  color: #ef4444;
+  font-size: 0.8125rem;
+  margin-top: 6px;
+}
+
+/* Password toggle button */
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: #374151;
+}
+
+.password-toggle:focus {
+  outline: none;
+  color: #6366f1;
+}
