@@ -1,0 +1,87 @@
+// src/services/restaurant.service.ts
+
+import { Restaurant, CreateRestaurantDto, PaginatedResponse } from '../types/restaurant.types';
+import { ApiResponse } from '../types';
+
+const API_BASE_URL = 'http://localhost:8080/api/v1';
+
+export class RestaurantService {
+  private static getHeaders(token: string): HeadersInit {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    };
+  }
+
+  static async getRestaurants(
+    token: string,
+    page: number = 1,
+    limit: number = 10,
+    filters?: any
+  ): Promise<ApiResponse<PaginatedResponse<Restaurant>>> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+
+    if (filters) {
+      params.append('filter', JSON.stringify(filters));
+    }
+
+    const response = await fetch(`${API_BASE_URL}/restaurants?${params}`, {
+      headers: this.getHeaders(token),
+    });
+
+    return response.json();
+  }
+
+  static async getRestaurant(
+    token: string,
+    id: string
+  ): Promise<ApiResponse<Restaurant>> {
+    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
+      headers: this.getHeaders(token),
+    });
+
+    return response.json();
+  }
+
+  static async createRestaurant(
+    token: string,
+    data: CreateRestaurantDto
+  ): Promise<ApiResponse<{ restaurant: Restaurant }>> {
+    const response = await fetch(`${API_BASE_URL}/restaurants`, {
+      method: 'POST',
+      headers: this.getHeaders(token),
+      body: JSON.stringify(data),
+    });
+
+    return response.json();
+  }
+
+  static async updateRestaurant(
+    token: string,
+    id: string,
+    data: Partial<Restaurant>
+  ): Promise<ApiResponse<Restaurant>> {
+    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
+      method: 'PUT',
+      headers: this.getHeaders(token),
+      body: JSON.stringify(data),
+    });
+
+    return response.json();
+  }
+
+  static async deleteRestaurant(
+    token: string,
+    id: string
+  ): Promise<ApiResponse<Restaurant>> {
+    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(token),
+    });
+
+    return response.json();
+  }
+}

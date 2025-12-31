@@ -7,11 +7,7 @@ import { loginSchema } from '../../validations/auth.validation';
 import './Login.css';
 import { ILLUSTRATION_URL } from '@/const/auth/auth';
 
-interface LoginPageProps {
-    onShowRegister: () => void;
-}
-
-export const LoginPage: React.FC<LoginPageProps> = () => {
+export const LoginPage: React.FC<{}> = () => {
     const { login } = useAuth();
 
     const [email, setEmail] = useState('');

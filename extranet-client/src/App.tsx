@@ -1,25 +1,61 @@
-import { useState } from 'react'
-import './App.css'
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { Loading } from './components/common/Loading';
 import { Dashboard } from './pages/Dashboard/Dashboard';
-import { RegisterPage } from './pages/auth/Register';
 import { LoginPage } from './pages/auth/Login';
+import { RegisterPage } from './pages/auth/Register';
 
 function App() {
-  const { superAdmin, isLoading } = useAuth();
-  const [showRegister, setShowRegister] = useState(false);
+  const { superAdmin } = useAuth();
 
-  if (superAdmin) {
-    return <Dashboard />;
-  }
+  return (
+    <Routes>
+      {/* Root route */}
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to={superAdmin ? '/dashboard' : '/login'}
+            replace
+          />
+        }
+      />
 
-  if (showRegister) {
-    return <RegisterPage onBackToLogin={() => setShowRegister(false)} />;
-  }
+      {/* Public routes */}
+      <Route
+        path="/login"
+        element={
+          superAdmin ? <Navigate to="/dashboard" replace /> : <LoginPage />
+        }
+      />
 
-  return <LoginPage onShowRegister={() => setShowRegister(true)} />;
+      <Route
+        path="/register"
+        element={
+          superAdmin ? <Navigate to="/dashboard" replace /> : <RegisterPage />
+        }
+      />
 
+      {/* Protected routes */}
+      <Route
+        path="/dashboard"
+        element={
+          superAdmin ? <Dashboard /> : <Navigate to="/login" replace />
+        }
+      />
+
+      {/* Catch-all */}
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to={superAdmin ? '/dashboard' : '/login'}
+            replace
+          />
+        }
+      />
+    </Routes>
+  );
 }
 
-export default App
+export default App;

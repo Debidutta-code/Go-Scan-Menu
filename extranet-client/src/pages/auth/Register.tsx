@@ -4,11 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import './Register.css';
 
-interface RegisterPageProps {
-  onBackToLogin: () => void;
-}
-
-export const RegisterPage: React.FC<RegisterPageProps> = ({ onBackToLogin }) => {
+export const RegisterPage: React.FC<{}> = () => {
   const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -123,7 +119,6 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onBackToLogin }) => 
           </button>
 
           <button
-            onClick={onBackToLogin}
             className="btn-secondary"
             disabled={loading}
           >
