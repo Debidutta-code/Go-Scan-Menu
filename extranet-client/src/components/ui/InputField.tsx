@@ -1,7 +1,11 @@
-// src/components/ui/InputField.tsx
-import React, { forwardRef, InputHTMLAttributes, useState } from 'react';
+import React, {
+  forwardRef,
+  InputHTMLAttributes,
+  useId,
+  useState,
+} from 'react';
 import './InputField.css';
-import { Eye, EyeOff } from 'lucide-react'; // ← install: npm install lucide-react
+import { Eye, EyeOff } from 'lucide-react';
 
 export interface InputFieldProps
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -23,25 +27,38 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     },
     ref
   ) => {
+    const generatedId = useId();
+    const inputId = id ?? generatedId;
+
     const [showPassword, setShowPassword] = useState(false);
-    const inputId = id || `input-${Math.random().toString(36).slice(2, 9)}`;
+
     const isPassword = type === 'password';
-    const effectiveType = isPassword && showPassword ? 'text' : type;
+    const effectiveType =
+      isPassword && showPassword ? 'text' : type;
 
     return (
-      <div className={`input-field-wrapper ${fullWidth ? 'full-width' : ''} ${className} ${error ? 'has-error' : ''}`}>
+      <div
+        className={`input-field-wrapper ${fullWidth ? 'full-width' : ''
+          } ${className}`}
+      >
         <div className="input-field-container">
           <input
             id={inputId}
             ref={ref}
             type={effectiveType}
-            className={`input-field peer ${error ? 'has-error' : ''}`}
+            className={`input-field peer ${error ? 'has-error' : ''
+              }`}
             placeholder=" "
+            aria-invalid={!!error}
+            aria-describedby={error ? `${inputId}-error` : undefined}
             {...props}
           />
 
           {label && (
-            <label htmlFor={inputId} className="input-field-floating-label">
+            <label
+              htmlFor={inputId}
+              className="input-field-floating-label"
+            >
               {label}
             </label>
           )}
@@ -50,17 +67,27 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             <button
               type="button"
               className="password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowPassword((v) => !v)}
               tabIndex={-1}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={
+                showPassword ? 'Hide password' : 'Show password'
+              }
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? (
+                <EyeOff size={18} />
+              ) : (
+                <Eye size={18} />
+              )}
             </button>
           )}
         </div>
 
         {error && (
-          <span className="input-field-error" role="alert">
+          <span
+            id={`${inputId}-error`}
+            className="input-field-error"
+            role="alert"
+          >
             {error}
           </span>
         )}

@@ -10,11 +10,6 @@ function App() {
   const { superAdmin, isLoading } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
 
-  if (isLoading) {
-    return <Loading />;
-
-  }
-
   if (superAdmin) {
     return <Dashboard />;
   }

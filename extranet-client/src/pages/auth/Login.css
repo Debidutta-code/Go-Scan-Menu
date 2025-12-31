@@ -35,9 +35,9 @@
 .login-page-card {
   background: white;
   border-radius: 16px;
-  box-shadow: 
+  /* box-shadow: 
     0 10px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    0 10px 10px -5px rgba(0, 0, 0, 0.04); */
   width: 100%;
   max-width: 420px;
   padding: 48px 40px;
@@ -45,7 +45,7 @@
 }
 
 .login-page-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(0px);
 }
 
 .login-page-header {

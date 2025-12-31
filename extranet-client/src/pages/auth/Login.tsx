@@ -1,36 +1,54 @@
-// src/pages/auth/Login.tsx (updated)
+// src/pages/auth/Login.tsx
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { InputField } from '../../components/ui/InputField';
 import { Button } from '../../components/ui/Button';
+import { loginSchema } from '../../validations/auth.validation';
 import './Login.css';
+import { ILLUSTRATION_URL } from '@/const/auth/auth';
 
 interface LoginPageProps {
     onShowRegister: () => void;
 }
 
-const ILLUSTRATION_URL = 'https://res.cloudinary.com/da5p8dzn3/image/upload/v1767174798/Gemini_Generated_Image_dvzvchdvzvchdvzv_d1mmkk.png';
-
-export const LoginPage: React.FC<LoginPageProps> = ({ onShowRegister }) => {
+export const LoginPage: React.FC<LoginPageProps> = () => {
     const { login } = useAuth();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+
+    const [errors, setErrors] = useState<{
+        email?: string;
+        password?: string;
+    }>({});
+
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async () => {
-        if (!email || !password) {
-            setError('Please enter email and password');
+        // 🔍 Zod validation
+        const result = loginSchema.safeParse({ email, password });
+
+        if (!result.success) {
+            const fieldErrors: typeof errors = {};
+
+            result.error.errors.forEach((err) => {
+                const field = err.path[0] as keyof typeof errors;
+                fieldErrors[field] = err.message;
+            });
+
+            setErrors(fieldErrors);
             return;
         }
 
-        setError('');
+        setErrors({});
         setLoading(true);
 
         try {
             await login(email, password);
         } catch (err: any) {
-            setError(err.message || 'Unable to sign in');
+            setErrors({
+                password: err.message || 'Invalid credentials',
+            });
         } finally {
             setLoading(false);
         }
@@ -62,16 +80,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onShowRegister }) => {
                     </div>
 
                     <div className="login-page-form">
-                        {error && (
-                            <div className="login-page-error-message" role="alert">
-                                {error}
-                            </div>
-                        )}
-
                         <InputField
                             label="Email"
                             type="email"
                             value={email}
+                            error={errors.email}
                             onChange={(e) => setEmail(e.target.value)}
                             onKeyPress={handleKeyPress}
                             disabled={loading}
@@ -83,6 +96,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onShowRegister }) => {
                             label="Password"
                             type="password"
                             value={password}
+                            error={errors.password}
                             onChange={(e) => setPassword(e.target.value)}
                             onKeyPress={handleKeyPress}
                             disabled={loading}
@@ -97,14 +111,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onShowRegister }) => {
                         >
                             Sign In
                         </Button>
-
-                        {/* Optional: divider + create account link */}
-                        {/* <div className="login-page-divider">
-                            <span className="login-page-divider-text">or</span>
-                        </div>
-                        <Button variant="outline" fullWidth onClick={onShowRegister}>
-                            Create an account
-                        </Button> */}
                     </div>
                 </div>
             </div>

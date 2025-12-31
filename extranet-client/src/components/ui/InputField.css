@@ -17,10 +17,10 @@
 }
 
 .input-field {
-  height: 56px;
+  height: 48px; /* ↓ from 56px */
   width: 100%;
-  padding: 20px 16px 8px 16px; /* space for floating label */
-  font-size: 1rem;
+  padding: 16px 14px 6px 14px; /* adjusted for floating label */
+  font-size: 0.95rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   background: white;
@@ -45,21 +45,22 @@
   color: transparent; /* hide default placeholder – we use floating label */
 }
 
+/* floating label initial position */
 .input-field-floating-label {
   position: absolute;
-  left: 16px;
-  top: 18px;
-  font-size: 1rem;
+  left: 14px;
+  top: 14px;
+  font-size: 0.95rem;
   color: #9ca3af;
   pointer-events: none;
   transition: all 0.2s ease;
-  transform-origin: left top;
 }
 
+/* floating state */
 .peer:focus ~ .input-field-floating-label,
 .peer:not(:placeholder-shown) ~ .input-field-floating-label {
-  top: 8px;
-  font-size: 0.75rem;
+  top: 6px;
+  font-size: 0.7rem;
   color: #6366f1;
   font-weight: 500;
 }
