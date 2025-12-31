@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/Button';
 import { loginSchema } from '../../validations/auth.validation';
 import './Login.css';
 import { ILLUSTRATION_URL } from '@/const/auth/auth';
+import Illustrator from './Illustrator';
 
 export const LoginPage: React.FC<{}> = () => {
     const { login } = useAuth();
@@ -59,14 +60,7 @@ export const LoginPage: React.FC<{}> = () => {
     return (
         <div className="login-split-container">
             {/* Left side: Illustration */}
-            <div className="login-illustration-side">
-                <img
-                    src={ILLUSTRATION_URL}
-                    alt="Customer scanning QR code menu on phone with waiter"
-                    className="login-illustration"
-                />
-            </div>
-
+            <Illustrator />
             {/* Right side: Login form */}
             <div className="login-form-side">
                 <div className="login-page-card">
