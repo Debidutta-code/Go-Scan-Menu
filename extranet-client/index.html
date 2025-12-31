@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Digital menu and ordering system for restaurants" />
+    <title>Go Scan Menu</title>
+
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@100..1000&display=swap"
+      as="style"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@100..1000&display=swap"
+    />
+
+    <link rel="preload" href="/splash.css" as="style" />
+    <link rel="stylesheet" href="/splash.css" />
+  </head>
+
+  <body>
+    <div id="splash-screen">
+      <img id="restom-logo" src="/logo.png" alt="go-scan-menu Logo" />
+    </div>
+
+    <div id="root"></div>
+
+    <script type="module">
+      document.addEventListener('DOMContentLoaded', () => {
+        // 🔒 Disable scroll during splash
+        document.body.style.overflow = 'hidden';
+
+        setTimeout(() => {
+          const splash = document.getElementById('splash-screen');
+
+          if (splash) {
+            splash.classList.add('fade-out');
+
+            // 🟢 Restore scroll after fade-out
+            setTimeout(() => {
+              splash.remove();
+              document.body.style.overflow = 'auto';
+            }, 400); // fade duration
+          }
+        }, 1000);
+      });
+    </script>
+
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
