@@ -1,16 +1,22 @@
+// src/App.tsx (or App.jsx)
+
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { Loading } from './components/common/Loading';
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { LoginPage } from './pages/auth/Login';
 import { RegisterPage } from './pages/auth/Register';
+import { RestaurantList } from './pages/restaurants/RestaurantList';
+import { CreateRestaurant } from './pages/restaurants/CreateRestaurant';
+import { ViewRestaurant } from './pages/restaurants/ViewRestaurant';
+import { EditRestaurant } from './pages/restaurants/EditRestaurant';
 
 function App() {
   const { superAdmin } = useAuth();
 
   return (
     <Routes>
-      {/* Root route */}
+      {/* Root redirect based on auth status */}
       <Route
         path="/"
         element={
@@ -21,7 +27,7 @@ function App() {
         }
       />
 
-      {/* Public routes */}
+      {/* Public Routes */}
       <Route
         path="/login"
         element={
@@ -36,7 +42,7 @@ function App() {
         }
       />
 
-      {/* Protected routes */}
+      {/* Protected Routes - Super Admin Only */}
       <Route
         path="/dashboard"
         element={
@@ -44,7 +50,36 @@ function App() {
         }
       />
 
-      {/* Catch-all */}
+      {/* Restaurant List - Protected Route */}
+      <Route
+        path="/restaurants"
+        element={
+          superAdmin ? <RestaurantList /> : <Navigate to="/login" replace />
+        }
+      />
+
+      <Route
+        path="/restaurants/create"
+        element={
+          superAdmin ? <CreateRestaurant /> : <Navigate to="/login" replace />
+        }
+      />
+
+      <Route
+        path="/restaurants/:id"
+        element={
+          superAdmin ? <ViewRestaurant /> : <Navigate to="/login" replace />
+        }
+      />
+
+      <Route
+        path="/restaurants/:id/edit"
+        element={
+          superAdmin ? <EditRestaurant /> : <Navigate to="/login" replace />
+        }
+      />
+
+      {/* 404 / Catch-all Route */}
       <Route
         path="*"
         element={

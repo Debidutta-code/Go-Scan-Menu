@@ -1,0 +1,222 @@
+/* src/pages/restaurants/ViewRestaurant.css */
+
+.view-restaurant-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+.view-restaurant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-info {
+  flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status-badges {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 16px;
+}
+
+.status-badge.active {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.status-badge.inactive {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: #edf2f7;
+  color: #2d3748;
+  border-radius: 16px;
+}
+
+.info-section {
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 24px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.info-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 16px;
+  color: #2d3748;
+  margin: 0;
+  word-break: break-word;
+}
+
+.info-value.mono {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.plan-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 16px;
+}
+
+.plan-badge.plan-trial {
+  background: #bee3f8;
+  color: #2c5282;
+}
+
+.plan-badge.plan-basic {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.plan-badge.plan-premium {
+  background: #fbd38d;
+  color: #744210;
+}
+
+.plan-badge.plan-enterprise {
+  background: #d6bcfa;
+  color: #44337a;
+}
+
+.color-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.color-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-image {
+  max-width: 200px;
+  max-height: 100px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  object-fit: contain;
+}
+
+.theme-image.banner {
+  max-width: 100%;
+  max-height: 200px;
+}
+
+.loading-state,
+.error-state {
+  padding: 60px 20px;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.error-state {
+  color: #e53e3e;
+}
+
+.error-state p {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .view-restaurant-container {
+    padding: 16px;
+  }
+
+  .view-restaurant-header {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .header-actions button {
+    width: 100%;
+  }
+
+  .info-section {
+    padding: 20px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
