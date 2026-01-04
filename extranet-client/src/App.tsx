@@ -6,6 +6,7 @@ import { Loading } from './components/common/Loading';
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { LoginPage } from './pages/auth/Login';
 import { RegisterPage } from './pages/auth/Register';
+import { StaffLoginPage } from './pages/auth/StaffLogin';
 import { RestaurantList } from './pages/restaurants/RestaurantList';
 import { CreateRestaurant } from './pages/restaurants/CreateRestaurant';
 import { ViewRestaurant } from './pages/restaurants/ViewRestaurant';
@@ -41,6 +42,9 @@ function App() {
           superAdmin ? <Navigate to="/dashboard" replace /> : <RegisterPage />
         }
       />
+
+      {/* Staff Login Route */}
+      <Route path="/staff/login" element={<StaffLoginPage />} />
 
       {/* Protected Routes - Super Admin Only */}
       <Route

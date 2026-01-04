@@ -1,222 +1,406 @@
 /* src/pages/restaurants/ViewRestaurant.css */
 
 .view-restaurant-container {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-  background: #f9fafb;
-  min-height: 100vh;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #f9fafb;
+    min-height: 100vh;
 }
 
 .view-restaurant-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 32px;
-  background: white;
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    background: white;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .header-info {
-  flex: 1;
+    flex: 1;
 }
 
 .header-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .status-badges {
-  display: flex;
-  gap: 12px;
-  margin-top: 12px;
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
 }
 
 .status-badge {
-  display: inline-block;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 16px;
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 16px;
 }
 
 .status-badge.active {
-  background: #c6f6d5;
-  color: #22543d;
+    background: #c6f6d5;
+    color: #22543d;
 }
 
 .status-badge.inactive {
-  background: #fed7d7;
-  color: #742a2a;
+    background: #fed7d7;
+    color: #742a2a;
 }
 
 .type-badge {
-  display: inline-block;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: capitalize;
-  background: #edf2f7;
-  color: #2d3748;
-  border-radius: 16px;
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: capitalize;
+    background: #edf2f7;
+    color: #2d3748;
+    border-radius: 16px;
 }
 
 .info-section {
-  background: white;
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 24px;
+    background: white;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
 }
 
 .section-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #2d3748;
-  margin: 0 0 24px 0;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e2e8f0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 24px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
 }
 
 .info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
 }
 
 .info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .info-item.full-width {
-  grid-column: 1 / -1;
+    grid-column: 1 / -1;
 }
 
 .info-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #718096;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .info-value {
-  font-size: 16px;
-  color: #2d3748;
-  margin: 0;
-  word-break: break-word;
+    font-size: 16px;
+    color: #2d3748;
+    margin: 0;
+    word-break: break-word;
 }
 
 .info-value.mono {
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  color: #4a5568;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #4a5568;
 }
 
 .plan-badge {
-  display: inline-block;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 16px;
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 16px;
 }
 
 .plan-badge.plan-trial {
-  background: #bee3f8;
-  color: #2c5282;
+    background: #bee3f8;
+    color: #2c5282;
 }
 
 .plan-badge.plan-basic {
-  background: #c6f6d5;
-  color: #22543d;
+    background: #c6f6d5;
+    color: #22543d;
 }
 
 .plan-badge.plan-premium {
-  background: #fbd38d;
-  color: #744210;
+    background: #fbd38d;
+    color: #744210;
 }
 
 .plan-badge.plan-enterprise {
-  background: #d6bcfa;
-  color: #44337a;
+    background: #d6bcfa;
+    color: #44337a;
 }
 
 .color-display {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .color-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  border: 2px solid #e2e8f0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .theme-image {
-  max-width: 200px;
-  max-height: 100px;
-  border-radius: 8px;
-  border: 2px solid #e2e8f0;
-  object-fit: contain;
+    max-width: 200px;
+    max-height: 100px;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    object-fit: contain;
 }
 
 .theme-image.banner {
-  max-width: 100%;
-  max-height: 200px;
+    max-width: 100%;
+    max-height: 200px;
 }
 
 .loading-state,
 .error-state {
-  padding: 60px 20px;
-  text-align: center;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 60px 20px;
+    text-align: center;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .error-state {
-  color: #e53e3e;
+    color: #e53e3e;
 }
 
 .error-state p {
-  margin-bottom: 20px;
-  font-size: 16px;
+    margin-bottom: 20px;
+    font-size: 16px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .view-restaurant-container {
-    padding: 16px;
-  }
+    .view-restaurant-container {
+        padding: 16px;
+    }
 
-  .view-restaurant-header {
-    flex-direction: column;
+    .view-restaurant-header {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .header-actions button {
+        width: 100%;
+    }
+
+    .info-section {
+        padding: 20px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Staff Management Styles */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.add-staff-form {
+    background: #f9fafb;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.form-subtitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 20px 0;
+}
+
+.staff-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
-    padding: 20px;
-  }
+    margin-bottom: 20px;
+}
 
-  .header-actions {
-    width: 100%;
+.input-group {
+    display: flex;
     flex-direction: column;
-  }
+    gap: 8px;
+}
 
-  .header-actions button {
+.input-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.role-select {
     width: 100%;
-  }
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #111827;
+    background: white;
+    transition: all 0.2s ease;
+    outline: none;
+    cursor: pointer;
+}
 
-  .info-section {
-    padding: 20px;
-  }
+.role-select:hover {
+    border-color: #9ca3af;
+}
 
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
+.role-select:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.role-select:disabled {
+    background: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.role-select.error {
+    border-color: #ef4444;
+}
+
+.error-message {
+    font-size: 13px;
+    color: #ef4444;
+    margin-top: 4px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.staff-list {
+    margin-top: 24px;
+}
+
+.staff-table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.staff-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.staff-table thead {
+    background: #f9fafb;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.staff-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.staff-table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background 0.2s ease;
+}
+
+.staff-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.staff-table td {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #2d3748;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+    background: #e0e7ff;
+    color: #3730a3;
+    border-radius: 12px;
+}
+
+.empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6b7280;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px dashed #d1d5db;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 15px;
+}
+
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .section-header button {
+        width: 100%;
+    }
+
+    .add-staff-form {
+        padding: 16px;
+    }
+
+    .staff-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .staff-table-container {
+        overflow-x: scroll;
+    }
+
+    .staff-table {
+        min-width: 600px;
+    }
 }
