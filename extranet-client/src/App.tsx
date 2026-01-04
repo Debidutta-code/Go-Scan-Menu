@@ -1,97 +1,114 @@
-// src/App.tsx (or App.jsx)
+// src/App.tsx
 
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { Loading } from './components/common/Loading';
+import { StaffAuthProvider } from './contexts/StaffAuthContext'; // ← ADD THIS IMPORT
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { LoginPage } from './pages/auth/Login';
 import { RegisterPage } from './pages/auth/Register';
 import { StaffLoginPage } from './pages/auth/StaffLogin';
+import { StaffDashboard } from './pages/staff/StaffDashboard'; // ← Create this page if not exists
+
 import { RestaurantList } from './pages/restaurants/RestaurantList';
 import { CreateRestaurant } from './pages/restaurants/CreateRestaurant';
 import { ViewRestaurant } from './pages/restaurants/ViewRestaurant';
 import { EditRestaurant } from './pages/restaurants/EditRestaurant';
+
+// Protected Admin Route Component
+const ProtectedAdminRoute = ({ children }: { children: any }) => {
+  const { superAdmin, isLoading } = useAuth();
+  if (isLoading) return <div>Loading...</div>;
+  return superAdmin ? children : <Navigate to="/login" replace />;
+};
+
+// Protected Staff Route Component
+const ProtectedStaffRoute = ({ children }: { children: any }) => {
+  const { useStaffAuth } = require('./contexts/StaffAuthContext');
+  const { isAuthenticated, isLoading } = useStaffAuth();
+
+  if (isLoading) return <div>Loading staff portal...</div>;
+  return isAuthenticated ? children : <Navigate to="/staff/login" replace />;
+};
 
 function App() {
   const { superAdmin } = useAuth();
 
   return (
     <Routes>
-      {/* Root redirect based on auth status */}
+      {/* Root Redirect */}
       <Route
         path="/"
-        element={
-          <Navigate
-            to={superAdmin ? '/dashboard' : '/login'}
-            replace
-          />
-        }
+        element={<Navigate to={superAdmin ? '/dashboard' : '/login'} replace />}
       />
 
-      {/* Public Routes */}
+      {/* Super Admin Routes */}
       <Route
         path="/login"
-        element={
-          superAdmin ? <Navigate to="/dashboard" replace /> : <LoginPage />
-        }
+        element={superAdmin ? <Navigate to="/dashboard" replace /> : <LoginPage />}
       />
-
       <Route
         path="/register"
-        element={
-          superAdmin ? <Navigate to="/dashboard" replace /> : <RegisterPage />
-        }
+        element={superAdmin ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
       />
 
-      {/* Staff Login Route */}
-      <Route path="/staff/login" element={<StaffLoginPage />} />
-
-      {/* Protected Routes - Super Admin Only */}
       <Route
         path="/dashboard"
-        element={
-          superAdmin ? <Dashboard /> : <Navigate to="/login" replace />
-        }
+        element={<ProtectedAdminRoute><Dashboard /></ProtectedAdminRoute>}
       />
-
-      {/* Restaurant List - Protected Route */}
       <Route
         path="/restaurants"
-        element={
-          superAdmin ? <RestaurantList /> : <Navigate to="/login" replace />
-        }
+        element={<ProtectedAdminRoute><RestaurantList /></ProtectedAdminRoute>}
       />
-
       <Route
         path="/restaurants/create"
-        element={
-          superAdmin ? <CreateRestaurant /> : <Navigate to="/login" replace />
-        }
+        element={<ProtectedAdminRoute><CreateRestaurant /></ProtectedAdminRoute>}
       />
-
       <Route
         path="/restaurants/:id"
-        element={
-          superAdmin ? <ViewRestaurant /> : <Navigate to="/login" replace />
-        }
+        element={<ProtectedAdminRoute><ViewRestaurant /></ProtectedAdminRoute>}
       />
-
       <Route
         path="/restaurants/:id/edit"
+        element={<ProtectedAdminRoute><EditRestaurant /></ProtectedAdminRoute>}
+      />
+
+      {/* ========== STAFF PORTAL ROUTES ========== */}
+      {/* Wrap ALL staff routes (including login) with StaffAuthProvider */}
+      <Route
+        path="/staff/*"
         element={
-          superAdmin ? <EditRestaurant /> : <Navigate to="/login" replace />
+          <StaffAuthProvider>
+            <Routes>
+              {/* Public: Staff Login */}
+              <Route path="login" element={<StaffLoginPage />} />
+
+              {/* Protected Staff Pages */}
+              <Route
+                path="dashboard"
+                element={
+                  <ProtectedStaffRoute>
+                    <StaffDashboard />
+                  </ProtectedStaffRoute>
+                }
+              />
+
+              {/* Add more staff routes here later */}
+              {/* <Route path="orders" element={<ProtectedStaffRoute><Orders /></ProtectedStaffRoute>} /> */}
+
+              {/* Default staff route */}
+              <Route index element={<Navigate to="dashboard" replace />} />
+
+              {/* 404 inside staff portal */}
+              <Route path="*" element={<div>Staff Page Not Found</div>} />
+            </Routes>
+          </StaffAuthProvider>
         }
       />
 
-      {/* 404 / Catch-all Route */}
+      {/* Global 404 */}
       <Route
         path="*"
-        element={
-          <Navigate
-            to={superAdmin ? '/dashboard' : '/login'}
-            replace
-          />
-        }
+        element={<Navigate to={superAdmin ? '/dashboard' : '/login'} replace />}
       />
     </Routes>
   );

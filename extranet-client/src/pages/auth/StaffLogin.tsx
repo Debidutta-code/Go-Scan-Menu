@@ -1,16 +1,17 @@
 // src/pages/auth/StaffLogin.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useStaffAuth } from '../../contexts/StaffAuthContext';
 import { InputField } from '../../components/ui/InputField';
 import { Button } from '../../components/ui/Button';
 import { staffLoginSchema } from '../../validations/staff.validation';
-import { StaffService } from '../../services/staff.service';
 import './StaffLogin.css';
 import { ILLUSTRATION_URL } from '@/const/auth/auth';
 import Illustrator from './Illustrator';
 
 export const StaffLoginPage: React.FC<{}> = () => {
     const navigate = useNavigate();
+    const { login } = useStaffAuth();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -53,18 +54,9 @@ export const StaffLoginPage: React.FC<{}> = () => {
         setLoading(true);
 
         try {
-            const response = await StaffService.login(email, password, role);
-            
-            if (response.success && response.data) {
-                // Store staff token and data
-                localStorage.setItem('staff_token', response.data.token);
-                localStorage.setItem('staff_data', JSON.stringify(response.data.staff));
-                
-                // Redirect to staff dashboard or appropriate page
-                alert('Login successful! Redirecting...');
-                // TODO: Navigate to staff dashboard when implemented
-                // navigate('/staff/dashboard');
-            }
+            await login(email, password, role);
+            // Redirect to staff dashboard
+            navigate('/staff/dashboard');
         } catch (err: any) {
             setErrors({
                 password: err.message || 'Invalid credentials',
