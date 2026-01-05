@@ -6,7 +6,11 @@ import {
   updateSuperAdminById,
   checkSuperAdminEmailExists,
 } from '@/repositories/superadmin.auth.repository';
+import { RoleRepository } from '@/repositories/role.repository';
 import { JWTUtil, BcryptUtil } from '@/utils';
+import { AppError } from '@/utils/AppError';
+
+const roleRepo = new RoleRepository();
 
 export const registerSuperAdmin = async (data: {
   name: string;
@@ -18,26 +22,28 @@ export const registerSuperAdmin = async (data: {
     throw new Error('Super admin with this email already exists');
   }
 
+  // Find or create super_admin role
+  let superAdminRole = await roleRepo.findByName('super_admin');
+  
+  if (!superAdminRole) {
+    throw new AppError('Super admin role not found. Please seed roles first.', 500);
+  }
+
   const hashedPassword = await BcryptUtil.hash(data.password);
 
   const superAdmin = await createSuperAdmin({
     name: data.name,
     email: data.email,
     password: hashedPassword,
+    roleId: superAdminRole._id,
   });
 
   const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
-    role: 'super_admin' as any,
-    permissions: {
-      canViewOrders: true,
-      canUpdateOrders: true,
-      canManageMenu: true,
-      canManageStaff: true,
-      canViewReports: true,
-      canManageSettings: true,
-    },
+    role: 'super_admin',
+    roleId: superAdminRole._id.toString(),
+    permissions: superAdminRole.permissions,
   });
 
   return {
@@ -45,7 +51,8 @@ export const registerSuperAdmin = async (data: {
       id: superAdmin._id,
       name: superAdmin.name,
       email: superAdmin.email,
-      role: superAdmin.role,
+      role: 'super_admin',
+      permissions: superAdminRole.permissions,
     },
     token,
   };
@@ -53,7 +60,7 @@ export const registerSuperAdmin = async (data: {
 
 export const loginSuperAdmin = async (data: { email: string; password: string }) => {
   const superAdmin = await findSuperAdminByEmail(data.email);
-  if (!superAdmin) {
+  if (!superAdmin || !superAdmin.isActive) {
     throw new Error('Invalid email or password');
   }
 
@@ -62,18 +69,18 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
     throw new Error('Invalid email or password');
   }
 
+  // Fetch role details
+  const role = await roleRepo.findById(superAdmin.roleId.toString());
+  if (!role || !role.isActive) {
+    throw new AppError('Role not found or inactive', 403);
+  }
+
   const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
-    role: 'super_admin' as any,
-    permissions: {
-      canViewOrders: true,
-      canUpdateOrders: true,
-      canManageMenu: true,
-      canManageStaff: true,
-      canViewReports: true,
-      canManageSettings: true,
-    },
+    role: role.name as any,
+    roleId: role._id.toString(),
+    permissions: role.permissions,
   });
 
   return {
@@ -81,7 +88,8 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
       id: superAdmin._id,
       name: superAdmin.name,
       email: superAdmin.email,
-      role: superAdmin.role,
+      role: role.name,
+      permissions: role.permissions,
     },
     token,
   };
