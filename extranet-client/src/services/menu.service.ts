@@ -47,17 +47,18 @@ export class MenuService {
   }
 
   // Category APIs
-  static async getCategories(token: string, restaurantId: string) {
+  static async getCategories(token: string, restaurantId: any) {
+    console.log("category id", restaurantId._id);
     return this.request<CategoryListResponse>(
-      `/restaurants/${restaurantId}/categories`,
+      `/restaurants/${restaurantId._id}/categories`,
       {},
       token
     );
   }
 
-  static async getCategory(token: string, restaurantId: string, categoryId: string) {
+  static async getCategory(token: string, restaurantId: any, categoryId: string) {
     return this.request<Category>(
-      `/restaurants/${restaurantId}/categories/${categoryId}`,
+      `/restaurants/${restaurantId._id}/categories/${categoryId}`,
       {},
       token
     );
@@ -93,20 +94,20 @@ export class MenuService {
   // Menu Item APIs
   static async getMenuItems(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     page: number = 1,
     limit: number = 50
   ) {
     return this.request<MenuItemListResponse>(
-      `/restaurants/${restaurantId}/menu-items?page=${page}&limit=${limit}`,
+      `/restaurants/${restaurantId._id}/menu-items?page=${page}&limit=${limit}`,
       {},
       token
     );
   }
 
-  static async getMenuItem(token: string, restaurantId: string, menuItemId: string) {
+  static async getMenuItem(token: string, restaurantId: any, menuItemId: string) {
     return this.request<MenuItem>(
-      `/restaurants/${restaurantId}/menu-items/${menuItemId}`,
+      `/restaurants/${restaurantId._id}/menu-items/${menuItemId}`,
       {},
       token
     );
@@ -114,13 +115,13 @@ export class MenuService {
 
   static async getMenuItemsByCategory(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     categoryId: string,
     page: number = 1,
     limit: number = 50
   ) {
     return this.request<MenuItemListResponse>(
-      `/restaurants/${restaurantId}/menu-items/category/${categoryId}?page=${page}&limit=${limit}`,
+      `/restaurants/${restaurantId._id}/menu-items/category/${categoryId}?page=${page}&limit=${limit}`,
       {},
       token
     );
@@ -128,11 +129,11 @@ export class MenuService {
 
   static async createMenuItem(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     payload: CreateMenuItemPayload
   ) {
     return this.request<MenuItem>(
-      `/restaurants/${restaurantId}/menu-items`,
+      `/restaurants/${restaurantId._id}/menu-items`,
       {
         method: 'POST',
         body: JSON.stringify(payload),

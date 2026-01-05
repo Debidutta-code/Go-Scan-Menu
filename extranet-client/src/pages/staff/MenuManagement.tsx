@@ -124,7 +124,7 @@ export const MenuManagement: React.FC = () => {
         <div className="header-actions">
           <Button
             variant="primary"
-            onClick={() => navigate('/staff/menu/categories')}
+            onClick={() => navigate('/staff/categories')}
             data-testid="manage-categories-button"
           >
             Manage Categories

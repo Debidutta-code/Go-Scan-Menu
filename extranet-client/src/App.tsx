@@ -1,13 +1,19 @@
 // src/App.tsx
 
+// src/App.tsx
+
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { StaffAuthProvider } from './contexts/StaffAuthContext'; // ← ADD THIS IMPORT
+import { StaffAuthProvider, useStaffAuth } from './contexts/StaffAuthContext';
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { LoginPage } from './pages/auth/Login';
 import { RegisterPage } from './pages/auth/Register';
 import { StaffLoginPage } from './pages/auth/StaffLogin';
-import { StaffDashboard } from './pages/staff/StaffDashboard'; // ← Create this page if not exists
+import { StaffDashboard } from './pages/staff/StaffDashboard';
+import { MenuManagement } from './pages/staff/MenuManagement';
+import { CategoryManagement } from './pages/staff/CategoryManagement';
+import { AddEditCategory } from './pages/staff/AddEditCategory';
+import { AddEditMenuItem } from './pages/staff/AddEditMenuItem';
 
 import { RestaurantList } from './pages/restaurants/RestaurantList';
 import { CreateRestaurant } from './pages/restaurants/CreateRestaurant';
@@ -23,7 +29,6 @@ const ProtectedAdminRoute = ({ children }: { children: any }) => {
 
 // Protected Staff Route Component
 const ProtectedStaffRoute = ({ children }: { children: any }) => {
-  const { useStaffAuth } = require('./contexts/StaffAuthContext');
   const { isAuthenticated, isLoading } = useStaffAuth();
 
   if (isLoading) return <div>Loading staff portal...</div>;
@@ -92,10 +97,59 @@ function App() {
                 }
               />
 
-              {/* Add more staff routes here later */}
-              {/* <Route path="orders" element={<ProtectedStaffRoute><Orders /></ProtectedStaffRoute>} /> */}
+              {/* Menu Management Routes */}
+              <Route
+                path="menu"
+                element={
+                  <ProtectedStaffRoute>
+                    <MenuManagement />
+                  </ProtectedStaffRoute>
+                }
+              />
+              <Route
+                path="menu/add"
+                element={
+                  <ProtectedStaffRoute>
+                    <AddEditMenuItem />
+                  </ProtectedStaffRoute>
+                }
+              />
+              <Route
+                path="menu/edit/:id"
+                element={
+                  <ProtectedStaffRoute>
+                    <AddEditMenuItem />
+                  </ProtectedStaffRoute>
+                }
+              />
 
-              {/* Default staff route */}
+              {/* Category Management Routes */}
+              <Route
+                path="categories"
+                element={
+                  <ProtectedStaffRoute>
+                    <CategoryManagement />
+                  </ProtectedStaffRoute>
+                }
+              />
+              <Route
+                path="categories/add"
+                element={
+                  <ProtectedStaffRoute>
+                    <AddEditCategory />
+                  </ProtectedStaffRoute>
+                }
+              />
+              <Route
+                path="categories/edit/:id"
+                element={
+                  <ProtectedStaffRoute>
+                    <AddEditCategory />
+                  </ProtectedStaffRoute>
+                }
+              />
+
+              {/* Default staff route - redirect to dashboard when accessing /staff directly */}
               <Route index element={<Navigate to="dashboard" replace />} />
 
               {/* 404 inside staff portal */}
