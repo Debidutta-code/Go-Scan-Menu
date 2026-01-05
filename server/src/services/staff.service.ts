@@ -1,17 +1,21 @@
 // src/services/staff.service.ts
 import { StaffRepository } from '@/repositories/staff.repository';
 import { RestaurantRepository } from '@/repositories/restaurant.repository';
+import { RoleRepository } from '@/repositories/role.repository';
 import { IStaff } from '@/models/Staff.model';
 import { BcryptUtil, JWTUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
+import { StaffRole } from '@/types/role.types';
 
 export class StaffService {
   private staffRepo: StaffRepository;
   private restaurantRepo: RestaurantRepository;
+  private roleRepo: RoleRepository;
 
   constructor() {
     this.staffRepo = new StaffRepository();
     this.restaurantRepo = new RestaurantRepository();
+    this.roleRepo = new RoleRepository();
   }
 
   async login(email: string, password: string) {
@@ -26,24 +30,34 @@ export class StaffService {
       throw new AppError('Invalid credentials', 401);
     }
 
-    // Check restaurant subscription
-    // const restaurant = await this.restaurantRepo.findById(restaurantId);
-    // if (!restaurant || !restaurant.subscription.isActive) {
-    //   throw new AppError('Restaurant subscription is inactive', 403);
-    // }
+    // Fetch role details
+    const role = await this.roleRepo.findById(staff.roleId.toString());
+    if (!role || !role.isActive) {
+      throw new AppError('Role not found or inactive', 403);
+    }
 
     const token = JWTUtil.generateToken({
       id: staff._id.toString(),
       email: staff.email,
-      role: staff.role,
+      role: role.name as StaffRole,
+      roleId: role._id.toString(),
       restaurantId: staff.restaurantId.toString(),
       branchId: staff.branchId?.toString(),
       accessLevel: staff.accessLevel,
       allowedBranchIds: staff.allowedBranchIds.map((id) => id.toString()),
-      permissions: staff.permissions,
+      permissions: role.permissions,
     });
 
-    return { staff, token };
+    // Return staff with role information
+    const staffData = staff.toObject();
+    return {
+      staff: {
+        ...staffData,
+        role: role.name,
+        permissions: role.permissions,
+      },
+      token
+    };
   }
 
   async createStaff(data: Partial<IStaff>) {
@@ -55,14 +69,19 @@ export class StaffService {
       throw new AppError('Staff with this email already exists', 400);
     }
 
+    // Validate role exists
+    if (data.roleId) {
+      const role = await this.roleRepo.findById(data.roleId.toString());
+      if (!role || !role.isActive) {
+        throw new AppError('Invalid role', 400);
+      }
+    } else {
+      throw new AppError('Role is required', 400);
+    }
+
     // Hash password
     if (data.password) {
       data.password = await BcryptUtil.hash(data.password);
-    }
-
-    // Set default permissions based on role
-    if (!data.permissions) {
-      data.permissions = this.getDefaultPermissions(data.role!);
     }
 
     const staff = await this.staffRepo.create(data);
@@ -90,6 +109,14 @@ export class StaffService {
       data.password = await BcryptUtil.hash(data.password);
     }
 
+    // Validate role if being updated
+    if (data.roleId) {
+      const role = await this.roleRepo.findById(data.roleId.toString());
+      if (!role || !role.isActive) {
+        throw new AppError('Invalid role', 400);
+      }
+    }
+
     const staff = await this.staffRepo.update(id, data);
     if (!staff) {
       throw new AppError('Staff not found', 404);
@@ -97,8 +124,14 @@ export class StaffService {
     return staff;
   }
 
-  async updatePermissions(id: string, permissions: Partial<IStaff['permissions']>) {
-    const staff = await this.staffRepo.updatePermissions(id, permissions);
+  async updateStaffRole(id: string, roleId: string) {
+    // Validate role exists
+    const role = await this.roleRepo.findById(roleId);
+    if (!role || !role.isActive) {
+      throw new AppError('Invalid role', 400);
+    }
+
+    const staff = await this.staffRepo.update(id, { roleId: role._id } as any);
     if (!staff) {
       throw new AppError('Staff not found', 404);
     }
@@ -111,60 +144,5 @@ export class StaffService {
       throw new AppError('Staff not found', 404);
     }
     return staff;
-  }
-
-  private getDefaultPermissions(role: string) {
-    const permissionMap: Record<string, IStaff['permissions']> = {
-      owner: {
-        canViewOrders: true,
-        canUpdateOrders: true,
-        canManageMenu: true,
-        canManageStaff: true,
-        canViewReports: true,
-        canManageSettings: true,
-      },
-      branch_manager: {
-        canViewOrders: true,
-        canUpdateOrders: true,
-        canManageMenu: true,
-        canManageStaff: true,
-        canViewReports: true,
-        canManageSettings: false,
-      },
-      manager: {
-        canViewOrders: true,
-        canUpdateOrders: true,
-        canManageMenu: true,
-        canManageStaff: false,
-        canViewReports: true,
-        canManageSettings: false,
-      },
-      waiter: {
-        canViewOrders: true,
-        canUpdateOrders: true,
-        canManageMenu: false,
-        canManageStaff: false,
-        canViewReports: false,
-        canManageSettings: false,
-      },
-      kitchen_staff: {
-        canViewOrders: true,
-        canUpdateOrders: true,
-        canManageMenu: false,
-        canManageStaff: false,
-        canViewReports: false,
-        canManageSettings: false,
-      },
-      cashier: {
-        canViewOrders: true,
-        canUpdateOrders: false,
-        canManageMenu: false,
-        canManageStaff: false,
-        canViewReports: false,
-        canManageSettings: false,
-      },
-    };
-
-    return permissionMap[role] || permissionMap.waiter;
   }
 }

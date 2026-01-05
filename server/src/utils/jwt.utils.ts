@@ -1,24 +1,19 @@
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import type { StringValue } from 'ms';
 import { envConfig as config } from '@/config';
-import { IStaff } from '@/models';
+import { IRole } from '@/models';
+import { StaffRole } from '@/types/role.types';
 
 export interface JWTPayload {
   id: string;
   email: string;
-  role:
-    | 'super_admin'
-    | 'owner'
-    | 'branch_manager'
-    | 'manager'
-    | 'waiter'
-    | 'kitchen_staff'
-    | 'cashier';
+  role: StaffRole;                     // ← use enum
+  roleId?: string;
   restaurantId?: string;
   branchId?: string;
   accessLevel?: 'single_branch' | 'all_branches';
   allowedBranchIds?: string[];
-  permissions: IStaff['permissions'];
+  permissions: IRole['permissions'];
 }
 
 export class JWTUtil {

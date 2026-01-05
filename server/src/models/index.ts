@@ -5,6 +5,7 @@ export { SuperAdmin, ISuperAdmin } from './SuperAdmin.model';
 export { Restaurant, IRestaurant } from './Restaurant.model';
 export { Branch, IBranch } from './Branch.model';
 export { Staff, IStaff } from './Staff.model';
+export { Role, IRole } from './Role.model';
 export { Table, ITable } from './Table.model';
 export { Category, ICategory } from './Category.model';
 export { MenuItem, IMenuItem } from './MenuItem.model';

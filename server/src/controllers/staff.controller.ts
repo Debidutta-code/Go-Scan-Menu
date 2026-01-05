@@ -71,10 +71,11 @@ export class StaffController {
     });
   });
 
-  updatePermissions = catchAsync(async (req: Request, res: Response) => {
-    const staff = await this.staffService.updatePermissions(req.params.id, req.body);
+  updateStaffRole = catchAsync(async (req: Request, res: Response) => {
+    const { roleId } = req.body;
+    const staff = await this.staffService.updateStaffRole(req.params.id, roleId);
     sendResponse(res, 200, {
-      message: 'Permissions updated successfully',
+      message: 'Staff role updated successfully',
       data: staff,
     });
   });

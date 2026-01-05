@@ -31,7 +31,7 @@ export interface AuthUser {
   id: string;
   email?: string;
   role: UserRole;
-
+  roleId?: string;
   restaurantId?: string;
   branchId?: string;
 

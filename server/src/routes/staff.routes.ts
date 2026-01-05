@@ -45,11 +45,11 @@ router.put(
 );
 
 router.put(
-  '/:id/permissions',
+  '/:id/role',
   AuthMiddleware.authenticate,
   AuthMiddleware.authorizeRoles('super_admin', 'owner', 'branch_manager'),
   AuthMiddleware.authorizePermission('canManageStaff'),
-  staffController.updatePermissions
+  staffController.updateStaffRole
 );
 
 router.delete(

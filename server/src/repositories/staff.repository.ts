@@ -12,6 +12,7 @@ export class StaffRepository {
     return Staff.findById(id)
       .populate('restaurantId')
       .populate('branchId')
+      .populate('roleId')
       .populate('allowedBranchIds');
   }
 
@@ -19,6 +20,7 @@ export class StaffRepository {
     return Staff.findOne({ email })
       .populate('restaurantId')
       .populate('branchId')
+      .populate('roleId')
       .populate('allowedBranchIds');
   }
 
@@ -34,6 +36,7 @@ export class StaffRepository {
     const [staff, total] = await Promise.all([
       Staff.find(query)
         .populate('branchId')
+        .populate('roleId')
         .populate('allowedBranchIds')
         .skip(skip)
         .limit(limit)
@@ -58,6 +61,7 @@ export class StaffRepository {
     const [staff, total] = await Promise.all([
       Staff.find({ branchId })
         .populate('restaurantId')
+        .populate('roleId')
         .populate('branchId')
         .skip(skip)
         .limit(limit)
@@ -80,18 +84,13 @@ export class StaffRepository {
     return Staff.findByIdAndUpdate(id, data, { new: true })
       .populate('restaurantId')
       .populate('branchId')
+      .populate('roleId')
       .populate('allowedBranchIds');
   }
 
-  async updatePermissions(
-    id: string,
-    permissions: Partial<IStaff['permissions']>
-  ): Promise<IStaff | null> {
-    return Staff.findByIdAndUpdate(id, { $set: { permissions } }, { new: true });
-  }
-
   async delete(id: string): Promise<IStaff | null> {
-    return Staff.findByIdAndUpdate(id, { isActive: false }, { new: true });
+    return Staff.findByIdAndUpdate(id, { isActive: false }, { new: true })
+      .populate('roleId');
   }
 
   async hardDelete(id: string): Promise<IStaff | null> {
