@@ -64,9 +64,9 @@ export class MenuService {
     );
   }
 
-  static async createCategory(token: string, restaurantId: string, payload: CreateCategoryPayload) {
+  static async createCategory(token: string, restaurantId: any, payload: CreateCategoryPayload) {
     return this.request<Category>(
-      `/restaurants/${restaurantId}/categories`,
+      `/restaurants/${restaurantId._id}/categories`,
       {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -77,12 +77,12 @@ export class MenuService {
 
   static async updateCategory(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     categoryId: string,
     payload: Partial<CreateCategoryPayload>
   ) {
     return this.request<Category>(
-      `/restaurants/${restaurantId}/categories/${categoryId}`,
+      `/restaurants/${restaurantId._id}/categories/${categoryId}`,
       {
         method: 'PUT',
         body: JSON.stringify(payload),
@@ -144,12 +144,12 @@ export class MenuService {
 
   static async updateMenuItem(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     menuItemId: string,
     payload: Partial<CreateMenuItemPayload>
   ) {
     return this.request<MenuItem>(
-      `/restaurants/${restaurantId}/menu-items/${menuItemId}`,
+      `/restaurants/${restaurantId._id}/menu-items/${menuItemId}`,
       {
         method: 'PUT',
         body: JSON.stringify(payload),
@@ -160,12 +160,12 @@ export class MenuService {
 
   static async updateAvailability(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     menuItemId: string,
     isAvailable: boolean
   ) {
     return this.request<MenuItem>(
-      `/restaurants/${restaurantId}/menu-items/${menuItemId}/availability`,
+      `/restaurants/${restaurantId._id}/menu-items/${menuItemId}/availability`,
       {
         method: 'PATCH',
         body: JSON.stringify({ isAvailable }),
@@ -174,9 +174,9 @@ export class MenuService {
     );
   }
 
-  static async deleteMenuItem(token: string, restaurantId: string, menuItemId: string) {
+  static async deleteMenuItem(token: string, restaurantId: any, menuItemId: string) {
     return this.request<MenuItem>(
-      `/restaurants/${restaurantId}/menu-items/${menuItemId}`,
+      `/restaurants/${restaurantId._id}/menu-items/${menuItemId}`,
       {
         method: 'DELETE',
       },
