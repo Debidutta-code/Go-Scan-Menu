@@ -82,17 +82,17 @@ export class RestaurantService {
       email: data.owner.email,
       phone: data.owner.phone,
       password: hashedPassword,
-      role: 'owner',
+      // role: 'owner',
       accessLevel: 'all_branches',
       allowedBranchIds: [],
-      permissions: {
-        canViewOrders: true,
-        canUpdateOrders: true,
-        canManageMenu: true,
-        canManageStaff: true,
-        canViewReports: true,
-        canManageSettings: true,
-      },
+      // permissions: {
+      //   canViewOrders: true,
+      //   canUpdateOrders: true,
+      //   canManageMenu: true,
+      //   canManageStaff: true,
+      //   canViewReports: true,
+      //   canManageSettings: true,
+      // },
       isActive: true,
     });
 

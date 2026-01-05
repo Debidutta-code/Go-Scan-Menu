@@ -62,7 +62,7 @@ export const AddEditMenuItem: React.FC = () => {
             categoryId: item.categoryId,
             image: item.image || '',
             price: item.price.toString(),
-            discountPrice: item.discountPrice?.toString() || '',
+            discountPrice: item.discountPrice?.toString() || '', 
             preparationTime: item.preparationTime?.toString() || '',
             spiceLevel: item.spiceLevel || '',
             tags: item.tags.join(', '),
