@@ -29,7 +29,7 @@ export const registerSuperAdmin = async (data: {
   const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
-    role: 'super_admin',
+    role: 'super_admin' as any,
     permissions: {
       canViewOrders: true,
       canUpdateOrders: true,
@@ -65,7 +65,7 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
   const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
-    role: 'super_admin',
+    role: 'super_admin' as any,
     permissions: {
       canViewOrders: true,
       canUpdateOrders: true,
