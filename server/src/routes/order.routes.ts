@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { OrderController } from '@/controllers/order.controller';
 import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { StaffRole } from '@/types/role.types';
 
 const router = Router({ mergeParams: true });
 const orderController = new OrderController();
@@ -11,12 +12,12 @@ const orderController = new OrderController();
 
 // Authorization helpers
 const canManageOrders = [
-  AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager', 'waiter'),
+  AuthMiddleware.authorizeRoles(StaffRole.OWNER, StaffRole.BRANCH_MANAGER, StaffRole.MANAGER, StaffRole.WAITER),
   // AuthMiddleware.authorizePermission('canManageOrders'),
 ];
 
 const canViewOrders = [
-  AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager', 'waiter', 'chef'),
+  AuthMiddleware.authorizeRoles(StaffRole.OWNER, StaffRole.BRANCH_MANAGER, StaffRole.MANAGER, StaffRole.WAITER, StaffRole.KITCHEN_STAFF),
   // AuthMiddleware.authorizePermission('canViewOrders'),
 ];
 

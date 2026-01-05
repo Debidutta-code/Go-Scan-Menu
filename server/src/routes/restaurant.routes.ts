@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { RestaurantController } from '@/controllers/restaurant.controller';
 import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { StaffRole } from '@/types/role.types';
 
 const router = Router();
 const restaurantController = new RestaurantController();
@@ -13,21 +14,21 @@ router.get('/slug/:slug', restaurantController.getRestaurantBySlug);
 router.post(
   '/',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN),
   restaurantController.createRestaurant
 );
 
 router.get(
   '/',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN),
   restaurantController.getAllRestaurants
 );
 
 router.get(
   '/:id',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin', 'owner'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER),
   restaurantController.getRestaurant
 );
 router.put(

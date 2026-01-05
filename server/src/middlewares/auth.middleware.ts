@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { JWTUtil, sendResponse } from '@/utils';
 import { RoleRepository } from '@/repositories/role.repository';
+import { StaffRole } from '@/types/role.types';
 
 const roleRepo = new RoleRepository();
 
@@ -71,7 +72,7 @@ export class AuthMiddleware {
       }
 
       // SUPERADMIN BYPASS
-      if (req.user.role === 'super_admin') {
+      if (req.user.role === StaffRole.SUPER_ADMIN) {
         return next();
       }
 
@@ -95,8 +96,7 @@ export class AuthMiddleware {
         return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
-      // SUPERADMIN BYPASS
-      if (req.user.role === 'super_admin') {
+      if (req.user.role === StaffRole.SUPER_ADMIN) {
         return next();
       }
 
@@ -130,8 +130,7 @@ export class AuthMiddleware {
         return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
-      // SUPERADMIN BYPASS
-      if (req.user.role === 'super_admin') {
+      if (req.user.role === StaffRole.SUPER_ADMIN) {
         return next();
       }
 

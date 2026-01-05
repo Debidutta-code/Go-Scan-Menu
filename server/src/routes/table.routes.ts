@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { TableController } from '@/controllers/table.controller';
 import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { StaffRole } from '@/types/role.types';
 
 const router = Router({ mergeParams: true });
 const tableController = new TableController();
@@ -14,7 +15,7 @@ router.use(AuthMiddleware.authenticate);
 
 // Authorization helpers
 const canManageTables = [
-  AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.OWNER, StaffRole.BRANCH_MANAGER, StaffRole.MANAGER),
   // AuthMiddleware.authorizePermission('canManageSettings'),
 ];
 
@@ -36,7 +37,7 @@ router.put('/:id', ...canManageTables, tableController.updateTable);
 // Update table status (waiters can do this)
 router.patch(
   '/:id/status',
-  AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager', 'waiter'),
+  AuthMiddleware.authorizeRoles(StaffRole.OWNER, StaffRole.BRANCH_MANAGER, StaffRole.MANAGER, StaffRole.WAITER),
   tableController.updateTableStatus
 );
 

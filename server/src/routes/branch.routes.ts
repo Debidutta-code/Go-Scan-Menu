@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { BranchController } from '@/controllers/branch.controller';
 import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { StaffRole } from '@/types/role.types';
 
 const router = Router({ mergeParams: true }); // Important: to access :restaurantId
 const branchController = new BranchController();
@@ -11,7 +12,7 @@ router.use(AuthMiddleware.authenticate);
 
 // Role + permission checks
 const canManageBranches = [
-  AuthMiddleware.authorizeRoles('owner', 'branch_manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
   // AuthMiddleware.authorizePermission('canManageSettings'), // or create a new one like canManageBranches
 ];
 

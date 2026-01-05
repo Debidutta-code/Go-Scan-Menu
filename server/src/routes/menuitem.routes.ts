@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { MenuItemController } from '@/controllers/menuitem.controller';
 import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { StaffRole } from '@/types/role.types';
 
 const router = Router({ mergeParams: true });
 const menuItemController = new MenuItemController();
@@ -14,7 +15,7 @@ router.use(AuthMiddleware.authenticate);
 
 // Authorization helpers
 const canManageMenu = [
-  AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.OWNER, StaffRole.BRANCH_MANAGER, StaffRole.MANAGER),
   // AuthMiddleware.authorizePermission('canManageMenu'),
 ];
 
@@ -39,7 +40,7 @@ router.put('/:id', ...canManageMenu, menuItemController.updateMenuItem);
 // Update availability (managers and waiters can do this)
 router.patch(
   '/:id/availability',
-  AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager', 'waiter'),
+  AuthMiddleware.authorizeRoles(StaffRole.OWNER, StaffRole.BRANCH_MANAGER, StaffRole.MANAGER, StaffRole.WAITER),
   menuItemController.updateAvailability
 );
 

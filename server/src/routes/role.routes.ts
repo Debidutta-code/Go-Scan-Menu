@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { RoleController } from '@/controllers/role.controller';
 import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { StaffRole } from '@/types/role.types';
 
 const router = Router();
 const roleController = new RoleController();
@@ -12,7 +13,7 @@ router.use(AuthMiddleware.authenticate);
 // Get all roles (accessible to staff who can manage staff)
 router.get(
   '/',
-  AuthMiddleware.authorizeRoles('super_admin', 'owner', 'branch_manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
   AuthMiddleware.authorizePermission('canManageStaff'),
   roleController.getAllRoles
 );
@@ -20,7 +21,7 @@ router.get(
 // Get system roles (accessible to those who can manage staff)
 router.get(
   '/system',
-  AuthMiddleware.authorizeRoles('super_admin', 'owner', 'branch_manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
   AuthMiddleware.authorizePermission('canManageStaff'),
   roleController.getSystemRoles
 );
@@ -28,28 +29,28 @@ router.get(
 // Get single role
 router.get(
   '/:id',
-  AuthMiddleware.authorizeRoles('super_admin', 'owner', 'branch_manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
   roleController.getRole
 );
 
 // Update role (only super_admin and owner can modify roles)
 router.put(
   '/:id',
-  AuthMiddleware.authorizeRoles('super_admin', 'owner'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER),
   roleController.updateRole
 );
 
 // Update role permissions
 router.put(
   '/:id/permissions',
-  AuthMiddleware.authorizeRoles('super_admin', 'owner'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER),
   roleController.updateRolePermissions
 );
 
 // Delete role (cannot delete system roles - handled in service)
 router.delete(
   '/:id',
-  AuthMiddleware.authorizeRoles('super_admin', 'owner'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER),
   roleController.deleteRole
 );
 

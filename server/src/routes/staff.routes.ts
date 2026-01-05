@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { StaffController } from '@/controllers/staff.controller';
 import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { StaffRole } from '@/types/role.types';
 
 const router = Router();
 const staffController = new StaffController();
@@ -15,7 +16,7 @@ router.get('/me', AuthMiddleware.authenticate, staffController.getCurrentUser);
 router.post(
   '/',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin', 'owner', 'branch_manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
   AuthMiddleware.authorizePermission('canManageStaff'),
   staffController.createStaff
 );
@@ -25,21 +26,21 @@ router.get('/:id', AuthMiddleware.authenticate, staffController.getStaff);
 router.get(
   '/restaurant/:restaurantId',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin', 'owner', 'branch_manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
   staffController.getStaffByRestaurant
 );
 
 router.get(
   '/branch/:branchId',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin', 'owner', 'branch_manager', 'manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
   staffController.getStaffByBranch
 );
 
 router.put(
   '/:id',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin', 'owner', 'branch_manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
   AuthMiddleware.authorizePermission('canManageStaff'),
   staffController.updateStaff
 );
@@ -47,7 +48,7 @@ router.put(
 router.put(
   '/:id/role',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin', 'owner', 'branch_manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
   AuthMiddleware.authorizePermission('canManageStaff'),
   staffController.updateStaffRole
 );
@@ -55,7 +56,7 @@ router.put(
 router.delete(
   '/:id',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin', 'owner', 'branch_manager'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
   AuthMiddleware.authorizePermission('canManageStaff'),
   staffController.deleteStaff
 );

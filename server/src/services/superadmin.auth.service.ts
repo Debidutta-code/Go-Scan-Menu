@@ -9,6 +9,7 @@ import {
 import { RoleRepository } from '@/repositories/role.repository';
 import { JWTUtil, BcryptUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
+import { StaffRole } from '@/types/role.types';
 
 const roleRepo = new RoleRepository();
 
@@ -38,20 +39,20 @@ export const registerSuperAdmin = async (data: {
     roleId: superAdminRole._id,
   });
 
-  const token = JWTUtil.generateToken({
+    const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
-    role: 'super_admin',
+    role: StaffRole.SUPER_ADMIN,
     roleId: superAdminRole._id.toString(),
     permissions: superAdminRole.permissions,
   });
 
-  return {
+    return {
     superAdmin: {
       id: superAdmin._id,
       name: superAdmin.name,
       email: superAdmin.email,
-      role: 'super_admin',
+      role: StaffRole.SUPER_ADMIN,
       permissions: superAdminRole.permissions,
     },
     token,
@@ -75,10 +76,10 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
     throw new AppError('Role not found or inactive', 403);
   }
 
-  const token = JWTUtil.generateToken({
+    const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
-    role: role.name as any,
+    role: role.name as StaffRole,
     roleId: role._id.toString(),
     permissions: role.permissions,
   });
