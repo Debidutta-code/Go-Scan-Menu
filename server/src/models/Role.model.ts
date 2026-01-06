@@ -34,10 +34,10 @@ const roleSchema = new Schema<IRole>(
       required: true,
       trim: true,
     },
-    level: {
+        level: {
       type: Number,
       required: true,
-      enum: Object.values(RoleLevel),
+      enum: [RoleLevel.PLATFORM, RoleLevel.RESTAURANT, RoleLevel.BRANCH_MULTI, RoleLevel.BRANCH_SINGLE, RoleLevel.OPERATIONAL],
     },
     accessScope: {
       type: String,
