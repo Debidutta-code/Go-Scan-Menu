@@ -1,3 +1,4 @@
+// Enhanced Authentication Middleware - Industry Standard
 import { Request, Response, NextFunction } from 'express';
 import { JWTUtil, sendResponse } from '@/utils';
 import { RoleRepository } from '@/repositories/role.repository';
@@ -25,9 +26,9 @@ export class AuthMiddleware {
         });
       }
 
-      // Fetch latest role details for real-time permission checking
+      // Fetch latest role details for real-time permission checking (for staff only)
       let rolePermissions = decoded.permissions;
-      if (decoded.roleId) {
+      if (decoded.role !== StaffRole.SUPER_ADMIN && decoded.roleId) {
         const role = await roleRepo.findById(decoded.roleId);
         if (role && role.isActive) {
           rolePermissions = role.permissions;
@@ -41,7 +42,7 @@ export class AuthMiddleware {
         roleId: decoded.roleId,
         restaurantId: decoded.restaurantId,
         branchId: decoded.branchId,
-        accessLevel: decoded.accessLevel,
+        accessScope: decoded.accessScope,
         allowedBranchIds: decoded.allowedBranchIds,
         permissions: rolePermissions,
       };
@@ -65,7 +66,8 @@ export class AuthMiddleware {
     };
   };
 
-  static authorizePermission = (permission: string) => {
+  // Enhanced permission check - supports nested permissions
+  static authorizePermission = (module: string, action: string) => {
     return (req: Request, res: Response, next: NextFunction) => {
       if (!req.user) {
         return sendResponse(res, 401, { message: 'Unauthorized' });
@@ -76,12 +78,12 @@ export class AuthMiddleware {
         return next();
       }
 
-      // Check if user has permissions object
+      // Check nested permissions (e.g., orders.view, menu.create)
       const permissions = (req.user as any).permissions;
 
-      if (!permissions || permissions[permission] !== true) {
+      if (!permissions || !permissions[module] || permissions[module][action] !== true) {
         return sendResponse(res, 403, {
-          message: `Permission denied - ${permission} required`,
+          message: `Permission denied - ${module}.${action} required`,
         });
       }
 
@@ -89,7 +91,7 @@ export class AuthMiddleware {
     };
   };
 
-  // New method: Check multiple permissions (user needs ALL of them)
+  // Check multiple permissions (user needs ALL of them)
   static authorizeAllPermissions = (...requiredPermissions: string[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
       if (!req.user) {
@@ -108,10 +110,11 @@ export class AuthMiddleware {
         });
       }
 
-      // Check if user has all required permissions
-      const hasAllPermissions = requiredPermissions.every(
-        (perm) => permissions[perm] === true
-      );
+      // Parse and check all required permissions (format: "module.action")
+      const hasAllPermissions = requiredPermissions.every((perm) => {
+        const [module, action] = perm.split('.');
+        return permissions[module] && permissions[module][action] === true;
+      });
 
       if (!hasAllPermissions) {
         return sendResponse(res, 403, {
@@ -123,7 +126,7 @@ export class AuthMiddleware {
     };
   };
 
-  // New method: Check any permission (user needs AT LEAST ONE)
+  // Check any permission (user needs AT LEAST ONE)
   static authorizeAnyPermission = (...requiredPermissions: string[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
       if (!req.user) {
@@ -142,10 +145,11 @@ export class AuthMiddleware {
         });
       }
 
-      // Check if user has at least one of the required permissions
-      const hasAnyPermission = requiredPermissions.some(
-        (perm) => permissions[perm] === true
-      );
+      // Parse and check if user has at least one permission
+      const hasAnyPermission = requiredPermissions.some((perm) => {
+        const [module, action] = perm.split('.');
+        return permissions[module] && permissions[module][action] === true;
+      });
 
       if (!hasAnyPermission) {
         return sendResponse(res, 403, {
@@ -156,5 +160,4 @@ export class AuthMiddleware {
       next();
     };
   };
-
 }

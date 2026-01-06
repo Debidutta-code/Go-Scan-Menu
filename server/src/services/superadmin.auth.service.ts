@@ -1,4 +1,4 @@
-// FILE 2: src/services/superadmin.auth.service.ts
+// Updated SuperAdmin Service - No Role Dependency
 import {
   findSuperAdminByEmail,
   findSuperAdminById,
@@ -6,12 +6,9 @@ import {
   updateSuperAdminById,
   checkSuperAdminEmailExists,
 } from '@/repositories/superadmin.auth.repository';
-import { RoleRepository } from '@/repositories/role.repository';
 import { JWTUtil, BcryptUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
 import { StaffRole } from '@/types/role.types';
-
-const roleRepo = new RoleRepository();
 
 export const registerSuperAdmin = async (data: {
   name: string;
@@ -23,28 +20,19 @@ export const registerSuperAdmin = async (data: {
     throw new Error('Super admin with this email already exists');
   }
 
-  // Find or create super_admin role
-  let superAdminRole = await roleRepo.findByName('super_admin');
-
-  if (!superAdminRole) {
-    throw new AppError('Super admin role not found. Please seed roles first.', 500);
-  }
-
   const hashedPassword = await BcryptUtil.hash(data.password);
 
   const superAdmin = await createSuperAdmin({
     name: data.name,
     email: data.email,
     password: hashedPassword,
-    roleId: superAdminRole._id,
   });
 
   const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
     role: StaffRole.SUPER_ADMIN,
-    roleId: superAdminRole._id.toString(),
-    permissions: superAdminRole.permissions,
+    permissions: superAdmin.permissions,
   });
 
   return {
@@ -53,7 +41,7 @@ export const registerSuperAdmin = async (data: {
       name: superAdmin.name,
       email: superAdmin.email,
       role: StaffRole.SUPER_ADMIN,
-      permissions: superAdminRole.permissions,
+      permissions: superAdmin.permissions,
     },
     token,
   };
@@ -70,29 +58,11 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
     throw new Error('Invalid email or password');
   }
 
-  console.log('SuperAdmin roleId:', superAdmin.roleId);
-
-  // Check if roleId is populated (is an object) or just an ID
-  let role: any;
-  const roleIdValue = superAdmin.roleId as any;
-  if (typeof roleIdValue === 'object' && roleIdValue !== null && roleIdValue._id) {
-    // roleId is already populated
-    role = roleIdValue;
-  } else {
-    // roleId is just an ObjectId, fetch role details
-    role = await roleRepo.findById(roleIdValue.toString());
-  }
-
-  if (!role || !role.isActive) {
-    throw new AppError('Role not found or inactive', 403);
-  }
-
-    const token = JWTUtil.generateToken({
+  const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
-    role: role.name as StaffRole,
-    roleId: role._id.toString(),
-    permissions: role.permissions,
+    role: StaffRole.SUPER_ADMIN,
+    permissions: superAdmin.permissions,
   });
 
   return {
@@ -100,8 +70,8 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
       id: superAdmin._id,
       name: superAdmin.name,
       email: superAdmin.email,
-      role: role.name,
-      permissions: role.permissions,
+      role: StaffRole.SUPER_ADMIN,
+      permissions: superAdmin.permissions,
     },
     token,
   };

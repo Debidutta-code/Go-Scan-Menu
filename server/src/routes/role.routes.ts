@@ -14,7 +14,7 @@ router.use(AuthMiddleware.authenticate);
 router.get(
   '/',
   AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
-  AuthMiddleware.authorizePermission('canManageStaff'),
+  AuthMiddleware.authorizePermission('staff', 'view'),
   roleController.getAllRoles
 );
 
@@ -22,7 +22,7 @@ router.get(
 router.get(
   '/system',
   AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
-  AuthMiddleware.authorizePermission('canManageStaff'),
+  AuthMiddleware.authorizePermission('staff', 'view'),
   roleController.getSystemRoles
 );
 

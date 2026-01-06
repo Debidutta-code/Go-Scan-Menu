@@ -20,7 +20,7 @@ router.use(AuthMiddleware.authenticate);
 
 const canViewSessions = [
   AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager', 'waiter'),
-  AuthMiddleware.authorizePermission('canViewOrders'),
+  AuthMiddleware.authorizePermission('orders', 'view'),
 ];
 
 // Get active sessions by branch

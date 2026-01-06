@@ -3,14 +3,14 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IStaff extends Document {
   restaurantId: Types.ObjectId;
-  branchId?: Types.ObjectId;
+  branchId?: Types.ObjectId; // Primary branch for single_branch access
   roleId: Types.ObjectId;
   name: string;
   email: string;
   phone: string;
   password: string;
-  accessLevel: 'single_branch' | 'all_branches';
-  allowedBranchIds: Types.ObjectId[];
+  // Removed accessLevel - now determined by role's accessScope
+  allowedBranchIds: Types.ObjectId[]; // For multi-branch access
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -48,15 +48,11 @@ const staffSchema = new Schema<IStaff>(
       required: true,
       trim: true,
     },
-    password: {
+        password: {
       type: String,
       required: true,
     },
-    accessLevel: {
-      type: String,
-      enum: ['single_branch', 'all_branches'],
-      default: 'single_branch',
-    },
+    // accessLevel removed - now determined by role's accessScope
     allowedBranchIds: [
       {
         type: Schema.Types.ObjectId,

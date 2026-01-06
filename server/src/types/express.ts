@@ -1,28 +1,6 @@
+// Updated Express Types for Enhanced RBAC
 import type {} from 'express-serve-static-core';
-
-/**
- * Central role type
- */
-export type UserRole =
-  | 'super_admin'
-  | 'owner'
-  | 'branch_manager'
-  | 'manager'
-  | 'waiter'
-  | 'kitchen_staff'
-  | 'cashier';
-
-/**
- * Permissions interface
- */
-export interface UserPermissions {
-  canViewOrders?: boolean;
-  canUpdateOrders?: boolean;
-  canManageMenu?: boolean;
-  canManageStaff?: boolean;
-  canViewReports?: boolean;
-  canManageSettings?: boolean;
-}
+import { StaffRole, RolePermissions, AccessScope } from './role.types';
 
 /**
  * Authenticated user payload
@@ -30,15 +8,13 @@ export interface UserPermissions {
 export interface AuthUser {
   id: string;
   email?: string;
-  role: UserRole;
+  role: StaffRole;
   roleId?: string;
   restaurantId?: string;
   branchId?: string;
-
-  accessLevel?: 'single_branch' | 'all_branches';
+  accessScope?: AccessScope;
   allowedBranchIds?: string[];
-
-  permissions?: UserPermissions;
+  permissions?: RolePermissions;
 }
 
 declare module 'express-serve-static-core' {

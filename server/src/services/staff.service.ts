@@ -1,11 +1,11 @@
-// src/services/staff.service.ts
+// Updated Staff Service - Enhanced Role System
 import { StaffRepository } from '@/repositories/staff.repository';
 import { RestaurantRepository } from '@/repositories/restaurant.repository';
 import { RoleRepository } from '@/repositories/role.repository';
 import { IStaff } from '@/models/Staff.model';
 import { BcryptUtil, JWTUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
-import { StaffRole } from '@/types/role.types';
+import { StaffRole, AccessScope } from '@/types/role.types';
 
 export class StaffService {
   private staffRepo: StaffRepository;
@@ -18,7 +18,7 @@ export class StaffService {
     this.roleRepo = new RoleRepository();
   }
 
-    async login(email: string, password: string) {
+  async login(email: string, password: string) {
     const staff = await this.staffRepo.findByEmail(email);
 
     if (!staff || !staff.isActive) {
@@ -30,14 +30,12 @@ export class StaffService {
       throw new AppError('Invalid credentials', 401);
     }
 
-    // Check if roleId is populated (is an object) or just an ID
+    // Get role information
     let role: any;
     const roleIdValue = staff.roleId as any;
     if (typeof roleIdValue === 'object' && roleIdValue !== null && roleIdValue._id) {
-      // roleId is already populated
       role = roleIdValue;
     } else {
-      // roleId is just an ObjectId, fetch role details
       role = await this.roleRepo.findById(roleIdValue.toString());
     }
 
@@ -63,6 +61,9 @@ export class StaffService {
       return typeof id === 'object' && id?._id ? id._id.toString() : id.toString();
     });
 
+    // Determine access scope from role
+    const accessScope = role.accessScope || AccessScope.BRANCH_SINGLE;
+
     const token = JWTUtil.generateToken({
       id: staff._id.toString(),
       email: staff.email,
@@ -70,17 +71,17 @@ export class StaffService {
       roleId: role._id.toString(),
       restaurantId,
       branchId,
-      accessLevel: staff.accessLevel,
+      accessScope, // Now from role instead of staff.accessLevel
       allowedBranchIds,
       permissions: role.permissions,
     });
 
-    // Return staff with role information
     const staffData = staff.toObject();
     return {
       staff: {
         ...staffData,
         role: role.name,
+        accessScope,
         permissions: role.permissions,
       },
       token
@@ -88,10 +89,8 @@ export class StaffService {
   }
 
   async createStaff(data: Partial<IStaff>) {
-    // Check if email already exists for this restaurant
-    const existingStaff = await this.staffRepo.findByEmail(
-      data.email!,
-    );
+    // Check if email already exists
+    const existingStaff = await this.staffRepo.findByEmail(data.email!);
     if (existingStaff) {
       throw new AppError('Staff with this email already exists', 400);
     }
@@ -101,6 +100,11 @@ export class StaffService {
       const role = await this.roleRepo.findById(data.roleId.toString());
       if (!role || !role.isActive) {
         throw new AppError('Invalid role', 400);
+      }
+
+      // Validate role belongs to same restaurant or is a system role
+      if (role.restaurantId && role.restaurantId.toString() !== data.restaurantId?.toString()) {
+        throw new AppError('Role does not belong to this restaurant', 400);
       }
     } else {
       throw new AppError('Role is required', 400);

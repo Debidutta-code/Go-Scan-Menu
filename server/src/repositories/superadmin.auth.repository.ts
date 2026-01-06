@@ -1,20 +1,20 @@
+// Updated SuperAdmin Repository - No Role Dependency
 import { SuperAdmin, ISuperAdmin } from '@/models/SuperAdmin.model';
 
 export const createSuperAdmin = async (data: {
   name: string;
   email: string;
   password: string;
-  roleId: any;
 }): Promise<ISuperAdmin> => {
   return SuperAdmin.create(data);
 };
 
 export const findSuperAdminByEmail = async (email: string): Promise<ISuperAdmin | null> => {
-  return SuperAdmin.findOne({ email }).populate('roleId');
+  return SuperAdmin.findOne({ email });
 };
 
 export const findSuperAdminById = async (id: string): Promise<ISuperAdmin | null> => {
-  return SuperAdmin.findById(id).populate('roleId').select('-password');
+  return SuperAdmin.findById(id).select('-password');
 };
 
 export const updateSuperAdminById = async (

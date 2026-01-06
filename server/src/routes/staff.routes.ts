@@ -17,7 +17,7 @@ router.post(
   '/',
   AuthMiddleware.authenticate,
   AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
-  AuthMiddleware.authorizePermission('canManageStaff'),
+  AuthMiddleware.authorizePermission('staff', 'create'),
   staffController.createStaff
 );
 
@@ -41,7 +41,7 @@ router.put(
   '/:id',
   AuthMiddleware.authenticate,
   AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
-  AuthMiddleware.authorizePermission('canManageStaff'),
+  AuthMiddleware.authorizePermission('staff', 'update'),
   staffController.updateStaff
 );
 
@@ -49,7 +49,7 @@ router.put(
   '/:id/role',
   AuthMiddleware.authenticate,
   AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
-  AuthMiddleware.authorizePermission('canManageStaff'),
+  AuthMiddleware.authorizePermission('staff', 'manageRoles'),
   staffController.updateStaffRole
 );
 
@@ -57,7 +57,7 @@ router.delete(
   '/:id',
   AuthMiddleware.authenticate,
   AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER, StaffRole.BRANCH_MANAGER),
-  AuthMiddleware.authorizePermission('canManageStaff'),
+  AuthMiddleware.authorizePermission('staff', 'delete'),
   staffController.deleteStaff
 );
 

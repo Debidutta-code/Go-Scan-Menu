@@ -12,8 +12,12 @@ export class RoleRepository {
     return await Role.findById(id);
   }
 
-  async findByName(name: string): Promise<IRole | null> {
-    return await Role.findOne({ name, isActive: true });
+  async findByName(name: string, restaurantId?: string): Promise<IRole | null> {
+    return await Role.findOne({
+      name,
+      restaurantId: restaurantId || null,
+      isActive: true
+    });
   }
 
   async findAll(filter: any = {}): Promise<IRole[]> {
@@ -32,7 +36,7 @@ export class RoleRepository {
     );
   }
 
-  async updatePermissions(id: string, permissions: Partial<IRole['permissions']>): Promise<IRole | null> {
+  async updatePermissions(id: string, permissions: any): Promise<IRole | null> {
     return await Role.findByIdAndUpdate(
       id,
       { $set: { permissions } },

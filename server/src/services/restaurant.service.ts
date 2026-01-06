@@ -82,7 +82,6 @@ export class RestaurantService {
       email: data.owner.email,
       phone: data.owner.phone,
       password: hashedPassword,
-      accessLevel: 'all_branches',
       allowedBranchIds: [],
       isActive: true,
     });
