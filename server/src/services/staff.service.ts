@@ -18,7 +18,7 @@ export class StaffService {
     this.roleRepo = new RoleRepository();
   }
 
-  async login(email: string, password: string) {
+    async login(email: string, password: string) {
     const staff = await this.staffRepo.findByEmail(email);
 
     if (!staff || !staff.isActive) {
@@ -30,21 +30,48 @@ export class StaffService {
       throw new AppError('Invalid credentials', 401);
     }
 
-    // Fetch role details
-    const role = await this.roleRepo.findById(staff.roleId.toString());
+    // Check if roleId is populated (is an object) or just an ID
+    let role: any;
+    const roleIdValue = staff.roleId as any;
+    if (typeof roleIdValue === 'object' && roleIdValue !== null && roleIdValue._id) {
+      // roleId is already populated
+      role = roleIdValue;
+    } else {
+      // roleId is just an ObjectId, fetch role details
+      role = await this.roleRepo.findById(roleIdValue.toString());
+    }
+
     if (!role || !role.isActive) {
       throw new AppError('Role not found or inactive', 403);
     }
+
+    // Extract ObjectIds from populated fields
+    const restaurantIdValue = staff.restaurantId as any;
+    const restaurantId = typeof restaurantIdValue === 'object' && restaurantIdValue?._id 
+      ? restaurantIdValue._id.toString() 
+      : staff.restaurantId.toString();
+
+    const branchIdValue = staff.branchId as any;
+    const branchId = branchIdValue ? 
+      (typeof branchIdValue === 'object' && branchIdValue?._id 
+        ? branchIdValue._id.toString() 
+        : branchIdValue.toString())
+      : undefined;
+
+    // Extract ObjectIds from allowedBranchIds array
+    const allowedBranchIds = staff.allowedBranchIds.map((id: any) => {
+      return typeof id === 'object' && id?._id ? id._id.toString() : id.toString();
+    });
 
     const token = JWTUtil.generateToken({
       id: staff._id.toString(),
       email: staff.email,
       role: role.name as StaffRole,
       roleId: role._id.toString(),
-      restaurantId: staff.restaurantId.toString(),
-      branchId: staff.branchId?.toString(),
+      restaurantId,
+      branchId,
       accessLevel: staff.accessLevel,
-      allowedBranchIds: staff.allowedBranchIds.map((id) => id.toString()),
+      allowedBranchIds,
       permissions: role.permissions,
     });
 

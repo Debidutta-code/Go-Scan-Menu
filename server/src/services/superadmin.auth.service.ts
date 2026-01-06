@@ -25,7 +25,7 @@ export const registerSuperAdmin = async (data: {
 
   // Find or create super_admin role
   let superAdminRole = await roleRepo.findByName('super_admin');
-  
+
   if (!superAdminRole) {
     throw new AppError('Super admin role not found. Please seed roles first.', 500);
   }
@@ -39,7 +39,7 @@ export const registerSuperAdmin = async (data: {
     roleId: superAdminRole._id,
   });
 
-    const token = JWTUtil.generateToken({
+  const token = JWTUtil.generateToken({
     id: superAdmin._id.toString(),
     email: superAdmin.email,
     role: StaffRole.SUPER_ADMIN,
@@ -47,7 +47,7 @@ export const registerSuperAdmin = async (data: {
     permissions: superAdminRole.permissions,
   });
 
-    return {
+  return {
     superAdmin: {
       id: superAdmin._id,
       name: superAdmin.name,
@@ -70,8 +70,19 @@ export const loginSuperAdmin = async (data: { email: string; password: string })
     throw new Error('Invalid email or password');
   }
 
-  // Fetch role details
-  const role = await roleRepo.findById(superAdmin.roleId.toString());
+  console.log('SuperAdmin roleId:', superAdmin.roleId);
+
+  // Check if roleId is populated (is an object) or just an ID
+  let role: any;
+  const roleIdValue = superAdmin.roleId as any;
+  if (typeof roleIdValue === 'object' && roleIdValue !== null && roleIdValue._id) {
+    // roleId is already populated
+    role = roleIdValue;
+  } else {
+    // roleId is just an ObjectId, fetch role details
+    role = await roleRepo.findById(roleIdValue.toString());
+  }
+
   if (!role || !role.isActive) {
     throw new AppError('Role not found or inactive', 403);
   }

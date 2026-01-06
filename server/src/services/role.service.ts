@@ -87,9 +87,23 @@ export class RoleService {
     return deletedRole;
   }
 
-  // Seed default system roles
+    // Seed default system roles
   async seedSystemRoles(): Promise<void> {
     const systemRoles = [
+      {
+        name: 'super_admin' as StaffRole,
+        displayName: 'Super Admin',
+        description: 'Platform administrator with full system access',
+        permissions: {
+          canViewOrders: true,
+          canUpdateOrders: true,
+          canManageMenu: true,
+          canManageStaff: true,
+          canViewReports: true,
+          canManageSettings: true,
+        },
+        isSystemRole: true,
+      },
       {
         name: 'owner' as StaffRole,
         displayName: 'Owner',
