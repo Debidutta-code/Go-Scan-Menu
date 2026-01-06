@@ -18,7 +18,9 @@ export const AddEditCategory: React.FC = () => {
     name: '',
     description: '',
     image: '',
+    displayOrder: '0',
     scope: 'restaurant' as 'restaurant' | 'branch',
+    isActive: true,
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -43,7 +45,9 @@ export const AddEditCategory: React.FC = () => {
           name: category.name,
           description: category.description || '',
           image: category.image || '',
+          displayOrder: category.displayOrder?.toString() || '0',
           scope: category.scope,
+          isActive: category.isActive,
         });
       }
     } catch (err: any) {
@@ -55,8 +59,15 @@ export const AddEditCategory: React.FC = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData((prev) => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
     // Clear error for this field
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
@@ -86,7 +97,9 @@ export const AddEditCategory: React.FC = () => {
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
         image: formData.image.trim() || undefined,
+        displayOrder: formData.displayOrder ? parseInt(formData.displayOrder) : 0,
         scope: formData.scope,
+        isActive: formData.isActive,
       };
 
       if (isEditMode && id) {
@@ -181,6 +194,36 @@ export const AddEditCategory: React.FC = () => {
               {isEditMode && (
                 <p className="field-help-text">Scope cannot be changed after creation</p>
               )}
+            </div>
+
+            <div className="form-row">
+              <InputField
+                label="Display Order"
+                type="number"
+                name="displayOrder"
+                value={formData.displayOrder}
+                onChange={handleChange}
+                disabled={loading}
+                min="0"
+                placeholder="0"
+              />
+
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="isActive"
+                    checked={formData.isActive}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="form-checkbox"
+                  />
+                  <span>Category is active</span>
+                </label>
+                <p className="field-help-text">
+                  Inactive categories won&apos;t be visible to customers
+                </p>
+              </div>
             </div>
 
             <div className="form-actions">

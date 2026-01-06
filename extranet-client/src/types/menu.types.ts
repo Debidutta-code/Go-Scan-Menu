@@ -90,6 +90,8 @@ export interface CreateMenuItemPayload {
   }>;
   isAvailable?: boolean;
   availableQuantity?: number;
+  isActive?: boolean;
+  displayOrder?: number;
 }
 
 export interface CreateCategoryPayload {
@@ -99,6 +101,7 @@ export interface CreateCategoryPayload {
   displayOrder?: number;
   scope?: 'restaurant' | 'branch';
   branchId?: string;
+  isActive?: boolean;
 }
 
 export interface MenuItemListResponse {
