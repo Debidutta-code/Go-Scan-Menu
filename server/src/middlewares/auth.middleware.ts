@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { JWTUtil, sendResponse } from '@/utils';
 import { StaffTypePermissionsRepository } from '@/repositories/staffTypePermissions.repository';
 import { StaffType } from '@/models/StaffTypePermissions.model';
+import { StaffRole } from '@/types/role.types';
 
 const permissionsRepo = new StaffTypePermissionsRepository();
 
@@ -17,10 +18,13 @@ export class AuthMiddleware {
         });
       }
 
-      const token = authHeader.split(' ')[1];
+            const token = authHeader.split(' ')[1];
       const decoded = JWTUtil.verifyToken(token);
 
-      if (!decoded?.id || !decoded?.staffType) {
+      // Support both staffType and role for backward compatibility
+      const userStaffType = decoded.staffType || (decoded.role as unknown as StaffType);
+
+      if (!decoded?.id || (!decoded?.staffType && !decoded?.role)) {
         return sendResponse(res, 401, {
           message: 'Invalid token',
         });
@@ -28,10 +32,10 @@ export class AuthMiddleware {
 
       // Fetch latest permissions for real-time permission checking
       let permissions = decoded.permissions;
-      if (decoded.staffType !== StaffType.SUPER_ADMIN && decoded.restaurantId) {
+      if (userStaffType !== StaffType.SUPER_ADMIN && decoded.restaurantId) {
         const staffTypePermissions = await permissionsRepo.findByRestaurantAndStaffType(
           decoded.restaurantId,
-          decoded.staffType
+          userStaffType
         );
         if (staffTypePermissions && staffTypePermissions.isActive) {
           permissions = staffTypePermissions.permissions;
@@ -41,7 +45,7 @@ export class AuthMiddleware {
       req.user = {
         id: decoded.id,
         email: decoded.email,
-        staffType: decoded.staffType,
+        staffType: userStaffType,
         restaurantId: decoded.restaurantId,
         branchId: decoded.branchId,
         allowedBranchIds: decoded.allowedBranchIds,
@@ -56,13 +60,41 @@ export class AuthMiddleware {
     }
   };
 
-  static authorizeStaffTypes = (...staffTypes: StaffType[]) => {
+    static authorizeStaffTypes = (...staffTypes: StaffType[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
       if (!req.user || !staffTypes.includes(req.user.staffType as StaffType)) {
         return sendResponse(res, 403, {
           message: 'Access denied - Insufficient staff type',
         });
       }
+      next();
+    };
+  };
+
+  // Alias method for role-based authorization (accepts StaffRole enum or string values)
+  static authorizeRoles = (...roles: (StaffRole | string)[]) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+      if (!req.user) {
+        return sendResponse(res, 403, {
+          message: 'Access denied - Authentication required',
+        });
+      }
+
+      // Convert user's staffType to string for comparison
+      const userRole = req.user.staffType as string;
+      
+      // Check if user's role matches any of the allowed roles
+      const hasAccess = roles.some(role => {
+        const roleStr = typeof role === 'string' ? role : String(role);
+        return userRole === roleStr;
+      });
+
+      if (!hasAccess) {
+        return sendResponse(res, 403, {
+          message: 'Access denied - Insufficient role',
+        });
+      }
+      
       next();
     };
   };
