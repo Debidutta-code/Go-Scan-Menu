@@ -1,15 +1,15 @@
 // src/models/Staff.model.ts
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import { StaffType } from './StaffTypePermissions.model';
 
 export interface IStaff extends Document {
   restaurantId: Types.ObjectId;
-  branchId?: Types.ObjectId; // Primary branch for single_branch access
-  roleId: Types.ObjectId;
+  branchId?: Types.ObjectId; // Primary branch
+  staffType: StaffType; // Changed from roleId to staffType
   name: string;
   email: string;
   phone: string;
   password: string;
-  // Removed accessLevel - now determined by role's accessScope
   allowedBranchIds: Types.ObjectId[]; // For multi-branch access
   isActive: boolean;
   createdAt: Date;
@@ -27,10 +27,10 @@ const staffSchema = new Schema<IStaff>(
       type: Schema.Types.ObjectId,
       ref: 'Branch',
     },
-    roleId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Role',
+    staffType: {
+      type: String,
       required: true,
+      enum: Object.values(StaffType),
     },
     name: {
       type: String,
@@ -48,11 +48,10 @@ const staffSchema = new Schema<IStaff>(
       required: true,
       trim: true,
     },
-        password: {
+    password: {
       type: String,
       required: true,
     },
-    // accessLevel removed - now determined by role's accessScope
     allowedBranchIds: [
       {
         type: Schema.Types.ObjectId,
@@ -71,7 +70,7 @@ const staffSchema = new Schema<IStaff>(
 
 // Indexes
 staffSchema.index({ restaurantId: 1, email: 1 }, { unique: true });
-staffSchema.index({ restaurantId: 1, branchId: 1, roleId: 1 });
-staffSchema.index({ roleId: 1 });
+staffSchema.index({ restaurantId: 1, branchId: 1, staffType: 1 });
+staffSchema.index({ staffType: 1 });
 
 export const Staff = mongoose.model<IStaff>('Staff', staffSchema);

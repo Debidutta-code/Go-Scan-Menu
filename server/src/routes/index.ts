@@ -3,6 +3,7 @@ import { Router } from 'express';
 import superAdminAuthRoutes from './superadmin.auth.route';
 import restaurantRoutes from './restaurant.routes';
 import staffRoutes from './staff.routes';
+import staffTypePermissionsRoutes from './staffTypePermissions.routes';
 import healthRoutes from './health.route';
 import branchRoutes from './branch.routes';
 import tableRoutes from './table.routes';
@@ -18,6 +19,7 @@ router.use('/health', healthRoutes);
 router.use('/superadmin/auth', superAdminAuthRoutes);
 router.use('/restaurants', restaurantRoutes);
 router.use('/staff', staffRoutes);
+router.use('/staff-type-permissions', staffTypePermissionsRoutes);
 router.use('/:restaurantId/branches', branchRoutes);
 
 // Table Management (can be accessed via restaurant or branch)

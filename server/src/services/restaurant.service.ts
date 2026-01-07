@@ -5,21 +5,18 @@ import { IRestaurant } from '@/models/Restaurant.model';
 import { BcryptUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
 import { defaultSettings, defaultTheme } from '@/constants';
-import { StaffRole } from '@/types/role.types';
-import { RoleRepository } from '@/repositories/role.repository';
+import { StaffType } from '@/models/StaffTypePermissions.model';
 import { TaxRepository } from '@/repositories/tax.repository';
 
 export class RestaurantService {
   private restaurantRepo: RestaurantRepository;
   private staffRepo: StaffRepository;
   private taxRepo: TaxRepository;
-  private roleRepo: RoleRepository;
 
   constructor() {
     this.restaurantRepo = new RestaurantRepository();
     this.staffRepo = new StaffRepository();
-    this.taxRepo = new TaxRepository(); // ADD THIS
-    this.roleRepo = new RoleRepository();
+    this.taxRepo = new TaxRepository();
   }
 
   async createRestaurant(data: {
@@ -77,18 +74,12 @@ export class RestaurantService {
       isActive: true,
     };
 
-    const restaurant = await this.restaurantRepo.create(restaurantData);
+        const restaurant = await this.restaurantRepo.create(restaurantData);
 
-    // Get owner role
-    const ownerRole = await this.roleRepo.findByName(StaffRole.OWNER);
-    if (!ownerRole) {
-      throw new AppError('Owner role not found. Please seed system roles first.', 500);
-    }
-
-    // Create owner staff record
+    // Create owner staff record with OWNER staff type
     const ownerStaff = await this.staffRepo.create({
       restaurantId: restaurant._id,
-      roleId: ownerRole._id,
+      staffType: StaffType.OWNER,
       name: data.owner.name,
       email: data.owner.email,
       phone: data.owner.phone,

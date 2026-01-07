@@ -1,18 +1,16 @@
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import type { StringValue } from 'ms';
 import { envConfig as config } from '@/config';
-import { StaffRole, RolePermissions, AccessScope } from '@/types/role.types';
+import { StaffType, IPermissions } from '@/models/StaffTypePermissions.model';
 
 export interface JWTPayload {
   id: string;
   email: string;
-  role: StaffRole;
-  roleId?: string;
+  staffType: StaffType;
   restaurantId?: string;
   branchId?: string;
-  accessScope?: AccessScope;
   allowedBranchIds?: string[];
-  permissions: RolePermissions;
+  permissions: IPermissions;
 }
 
 export class JWTUtil {

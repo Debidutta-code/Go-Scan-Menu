@@ -1,10 +1,10 @@
-// Enhanced Authentication Middleware - Industry Standard
+// Enhanced Authentication Middleware - Staff Type Based
 import { Request, Response, NextFunction } from 'express';
 import { JWTUtil, sendResponse } from '@/utils';
-import { RoleRepository } from '@/repositories/role.repository';
-import { StaffRole } from '@/types/role.types';
+import { StaffTypePermissionsRepository } from '@/repositories/staffTypePermissions.repository';
+import { StaffType } from '@/models/StaffTypePermissions.model';
 
-const roleRepo = new RoleRepository();
+const permissionsRepo = new StaffTypePermissionsRepository();
 
 export class AuthMiddleware {
   static authenticate = async (req: Request, res: Response, next: NextFunction) => {
@@ -20,31 +20,32 @@ export class AuthMiddleware {
       const token = authHeader.split(' ')[1];
       const decoded = JWTUtil.verifyToken(token);
 
-      if (!decoded?.id || !decoded?.role) {
+      if (!decoded?.id || !decoded?.staffType) {
         return sendResponse(res, 401, {
           message: 'Invalid token',
         });
       }
 
-      // Fetch latest role details for real-time permission checking (for staff only)
-      let rolePermissions = decoded.permissions;
-      if (decoded.role !== StaffRole.SUPER_ADMIN && decoded.roleId) {
-        const role = await roleRepo.findById(decoded.roleId);
-        if (role && role.isActive) {
-          rolePermissions = role.permissions;
+      // Fetch latest permissions for real-time permission checking
+      let permissions = decoded.permissions;
+      if (decoded.staffType !== StaffType.SUPER_ADMIN && decoded.restaurantId) {
+        const staffTypePermissions = await permissionsRepo.findByRestaurantAndStaffType(
+          decoded.restaurantId,
+          decoded.staffType
+        );
+        if (staffTypePermissions && staffTypePermissions.isActive) {
+          permissions = staffTypePermissions.permissions;
         }
       }
 
       req.user = {
         id: decoded.id,
         email: decoded.email,
-        role: decoded.role,
-        roleId: decoded.roleId,
+        staffType: decoded.staffType,
         restaurantId: decoded.restaurantId,
         branchId: decoded.branchId,
-        accessScope: decoded.accessScope,
         allowedBranchIds: decoded.allowedBranchIds,
-        permissions: rolePermissions,
+        permissions: permissions,
       };
 
       next();
@@ -55,11 +56,11 @@ export class AuthMiddleware {
     }
   };
 
-  static authorizeRoles = (...roles: string[]) => {
+  static authorizeStaffTypes = (...staffTypes: StaffType[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
-      if (!req.user || !roles.includes(req.user.role)) {
+      if (!req.user || !staffTypes.includes(req.user.staffType as StaffType)) {
         return sendResponse(res, 403, {
-          message: 'Access denied - Insufficient role',
+          message: 'Access denied - Insufficient staff type',
         });
       }
       next();
@@ -74,7 +75,7 @@ export class AuthMiddleware {
       }
 
       // SUPERADMIN BYPASS
-      if (req.user.role === StaffRole.SUPER_ADMIN) {
+      if (req.user.staffType === StaffType.SUPER_ADMIN) {
         return next();
       }
 
@@ -98,7 +99,7 @@ export class AuthMiddleware {
         return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
-      if (req.user.role === StaffRole.SUPER_ADMIN) {
+      if (req.user.staffType === StaffType.SUPER_ADMIN) {
         return next();
       }
 
@@ -110,7 +111,7 @@ export class AuthMiddleware {
         });
       }
 
-      // Parse and check all required permissions (format: "module.action")
+      // Parse and check all required permissions (format: \"module.action\")
       const hasAllPermissions = requiredPermissions.every((perm) => {
         const [module, action] = perm.split('.');
         return permissions[module] && permissions[module][action] === true;
@@ -133,7 +134,7 @@ export class AuthMiddleware {
         return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
-      if (req.user.role === StaffRole.SUPER_ADMIN) {
+      if (req.user.staffType === StaffType.SUPER_ADMIN) {
         return next();
       }
 
