@@ -30,14 +30,14 @@ export const ViewRestaurant: React.FC = () => {
         email: '',
         phone: '',
         password: '',
-        role: 'waiter' as CreateStaffPayload['role'],
+        staffType: 'waiter' as CreateStaffPayload['staffType'],
     });
     const [staffFormErrors, setStaffFormErrors] = useState<{
         name?: string;
         email?: string;
         phone?: string;
         password?: string;
-        role?: string;
+        staffType?: string;
     }>({});
 
     useEffect(() => {
@@ -125,7 +125,7 @@ export const ViewRestaurant: React.FC = () => {
                     email: '',
                     phone: '',
                     password: '',
-                    role: 'waiter',
+                    staffType: 'waiter' as CreateStaffPayload['staffType'],
                 });
                 loadStaff();
             } else {
@@ -459,9 +459,9 @@ export const ViewRestaurant: React.FC = () => {
                             <div className="input-group">
                                 <label className="input-label">Role</label>
                                 <select
-                                    className={`role-select ${staffFormErrors.role ? 'error' : ''}`}
-                                    value={staffFormData.role}
-                                    onChange={(e) => setStaffFormData({ ...staffFormData, role: e.target.value as CreateStaffPayload['role'] })}
+                                    className={`role-select ${staffFormErrors.staffType ? 'error' : ''}`}
+                                    value={staffFormData.staffType}
+                                    onChange={(e) => setStaffFormData({ ...staffFormData, staffType: e.target.value as CreateStaffPayload['staffType'] })}
                                     disabled={staffLoading}
                                     data-testid="staff-role-select"
                                 >
@@ -472,8 +472,8 @@ export const ViewRestaurant: React.FC = () => {
                                     <option value="kitchen_staff">Kitchen Staff</option>
                                     <option value="cashier">Cashier</option>
                                 </select>
-                                {staffFormErrors.role && (
-                                    <span className="error-message">{staffFormErrors.role}</span>
+                                {staffFormErrors.staffType && (
+                                    <span className="error-message">{staffFormErrors.staffType}</span>
                                 )}
                             </div>
                         </div>
@@ -520,7 +520,9 @@ export const ViewRestaurant: React.FC = () => {
                                             <td>{staff.phone || '—'}</td>
                                             <td>
                                                 <span className="role-badge">
-                                                    {staff.role.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                                                    {staff.staffType
+                                                        .replace('_', ' ')
+                                                        .replace(/\b\w/g, (l) => l.toUpperCase())}
                                                 </span>
                                             </td>
                                             <td>

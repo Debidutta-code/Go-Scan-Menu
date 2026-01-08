@@ -39,12 +39,12 @@ export class StaffService {
     }
   }
 
-  static async login(email: string, password: string, role: string) {
+  static async login(email: string, password: string) {
     return this.request<StaffLoginResponse>(
       '/staff/login',
       {
         method: 'POST',
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, password }),
       }
     );
   }
@@ -88,7 +88,7 @@ export class StaffService {
     );
   }
 
-    static async updateStaff(token: string, staffId: string, data: UpdateStaffPayload) {
+  static async updateStaff(token: string, staffId: string, data: UpdateStaffPayload) {
     return this.request<Staff>(
       `/staff/${staffId}`,
       {

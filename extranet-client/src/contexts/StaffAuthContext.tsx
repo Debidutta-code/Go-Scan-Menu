@@ -12,7 +12,7 @@ import { Staff } from '../types/staff.types';
 interface StaffAuthContextType {
   staff: Staff | null;
   token: string | null;
-  login: (email: string, password: string, role: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -52,9 +52,9 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({
     loadStoredAuth();
   }, []);
 
-  const login = async (email: string, password: string, role: string) => {
+    const login = async (email: string, password: string) => {
     try {
-      const response = await StaffService.login(email, password, role);
+      const response = await StaffService.login(email, password);
 
       if (!response.success || !response.data?.staff || !response.data?.token) {
         throw new Error('Login failed');
