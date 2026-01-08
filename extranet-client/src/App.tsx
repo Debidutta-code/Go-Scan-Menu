@@ -14,6 +14,10 @@ import { MenuManagement } from './pages/staff/MenuManagement';
 import { CategoryManagement } from './pages/staff/CategoryManagement';
 import { AddEditCategory } from './pages/staff/AddEditCategory';
 import { AddEditMenuItem } from './pages/staff/AddEditMenuItem';
+import { StaffList } from './pages/staff/StaffList';
+import { AddStaff } from './pages/staff/AddStaff';
+import { EditStaff } from './pages/staff/EditStaff';
+import { RolePermissions } from './pages/staff/RolePermissions';
 
 import { RestaurantList } from './pages/restaurants/RestaurantList';
 import { CreateRestaurant } from './pages/restaurants/CreateRestaurant';
@@ -145,6 +149,42 @@ function App() {
                 element={
                   <ProtectedStaffRoute>
                     <AddEditCategory />
+                  </ProtectedStaffRoute>
+                }
+              />
+
+              {/* Staff Management Routes */}
+              <Route
+                path="team"
+                element={
+                  <ProtectedStaffRoute>
+                    <StaffList />
+                  </ProtectedStaffRoute>
+                }
+              />
+              <Route
+                path="team/add"
+                element={
+                  <ProtectedStaffRoute>
+                    <AddStaff />
+                  </ProtectedStaffRoute>
+                }
+              />
+              <Route
+                path="team/edit/:id"
+                element={
+                  <ProtectedStaffRoute>
+                    <EditStaff />
+                  </ProtectedStaffRoute>
+                }
+              />
+
+              {/* Role Permissions Route */}
+              <Route
+                path="permissions"
+                element={
+                  <ProtectedStaffRoute>
+                    <RolePermissions />
                   </ProtectedStaffRoute>
                 }
               />

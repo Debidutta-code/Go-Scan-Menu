@@ -1,7 +1,7 @@
 // src/services/staff.service.ts
 
 import { ApiResponse } from '../types';
-import { Staff, StaffLoginResponse, CreateStaffPayload, StaffListResponse } from '../types/staff.types';
+import { Staff, StaffLoginResponse, CreateStaffPayload, StaffListResponse, UpdateStaffPayload } from '../types/staff.types';
 
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 
@@ -88,12 +88,23 @@ export class StaffService {
     );
   }
 
-  static async updateStaff(token: string, staffId: string, data: Partial<CreateStaffPayload>) {
+    static async updateStaff(token: string, staffId: string, data: UpdateStaffPayload) {
     return this.request<Staff>(
       `/staff/${staffId}`,
       {
         method: 'PUT',
         body: JSON.stringify(data),
+      },
+      token
+    );
+  }
+
+  static async updateStaffType(token: string, staffId: string, staffType: string) {
+    return this.request<Staff>(
+      `/staff/${staffId}/staff-type`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ staffType }),
       },
       token
     );
@@ -105,6 +116,14 @@ export class StaffService {
       {
         method: 'DELETE',
       },
+      token
+    );
+  }
+
+  static async getCurrentUser(token: string) {
+    return this.request<Staff>(
+      '/staff/me',
+      {},
       token
     );
   }

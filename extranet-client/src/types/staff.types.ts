@@ -1,5 +1,7 @@
 // src/types/staff.types.ts
 
+import { StaffType } from './staffPermissions.types';
+
 export interface Staff {
   _id: string;
   restaurantId: string;
@@ -7,17 +9,8 @@ export interface Staff {
   name: string;
   email: string;
   phone: string;
-  role: 'owner' | 'branch_manager' | 'manager' | 'waiter' | 'kitchen_staff' | 'cashier';
-  accessLevel: 'single_branch' | 'all_branches';
+  staffType: StaffType; // Changed from role to staffType
   allowedBranchIds: string[];
-  permissions: {
-    canViewOrders: boolean;
-    canUpdateOrders: boolean;
-    canManageMenu: boolean;
-    canManageStaff: boolean;
-    canViewReports: boolean;
-    canManageSettings: boolean;
-  };
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -35,9 +28,18 @@ export interface CreateStaffPayload {
   email: string;
   phone: string;
   password: string;
-  role: 'owner' | 'branch_manager' | 'manager' | 'waiter' | 'kitchen_staff' | 'cashier';
-  accessLevel?: 'single_branch' | 'all_branches';
+  staffType: StaffType;
   allowedBranchIds?: string[];
+}
+
+export interface UpdateStaffPayload {
+  name?: string;
+  email?: string;
+  phone?: string;
+  staffType?: StaffType;
+  branchId?: string;
+  allowedBranchIds?: string[];
+  isActive?: boolean;
 }
 
 export interface StaffListResponse {
