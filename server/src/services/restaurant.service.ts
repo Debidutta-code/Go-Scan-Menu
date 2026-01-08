@@ -1,22 +1,25 @@
 // src/services/restaurant.service.ts
 import { RestaurantRepository } from '@/repositories/restaurant.repository';
 import { StaffRepository } from '@/repositories/staff.repository';
+import { StaffTypePermissionsRepository } from '@/repositories/staffTypePermissions.repository';
 import { IRestaurant } from '@/models/Restaurant.model';
 import { BcryptUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
 import { defaultSettings, defaultTheme } from '@/constants';
-import { StaffType } from '@/models/StaffTypePermissions.model';
+import { StaffType, IPermissions } from '@/models/StaffTypePermissions.model';
 import { TaxRepository } from '@/repositories/tax.repository';
 
 export class RestaurantService {
   private restaurantRepo: RestaurantRepository;
   private staffRepo: StaffRepository;
   private taxRepo: TaxRepository;
+  private permissionsRepo: StaffTypePermissionsRepository;
 
   constructor() {
     this.restaurantRepo = new RestaurantRepository();
     this.staffRepo = new StaffRepository();
     this.taxRepo = new TaxRepository();
+    this.permissionsRepo = new StaffTypePermissionsRepository();
   }
 
   async createRestaurant(data: {
@@ -74,7 +77,7 @@ export class RestaurantService {
       isActive: true,
     };
 
-        const restaurant = await this.restaurantRepo.create(restaurantData);
+    const restaurant = await this.restaurantRepo.create(restaurantData);
 
     // Create owner staff record with OWNER staff type
     const ownerStaff = await this.staffRepo.create({
@@ -91,6 +94,62 @@ export class RestaurantService {
     // Link owner staff to restaurant
     await this.restaurantRepo.update(restaurant._id.toString(), {
       ownerId: ownerStaff._id,
+    });
+
+    // Initialize full permissions for OWNER staff type
+    const fullPermissions: IPermissions = {
+      orders: {
+        view: true,
+        create: true,
+        update: true,
+        delete: true,
+        managePayment: true,
+        viewAllBranches: true,
+      },
+      menu: {
+        view: true,
+        create: true,
+        update: true,
+        delete: true,
+        manageCategories: true,
+        managePricing: true,
+      },
+      staff: {
+        view: true,
+        create: true,
+        update: true,
+        delete: true,
+        manageRoles: true,
+      },
+      reports: {
+        view: true,
+        export: true,
+        viewFinancials: true,
+      },
+      settings: {
+        view: true,
+        updateRestaurant: true,
+        updateBranch: true,
+        manageTaxes: true,
+      },
+      tables: {
+        view: true,
+        create: true,
+        update: true,
+        delete: true,
+        manageQR: true,
+      },
+      customers: {
+        view: true,
+        manage: true,
+      },
+    };
+
+    // Create permissions for OWNER with all permissions enabled
+    await this.permissionsRepo.create({
+      restaurantId: restaurant._id,
+      staffType: StaffType.OWNER,
+      permissions: fullPermissions,
     });
 
     return { restaurant, ownerStaff };

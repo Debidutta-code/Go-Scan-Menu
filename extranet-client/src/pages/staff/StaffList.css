@@ -219,6 +219,14 @@
   background: #eef2ff;
 }
 
+.icon-button.permissions {
+  color: #10b981;
+}
+
+.icon-button.permissions:hover {
+  background: #d1fae5;
+}
+
 .icon-button.delete {
   color: #dc2626;
 }

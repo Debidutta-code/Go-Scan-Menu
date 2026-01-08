@@ -40,18 +40,18 @@ export class StaffPermissionsService {
   }
 
   // GET all staff type permissions for a restaurant
-  static async getAllStaffTypePermissions(token: string, restaurantId: string) {
+  static async getAllStaffTypePermissions(token: string, restaurantId: any) {
     return this.request<IStaffTypePermissions[]>(
-      `/staff-type-permissions/${restaurantId}`,
+      `/staff-type-permissions/${restaurantId._id}`,
       {},
       token
     );
   }
 
   // GET permissions for a specific staff type
-  static async getPermissionsForStaffType(token: string, restaurantId: string, staffType: StaffType) {
+  static async getPermissionsForStaffType(token: string, restaurantId: any, staffType: StaffType) {
     return this.request<IStaffTypePermissions>(
-      `/staff-type-permissions/${restaurantId}/${staffType}`,
+      `/staff-type-permissions/${restaurantId._id}/${staffType}`,
       {},
       token
     );
@@ -60,12 +60,12 @@ export class StaffPermissionsService {
   // UPDATE permissions for a specific staff type
   static async updatePermissionsForStaffType(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     staffType: StaffType,
     payload: UpdatePermissionsPayload
   ) {
     return this.request<IStaffTypePermissions>(
-      `/staff-type-permissions/${restaurantId}/${staffType}`,
+      `/staff-type-permissions/${restaurantId._id}/${staffType}`,
       {
         method: 'PUT',
         body: JSON.stringify(payload),
@@ -75,9 +75,9 @@ export class StaffPermissionsService {
   }
 
   // Initialize all default permissions for a restaurant
-  static async initializeAllPermissions(token: string, restaurantId: string) {
+  static async initializeAllPermissions(token: string, restaurantId: any) {
     return this.request<null>(
-      `/staff-type-permissions/${restaurantId}/initialize`,
+      `/staff-type-permissions/${restaurantId._id}/initialize`,
       {
         method: 'POST',
       },

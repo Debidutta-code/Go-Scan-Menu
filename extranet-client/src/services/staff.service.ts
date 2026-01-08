@@ -62,7 +62,7 @@ export class StaffService {
 
   static async getStaffByRestaurant(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     page: number = 1,
     limit: number = 10,
     filter: any = {}
@@ -74,7 +74,7 @@ export class StaffService {
     });
 
     return this.request<StaffListResponse>(
-      `/staff/restaurant/${restaurantId}?${queryParams.toString()}`,
+      `/staff/restaurant/${restaurantId._id}?${queryParams.toString()}`,
       {},
       token
     );

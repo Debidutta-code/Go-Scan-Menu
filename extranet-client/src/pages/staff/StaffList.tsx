@@ -6,7 +6,8 @@ import { StaffService } from '../../services/staff.service';
 import { Staff } from '../../types/staff.types';
 import { StaffType } from '../../types/staffPermissions.types';
 import { Button } from '../../components/ui/Button';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { PermissionsModal } from '../../components/PermissionsModal';
+import { Plus, Edit, Trash2, Search, Shield } from 'lucide-react';
 import './StaffList.css';
 
 const STAFF_TYPE_LABELS: Record<StaffType, string> = {
@@ -28,6 +29,10 @@ export const StaffList: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterRole, setFilterRole] = useState<string>('all');
     const [error, setError] = useState<string | null>(null);
+
+    // Permissions modal state
+    const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
+    const [selectedStaffType, setSelectedStaffType] = useState<StaffType | null>(null);
 
     useEffect(() => {
         fetchStaff();
@@ -67,6 +72,16 @@ export const StaffList: React.FC = () => {
         } catch (err: any) {
             alert(err.message || 'Failed to delete staff');
         }
+    };
+
+    const handleManagePermissions = (staffType: StaffType) => {
+        setSelectedStaffType(staffType);
+        setIsPermissionsModalOpen(true);
+    };
+
+    const handlePermissionsSaved = () => {
+        // Optionally refetch staff or show success message
+        alert('Permissions updated successfully!');
     };
 
     const filteredStaff = staffList.filter((staff) => {
@@ -175,6 +190,14 @@ export const StaffList: React.FC = () => {
                                     </td>
                                     <td className="action-buttons">
                                         <button
+                                            className="icon-button permissions"
+                                            onClick={() => handleManagePermissions(staff.staffType)}
+                                            title="Manage Permissions"
+                                            data-testid={`permissions-button-${staff._id}`}
+                                        >
+                                            <Shield size={16} />
+                                        </button>
+                                        <button
                                             className="icon-button edit"
                                             onClick={() => navigate(`/staff/team/edit/${staff._id}`)}
                                             title="Edit"
@@ -201,6 +224,18 @@ export const StaffList: React.FC = () => {
             <div className="staff-count" data-testid="staff-count">
                 Showing {filteredStaff.length} of {staffList.length} staff members
             </div>
+
+            {/* Permissions Management Modal */}
+            {selectedStaffType && currentStaff && (
+                <PermissionsModal
+                    isOpen={isPermissionsModalOpen}
+                    onClose={() => setIsPermissionsModalOpen(false)}
+                    restaurantId={currentStaff.restaurantId}
+                    staffType={selectedStaffType}
+                    token={token || ''}
+                    onSave={handlePermissionsSaved}
+                />
+            )}
         </div>
     );
 };
