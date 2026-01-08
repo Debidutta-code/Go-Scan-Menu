@@ -17,16 +17,40 @@ export const StaffDashboard: React.FC = () => {
   };
 
   const getRolePermissions = () => {
-    if (!staff) return [];
-    
+    if (!staff || !staff.permissions) return [];
+
     const permissions = [];
-    if (staff.permissions.canManageMenu) permissions.push('Manage Menu');
-    if (staff.permissions.canViewOrders) permissions.push('View Orders');
-    if (staff.permissions.canUpdateOrders) permissions.push('Update Orders');
-    if (staff.permissions.canManageStaff) permissions.push('Manage Staff');
-    if (staff.permissions.canViewReports) permissions.push('View Reports');
-    if (staff.permissions.canManageSettings) permissions.push('Manage Settings');
-    
+    const perms = staff.permissions;
+
+    // Menu permissions
+    if (perms.menu?.view) permissions.push('View Menu');
+    if (perms.menu?.create) permissions.push('Create Menu Items');
+    if (perms.menu?.update) permissions.push('Update Menu Items');
+    if (perms.menu?.delete) permissions.push('Delete Menu Items');
+    if (perms.menu?.manageCategories) permissions.push('Manage Categories');
+
+    // Order permissions
+    if (perms.orders?.view) permissions.push('View Orders');
+    if (perms.orders?.create) permissions.push('Create Orders');
+    if (perms.orders?.update) permissions.push('Update Orders');
+    if (perms.orders?.managePayment) permissions.push('Manage Payments');
+
+    // Staff permissions
+    if (perms.staff?.view) permissions.push('View Staff');
+    if (perms.staff?.create) permissions.push('Create Staff');
+    if (perms.staff?.update) permissions.push('Update Staff');
+    if (perms.staff?.manageRoles) permissions.push('Manage Roles');
+
+    // Reports permissions
+    if (perms.reports?.view) permissions.push('View Reports');
+    if (perms.reports?.export) permissions.push('Export Reports');
+    if (perms.reports?.viewFinancials) permissions.push('View Financials');
+
+    // Settings permissions
+    if (perms.settings?.view) permissions.push('View Settings');
+    if (perms.settings?.updateRestaurant) permissions.push('Update Restaurant');
+    if (perms.settings?.updateBranch) permissions.push('Update Branch');
+
     return permissions;
   };
 
@@ -58,7 +82,11 @@ export const StaffDashboard: React.FC = () => {
       <div className="welcome-section">
         <h2 className="welcome-title">Welcome, {staff.name}!</h2>
         <p className="welcome-subtitle">
-          Role: <span className="role-badge">{staff.role.replace('_', ' ').toUpperCase()}</span>
+          Role: <span className="role-badge">
+            {staff.staffType
+              .replace(/_/g, ' ')
+              .replace(/\b\w/g, (letter) => letter.toUpperCase())}
+          </span>
         </p>
       </div>
 
@@ -75,8 +103,12 @@ export const StaffDashboard: React.FC = () => {
             <p className="info-value">{staff.phone}</p>
           </div>
           <div className="info-item">
-            <label className="info-label">Access Level</label>
-            <p className="info-value">{staff.accessLevel.replace('_', ' ').toUpperCase()}</p>
+            <label className="info-label">Staff Type</label>
+            <p className="info-value">
+              {staff.staffType
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, (letter) => letter.toUpperCase())}
+            </p>
           </div>
           <div className="info-item">
             <label className="info-label">Status</label>
@@ -110,7 +142,7 @@ export const StaffDashboard: React.FC = () => {
       <div className="quick-actions-section">
         <h3 className="section-title">Quick Actions</h3>
         <div className="actions-grid">
-          {staff.permissions.canManageMenu && (
+          {staff.permissions?.menu?.view && (
             <button
               className="action-card"
               onClick={() => navigate('/staff/menu')}
@@ -122,7 +154,31 @@ export const StaffDashboard: React.FC = () => {
             </button>
           )}
 
-          {staff.permissions.canViewOrders && (
+          {staff.permissions?.staff?.view && (
+            <button
+              className="action-card"
+              onClick={() => navigate('/staff/team')}
+              data-testid="staff-management-button"
+            >
+              <div className="action-icon">👥</div>
+              <h4 className="action-title">Staff Management</h4>
+              <p className="action-description">Manage team members and roles</p>
+            </button>
+          )}
+
+          {staff.permissions?.staff?.manageRoles && (
+            <button
+              className="action-card"
+              onClick={() => navigate('/staff/permissions')}
+              data-testid="permissions-management-button"
+            >
+              <div className="action-icon">🔐</div>
+              <h4 className="action-title">Role Permissions</h4>
+              <p className="action-description">Configure role-based permissions</p>
+            </button>
+          )}
+
+          {staff.permissions?.orders?.view && (
             <button className="action-card" disabled>
               <div className="action-icon">🛎️</div>
               <h4 className="action-title">Orders</h4>
@@ -131,7 +187,7 @@ export const StaffDashboard: React.FC = () => {
             </button>
           )}
 
-          {staff.permissions.canViewReports && (
+          {staff.permissions?.reports?.view && (
             <button className="action-card" disabled>
               <div className="action-icon">📊</div>
               <h4 className="action-title">Reports</h4>
@@ -140,11 +196,11 @@ export const StaffDashboard: React.FC = () => {
             </button>
           )}
 
-          {staff.permissions.canManageStaff && (
+          {staff.permissions?.settings?.view && (
             <button className="action-card" disabled>
-              <div className="action-icon">👥</div>
-              <h4 className="action-title">Staff Management</h4>
-              <p className="action-description">Manage staff members</p>
+              <div className="action-icon">⚙️</div>
+              <h4 className="action-title">Settings</h4>
+              <p className="action-description">Configure restaurant settings</p>
               <span className="coming-soon">Coming Soon</span>
             </button>
           )}

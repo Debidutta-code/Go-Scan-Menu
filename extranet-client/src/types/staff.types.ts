@@ -1,6 +1,6 @@
 // src/types/staff.types.ts
 
-import { StaffType } from './staffPermissions.types';
+import { StaffType, IPermissions } from './staffPermissions.types';
 
 export interface Staff {
   _id: string;
@@ -12,6 +12,7 @@ export interface Staff {
   staffType: StaffType; // Changed from role to staffType
   allowedBranchIds: string[];
   isActive: boolean;
+  permissions?: IPermissions; // Added permissions from backend response
   createdAt: string;
   updatedAt: string;
 }

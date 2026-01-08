@@ -95,6 +95,8 @@ export const ViewRestaurant: React.FC = () => {
         // Validate form data
         const result = createStaffSchema.safeParse(staffFormData);
 
+        console.log('Validation result:', result);
+
         if (!result.success) {
             const fieldErrors: typeof staffFormErrors = {};
             result.error.errors.forEach((err) => {
