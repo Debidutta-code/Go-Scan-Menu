@@ -74,7 +74,7 @@ export class StaffService {
     });
 
     return this.request<StaffListResponse>(
-      `/staff/restaurant/${restaurantId._id}?${queryParams.toString()}`,
+      `/staff/restaurant/${restaurantId}?${queryParams.toString()}`,
       {},
       token
     );
