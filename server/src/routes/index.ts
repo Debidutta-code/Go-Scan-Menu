@@ -20,7 +20,8 @@ router.use('/superadmin/auth', superAdminAuthRoutes);
 router.use('/restaurants', restaurantRoutes);
 router.use('/staff', staffRoutes);
 router.use('/staff-type-permissions', staffTypePermissionsRoutes);
-router.use('/:restaurantId/branches', branchRoutes);
+// router.use('/:restaurantId/branches', branchRoutes);
+router.use('/restaurants/:restaurantId/branches', branchRoutes);
 
 // Table Management (can be accessed via restaurant or branch)
 router.use('/restaurants/:restaurantId/tables', tableRoutes);
