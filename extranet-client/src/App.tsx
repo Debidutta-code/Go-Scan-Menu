@@ -18,6 +18,8 @@ import { StaffList } from './pages/staff/StaffList';
 import { AddStaff } from './pages/staff/AddStaff';
 import { EditStaff } from './pages/staff/EditStaff';
 import { RolePermissions } from './pages/staff/RolePermissions';
+import { BranchSelection } from './pages/staff/BranchSelection';
+import { TableManagement } from './pages/staff/TableManagement';
 
 import { RestaurantList } from './pages/restaurants/RestaurantList';
 import { CreateRestaurant } from './pages/restaurants/CreateRestaurant';
@@ -185,6 +187,24 @@ function App() {
                 element={
                   <ProtectedStaffRoute>
                     <RolePermissions />
+                  </ProtectedStaffRoute>
+                }
+              />
+
+              {/* Table Management Routes */}
+              <Route
+                path="tables"
+                element={
+                  <ProtectedStaffRoute>
+                    <BranchSelection />
+                  </ProtectedStaffRoute>
+                }
+              />
+              <Route
+                path="tables/:branchId"
+                element={
+                  <ProtectedStaffRoute>
+                    <TableManagement />
                   </ProtectedStaffRoute>
                 }
               />

@@ -178,6 +178,18 @@ export const StaffDashboard: React.FC = () => {
             </button>
           )}
 
+          {staff.permissions?.tables?.view && (
+            <button
+              className="action-card"
+              onClick={() => navigate('/staff/tables')}
+              data-testid="table-management-button"
+            >
+              <div className="action-icon">🪑</div>
+              <h4 className="action-title">Table Management</h4>
+              <p className="action-description">Manage tables and QR codes</p>
+            </button>
+          )}
+
           {staff.permissions?.orders?.view && (
             <button className="action-card" disabled>
               <div className="action-icon">🛎️</div>
@@ -204,6 +216,7 @@ export const StaffDashboard: React.FC = () => {
               <span className="coming-soon">Coming Soon</span>
             </button>
           )}
+
         </div>
       </div>
     </div>
