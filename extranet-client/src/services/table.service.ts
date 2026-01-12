@@ -21,15 +21,15 @@ export class TableService {
 
   static async getTables(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     branchId?: string,
     page: number = 1,
     limit: number = 100
   ): Promise<ApiResponse<TableListResponse>> {
     try {
       const endpoint = branchId
-        ? `/restaurants/${restaurantId}/tables/branch/${branchId}?page=${page}&limit=${limit}`
-        : `/restaurants/${restaurantId}/tables?page=${page}&limit=${limit}`;
+        ? `/restaurants/${restaurantId._id}/tables/branch/${branchId}?page=${page}&limit=${limit}`
+        : `/restaurants/${restaurantId._id}/tables?page=${page}&limit=${limit}`;
 
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'GET',
@@ -50,13 +50,13 @@ export class TableService {
 
   static async createTable(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     branchId: string,
     payload: CreateTablePayload
   ): Promise<ApiResponse<Table>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId}/tables`,
+        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables`,
         {
           method: 'POST',
           headers: this.getHeaders(token),
@@ -78,7 +78,7 @@ export class TableService {
 
   static async createBulkTables(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     branchId: string,
     payload: BulkCreateTablePayload
   ): Promise<ApiResponse<{ tables: Table[]; created: number }>> {
@@ -98,7 +98,7 @@ export class TableService {
 
       for (const tableData of tables) {
         try {
-          const result = await this.createTable(token, restaurantId, branchId, tableData);
+          const result = await this.createTable(token, restaurantId._id, branchId, tableData);
           if (result.success && result.data) {
             createdTables.push(result.data);
           }
@@ -126,13 +126,13 @@ export class TableService {
 
   static async updateTable(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     tableId: string,
     payload: UpdateTablePayload
   ): Promise<ApiResponse<Table>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId}/tables/${tableId}`,
+        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}`,
         {
           method: 'PUT',
           headers: this.getHeaders(token),
@@ -154,13 +154,13 @@ export class TableService {
 
   static async updateTableStatus(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     tableId: string,
     status: Table['status']
   ): Promise<ApiResponse<Table>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId}/tables/${tableId}/status`,
+        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/status`,
         {
           method: 'PATCH',
           headers: this.getHeaders(token),
@@ -182,12 +182,12 @@ export class TableService {
 
   static async deleteTable(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     tableId: string
   ): Promise<ApiResponse<Table>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId}/tables/${tableId}`,
+        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}`,
         {
           method: 'DELETE',
           headers: this.getHeaders(token),
@@ -208,12 +208,12 @@ export class TableService {
 
   static async regenerateQR(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     tableId: string
   ): Promise<ApiResponse<Table>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId}/tables/${tableId}/regenerate-qr`,
+        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/regenerate-qr`,
         {
           method: 'POST',
           headers: this.getHeaders(token),
@@ -234,12 +234,12 @@ export class TableService {
 
   static async getQRCodeData(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     tableId: string
   ): Promise<ApiResponse<{ qrUrl: string }>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId}/tables/${tableId}/qr-data`,
+        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/qr-data`,
         {
           method: 'GET',
           headers: this.getHeaders(token),
@@ -260,9 +260,9 @@ export class TableService {
 
   static getQRCodeImageUrl(
     token: string,
-    restaurantId: string,
+    restaurantId: any,
     tableId: string
   ): string {
-    return `${API_BASE_URL}/restaurants/${restaurantId}/tables/${tableId}/qr-image?token=${token}`;
+    return `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/qr-image?token=${token}`;
   }
 }

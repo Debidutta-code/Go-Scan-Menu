@@ -23,7 +23,7 @@ export const BranchSelection: React.FC = () => {
     }
   }, [staff, token]);
 
-  const loadBranches = async () => {
+    const loadBranches = async () => {
     if (!staff || !token) return;
 
     setLoading(true);
@@ -42,21 +42,25 @@ export const BranchSelection: React.FC = () => {
             staff.allowedBranchIds.includes(branch._id)
           );
         }
-        
-        setBranches(filteredBranches);
 
-        // AUTO-SELECT LOGIC: If single restaurant or only one branch available
-        if (staff.restaurant?.type === 'single' && filteredBranches.length === 1) {
-          // Auto-redirect to the single branch for single restaurants
-          navigate(`/staff/tables/${filteredBranches[0]._id}`);
-          return;
-        } else if (filteredBranches.length === 1) {
-          // Also auto-redirect if only one branch is available (even for chain)
-          navigate(`/staff/tables/${filteredBranches[0]._id}`);
+        // AUTO-REDIRECT LOGIC: Redirect immediately for single restaurants or single branch access
+        if (filteredBranches.length === 1) {
+          // Auto-redirect to the single branch without showing selection UI
+          navigate(`/staff/tables/${filteredBranches[0]._id}`, { replace: true });
           return;
         }
 
-        // Load table counts for each branch
+        // If single restaurant type but somehow has multiple branches, still redirect to first active branch
+        if (staff.restaurant?.type === 'single' && filteredBranches.length > 0) {
+          const activeBranch = filteredBranches.find(b => b.isActive) || filteredBranches[0];
+          navigate(`/staff/tables/${activeBranch._id}`, { replace: true });
+          return;
+        }
+        
+        // Only set branches state if we're showing the selection UI (multiple branches for chain)
+        setBranches(filteredBranches);
+
+        // Load table counts for each branch (only for chain restaurants with multiple branches)
         const counts: Record<string, number> = {};
         for (const branch of filteredBranches) {
           try {

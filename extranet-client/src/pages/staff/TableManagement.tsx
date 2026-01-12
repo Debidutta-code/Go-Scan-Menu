@@ -162,8 +162,18 @@ export const TableManagement: React.FC = () => {
       {/* Header */}
       <div className="table-header">
         <div className="header-left">
-          <Button variant="outline" onClick={() => navigate('/staff/tables')}>
-            ← Back to Branches
+          <Button
+            variant="outline"
+            onClick={() => {
+              // For single restaurants, go back to dashboard instead of branch selection
+              if (staff?.restaurant?.type === 'single') {
+                navigate('/staff/dashboard');
+              } else {
+                navigate('/staff/tables');
+              }
+            }}
+          >
+            ← {staff?.restaurant?.type === 'single' ? 'Back to Dashboard' : 'Back to Branches'}
           </Button>
           <div>
             <h1 className="page-title" data-testid="table-management-title">
@@ -171,29 +181,6 @@ export const TableManagement: React.FC = () => {
             </h1>
             {branch && <p className="branch-subtitle">{branch.name}</p>}
           </div>
-        </div>
-        <div className="header-actions">
-          {canManageTables() && (
-            <>
-              <Button
-                variant="outline"
-                onClick={() => setBulkCreateModalOpen(true)}
-                data-testid="bulk-create-button"
-              >
-                + Bulk Create
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => setCreateModalOpen(true)}
-                data-testid="create-table-button"
-              >
-                + Add Table
-              </Button>
-            </>
-          )}
-          <Button variant="outline" onClick={handleLogout}>
-            Logout
-          </Button>
         </div>
       </div>
 
