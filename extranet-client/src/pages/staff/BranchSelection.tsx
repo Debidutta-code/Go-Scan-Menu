@@ -17,7 +17,7 @@ export const BranchSelection: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
+    useEffect(() => {
     if (staff && token) {
       loadBranches();
     }
@@ -44,6 +44,17 @@ export const BranchSelection: React.FC = () => {
         }
         
         setBranches(filteredBranches);
+
+        // AUTO-SELECT LOGIC: If single restaurant or only one branch available
+        if (staff.restaurant?.type === 'single' && filteredBranches.length === 1) {
+          // Auto-redirect to the single branch for single restaurants
+          navigate(`/staff/tables/${filteredBranches[0]._id}`);
+          return;
+        } else if (filteredBranches.length === 1) {
+          // Also auto-redirect if only one branch is available (even for chain)
+          navigate(`/staff/tables/${filteredBranches[0]._id}`);
+          return;
+        }
 
         // Load table counts for each branch
         const counts: Record<string, number> = {};
@@ -99,9 +110,17 @@ export const BranchSelection: React.FC = () => {
           <Button variant="outline" onClick={() => navigate('/staff/dashboard')}>
             ← Back to Dashboard
           </Button>
-          <h1 className="page-title" data-testid="branch-selection-title">
-            Table Management - Select Branch
-          </h1>
+          <div>
+            <h1 className="page-title" data-testid="branch-selection-title">
+              Table Management - Select Branch
+            </h1>
+            {staff?.restaurant && (
+              <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '4px' }}>
+                {staff.restaurant.name} 
+                {staff.restaurant.type === 'single' ? ' (Single Location)' : ' (Multiple Locations)'}
+              </p>
+            )}
+          </div>
         </div>
         <div className="header-actions">
           <Button variant="outline" onClick={handleLogout}>
@@ -116,7 +135,11 @@ export const BranchSelection: React.FC = () => {
       <div className="branches-section">
         {branches.length === 0 ? (
           <div className="empty-state">
-            <p>No branches found. Please contact your administrator.</p>
+            <p>
+              {staff?.restaurant?.type === 'single' 
+                ? 'No branch found. Please contact your administrator to set up a branch for your restaurant.'
+                : 'No branches assigned to you. Please contact your administrator.'}
+            </p>
           </div>
         ) : (
           <div className="branches-grid">

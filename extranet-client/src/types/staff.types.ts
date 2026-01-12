@@ -2,6 +2,13 @@
 
 import { StaffType, IPermissions } from './staffPermissions.types';
 
+export interface RestaurantInfo {
+  _id: string;
+  name: string;
+  type: 'single' | 'chain';
+  slug: string;
+}
+
 export interface Staff {
   _id: string;
   restaurantId: string;
@@ -13,6 +20,7 @@ export interface Staff {
   allowedBranchIds: string[];
   isActive: boolean;
   permissions?: IPermissions; // Added permissions from backend response
+  restaurant?: RestaurantInfo; // Restaurant details
   createdAt: string;
   updatedAt: string;
 }

@@ -18,7 +18,7 @@ export class StaffService {
     this.permissionsRepo = new StaffTypePermissionsRepository();
   }
 
-    async login(email: string, password: string) {
+  async login(email: string, password: string) {
     const staff = await this.staffRepo.findByEmail(email);
 
     if (!staff || !staff.isActive) {
@@ -32,8 +32,8 @@ export class StaffService {
 
     // Get permissions for staff type
     const restaurantIdValue = staff.restaurantId as any;
-    const restaurantId = typeof restaurantIdValue === 'object' && restaurantIdValue?._id 
-      ? restaurantIdValue._id.toString() 
+    const restaurantId = typeof restaurantIdValue === 'object' && restaurantIdValue?._id
+      ? restaurantIdValue._id.toString()
       : staff.restaurantId.toString();
 
     const staffTypePermissions = await this.permissionsRepo.findByRestaurantAndStaffType(
@@ -53,9 +53,9 @@ export class StaffService {
     };
 
     const branchIdValue = staff.branchId as any;
-    const branchId = branchIdValue ? 
-      (typeof branchIdValue === 'object' && branchIdValue?._id 
-        ? branchIdValue._id.toString() 
+    const branchId = branchIdValue ?
+      (typeof branchIdValue === 'object' && branchIdValue?._id
+        ? branchIdValue._id.toString()
         : branchIdValue.toString())
       : undefined;
 
@@ -73,17 +73,29 @@ export class StaffService {
       permissions,
     });
 
+    // Get restaurant data
+    const restaurant = await this.restaurantRepo.findById(restaurantId);
+    if (!restaurant) {
+      throw new AppError('Restaurant not found', 404);
+    }
+
     const staffData = staff.toObject();
     return {
       staff: {
         ...staffData,
         permissions,
+        restaurant: {
+          _id: restaurant._id.toString(),
+          name: restaurant.name,
+          type: restaurant.type,
+          slug: restaurant.slug,
+        },
       },
       token
     };
   }
 
-    async createStaff(data: Partial<IStaff>) {
+  async createStaff(data: Partial<IStaff>) {
     // Check if email already exists
     const existingStaff = await this.staffRepo.findByEmail(data.email!);
     if (existingStaff) {
@@ -125,7 +137,7 @@ export class StaffService {
     return this.staffRepo.findByBranch(branchId, page, limit);
   }
 
-    async updateStaff(id: string, data: Partial<IStaff>) {
+  async updateStaff(id: string, data: Partial<IStaff>) {
     if (data.password) {
       data.password = await BcryptUtil.hash(data.password);
     }
