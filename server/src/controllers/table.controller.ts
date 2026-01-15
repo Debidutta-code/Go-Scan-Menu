@@ -1,7 +1,7 @@
 // src/controllers/table.controller.ts
 import { Request, Response } from 'express';
 import { TableService } from '@/services/table.service';
-import { catchAsync, sendResponse } from '@/utils';
+import { catchAsync, sendResponse, ParamsUtil } from '@/utils';
 import QRCode from 'qrcode';
 
 export class TableController {
@@ -12,8 +12,8 @@ export class TableController {
   }
 
   createTable = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const branchId = req.params.branchId || req.body.branchId;
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
+    const branchId = ParamsUtil.getString(req.params.branchId) || req.body.branchId;
 
     if (!restaurantId || !branchId) {
       sendResponse(res, 400, {
@@ -31,7 +31,7 @@ export class TableController {
   });
 
   getTable = catchAsync(async (req: Request, res: Response) => {
-    const table = await this.tableService.getTable(req.params.id);
+    const table = await this.tableService.getTable(ParamsUtil.getString(req.params.id));
 
     sendResponse(res, 200, {
       message: 'Table retrieved successfully',
@@ -40,7 +40,7 @@ export class TableController {
   });
 
   getTableByQrCode = catchAsync(async (req: Request, res: Response) => {
-    const { qrCode } = req.params;
+    const qrCode = ParamsUtil.getString(req.params.qrCode);
     const table = await this.tableService.getTableByQrCode(qrCode);
 
     sendResponse(res, 200, {
@@ -50,7 +50,7 @@ export class TableController {
   });
 
   getTablesByBranch = catchAsync(async (req: Request, res: Response) => {
-    const { branchId } = req.params;
+    const branchId = ParamsUtil.getString(req.params.branchId);
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const filter = req.query.status ? { status: req.query.status } : {};
@@ -64,7 +64,7 @@ export class TableController {
   });
 
   getTablesByRestaurant = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const filter = req.query.status ? { status: req.query.status } : {};
@@ -83,8 +83,8 @@ export class TableController {
   });
 
   updateTable = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const table = await this.tableService.updateTable(req.params.id, restaurantId!, req.body);
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
+    const table = await this.tableService.updateTable(ParamsUtil.getString(req.params.id), restaurantId!, req.body);
 
     sendResponse(res, 200, {
       message: 'Table updated successfully',
@@ -102,7 +102,7 @@ export class TableController {
       return;
     }
 
-    const table = await this.tableService.updateTableStatus(req.params.id, status);
+    const table = await this.tableService.updateTableStatus(ParamsUtil.getString(req.params.id), status);
 
     sendResponse(res, 200, {
       message: 'Table status updated successfully',
@@ -111,8 +111,8 @@ export class TableController {
   });
 
   deleteTable = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const table = await this.tableService.deleteTable(req.params.id, restaurantId!);
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
+    const table = await this.tableService.deleteTable(ParamsUtil.getString(req.params.id), restaurantId!);
 
     sendResponse(res, 200, {
       message: 'Table deleted successfully',
@@ -121,8 +121,8 @@ export class TableController {
   });
 
   regenerateQrCode = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const table = await this.tableService.regenerateQrCode(req.params.id, restaurantId!);
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
+    const table = await this.tableService.regenerateQrCode(ParamsUtil.getString(req.params.id), restaurantId!);
 
     sendResponse(res, 200, {
       message: 'QR code regenerated successfully',
@@ -131,8 +131,8 @@ export class TableController {
   });
 
   getQrCodeData = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const qrUrl = await this.tableService.getQrCodeData(req.params.id, restaurantId!);
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
+    const qrUrl = await this.tableService.getQrCodeData(ParamsUtil.getString(req.params.id), restaurantId!);
 
     sendResponse(res, 200, {
       message: 'QR code data retrieved successfully',
@@ -146,8 +146,8 @@ export class TableController {
 
   // this will generate qr code image in the backend
   generateQrCodeImage = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const qrUrl = await this.tableService.getQrCodeData(req.params.id, restaurantId!);
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
+    const qrUrl = await this.tableService.getQrCodeData(ParamsUtil.getString(req.params.id), restaurantId!);
 
     // Generate QR code as PNG buffer
     const qrCodeBuffer = await QRCode.toBuffer(qrUrl, {
@@ -159,7 +159,7 @@ export class TableController {
 
     // Set response headers
     res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Content-Disposition', `attachment; filename="table-qr-${req.params.id}.png"`);
+    res.setHeader('Content-Disposition', `attachment; filename="table-qr-${ParamsUtil.getString(req.params.id)}.png"`);
 
     // Send image
     res.send(qrCodeBuffer);

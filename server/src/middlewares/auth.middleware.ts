@@ -18,7 +18,7 @@ export class AuthMiddleware {
         });
       }
 
-            const token = authHeader.split(' ')[1];
+      const token = authHeader.split(' ')[1];
       const decoded = JWTUtil.verifyToken(token);
 
       // Support both staffType and role for backward compatibility
@@ -60,7 +60,7 @@ export class AuthMiddleware {
     }
   };
 
-    static authorizeStaffTypes = (...staffTypes: StaffType[]) => {
+  static authorizeStaffTypes = (...staffTypes: StaffType[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
       if (!req.user || !staffTypes.includes(req.user.staffType as StaffType)) {
         return sendResponse(res, 403, {
@@ -82,7 +82,7 @@ export class AuthMiddleware {
 
       // Convert user's staffType to string for comparison
       const userRole = req.user.staffType as string;
-      
+
       // Check if user's role matches any of the allowed roles
       const hasAccess = roles.some(role => {
         const roleStr = typeof role === 'string' ? role : String(role);
@@ -94,7 +94,7 @@ export class AuthMiddleware {
           message: 'Access denied - Insufficient role',
         });
       }
-      
+
       next();
     };
   };
@@ -192,5 +192,66 @@ export class AuthMiddleware {
 
       next();
     };
+  };
+
+  // Authenticate with token from query parameter (for image/file endpoints)
+  static authenticateWithQueryToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Try to get token from query parameter first
+      let token = req.query.token as string;
+
+      // Fall back to Authorization header if no query token
+      if (!token) {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          token = authHeader.split(' ')[1];
+        }
+      }
+
+      if (!token) {
+        return sendResponse(res, 401, {
+          message: 'No token provided',
+        });
+      }
+
+      const decoded = JWTUtil.verifyToken(token);
+
+      // Support both staffType and role for backward compatibility
+      const userStaffType = decoded.staffType || (decoded.role as unknown as StaffType);
+
+      if (!decoded?.id || (!decoded?.staffType && !decoded?.role)) {
+        return sendResponse(res, 401, {
+          message: 'Invalid token',
+        });
+      }
+
+      // Fetch latest permissions for real-time permission checking
+      let permissions = decoded.permissions;
+      if (userStaffType !== StaffType.SUPER_ADMIN && decoded.restaurantId) {
+        const staffTypePermissions = await permissionsRepo.findByRestaurantAndStaffType(
+          decoded.restaurantId,
+          userStaffType
+        );
+        if (staffTypePermissions && staffTypePermissions.isActive) {
+          permissions = staffTypePermissions.permissions;
+        }
+      }
+
+      req.user = {
+        id: decoded.id,
+        email: decoded.email,
+        staffType: userStaffType,
+        restaurantId: decoded.restaurantId,
+        branchId: decoded.branchId,
+        allowedBranchIds: decoded.allowedBranchIds,
+        permissions: permissions,
+      };
+
+      next();
+    } catch {
+      return sendResponse(res, 401, {
+        message: 'Authentication failed',
+      });
+    }
   };
 }

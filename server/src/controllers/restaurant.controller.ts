@@ -19,7 +19,8 @@ export class RestaurantController {
   });
 
   getRestaurant = catchAsync(async (req: Request, res: Response) => {
-    const restaurant = await this.restaurantService.getRestaurant(req.params.id);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const restaurant = await this.restaurantService.getRestaurant(id);
     sendResponse(res, 200, {
       message: 'Restaurant retrieved successfully',
       data: restaurant,
@@ -27,7 +28,8 @@ export class RestaurantController {
   });
 
   getRestaurantBySlug = catchAsync(async (req: Request, res: Response) => {
-    const restaurant = await this.restaurantService.getRestaurantBySlug(req.params.slug);
+    const slug = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;
+    const restaurant = await this.restaurantService.getRestaurantBySlug(slug);
     sendResponse(res, 200, {
       message: 'Restaurant retrieved successfully',
       data: restaurant,
@@ -47,7 +49,8 @@ export class RestaurantController {
   });
 
   updateRestaurant = catchAsync(async (req: Request, res: Response) => {
-    const restaurant = await this.restaurantService.updateRestaurant(req.params.id, req.body);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const restaurant = await this.restaurantService.updateRestaurant(id, req.body);
     sendResponse(res, 200, {
       message: 'Restaurant updated successfully',
       data: restaurant,
@@ -55,7 +58,8 @@ export class RestaurantController {
   });
 
   updateTheme = catchAsync(async (req: Request, res: Response) => {
-    const restaurant = await this.restaurantService.updateTheme(req.params.id, req.body);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const restaurant = await this.restaurantService.updateTheme(id, req.body);
     sendResponse(res, 200, {
       message: 'Theme updated successfully',
       data: restaurant,
@@ -63,7 +67,8 @@ export class RestaurantController {
   });
 
   updateSubscription = catchAsync(async (req: Request, res: Response) => {
-    const restaurant = await this.restaurantService.updateSubscription(req.params.id, req.body);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const restaurant = await this.restaurantService.updateSubscription(id, req.body);
     sendResponse(res, 200, {
       message: 'Subscription updated successfully',
       data: restaurant,
@@ -71,7 +76,8 @@ export class RestaurantController {
   });
 
   updateDefaultSettings = catchAsync(async (req: Request, res: Response) => {
-    const restaurant = await this.restaurantService.updateDefaultSettings(req.params.id, req.body);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const restaurant = await this.restaurantService.updateDefaultSettings(id, req.body);
     sendResponse(res, 200, {
       message: 'Default settings updated successfully',
       data: restaurant,
@@ -79,7 +85,8 @@ export class RestaurantController {
   });
 
   deleteRestaurant = catchAsync(async (req: Request, res: Response) => {
-    const restaurant = await this.restaurantService.deleteRestaurant(req.params.id);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const restaurant = await this.restaurantService.deleteRestaurant(id);
     sendResponse(res, 200, {
       message: 'Restaurant deleted successfully',
       data: restaurant,

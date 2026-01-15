@@ -47,8 +47,13 @@ router.post('/:id/regenerate-qr', ...canManageTables, tableController.regenerate
 // Get QR code data URL
 router.get('/:id/qr-data', ...canManageTables, tableController.getQrCodeData);
 
-// Generate QR code image (PNG)
-router.get('/:id/qr-image', ...canManageTables, tableController.generateQrCodeImage);
+// Generate QR code image (PNG) - uses query token auth for <img> tag compatibility
+router.get(
+  '/:id/qr-image',
+  AuthMiddleware.authenticateWithQueryToken,
+  AuthMiddleware.authorizeRoles(StaffRole.OWNER, StaffRole.BRANCH_MANAGER, StaffRole.MANAGER),
+  tableController.generateQrCodeImage
+);
 
 // Delete table
 router.delete('/:id', ...canManageTables, tableController.deleteTable);

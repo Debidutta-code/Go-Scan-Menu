@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { PublicMenuService } from '@/services/public.menu.service';
-import { catchAsync, sendResponse } from '@/utils';
+import { catchAsync, sendResponse, ParamsUtil } from '@/utils';
 
 export class PublicMenuController {
   private menuService: PublicMenuService;
@@ -14,7 +14,9 @@ export class PublicMenuController {
    * Returns: restaurant theme, branch info, table, menu grouped by categories
    */
   getMenuByQrCode = catchAsync(async (req: Request, res: Response) => {
-    const { restaurantSlug, branchCode, qrCode } = req.params;
+    const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
+    const branchCode = ParamsUtil.getString(req.params.branchCode);
+    const qrCode = ParamsUtil.getString(req.params.qrCode);
 
     console.log('Received params:', { restaurantSlug, branchCode, qrCode });
 
@@ -35,7 +37,8 @@ export class PublicMenuController {
    * Useful for takeaway/delivery or browsing without sitting
    */
   getMenuByBranch = catchAsync(async (req: Request, res: Response) => {
-    const { restaurantSlug, branchCode } = req.params;
+    const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
+    const branchCode = ParamsUtil.getString(req.params.branchCode);
 
     const menuData = await this.menuService.getCompleteMenuByBranch(restaurantSlug, branchCode);
 
@@ -49,7 +52,7 @@ export class PublicMenuController {
    * Get restaurant info (for landing pages, etc.)
    */
   getRestaurantInfo = catchAsync(async (req: Request, res: Response) => {
-    const { restaurantSlug } = req.params;
+    const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
 
     const restaurantInfo = await this.menuService.getRestaurantInfo(restaurantSlug);
 

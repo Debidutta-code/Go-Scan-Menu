@@ -1,7 +1,7 @@
 // src/controllers/staff.controller.ts
 import { Request, Response } from 'express';
 import { StaffService } from '@/services/staff.service';
-import { catchAsync, sendResponse } from '@/utils';
+import { catchAsync, sendResponse, ParamsUtil } from '@/utils';
 
 export class StaffController {
   private staffService: StaffService;
@@ -28,7 +28,7 @@ export class StaffController {
   });
 
   getStaff = catchAsync(async (req: Request, res: Response) => {
-    const staff = await this.staffService.getStaff(req.params.id);
+    const staff = await this.staffService.getStaff(ParamsUtil.getString(req.params.id));
     sendResponse(res, 200, {
       message: 'Staff retrieved successfully',
       data: staff,
@@ -41,7 +41,7 @@ export class StaffController {
     const filter = req.query.filter ? JSON.parse(req.query.filter as string) : {};
 
     const result = await this.staffService.getStaffByRestaurant(
-      req.params.restaurantId,
+      ParamsUtil.getString(req.params.restaurantId),
       filter,
       page,
       limit
@@ -56,7 +56,7 @@ export class StaffController {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
 
-    const result = await this.staffService.getStaffByBranch(req.params.branchId, page, limit);
+    const result = await this.staffService.getStaffByBranch(ParamsUtil.getString(req.params.branchId), page, limit);
     sendResponse(res, 200, {
       message: 'Staff retrieved successfully',
       data: result,
@@ -64,7 +64,7 @@ export class StaffController {
   });
 
   updateStaff = catchAsync(async (req: Request, res: Response) => {
-    const staff = await this.staffService.updateStaff(req.params.id, req.body);
+    const staff = await this.staffService.updateStaff(ParamsUtil.getString(req.params.id), req.body);
     sendResponse(res, 200, {
       message: 'Staff updated successfully',
       data: staff,
@@ -73,7 +73,7 @@ export class StaffController {
 
   updateStaffRole = catchAsync(async (req: Request, res: Response) => {
     const { staffType } = req.body;
-    const staff = await this.staffService.updateStaffType(req.params.id, staffType);
+    const staff = await this.staffService.updateStaffType(ParamsUtil.getString(req.params.id), staffType);
     sendResponse(res, 200, {
       message: 'Staff type updated successfully',
       data: staff,
@@ -81,7 +81,7 @@ export class StaffController {
   });
 
   deleteStaff = catchAsync(async (req: Request, res: Response) => {
-    const staff = await this.staffService.deleteStaff(req.params.id);
+    const staff = await this.staffService.deleteStaff(ParamsUtil.getString(req.params.id));
     sendResponse(res, 200, {
       message: 'Staff deleted successfully',
       data: staff,

@@ -1,7 +1,7 @@
 // src/controllers/menuitem.controller.ts
 import { Request, Response } from 'express';
 import { MenuItemService } from '@/services/menuitem.service';
-import { catchAsync, sendResponse } from '@/utils';
+import { catchAsync, ParamsUtil, sendResponse } from '@/utils';
 
 export class MenuItemController {
   private menuItemService: MenuItemService;
@@ -38,7 +38,7 @@ export class MenuItemController {
   });
 
   getMenuItemsByCategory = catchAsync(async (req: Request, res: Response) => {
-    const { categoryId } = req.params;
+    const categoryId = ParamsUtil.getString(req.params.categoryId);
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
 
@@ -73,7 +73,7 @@ export class MenuItemController {
   });
 
   getMenuItemsByBranch = catchAsync(async (req: Request, res: Response) => {
-    const { branchId } = req.params;
+    const branchId = ParamsUtil.getString(req.params.branchId);
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
 
@@ -135,8 +135,8 @@ export class MenuItemController {
   });
 
   updateBranchPricing = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const { branchId } = req.params;
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
+    const branchId = ParamsUtil.getString(req.params.branchId);
     const { price, discountPrice, isAvailable } = req.body;
 
     if (!price || isAvailable === undefined) {
@@ -147,7 +147,7 @@ export class MenuItemController {
     }
 
     const menuItem = await this.menuItemService.updateBranchPricing(
-      req.params.id,
+      ParamsUtil.getString(req.params.id),
       restaurantId!,
       branchId,
       { price, discountPrice, isAvailable }

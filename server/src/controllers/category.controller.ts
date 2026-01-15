@@ -1,7 +1,7 @@
 // src/controllers/category.controller.ts
 import { Request, Response } from 'express';
 import { CategoryService } from '@/services/category.service';
-import { catchAsync, sendResponse } from '@/utils';
+import { catchAsync, ParamsUtil, sendResponse } from '@/utils';
 
 export class CategoryController {
   private categoryService: CategoryService;
@@ -57,7 +57,7 @@ export class CategoryController {
   });
 
   getCategoriesByBranch = catchAsync(async (req: Request, res: Response) => {
-    const { branchId } = req.params;
+    const branchId = ParamsUtil.getString(req.params.branchId);
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
 
