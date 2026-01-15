@@ -20,6 +20,7 @@ import { EditStaff } from './pages/staff/EditStaff';
 import { RolePermissions } from './pages/staff/RolePermissions';
 import { BranchSelection } from './pages/staff/BranchSelection';
 import { TableManagement } from './pages/staff/TableManagement';
+import { PublicMenu } from './pages/public/PublicMenu';
 
 import { RestaurantList } from './pages/restaurants/RestaurantList';
 import { CreateRestaurant } from './pages/restaurants/CreateRestaurant';
@@ -218,6 +219,10 @@ function App() {
           </StaffAuthProvider>
         }
       />
+
+      {/* ========== PUBLIC MENU ROUTES (No Authentication) ========== */}
+      <Route path="/menu/:restaurantSlug/:branchCode/:qrCode" element={<PublicMenu />} />
+      <Route path="/menu/:restaurantSlug/:branchCode" element={<PublicMenu />} />
 
       {/* Global 404 */}
       <Route
