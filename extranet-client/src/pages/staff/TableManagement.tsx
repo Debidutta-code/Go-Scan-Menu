@@ -106,6 +106,7 @@ export const TableManagement: React.FC = () => {
   };
 
   const handleShowQR = (table: Table) => {
+    console.log("table data is ----- ", table);
     setSelectedTable(table);
     setQrModalOpen(true);
   };

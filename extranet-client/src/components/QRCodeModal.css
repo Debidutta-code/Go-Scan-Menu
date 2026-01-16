@@ -1,6 +1,6 @@
 /* src/components/QRCodeModal.css */
 
-.modal-overlay {
+.qr-code-modal-component-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -14,17 +14,17 @@
   padding: 1rem;
 }
 
-.modal-content {
+.qr-code-modal-component-content {
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-  max-width: 600px;
+  max-width: 900px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
 }
 
-.modal-header {
+.qr-code-modal-component-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -32,14 +32,14 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
-.modal-title {
+.qr-code-modal-component-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: #1a202c;
   margin: 0;
 }
 
-.modal-close {
+.qr-code-modal-component-close {
   background: none;
   border: none;
   font-size: 2rem;
@@ -56,36 +56,55 @@
   transition: all 0.2s;
 }
 
-.modal-close:hover {
+.qr-code-modal-component-close:hover {
   background-color: #edf2f7;
   color: #2d3748;
 }
 
-.modal-body {
+.qr-code-modal-component-body {
   padding: 1.5rem;
 }
 
-.loading-state,
-.error-state {
+.qr-code-modal-component-loading,
+.qr-code-modal-component-error {
   text-align: center;
   padding: 2rem;
   color: #718096;
 }
 
-.error-state {
+.qr-code-modal-component-error {
   color: #e53e3e;
 }
 
-.qr-display {
+/* Split Layout - Settings Left, QR Right */
+.qr-code-modal-component-split-layout {
   display: flex;
+  gap: 2rem;
+}
+
+.qr-code-modal-component-settings-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.qr-code-modal-component-qr-preview-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
+  padding: 1rem;
   background-color: #f7fafc;
   border-radius: 8px;
 }
 
-.qr-image {
+.qr-code-modal-component-qr-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-code-modal-component-qr-image {
   max-width: 300px;
   width: 100%;
   height: auto;
@@ -94,23 +113,23 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.qr-info {
-  margin-bottom: 1.5rem;
+.qr-code-modal-component-qr-info {
+  margin-bottom: 0;
 }
 
-.qr-url-label {
+.qr-code-modal-component-url-label {
   font-size: 0.875rem;
   font-weight: 600;
   color: #4a5568;
   margin-bottom: 0.5rem;
 }
 
-.qr-url-container {
+.qr-code-modal-component-url-container {
   display: flex;
   gap: 0.5rem;
 }
 
-.qr-url-input {
+.qr-code-modal-component-url-input {
   flex: 1;
   padding: 0.5rem 0.75rem;
   border: 1px solid #cbd5e0;
@@ -120,42 +139,42 @@
   background-color: #f7fafc;
 }
 
-.qr-url-input:focus {
+.qr-code-modal-component-url-input:focus {
   outline: none;
   border-color: #3182ce;
 }
 
-.qr-actions {
+.qr-code-modal-component-actions {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
 }
 
-.qr-actions button {
+.qr-code-modal-component-actions button {
   flex: 1;
-  min-width: 150px;
+  min-width: 120px;
 }
 
 /* Form styles for table modals */
-.table-form {
+.qr-code-modal-component-table-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.form-field {
+.qr-code-modal-component-form-field {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-label {
+.qr-code-modal-component-form-label {
   font-size: 0.875rem;
   font-weight: 600;
   color: #4a5568;
 }
 
-.form-select {
+.qr-code-modal-component-form-select {
   padding: 0.5rem 0.75rem;
   border: 1px solid #cbd5e0;
   border-radius: 6px;
@@ -165,19 +184,19 @@
   cursor: pointer;
 }
 
-.form-select:focus {
+.qr-code-modal-component-form-select:focus {
   outline: none;
   border-color: #3182ce;
   box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
 }
 
-.form-row {
+.qr-code-modal-component-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.form-actions {
+.qr-code-modal-component-form-actions {
   display: flex;
   gap: 0.75rem;
   margin-top: 1rem;
@@ -185,116 +204,95 @@
   border-top: 1px solid #e2e8f0;
 }
 
-.form-actions button {
+.qr-code-modal-component-form-actions button {
   flex: 1;
 }
 
-.preview-section {
+.qr-code-modal-component-preview-section {
   padding: 1rem;
   background-color: #f7fafc;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
 }
 
-.preview-title {
+.qr-code-modal-component-preview-title {
   font-size: 0.875rem;
   font-weight: 600;
   color: #4a5568;
   margin: 0 0 0.5rem 0;
 }
 
-.preview-text {
+.qr-code-modal-component-preview-text {
   font-size: 0.875rem;
   color: #2d3748;
   margin: 0 0 0.5rem 0;
 }
 
-.preview-examples {
-  font-size: 0.875rem;
+.qr-code-modal-component-preview-note {
+  font-size: 0.75rem;
   color: #718096;
-  font-family: 'Courier New', monospace;
-  margin: 0;
-  padding: 0.5rem;
-  background-color: white;
-  border-radius: 4px;
+  margin: 0.5rem 0 0 0;
 }
 
-@media (max-width: 640px) {
-  .modal-content {
-    margin: 0;
-    max-height: 100vh;
-    border-radius: 0;
-  }
-
-  .qr-actions {
-    flex-direction: column;
-  }
-
-  .qr-actions button {
-    width: 100%;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
+.qr-code-modal-component-mt-4 { 
+  margin-top: 1rem; 
 }
 
-.split-layout {
-  display: flex;
-  gap: 2rem;
-  padding: 1.5rem;
+.qr-code-modal-component-mt-6 { 
+  margin-top: 1.5rem; 
 }
 
-.settings-panel {
-  flex: 1;
-  min-width: 0;
-}
-
-.qr-preview-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.qr-display {
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.mt-4 { margin-top: 1rem; }
-.mt-6 { margin-top: 1.5rem; }
-
-.logo-preview {
+.qr-code-modal-component-logo-preview {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
 }
 
-.full-width {
+.qr-code-modal-component-full-width {
   width: 100%;
   text-align: center;
   padding: 3rem 1rem;
 }
 
-/* Mobile stacking */
+/* Mobile stacking - Settings on top, QR on bottom */
 @media (max-width: 768px) {
-  .split-layout {
+  .qr-code-modal-component-content {
+    margin: 0;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .qr-code-modal-component-split-layout {
     flex-direction: column;
     gap: 1.5rem;
   }
 
-  .qr-preview-panel {
-    order: -1; /* QR on top on mobile */
+  .qr-code-modal-component-qr-preview-panel {
+    order: 1; /* QR on bottom on mobile */
   }
 
-  .qr-display {
+  .qr-code-modal-component-settings-panel {
+    order: 0; /* Settings on top on mobile */
+  }
+
+  .qr-code-modal-component-qr-display {
     padding: 1rem;
   }
 
-  .mobile-close {
+  .qr-code-modal-component-actions {
+    flex-direction: column;
+  }
+
+  .qr-code-modal-component-actions button {
+    width: 100%;
+  }
+
+  .qr-code-modal-component-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-code-modal-component-mobile-close {
     display: block;
     padding: 1rem 1.5rem;
     border-top: 1px solid #e2e8f0;
@@ -303,7 +301,7 @@
 
 /* Hide mobile close on desktop */
 @media (min-width: 769px) {
-  .mobile-close {
+  .qr-code-modal-component-mobile-close {
     display: none;
   }
 }
