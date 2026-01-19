@@ -20,6 +20,7 @@ import { EditStaff } from './pages/staff/EditStaff';
 import { RolePermissions } from './pages/staff/RolePermissions';
 import { BranchSelection } from './pages/staff/BranchSelection';
 import { TableManagement } from './pages/staff/TableManagement';
+import { QRManagement } from './pages/staff/QRManagement';
 import { PublicMenu } from './pages/public/PublicMenu';
 
 import { RestaurantList } from './pages/restaurants/RestaurantList';
@@ -206,6 +207,14 @@ function App() {
                 element={
                   <ProtectedStaffRoute>
                     <TableManagement />
+                  </ProtectedStaffRoute>
+                }
+              />
+              <Route
+                path="tables/:branchId/qr-settings"
+                element={
+                  <ProtectedStaffRoute>
+                    <QRManagement />
                   </ProtectedStaffRoute>
                 }
               />

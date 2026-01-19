@@ -12,6 +12,7 @@ import menuItemRoutes from './menuitem.routes';
 import publicMenuRoutes from './public.menu.routes';
 import taxRoutes from './tax.routes';
 import orderRoutes from './order.routes';
+import qrConfigRoutes from './qrconfig.routes';
 
 const router = Router();
 
@@ -38,6 +39,9 @@ router.use('/restaurants/:restaurantId/taxes', taxRoutes);
 
 // Order Management (nested under restaurants)
 router.use('/restaurants/:restaurantId/orders', orderRoutes);
+
+// QR Config Management (nested under restaurants)
+router.use('/restaurants/:restaurantId/qr-config', qrConfigRoutes);
 
 // Register public routes (no auth required)
 router.use('/public', publicMenuRoutes);

@@ -13,3 +13,4 @@ export { Order, IOrder } from './Order.model';
 export { CustomerSession, ICustomerSession } from './CustomerSession.model';
 export { Notification, INotification } from './Notification.model';
 export { Analytics, IAnalytics } from './Analytics.model';
+export { QRConfig, IQRConfig } from './QRConfig.model';

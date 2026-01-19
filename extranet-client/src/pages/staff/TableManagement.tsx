@@ -183,6 +183,33 @@ export const TableManagement: React.FC = () => {
             {branch && <p className="branch-subtitle">{branch.name}</p>}
           </div>
         </div>
+        <div className="header-actions">
+          {canManageTables() && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/staff/tables/${branchId}/qr-settings`)}
+                data-testid="manage-qr-button"
+              >
+                🎨 Manage QR Codes
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setCreateModalOpen(true)}
+                data-testid="add-table-button"
+              >
+                + Add Table
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => setBulkCreateModalOpen(true)}
+                data-testid="bulk-add-button"
+              >
+                + Bulk Add Tables
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {error && <div className="error-banner">{error}</div>}
