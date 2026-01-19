@@ -593,3 +593,183 @@
     height: auto;
   }
 }
+
+/* Design Mode Section */
+.qr-design-mode-section {
+  margin-bottom: 1.5rem;
+}
+
+.qr-design-mode-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.qr-design-mode-btn {
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.qr-design-mode-btn:hover {
+  border-color: #cbd5e0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.qr-design-mode-btn.active {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+}
+
+.qr-design-mode-btn .mode-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.qr-design-mode-btn .mode-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.qr-design-mode-btn .mode-desc {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.qr-design-mode-btn.active .mode-name,
+.qr-design-mode-btn.active .mode-desc {
+  color: white;
+}
+
+/* Template Categories */
+.qr-template-categories {
+  margin-bottom: 1.5rem;
+}
+
+.qr-category-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.qr-category-btn {
+  padding: 0.5rem 0.875rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  color: #1e293b;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  transition: all 0.2s;
+}
+
+.qr-category-btn:hover {
+  border-color: #cbd5e0;
+  transform: translateY(-1px);
+}
+
+.qr-category-btn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Templates Section */
+.qr-templates-section {
+  margin-bottom: 1.5rem;
+}
+
+.qr-templates-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.qr-template-button {
+  padding: 0.875rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.qr-template-button:hover {
+  border-color: #cbd5e0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.qr-template-button.active {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
+}
+
+.qr-template-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.qr-template-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.qr-template-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.qr-template-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+/* Enhanced QR Preview Panel for Templates */
+.qr-code-modal-component-qr-preview-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Responsive Updates */
+@media (max-width: 768px) {
+  .qr-design-mode-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-category-buttons {
+    justify-content: center;
+  }
+
+  .qr-templates-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-template-button {
+    padding: 1rem;
+  }
+}
