@@ -72,8 +72,8 @@ export const PublicMenu: React.FC = () => {
 
     try {
       const endpoint = qrCode
-        ? `/api/v1/menu/${restaurantSlug}/${branchCode}/${qrCode}`
-        : `/api/v1/menu/${restaurantSlug}/${branchCode}`;
+        ? `/api/v1/public/menu/${restaurantSlug}/${branchCode}/${qrCode}`
+        : `/api/v1/public/menu/${restaurantSlug}/${branchCode}`;
 
       const response = await fetch(`http://localhost:8080${endpoint}`);
       const data = await response.json();
