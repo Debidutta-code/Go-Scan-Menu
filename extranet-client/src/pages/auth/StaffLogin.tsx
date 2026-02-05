@@ -54,7 +54,7 @@ export const StaffLoginPage: React.FC<{}> = () => {
         setLoading(true);
 
         try {
-            await login(email, password, role);
+            await login(email, password);
             // Redirect to staff dashboard
             navigate('/staff/dashboard');
         } catch (err: any) {

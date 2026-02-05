@@ -109,6 +109,7 @@ export interface MenuItemListResponse {
   total: number;
   page: number;
   limit: number;
+  items: any;
   totalPages: number;
 }
 

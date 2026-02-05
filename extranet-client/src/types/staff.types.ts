@@ -11,7 +11,7 @@ export interface RestaurantInfo {
 
 export interface Staff {
   _id: string;
-  restaurantId: string;
+  restaurantId: any;
   branchId?: string;
   name: string;
   email: string;
