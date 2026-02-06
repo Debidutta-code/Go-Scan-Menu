@@ -1,13 +1,20 @@
-// src/App.tsx
-
-// src/App.tsx
-
+import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+
 import { useAuth } from './contexts/AuthContext';
 import { StaffAuthProvider, useStaffAuth } from './contexts/StaffAuthContext';
+
+/* ===================== SUPER ADMIN PAGES ===================== */
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { LoginPage } from './pages/auth/Login';
 import { RegisterPage } from './pages/auth/Register';
+
+import { RestaurantList } from './pages/restaurants/RestaurantList';
+import { CreateRestaurant } from './pages/restaurants/CreateRestaurant';
+import { ViewRestaurant } from './pages/restaurants/ViewRestaurant';
+import { EditRestaurant } from './pages/restaurants/EditRestaurant';
+
+/* ===================== STAFF PAGES ===================== */
 import { StaffLoginPage } from './pages/auth/StaffLogin';
 import { StaffDashboard } from './pages/staff/StaffDashboard';
 import { MenuManagement } from './pages/staff/MenuManagement';
@@ -21,224 +28,246 @@ import { RolePermissions } from './pages/staff/RolePermissions';
 import { BranchSelection } from './pages/staff/BranchSelection';
 import { TableManagement } from './pages/staff/TableManagement';
 import { QRManagement } from './pages/staff/QRManagement';
+
+/* ===================== PUBLIC ===================== */
 import { PublicMenu } from './pages/public/PublicMenu';
 
-import { RestaurantList } from './pages/restaurants/RestaurantList';
-import { CreateRestaurant } from './pages/restaurants/CreateRestaurant';
-import { ViewRestaurant } from './pages/restaurants/ViewRestaurant';
-import { EditRestaurant } from './pages/restaurants/EditRestaurant';
+/* ===================== PROTECTED ROUTES ===================== */
 
-// Protected Admin Route Component
-const ProtectedAdminRoute = ({ children }: { children: any }) => {
+// Super Admin Protection
+const ProtectedAdminRoute = ({ children }: { children: React.JSX.Element }) => {
   const { superAdmin, isLoading } = useAuth();
+
   if (isLoading) return <div>Loading...</div>;
-  return superAdmin ? children : <Navigate to="/login" replace />;
+
+  return superAdmin ? children : <Navigate to="/sadmin/login" replace />;
 };
 
-// Protected Staff Route Component
-const ProtectedStaffRoute = ({ children }: { children: any }) => {
+// Staff Protection
+const ProtectedStaffRoute = ({ children }: { children: React.JSX.Element }) => {
   const { isAuthenticated, isLoading } = useStaffAuth();
 
   if (isLoading) return <div>Loading staff portal...</div>;
+
   return isAuthenticated ? children : <Navigate to="/staff/login" replace />;
 };
+
+/* ===================== APP ===================== */
 
 function App() {
   const { superAdmin } = useAuth();
 
   return (
-    <Routes>
-      {/* Root Redirect */}
-      <Route
-        path="/"
-        element={<Navigate to={superAdmin ? '/dashboard' : '/login'} replace />}
-      />
+    <StaffAuthProvider>
+      <Routes>
 
-      {/* Super Admin Routes */}
-      <Route
-        path="/login"
-        element={superAdmin ? <Navigate to="/dashboard" replace /> : <LoginPage />}
-      />
-      <Route
-        path="/register"
-        element={superAdmin ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
-      />
+        {/* ================= ROOT ================= */}
+        <Route
+          path="/"
+          element={
+            <Navigate
+              to={superAdmin ? '/dashboard' : '/staff/login'}
+              replace
+            />
+          }
+        />
 
-      <Route
-        path="/dashboard"
-        element={<ProtectedAdminRoute><Dashboard /></ProtectedAdminRoute>}
-      />
-      <Route
-        path="/restaurants"
-        element={<ProtectedAdminRoute><RestaurantList /></ProtectedAdminRoute>}
-      />
-      <Route
-        path="/restaurants/create"
-        element={<ProtectedAdminRoute><CreateRestaurant /></ProtectedAdminRoute>}
-      />
-      <Route
-        path="/restaurants/:id"
-        element={<ProtectedAdminRoute><ViewRestaurant /></ProtectedAdminRoute>}
-      />
-      <Route
-        path="/restaurants/:id/edit"
-        element={<ProtectedAdminRoute><EditRestaurant /></ProtectedAdminRoute>}
-      />
+        {/* ================= SUPER ADMIN AUTH ================= */}
+        <Route
+          path="/sadmin/login"
+          element={superAdmin ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+        />
+        <Route
+          path="/register"
+          element={superAdmin ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
+        />
 
-      {/* ========== STAFF PORTAL ROUTES ========== */}
-      {/* Wrap ALL staff routes (including login) with StaffAuthProvider */}
-      <Route
-        path="/staff/*"
-        element={
-          <StaffAuthProvider>
-            <Routes>
-              {/* Public: Staff Login */}
-              <Route path="login" element={<StaffLoginPage />} />
+        {/* ================= SUPER ADMIN ================= */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedAdminRoute>
+              <Dashboard />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/restaurants"
+          element={
+            <ProtectedAdminRoute>
+              <RestaurantList />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/restaurants/create"
+          element={
+            <ProtectedAdminRoute>
+              <CreateRestaurant />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/restaurants/:id"
+          element={
+            <ProtectedAdminRoute>
+              <ViewRestaurant />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/restaurants/:id/edit"
+          element={
+            <ProtectedAdminRoute>
+              <EditRestaurant />
+            </ProtectedAdminRoute>
+          }
+        />
 
-              {/* Protected Staff Pages */}
-              <Route
-                path="dashboard"
-                element={
-                  <ProtectedStaffRoute>
-                    <StaffDashboard />
-                  </ProtectedStaffRoute>
-                }
-              />
+        {/* ================= STAFF AUTH ================= */}
+        <Route path="/staff/login" element={<StaffLoginPage />} />
 
-              {/* Menu Management Routes */}
-              <Route
-                path="menu"
-                element={
-                  <ProtectedStaffRoute>
-                    <MenuManagement />
-                  </ProtectedStaffRoute>
-                }
-              />
-              <Route
-                path="menu/add"
-                element={
-                  <ProtectedStaffRoute>
-                    <AddEditMenuItem />
-                  </ProtectedStaffRoute>
-                }
-              />
-              <Route
-                path="menu/edit/:id"
-                element={
-                  <ProtectedStaffRoute>
-                    <AddEditMenuItem />
-                  </ProtectedStaffRoute>
-                }
-              />
+        {/* ================= STAFF PORTAL ================= */}
+        <Route
+          path="/staff/dashboard"
+          element={
+            <ProtectedStaffRoute>
+              <StaffDashboard />
+            </ProtectedStaffRoute>
+          }
+        />
 
-              {/* Category Management Routes */}
-              <Route
-                path="categories"
-                element={
-                  <ProtectedStaffRoute>
-                    <CategoryManagement />
-                  </ProtectedStaffRoute>
-                }
-              />
-              <Route
-                path="categories/add"
-                element={
-                  <ProtectedStaffRoute>
-                    <AddEditCategory />
-                  </ProtectedStaffRoute>
-                }
-              />
-              <Route
-                path="categories/edit/:id"
-                element={
-                  <ProtectedStaffRoute>
-                    <AddEditCategory />
-                  </ProtectedStaffRoute>
-                }
-              />
+        {/* Menu */}
+        <Route
+          path="/staff/menu"
+          element={
+            <ProtectedStaffRoute>
+              <MenuManagement />
+            </ProtectedStaffRoute>
+          }
+        />
+        <Route
+          path="/staff/menu/add"
+          element={
+            <ProtectedStaffRoute>
+              <AddEditMenuItem />
+            </ProtectedStaffRoute>
+          }
+        />
+        <Route
+          path="/staff/menu/edit/:id"
+          element={
+            <ProtectedStaffRoute>
+              <AddEditMenuItem />
+            </ProtectedStaffRoute>
+          }
+        />
 
-              {/* Staff Management Routes */}
-              <Route
-                path="team"
-                element={
-                  <ProtectedStaffRoute>
-                    <StaffList />
-                  </ProtectedStaffRoute>
-                }
-              />
-              <Route
-                path="team/add"
-                element={
-                  <ProtectedStaffRoute>
-                    <AddStaff />
-                  </ProtectedStaffRoute>
-                }
-              />
-              <Route
-                path="team/edit/:id"
-                element={
-                  <ProtectedStaffRoute>
-                    <EditStaff />
-                  </ProtectedStaffRoute>
-                }
-              />
+        {/* Categories */}
+        <Route
+          path="/staff/categories"
+          element={
+            <ProtectedStaffRoute>
+              <CategoryManagement />
+            </ProtectedStaffRoute>
+          }
+        />
+        <Route
+          path="/staff/categories/add"
+          element={
+            <ProtectedStaffRoute>
+              <AddEditCategory />
+            </ProtectedStaffRoute>
+          }
+        />
+        <Route
+          path="/staff/categories/edit/:id"
+          element={
+            <ProtectedStaffRoute>
+              <AddEditCategory />
+            </ProtectedStaffRoute>
+          }
+        />
 
-              {/* Role Permissions Route */}
-              <Route
-                path="permissions"
-                element={
-                  <ProtectedStaffRoute>
-                    <RolePermissions />
-                  </ProtectedStaffRoute>
-                }
-              />
+        {/* Staff */}
+        <Route
+          path="/staff/team"
+          element={
+            <ProtectedStaffRoute>
+              <StaffList />
+            </ProtectedStaffRoute>
+          }
+        />
+        <Route
+          path="/staff/team/add"
+          element={
+            <ProtectedStaffRoute>
+              <AddStaff />
+            </ProtectedStaffRoute>
+          }
+        />
+        <Route
+          path="/staff/team/edit/:id"
+          element={
+            <ProtectedStaffRoute>
+              <EditStaff />
+            </ProtectedStaffRoute>
+          }
+        />
 
-              {/* Table Management Routes */}
-              <Route
-                path="tables"
-                element={
-                  <ProtectedStaffRoute>
-                    <BranchSelection />
-                  </ProtectedStaffRoute>
-                }
-              />
-              <Route
-                path="tables/:branchId"
-                element={
-                  <ProtectedStaffRoute>
-                    <TableManagement />
-                  </ProtectedStaffRoute>
-                }
-              />
-              <Route
-                path="tables/:branchId/qr-settings"
-                element={
-                  <ProtectedStaffRoute>
-                    <QRManagement />
-                  </ProtectedStaffRoute>
-                }
-              />
+        {/* Permissions */}
+        <Route
+          path="/staff/permissions"
+          element={
+            <ProtectedStaffRoute>
+              <RolePermissions />
+            </ProtectedStaffRoute>
+          }
+        />
 
-              {/* Default staff route - redirect to dashboard when accessing /staff directly */}
-              <Route index element={<Navigate to="dashboard" replace />} />
+        {/* Tables */}
+        <Route
+          path="/staff/tables"
+          element={
+            <ProtectedStaffRoute>
+              <BranchSelection />
+            </ProtectedStaffRoute>
+          }
+        />
+        <Route
+          path="/staff/tables/:branchId"
+          element={
+            <ProtectedStaffRoute>
+              <TableManagement />
+            </ProtectedStaffRoute>
+          }
+        />
+        <Route
+          path="/staff/tables/:branchId/qr-settings"
+          element={
+            <ProtectedStaffRoute>
+              <QRManagement />
+            </ProtectedStaffRoute>
+          }
+        />
 
-              {/* 404 inside staff portal */}
-              <Route path="*" element={<div>Staff Page Not Found</div>} />
-            </Routes>
-          </StaffAuthProvider>
-        }
-      />
+        {/* ================= PUBLIC MENU ================= */}
+        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode" element={<PublicMenu />} />
+        <Route path="/menu/:restaurantSlug/:branchCode" element={<PublicMenu />} />
 
-      {/* ========== PUBLIC MENU ROUTES (No Authentication) ========== */}
-      <Route path="/menu/:restaurantSlug/:branchCode/:qrCode" element={<PublicMenu />} />
-      <Route path="/menu/:restaurantSlug/:branchCode" element={<PublicMenu />} />
+        {/* ================= 404 ================= */}
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to={superAdmin ? '/dashboard' : '/staff/login'}
+              replace
+            />
+          }
+        />
 
-      {/* Global 404 */}
-      <Route
-        path="*"
-        element={<Navigate to={superAdmin ? '/dashboard' : '/login'} replace />}
-      />
-    </Routes>
+      </Routes>
+    </StaffAuthProvider>
   );
 }
 

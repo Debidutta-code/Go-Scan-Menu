@@ -12,4 +12,5 @@ export const envConfig = {
   bcrypt: {
     saltRounds: Number(process.env.BCRYPT_SALT_ROUNDS ?? 10),
   },
+  cors_origins: process.env.CORS_ORIGINS,
 };

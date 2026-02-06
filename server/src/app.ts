@@ -1,38 +1,40 @@
 import express from 'express';
-import cors from 'cors';
-import apiV1Routes from './routes';
-import { requestLogger } from '@/config';
+import apiV1Routes from '@/routes';
+import { requestLogger, corsMiddleware } from '@/config';
 import { AppError } from '@/utils';
 import { globalErrorHandler } from '@/middlewares';
-import { envConfig } from '@/config';
 
 const app = express();
 
-// CORS configuration
-app.use(
-  cors({
-    origin: envConfig.CLIENT_URL || '*',
-    credentials: true,
-  })
-);
+/* ===================== GLOBAL MIDDLEWARE ===================== */
 
+// Enable CORS (env-based allowed origins)
+app.use(corsMiddleware);
+
+// Parse JSON request bodies
 app.use(express.json());
+
+// Log incoming requests
 app.use(requestLogger);
 
-// Health check
-app.get('/health', (req, res) => {
+/* ===================== ROUTES ===================== */
+
+// Health check endpoint
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
-// API v1
+// API v1 routes
 app.use('/api/v1', apiV1Routes);
 
-// 404 handler
+/* ===================== ERROR HANDLING ===================== */
+
+// Handle unknown routes
 app.use((req, _res, next) => {
   next(new AppError(`Can't find ${req.originalUrl}`, 404));
 });
 
-// Global error handler
+// Centralized error handler (must be last)
 app.use(globalErrorHandler);
 
 export default app;

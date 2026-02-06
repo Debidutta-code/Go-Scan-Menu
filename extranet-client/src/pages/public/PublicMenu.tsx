@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import './PublicMenu.css';
+import env from '@/config/env';
 
 interface MenuItem {
   id: string;
@@ -51,6 +52,7 @@ interface MenuData {
 }
 
 export const PublicMenu: React.FC = () => {
+  const clientUrl = env.CLIENT_URL;
   const { restaurantSlug, branchCode, qrCode } = useParams<{
     restaurantSlug: string;
     branchCode: string;

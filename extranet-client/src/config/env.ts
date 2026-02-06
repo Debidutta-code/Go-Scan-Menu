@@ -13,6 +13,7 @@ const env = {
 
   IS_DEV: import.meta.env.DEV,
   IS_PROD: import.meta.env.PROD,
+  CLIENT_URL: import.meta.env.VITE_CLIENT_URL as string,
 };
 
 export default env;

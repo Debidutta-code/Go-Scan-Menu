@@ -10,10 +10,6 @@ export const staffLoginSchema = z.object({
   password: z
     .string()
     .min(6, 'Password must be at least 6 characters'),
-  role: z.enum(
-    ['owner', 'branch_manager', 'manager', 'waiter', 'kitchen_staff', 'cashier'],
-    { required_error: 'Role is required' }
-  ),
 });
 
 export const createStaffSchema = z.object({
