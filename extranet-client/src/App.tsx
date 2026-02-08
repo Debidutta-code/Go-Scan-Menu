@@ -30,7 +30,7 @@ import { TableManagement } from './pages/staff/TableManagement';
 import { QRManagement } from './pages/staff/QRManagement';
 
 /* ===================== PUBLIC ===================== */
-import { PublicMenu } from './pages/public/PublicMenu';
+import { MenuPage } from './public-app/pages/Menu/MenuPage';
 
 /* ===================== PROTECTED ROUTES ===================== */
 
@@ -252,8 +252,8 @@ function App() {
         />
 
         {/* ================= PUBLIC MENU ================= */}
-        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode" element={<PublicMenu />} />
-        <Route path="/menu/:restaurantSlug/:branchCode" element={<PublicMenu />} />
+        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode" element={<MenuPage />} />
+        <Route path="/menu/:restaurantSlug/:branchCode" element={<MenuPage />} />
 
         {/* ================= 404 ================= */}
         <Route
