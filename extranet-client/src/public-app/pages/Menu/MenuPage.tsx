@@ -43,7 +43,7 @@ export const MenuPage: React.FC = () => {
   };
 
   return (
-    <div className="menu-page-wrapper">
+    <div className="wrapper-menu-page">
       <CategoryFilter
         categories={menuData.menu}
         activeCategory={activeCategory}

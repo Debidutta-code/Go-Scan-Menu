@@ -41,7 +41,7 @@ export const PublicLayout: React.FC = () => {
       <div className="public-layout">
         <Navbar restaurant={menuData.restaurant} table={menuData.table} />
 
-        <main className="public-layout-content">
+        <main className="">
           <Outlet />
         </main>
 
