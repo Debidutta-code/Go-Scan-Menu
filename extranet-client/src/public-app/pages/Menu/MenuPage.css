@@ -11,5 +11,8 @@
 .wrapper-menu-page {
   width: 100%;
   min-height: 100vh;
+  min-height: 100%!important;
   background-color: #ffffff;
+  bottom: 0px;
+  padding-bottom: 110px;
 }
