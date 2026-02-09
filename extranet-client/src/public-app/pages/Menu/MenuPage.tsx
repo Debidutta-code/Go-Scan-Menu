@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Navbar } from '../../components/common/Navbar/Navbar';
+import { BottomNav } from '../../components/common/BottomNav/BottomNav';
 import { Loading } from '../../components/common/Loading/Loading';
 import { Error } from '../../components/common/Error/Error';
 import { CategoryFilter } from '../../components/menu/CategoryFilter/CategoryFilter';
@@ -99,6 +100,13 @@ export const MenuPage: React.FC = () => {
           onAddToCart={handleAddToCart}
         />
       )}
+
+      <BottomNav
+        restaurantSlug={restaurantSlug!}
+        branchCode={branchCode!}
+        qrCode={qrCode}
+        cartItemCount={0}
+      />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { MenuResponse } from '../types/menu.types';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'http://localhost:8080'; // Change to your backend URL
 
 export const menuApi = {
   getMenu: async (
