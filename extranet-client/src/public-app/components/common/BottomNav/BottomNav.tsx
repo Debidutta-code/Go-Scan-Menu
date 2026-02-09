@@ -57,21 +57,21 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   };
 
   return (
-    <nav className="bottom-nav">
+    <nav className="bottom-nav-container">
       <div className="bottom-nav-content">
         {navItems.map((item) => (
           <button
             key={item.id}
-            className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
+            className={`bottom-nav-item ${isActive(item.path) ? 'active' : ''}`}
             onClick={() => navigate(item.path)}
           >
             <div style={{ position: 'relative' }}>
-              <span className="nav-icon">{item.icon}</span>
+              <span className="bottom-nav-icon">{item.icon}</span>
               {item.badge && item.badge > 0 && (
-                <span className="cart-badge">{item.badge}</span>
+                <span className="bottom-nav-cart-badge">{item.badge}</span>
               )}
             </div>
-            <span className="nav-label">{item.label}</span>
+            <span className="bottom-nav-label">{item.label}</span>
           </button>
         ))}
       </div>

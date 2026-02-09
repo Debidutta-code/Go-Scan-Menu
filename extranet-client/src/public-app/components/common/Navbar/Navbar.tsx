@@ -9,21 +9,25 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ restaurant, table }) => {
   return (
-    <nav className="public-navbar">
-      <div className="navbar-content">
-        <div className="navbar-left">
+    <nav className="pub-nav-container">
+      <div className="pub-nav-content">
+        <div className="pub-nav-left">
           {restaurant.logo && (
-            <img src={restaurant.logo} alt={restaurant.name} className="restaurant-logo" />
+            <img
+              src={restaurant.logo}
+              alt={restaurant.name}
+              className="pub-nav-logo"
+            />
           )}
-          <div className="restaurant-details">
-            <h1 className="restaurant-name">{restaurant.name}</h1>
+          <div className="pub-nav-details">
+            <h1 className="pub-nav-name">{restaurant.name}</h1>
           </div>
         </div>
         {table && (
-          <div className="navbar-right">
-            <div className="table-badge">
-              <span className="table-label">Table</span>
-              <span className="table-number">{table.tableNumber}</span>
+          <div className="pub-nav-right">
+            <div className="pub-nav-table-badge">
+              <span className="pub-nav-table-label">Table</span>
+              <span className="pub-nav-table-number">{table.tableNumber}</span>
             </div>
           </div>
         )}

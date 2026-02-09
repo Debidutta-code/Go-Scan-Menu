@@ -2,4 +2,11 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
+  background-color: #ffffff;
+}
+
+.wrapper-menu-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff;
 }

@@ -1,13 +1,14 @@
-.category-filter-container {
-  background-color: #ffffff;
+.public-category-filter-container {
+  background-color: hsl(0, 0%, 100%);
   position: sticky;
-  top: 73px;
+  top: 74px;
   z-index: 90;
   padding: 0.75rem 0;
+  margin: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.category-filter-scroll {
+.public-category-filter-scroll {
   display: flex;
   gap: 0.5rem;
   padding: 0 1rem;
@@ -18,11 +19,11 @@
   -ms-overflow-style: none;
 }
 
-.category-filter-scroll::-webkit-scrollbar {
+.public-category-filter-scroll::-webkit-scrollbar {
   display: none;
 }
 
-.category-filter-btn {
+.public-category-filter-btn {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -36,7 +37,7 @@
   min-width: 70px;
 }
 
-.category-filter-icon {
+.public-category-filter-icon {
   width: 48px;
   height: 48px;
   border-radius: 12px;
@@ -48,29 +49,29 @@
   overflow: hidden;
 }
 
-.category-filter-btn.active .category-filter-icon {
+.public-category-filter-btn.active .public-category-filter-icon {
   background-color: #1a202c;
 }
 
-.category-filter-btn:hover .category-filter-icon {
+.public-category-filter-btn:hover .public-category-filter-icon {
   transform: scale(1.05);
 }
 
-.category-emoji {
+.public-category-filter-emoji {
   font-size: 1.5rem;
 }
 
-.category-filter-btn.active .category-emoji {
+.public-category-filter-btn.active .public-category-filter-emoji {
   filter: grayscale(100%) brightness(3);
 }
 
-.category-filter-img {
+.public-category-filter-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.category-filter-name {
+.public-category-filter-name {
   font-size: 0.75rem;
   font-weight: 600;
   color: #4a5568;
@@ -79,21 +80,21 @@
   transition: color 0.2s;
 }
 
-.category-filter-btn.active .category-filter-name {
+.public-category-filter-btn.active .public-category-filter-name {
   color: #1a202c;
 }
 
 @media (max-width: 768px) {
-  .category-filter-container {
-    top: 65px;
+  .public-category-filter-container {
+    top: 66px;
   }
 
-  .category-filter-icon {
+  .public-category-filter-icon {
     width: 44px;
     height: 44px;
   }
 
-  .category-filter-btn {
+  .public-category-filter-btn {
     min-width: 65px;
   }
 }

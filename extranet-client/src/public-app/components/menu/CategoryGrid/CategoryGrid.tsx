@@ -18,25 +18,29 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, onCatego
   };
 
   return (
-    <div className="category-grid-section">
-      <h2 className="category-grid-title">Categories</h2>
-      <div className="category-grid">
+    <div className="public-category-grid-section">
+      <h2 className="public-category-grid-title">Categories</h2>
+      <div className="public-category-grid">
         {categories.map((category, index) => (
           <div
             key={category.id}
-            className={`category-card ${index % 3 === 0 ? 'large' : ''}`}
+            className={`public-category-grid-card ${index % 3 === 0 ? 'large' : ''}`}
             onClick={() => handleClick(category.id)}
           >
             {category.image ? (
-              <img src={category.image} alt={category.name} className="category-card-image" />
+              <img
+                src={category.image}
+                alt={category.name}
+                className="public-category-grid-card-image"
+              />
             ) : (
-              <div className="category-card-placeholder">
-                <span className="placeholder-icon">🍴</span>
+              <div className="public-category-grid-card-placeholder">
+                <span className="public-category-grid-placeholder-icon">🍴</span>
               </div>
             )}
-            <div className="category-card-overlay">
-              <h3 className="category-card-name">{category.name}</h3>
-              <p className="category-card-count">{category.items.length} items</p>
+            <div className="public-category-grid-card-overlay">
+              <h3 className="public-category-grid-card-name">{category.name}</h3>
+              <p className="public-category-grid-card-count">{category.items.length} items</p>
             </div>
           </div>
         ))}

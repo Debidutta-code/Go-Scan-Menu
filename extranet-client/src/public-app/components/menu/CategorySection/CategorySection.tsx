@@ -17,7 +17,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   onAddClick,
 }) => {
   return (
-    <section id={`category-${category.id}`} className="category-section">
+    <section id={`category-${category.id}`} className="category-section-container">
       <div className="category-section-header">
         <h2 className="category-section-title">{category.name}</h2>
         {category.description && (
@@ -25,7 +25,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
         )}
       </div>
 
-      <div className="menu-items-list">
+      <div className="category-section-items-list">
         {category.items.map((item) => (
           <MenuItemCard
             key={item.id}

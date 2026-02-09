@@ -6,8 +6,8 @@ export const CartPage: React.FC = () => {
   const { menuData } = usePublicApp();
 
   return (
-    <div className="cart-page-wrapper">
-      <div className="cart-container">
+    <div className="public-cart-page-wrapper">
+      <div className="public-cart-page-container">
         <h2>Hello World</h2>
         <p>Restaurant: {menuData.restaurant.name}</p>
       </div>

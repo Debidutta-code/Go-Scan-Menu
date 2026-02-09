@@ -18,7 +18,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
 
   useEffect(() => {
     if (scrollContainerRef.current) {
-      const activeButton = scrollContainerRef.current.querySelector('.category-filter-btn.active');
+      const activeButton = scrollContainerRef.current.querySelector('.public-category-filter-btn.active');
       if (activeButton) {
         activeButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
@@ -40,31 +40,36 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
   };
 
   return (
-    <div className="category-filter-container">
-      <div className="category-filter-scroll" ref={scrollContainerRef}>
+    <div className="public-category-filter-container">
+      <div className="public-category-filter-scroll" ref={scrollContainerRef}>
         <button
-          className={`category-filter-btn ${activeCategory === ALL_CATEGORIES_ID ? 'active' : ''}`}
+          className={`public-category-filter-btn ${activeCategory === ALL_CATEGORIES_ID ? 'active' : ''}`}
           onClick={() => handleCategoryClick(ALL_CATEGORIES_ID)}
         >
-          <div className="category-filter-icon">
-            <span className="category-emoji">🍽️</span>
+          <div className="public-category-filter-icon">
+            <span className="public-category-filter-emoji">🍽️</span>
           </div>
-          <span className="category-filter-name">{ALL_CATEGORIES_NAME}</span>
+          <span className="public-category-filter-name">{ALL_CATEGORIES_NAME}</span>
         </button>
+
         {categories.map((category) => (
           <button
             key={category.id}
-            className={`category-filter-btn ${activeCategory === category.id ? 'active' : ''}`}
+            className={`public-category-filter-btn ${activeCategory === category.id ? 'active' : ''}`}
             onClick={() => handleCategoryClick(category.id)}
           >
-            <div className="category-filter-icon">
+            <div className="public-category-filter-icon">
               {category.image ? (
-                <img src={category.image} alt={category.name} className="category-filter-img" />
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  className="public-category-filter-img"
+                />
               ) : (
-                <span className="category-emoji">🍴</span>
+                <span className="public-category-filter-emoji">🍴</span>
               )}
             </div>
-            <span className="category-filter-name">{category.name}</span>
+            <span className="public-category-filter-name">{category.name}</span>
           </button>
         ))}
       </div>
