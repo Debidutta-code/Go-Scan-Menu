@@ -1,8 +1,8 @@
 import React, { createContext, useContext } from 'react';
-import { MenuResponse } from '../types/menu.types';
+import { MenuData } from '../types/menu.types';
 
 interface PublicAppContextType {
-  menuData: MenuResponse;
+  menuData: MenuData;
   restaurantSlug: string;
   branchCode: string;
   qrCode?: string;

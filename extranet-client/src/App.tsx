@@ -30,6 +30,7 @@ import { TableManagement } from './pages/staff/TableManagement';
 import { QRManagement } from './pages/staff/QRManagement';
 
 /* ===================== PUBLIC ===================== */
+import { PublicLayout } from './public-app/layouts/PublicLayout';
 import { MenuPage } from './public-app/pages/Menu/MenuPage';
 import { OrdersPage } from './public-app/pages/Orders/OrdersPage';
 import { CartPage } from './public-app/pages/Cart/CartPage';
@@ -254,22 +255,22 @@ function App() {
           }
         />
 
-        {/* ================= PUBLIC MENU ================= */}
-        {/* Menu Page */}
-        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode" element={<MenuPage />} />
-        <Route path="/menu/:restaurantSlug/:branchCode" element={<MenuPage />} />
-
-        {/* Orders Page */}
-        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode/orders" element={<OrdersPage />} />
-        <Route path="/menu/:restaurantSlug/:branchCode/orders" element={<OrdersPage />} />
-
-        {/* Cart Page */}
-        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode/cart" element={<CartPage />} />
-        <Route path="/menu/:restaurantSlug/:branchCode/cart" element={<CartPage />} />
-
-        {/* Payment Page */}
-        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode/payment" element={<PaymentPage />} />
-        <Route path="/menu/:restaurantSlug/:branchCode/payment" element={<PaymentPage />} />
+                {/* ================= PUBLIC MENU ================= */}
+        {/* With QR Code */}
+        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode" element={<PublicLayout />}>
+          <Route index element={<MenuPage />} />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="payment" element={<PaymentPage />} />
+        </Route>
+        
+        {/* Without QR Code */}
+        <Route path="/menu/:restaurantSlug/:branchCode" element={<PublicLayout />}>
+          <Route index element={<MenuPage />} />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="payment" element={<PaymentPage />} />
+        </Route>
 
         {/* ================= 404 ================= */}
         <Route

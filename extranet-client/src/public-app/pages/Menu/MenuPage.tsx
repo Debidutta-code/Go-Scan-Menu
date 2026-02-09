@@ -1,33 +1,22 @@
 import React, { useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { Navbar } from '../../components/common/Navbar/Navbar';
-import { BottomNav } from '../../components/common/BottomNav/BottomNav';
-import { Loading } from '../../components/common/Loading/Loading';
-import { Error } from '../../components/common/Error/Error';
 import { CategoryFilter } from '../../components/menu/CategoryFilter/CategoryFilter';
 import { CategoryGrid } from '../../components/menu/CategoryGrid/CategoryGrid';
 import { CategorySection } from '../../components/menu/CategorySection/CategorySection';
 import { MenuItemDetail } from '../../components/menu/MenuItemDetail/MenuItemDetail';
-import { useMenu } from '../../hooks/useMenu';
+import { usePublicApp } from '../../contexts/PublicAppContext';
 import { useScrollSpy } from '../../hooks/useScrollSpy';
 import { MenuItem, Variant } from '../../types/menu.types';
 import { ALL_CATEGORIES_ID } from '../../utils/constants';
 import './MenuPage.css';
 
 export const MenuPage: React.FC = () => {
-  const { restaurantSlug, branchCode, qrCode } = useParams<{
-    restaurantSlug: string;
-    branchCode: string;
-    qrCode?: string;
-  }>();
-
-  const { menuData, loading, error } = useMenu(restaurantSlug!, branchCode!, qrCode);
+  const { menuData } = usePublicApp();
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES_ID);
 
   const categoryIds = useMemo(
-    () => (menuData ? menuData.menu.map((cat) => cat.id) : []),
-    [menuData]
+    () => menuData.menu.map((cat) => cat.id),
+    [menuData.menu]
   );
 
   const scrollSpyCategory = useScrollSpy(categoryIds.map((id) => `category-${id}`));
@@ -53,29 +42,15 @@ export const MenuPage: React.FC = () => {
     console.log('Add to cart:', { item, variant, quantity });
   };
 
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (error) {
-    return <Error message={error} />;
-  }
-
-  if (!menuData) {
-    return <Error message="Menu not available" />;
-  }
-
   return (
-    <div className="menu-page">
-      <Navbar restaurant={menuData.restaurant} table={menuData.table} />
-
+    <div className="menu-page-wrapper">
       <CategoryFilter
         categories={menuData.menu}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
       />
 
-      <main className="menu-page-content">
+      <div className="menu-page-content">
         {activeCategory === ALL_CATEGORIES_ID ? (
           <CategoryGrid categories={menuData.menu} onCategoryClick={setActiveCategory} />
         ) : (
@@ -89,7 +64,7 @@ export const MenuPage: React.FC = () => {
             />
           ))
         )}
-      </main>
+      </div>
 
       {selectedItem && (
         <MenuItemDetail
@@ -100,13 +75,6 @@ export const MenuPage: React.FC = () => {
           onAddToCart={handleAddToCart}
         />
       )}
-
-      <BottomNav
-        restaurantSlug={restaurantSlug!}
-        branchCode={branchCode!}
-        qrCode={qrCode}
-        cartItemCount={0}
-      />
     </div>
   );
 };
