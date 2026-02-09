@@ -31,6 +31,9 @@ import { QRManagement } from './pages/staff/QRManagement';
 
 /* ===================== PUBLIC ===================== */
 import { MenuPage } from './public-app/pages/Menu/MenuPage';
+import { OrdersPage } from './public-app/pages/Orders/OrdersPage';
+import { CartPage } from './public-app/pages/Cart/CartPage';
+import { PaymentPage } from './public-app/pages/Payment/PaymentPage';
 
 /* ===================== PROTECTED ROUTES ===================== */
 
@@ -252,8 +255,21 @@ function App() {
         />
 
         {/* ================= PUBLIC MENU ================= */}
+        {/* Menu Page */}
         <Route path="/menu/:restaurantSlug/:branchCode/:qrCode" element={<MenuPage />} />
         <Route path="/menu/:restaurantSlug/:branchCode" element={<MenuPage />} />
+
+        {/* Orders Page */}
+        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode/orders" element={<OrdersPage />} />
+        <Route path="/menu/:restaurantSlug/:branchCode/orders" element={<OrdersPage />} />
+
+        {/* Cart Page */}
+        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode/cart" element={<CartPage />} />
+        <Route path="/menu/:restaurantSlug/:branchCode/cart" element={<CartPage />} />
+
+        {/* Payment Page */}
+        <Route path="/menu/:restaurantSlug/:branchCode/:qrCode/payment" element={<PaymentPage />} />
+        <Route path="/menu/:restaurantSlug/:branchCode/payment" element={<PaymentPage />} />
 
         {/* ================= 404 ================= */}
         <Route
