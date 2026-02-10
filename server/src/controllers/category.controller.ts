@@ -83,6 +83,7 @@ export class CategoryController {
 
   updateCategory = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+
     const category = await this.categoryService.updateCategory(
       req.params.id,
       restaurantId!,
@@ -118,13 +119,43 @@ export class CategoryController {
     });
   });
 
-  // deleteCategory = catchAsync(async (req: Request, res: Response) => {
-  //   const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-  //   const category = await this.categoryService.deleteCategory(req.params.id, restaurantId!);
+  // PUBLIC ENDPOINTS (No authentication required)
+  
+  getPublicCategories = catchAsync(async (req: Request, res: Response) => {
+    const restaurantId = req.params.restaurantId;
+    const branchId = req.query.branchId as string | undefined;
 
-  //   sendResponse(res, 200, {
-  //     message: 'Category deleted successfully',
-  //     data: category,
-  //   });
-  // });
+    if (!restaurantId) {
+      sendResponse(res, 400, {
+        message: 'Restaurant ID is required',
+      });
+      return;
+    }
+
+    const categories = await this.categoryService.getAllCategoriesForMenu(restaurantId, branchId);
+
+    sendResponse(res, 200, {
+      message: 'Categories retrieved successfully',
+      data: { categories },
+    });
+  });
+
+  getPublicCategoryCount = catchAsync(async (req: Request, res: Response) => {
+    const restaurantId = req.params.restaurantId;
+    const scope = (req.query.scope as 'restaurant' | 'branch') || 'restaurant';
+
+    if (!restaurantId) {
+      sendResponse(res, 400, {
+        message: 'Restaurant ID is required',
+      });
+      return;
+    }
+
+    const count = await this.categoryService.getCategoryCount(restaurantId, scope);
+
+    sendResponse(res, 200, {
+      message: 'Category count retrieved successfully',
+      data: { count },
+    });
+  });
 }

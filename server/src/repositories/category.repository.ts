@@ -8,8 +8,14 @@ export class CategoryRepository {
     return category;
   }
 
-  async findById(id: string): Promise<ICategory | null> {
-    return Category.findById(id).populate('restaurantId').populate('branchId');
+  async findById(id: string, populate: boolean = true): Promise<ICategory | null> {
+    const query = Category.findById(id);
+    
+    if (populate) {
+      return query.populate('restaurantId').populate('branchId');
+    }
+    
+    return query;
   }
 
   async findByRestaurant(

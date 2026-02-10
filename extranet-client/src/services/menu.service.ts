@@ -91,6 +91,22 @@ export class MenuService {
     );
   }
 
+  /**
+   * Get category count for auto-incrementing display order
+   * Uses public endpoint (no auth required)
+   */
+  static async getCategoryCount(
+    token: string,
+    restaurantId: any,
+    scope: 'restaurant' | 'branch' = 'restaurant'
+  ) {
+    return this.request<{ count: number }>(
+      `/categories/public/${restaurantId._id}/count?scope=${scope}`,
+      {},
+      null // No token needed for public endpoint
+    );
+  }
+
   // Menu Item APIs
   static async getMenuItems(
     token: string,

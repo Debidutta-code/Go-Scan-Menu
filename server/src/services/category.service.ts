@@ -17,6 +17,27 @@ export class CategoryService {
     this.branchRepo = new BranchRepository();
   }
 
+  /**
+   * Helper to extract restaurantId as string from either ObjectId or populated document
+   */
+  private extractRestaurantId(restaurantId: any): string {
+    if (!restaurantId) {
+      throw new AppError('Restaurant ID is missing', 500);
+    }
+
+    // If it's a populated document with _id
+    if (typeof restaurantId === 'object' && restaurantId._id) {
+      return restaurantId._id.toString();
+    }
+
+    // If it's an ObjectId or string
+    if (typeof restaurantId.toString === 'function') {
+      return restaurantId.toString();
+    }
+
+    throw new AppError('Invalid restaurant ID format', 500);
+  }
+
   async createCategory(
     restaurantId: string,
     data: {
@@ -46,9 +67,9 @@ export class CategoryService {
       }
     }
 
-    // Get next display order if not provided
+    // Auto-increment display order if not provided
     let displayOrder = data.displayOrder;
-    if (displayOrder === undefined) {
+    if (displayOrder === undefined || displayOrder === null) {
       const count = await this.categoryRepo.countByRestaurant(restaurantId, data.scope);
       displayOrder = count;
     }
@@ -90,8 +111,11 @@ export class CategoryService {
   }
 
   async getAllCategoriesForMenu(restaurantId: string, branchId?: string) {
-    // Returns both restaurant-wide and branch-specific categories
     return this.categoryRepo.findAllForMenu(restaurantId, branchId);
+  }
+
+  async getCategoryCount(restaurantId: string, scope?: 'restaurant' | 'branch'): Promise<number> {
+    return this.categoryRepo.countByRestaurant(restaurantId, scope);
   }
 
   async updateCategory(
@@ -99,16 +123,33 @@ export class CategoryService {
     restaurantId: string,
     data: Partial<ICategory>
   ): Promise<ICategory> {
-    const category = await this.categoryRepo.findById(id);
+    const category = await this.categoryRepo.findById(id, false);
+    
     if (!category || !category.isActive) {
       throw new AppError('Category not found', 404);
     }
 
-    if (category.restaurantId.toString() !== restaurantId) {
+    // Use helper to extract restaurantId
+    const categoryRestaurantId = this.extractRestaurantId(category.restaurantId);
+    const requestRestaurantId = restaurantId.toString();
+
+    if (categoryRestaurantId !== requestRestaurantId) {
       throw new AppError('Category does not belong to this restaurant', 403);
     }
 
-    const updatedCategory = await this.categoryRepo.update(id, data);
+    // Don't allow changing scope after creation
+    if (data.scope && data.scope !== category.scope) {
+      throw new AppError('Cannot change category scope after creation', 400);
+    }
+
+    // Don't allow changing critical fields
+    const updateData = { ...data };
+    delete (updateData as any).restaurantId;
+    delete (updateData as any).branchId;
+    delete (updateData as any).scope;
+    delete (updateData as any).displayOrder;
+
+    const updatedCategory = await this.categoryRepo.update(id, updateData);
     if (!updatedCategory) {
       throw new AppError('Failed to update category', 500);
     }
@@ -121,12 +162,17 @@ export class CategoryService {
     restaurantId: string,
     displayOrder: number
   ): Promise<ICategory> {
-    const category = await this.categoryRepo.findById(id);
+    const category = await this.categoryRepo.findById(id, false);
+    
     if (!category || !category.isActive) {
       throw new AppError('Category not found', 404);
     }
 
-    if (category.restaurantId.toString() !== restaurantId) {
+    // Use helper to extract restaurantId
+    const categoryRestaurantId = this.extractRestaurantId(category.restaurantId);
+    const requestRestaurantId = restaurantId.toString();
+
+    if (categoryRestaurantId !== requestRestaurantId) {
       throw new AppError('Category does not belong to this restaurant', 403);
     }
 

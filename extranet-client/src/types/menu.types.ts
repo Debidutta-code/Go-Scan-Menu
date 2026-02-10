@@ -120,3 +120,7 @@ export interface CategoryListResponse {
   limit: number;
   totalPages: number;
 }
+
+export interface CategoryCountResponse {
+  count: number;
+}

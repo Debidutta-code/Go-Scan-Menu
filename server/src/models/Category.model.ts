@@ -1,9 +1,13 @@
 // src/models/Category.model.ts
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
+// Import Restaurant interface if available
+// import { IRestaurant } from './Restaurant.model';
+// import { IBranch } from './Branch.model';
+
 export interface ICategory extends Document {
-  restaurantId: Types.ObjectId;
-  branchId?: Types.ObjectId;
+  restaurantId: Types.ObjectId | any; // Allow any for populated documents
+  branchId?: Types.ObjectId | any;
   name: string;
   description?: string;
   image?: string;

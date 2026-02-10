@@ -7,10 +7,20 @@ import { StaffRole } from '@/types/role.types';
 const router = Router({ mergeParams: true });
 const categoryController = new CategoryController();
 
-// Public route - Get all categories for menu display
+// ============= PUBLIC ROUTES (No Authentication) =============
+// These routes MUST come BEFORE authentication middleware
+
+// Get all categories for public menu display
+router.get('/public/:restaurantId', categoryController.getPublicCategories);
+
+// Get category count for public use (for auto-increment)
+router.get('/public/:restaurantId/count', categoryController.getPublicCategoryCount);
+
+// Public route - Get all categories for menu display (existing)
 router.get('/menu', categoryController.getAllCategoriesForMenu);
 
-// All other routes require authentication
+// ============= AUTHENTICATED ROUTES =============
+// All routes below require authentication
 router.use(AuthMiddleware.authenticate);
 
 // Authorization helpers
