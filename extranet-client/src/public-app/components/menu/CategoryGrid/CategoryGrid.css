@@ -14,6 +14,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   grid-auto-rows: 140px;
+  grid-auto-flow: dense;
 }
 
 .public-category-grid-card {
@@ -31,9 +32,14 @@
   grid-row: span 2;
 }
 
+.public-category-grid-card.small {
+  grid-row: span 1;
+}
+
 .public-category-grid-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+  z-index: 10;
 }
 
 .public-category-grid-card-image {
@@ -70,12 +76,14 @@
   font-weight: 700;
   margin: 0 0 0.25rem 0;
   color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .public-category-grid-card-count {
   font-size: 0.75rem;
   margin: 0;
   color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 @media (max-width: 768px) {
