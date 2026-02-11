@@ -1,9 +1,8 @@
 // src/services/staffPermissions.service.ts
 
+import env from '@/config/env';
 import { ApiResponse } from '../types';
 import { IStaffTypePermissions, StaffType, UpdatePermissionsPayload } from '../types/staffPermissions.types';
-
-const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 export class StaffPermissionsService {
   private static getHeaders(token?: string | null): HeadersInit {
@@ -22,7 +21,7 @@ export class StaffPermissionsService {
     token?: string | null
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${env.API_BASE_URL}${endpoint}`, {
         ...options,
         headers: this.getHeaders(token),
       });

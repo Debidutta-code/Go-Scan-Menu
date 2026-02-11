@@ -1,6 +1,5 @@
+import env from '@/config/env';
 import { MenuResponse } from '../types/menu.types';
-
-const API_BASE_URL = 'http://localhost:8080'; // Change to your backend URL
 
 export const menuApi = {
   getMenu: async (
@@ -10,10 +9,10 @@ export const menuApi = {
   ): Promise<MenuResponse> => {
     try {
       const endpoint = qrCode
-        ? `/api/v1/public/menu/${restaurantSlug}/${branchCode}/${qrCode}`
-        : `/api/v1/public/menu/${restaurantSlug}/${branchCode}`;
+        ? `/public/menu/${restaurantSlug}/${branchCode}/${qrCode}`
+        : `/public/menu/${restaurantSlug}/${branchCode}`;
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`);
+      const response = await fetch(`${env.API_BASE_URL}${endpoint}`);
       const data = await response.json();
 
       if (!response.ok) {

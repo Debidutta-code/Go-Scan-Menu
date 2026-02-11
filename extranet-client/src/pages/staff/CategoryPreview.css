@@ -1,0 +1,113 @@
+/* src/pages/staff/CategoryPreview.css */
+
+.category-preview-container {
+  padding: 16px;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.category-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  grid-auto-rows: 120px;
+  grid-auto-flow: dense;
+}
+
+.category-preview-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: #f7fafc;
+}
+
+.category-preview-card.large {
+  grid-row: span 2;
+}
+
+.category-preview-card.small {
+  grid-row: span 1;
+}
+
+.category-preview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  z-index: 1;
+}
+
+.category-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.category-preview-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-preview-placeholder-icon {
+  font-size: 2.5rem;
+  opacity: 0.7;
+}
+
+.category-preview-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+  padding: 12px;
+  color: white;
+}
+
+.category-preview-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-preview-count {
+  font-size: 0.6875rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.preview-empty-state {
+  height: 100%;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.preview-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.preview-empty-state p {
+  font-size: 0.875rem;
+  margin: 0;
+  color: #6b7280;
+}

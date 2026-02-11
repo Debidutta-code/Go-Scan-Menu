@@ -1,8 +1,7 @@
 // src/services/qrconfig.service.ts
 
+import env from '@/config/env';
 import { ApiResponse } from '../types';
-
-const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 export interface QRConfig {
   _id?: string;
@@ -37,7 +36,7 @@ export class QRConfigService {
   ): Promise<ApiResponse<QRConfig>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/qr-config`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/qr-config`,
         {
           method: 'GET',
           headers: this.getHeaders(token),
@@ -63,7 +62,7 @@ export class QRConfigService {
   ): Promise<ApiResponse<QRConfig>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/qr-config`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/qr-config`,
         {
           method: 'POST',
           headers: this.getHeaders(token),
@@ -89,7 +88,7 @@ export class QRConfigService {
   ): Promise<ApiResponse<QRConfig>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/qr-config/reset`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/qr-config/reset`,
         {
           method: 'POST',
           headers: this.getHeaders(token),
@@ -114,7 +113,7 @@ export class QRConfigService {
   ): Promise<ApiResponse<QRConfig>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/qr-config`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/qr-config`,
         {
           method: 'DELETE',
           headers: this.getHeaders(token),

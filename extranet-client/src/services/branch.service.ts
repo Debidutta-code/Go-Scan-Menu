@@ -1,9 +1,8 @@
 // src/services/branch.service.ts
 
+import env from '@/config/env';
 import { ApiResponse } from '../types';
 import { Branch, BranchListResponse } from '../types/table.types';
-
-const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 export class BranchService {
   private static getHeaders(token: string): HeadersInit {
@@ -21,7 +20,7 @@ export class BranchService {
   ): Promise<ApiResponse<BranchListResponse>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/branches?page=${page}&limit=${limit}`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/branches?page=${page}&limit=${limit}`,
         {
           method: 'GET',
           headers: this.getHeaders(token),
@@ -47,7 +46,7 @@ export class BranchService {
   ): Promise<ApiResponse<Branch>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/branches/${branchId}`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/branches/${branchId}`,
         {
           method: 'GET',
           headers: this.getHeaders(token),

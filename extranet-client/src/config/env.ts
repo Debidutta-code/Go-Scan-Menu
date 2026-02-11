@@ -5,6 +5,7 @@
 
 const env = {
   API_BASE_URL: import.meta.env.VITE_API_BASE_URL as string,
+  PUBLIC_BASE_URL: import.meta.env.VITE_PUBLIC_BASE_URL as string,
   APP_NAME: import.meta.env.VITE_APP_NAME as string,
   SOCKET_URL: import.meta.env.VITE_SOCKET_URL as string,
 

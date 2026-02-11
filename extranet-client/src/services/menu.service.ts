@@ -1,5 +1,6 @@
 // src/services/menu.service.ts
 
+import env from '@/config/env';
 import { ApiResponse } from '../types';
 import {
   MenuItem,
@@ -9,8 +10,6 @@ import {
   MenuItemListResponse,
   CategoryListResponse,
 } from '../types/menu.types';
-
-const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 export class MenuService {
   private static getHeaders(token?: string | null): HeadersInit {
@@ -29,7 +28,7 @@ export class MenuService {
     token?: string | null
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${env.API_BASE_URL}${endpoint}`, {
         ...options,
         headers: this.getHeaders(token),
       });
@@ -195,6 +194,22 @@ export class MenuService {
       `/restaurants/${restaurantId._id}/menu-items/${menuItemId}`,
       {
         method: 'DELETE',
+      },
+      token
+    );
+  }
+
+  static async updateCategoryDisplayOrder(
+    token: string,
+    restaurantId: any,
+    categoryId: string,
+    displayOrder: number
+  ) {
+    return this.request<Category>(
+      `/restaurants/${restaurantId._id}/categories/${categoryId}/display-order`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ displayOrder }),
       },
       token
     );

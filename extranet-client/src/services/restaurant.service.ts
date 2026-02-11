@@ -2,8 +2,7 @@
 
 import { Restaurant, CreateRestaurantDto, PaginatedResponse } from '../types/restaurant.types';
 import { ApiResponse } from '../types';
-
-const API_BASE_URL = 'http://localhost:8080/api/v1';
+import env from '@/config/env';
 
 export class RestaurantService {
   private static getHeaders(token: string): HeadersInit {
@@ -28,7 +27,7 @@ export class RestaurantService {
       params.append('filter', JSON.stringify(filters));
     }
 
-    const response = await fetch(`${API_BASE_URL}/restaurants?${params}`, {
+    const response = await fetch(`${env.API_BASE_URL}/restaurants?${params}`, {
       headers: this.getHeaders(token),
     });
 
@@ -39,7 +38,7 @@ export class RestaurantService {
     token: string,
     id: string
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}`, {
       headers: this.getHeaders(token),
     });
 
@@ -50,7 +49,7 @@ export class RestaurantService {
     token: string,
     data: CreateRestaurantDto
   ): Promise<ApiResponse<{ restaurant: Restaurant }>> {
-    const response = await fetch(`${API_BASE_URL}/restaurants`, {
+    const response = await fetch(`${env.API_BASE_URL}/restaurants`, {
       method: 'POST',
       headers: this.getHeaders(token),
       body: JSON.stringify(data),
@@ -64,7 +63,7 @@ export class RestaurantService {
     id: string,
     data: Partial<Restaurant>
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}`, {
       method: 'PUT',
       headers: this.getHeaders(token),
       body: JSON.stringify(data),
@@ -77,7 +76,7 @@ export class RestaurantService {
     token: string,
     id: string
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}`, {
       method: 'DELETE',
       headers: this.getHeaders(token),
     });
@@ -90,7 +89,7 @@ export class RestaurantService {
     id: string,
     theme: Partial<Restaurant['theme']>
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${API_BASE_URL}/restaurants/${id}/theme`, {
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}/theme`, {
       method: 'PUT',
       headers: this.getHeaders(token),
       body: JSON.stringify(theme),
@@ -104,7 +103,7 @@ export class RestaurantService {
     id: string,
     subscription: Partial<Restaurant['subscription']>
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${API_BASE_URL}/restaurants/${id}/subscription`, {
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}/subscription`, {
       method: 'PUT',
       headers: this.getHeaders(token),
       body: JSON.stringify(subscription),
@@ -118,7 +117,7 @@ export class RestaurantService {
     id: string,
     settings: Partial<Restaurant['defaultSettings']>
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${API_BASE_URL}/restaurants/${id}/settings`, {
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}/settings`, {
       method: 'PUT',
       headers: this.getHeaders(token),
       body: JSON.stringify(settings),

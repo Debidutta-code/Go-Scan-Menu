@@ -1,5 +1,6 @@
 // src/services/table.service.ts
 
+import env from '@/config/env';
 import { ApiResponse } from '../types';
 import {
   Table,
@@ -8,8 +9,6 @@ import {
   UpdateTablePayload,
   TableListResponse,
 } from '../types/table.types';
-
-const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 export class TableService {
   private static getHeaders(token: string): HeadersInit {
@@ -31,7 +30,7 @@ export class TableService {
         ? `/restaurants/${restaurantId._id}/tables/branch/${branchId}?page=${page}&limit=${limit}`
         : `/restaurants/${restaurantId._id}/tables?page=${page}&limit=${limit}`;
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${env.API_BASE_URL}${endpoint}`, {
         method: 'GET',
         headers: this.getHeaders(token),
       });
@@ -56,7 +55,7 @@ export class TableService {
   ): Promise<ApiResponse<Table>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables`,
         {
           method: 'POST',
           headers: this.getHeaders(token),
@@ -132,7 +131,7 @@ export class TableService {
   ): Promise<ApiResponse<Table>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}`,
         {
           method: 'PUT',
           headers: this.getHeaders(token),
@@ -160,7 +159,7 @@ export class TableService {
   ): Promise<ApiResponse<Table>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/status`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/status`,
         {
           method: 'PATCH',
           headers: this.getHeaders(token),
@@ -187,7 +186,7 @@ export class TableService {
   ): Promise<ApiResponse<Table>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}`,
         {
           method: 'DELETE',
           headers: this.getHeaders(token),
@@ -213,7 +212,7 @@ export class TableService {
   ): Promise<ApiResponse<Table>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/regenerate-qr`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/regenerate-qr`,
         {
           method: 'POST',
           headers: this.getHeaders(token),
@@ -239,7 +238,7 @@ export class TableService {
   ): Promise<ApiResponse<{ qrUrl: string }>> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/qr-data`,
+        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/qr-data`,
         {
           method: 'GET',
           headers: this.getHeaders(token),
@@ -263,6 +262,6 @@ export class TableService {
     restaurantId: any,
     tableId: string
   ): string {
-    return `${API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/qr-image?token=${token}`;
+    return `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/qr-image?token=${token}`;
   }
 }

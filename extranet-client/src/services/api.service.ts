@@ -1,8 +1,7 @@
 // src/services/api.service.ts
 
+import env from '@/config/env';
 import { SuperAdmin, ApiResponse } from '../types';
-
-const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 export class ApiService {
   private static getHeaders(token?: string | null): HeadersInit {
@@ -21,7 +20,7 @@ export class ApiService {
     token?: string | null
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${env.API_BASE_URL}${endpoint}`, {
         ...options,
         headers: this.getHeaders(token),
       });
