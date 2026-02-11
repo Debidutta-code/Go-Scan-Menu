@@ -2,8 +2,8 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Category } from '../../types/menu.types';
-import { Button } from '../../components/ui/Button';
+import { Category } from '../../../types/menu.types';
+import { Button } from '../../../components/ui/Button';
 import './SortableCategoryItem.css';
 
 interface SortableCategoryItemProps {

@@ -1,10 +1,10 @@
 // src/pages/staff/CategoryManagement.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStaffAuth } from '../../contexts/StaffAuthContext';
-import { MenuService } from '../../services/menu.service';
-import { Category } from '../../types/menu.types';
-import { Button } from '../../components/ui/Button';
+import { useStaffAuth } from '../../../contexts/StaffAuthContext';
+import { MenuService } from '../../../services/menu.service';
+import { Category } from '../../../types/menu.types';
+import { Button } from '../../../components/ui/Button';
 import { CategoryPreview } from './CategoryPreview';
 import {
   DndContext,
@@ -20,7 +20,12 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
+  rectSortingStrategy,
 } from '@dnd-kit/sortable';
+// import {
+//   restrictToVerticalAxis,
+//   restrictToParentElement,
+// } from '@dnd-kit/modifiers';
 import { SortableCategoryItem } from './SortableCategoryItem';
 import './CategoryManagement.css';
 
@@ -34,7 +39,11 @@ export const CategoryManagement: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px of movement before drag starts
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -155,35 +164,35 @@ export const CategoryManagement: React.FC = () => {
       {error && <div className="error-banner">{error}</div>}
       {saving && <div className="saving-indicator">Saving changes...</div>}
 
-      {/* Main Content - Fixed Height */}
-      <div className="category-management-content">
-        {/* Left Side - Scrollable Category List */}
-        <div className="category-list-panel">
-          <div className="panel-header">
-            <h2 className="panel-title">Categories ({categories.length})</h2>
-          </div>
+      {/* Main Content - Fixed Height with Shared DndContext */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="category-management-content">
+          {/* Left Side - Scrollable Category List */}
+          <div className="category-list-panel">
+            <div className="panel-header">
+              <h2 className="panel-title">Categories ({categories.length})</h2>
+            </div>
 
-          <div className="category-list-container">
-            {categories.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">📋</div>
-                <p className="empty-title">No categories yet</p>
-                <p className="empty-description">
-                  Start by adding your first category to organize your menu
-                </p>
-                <Button
-                  variant="primary"
-                  onClick={() => navigate('/staff/categories/add')}
-                >
-                  + Add Category
-                </Button>
-              </div>
-            ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
+            <div className="category-list-container">
+              {categories.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon">📋</div>
+                  <p className="empty-title">No categories yet</p>
+                  <p className="empty-description">
+                    Start by adding your first category to organize your menu
+                  </p>
+                  <Button
+                    variant="primary"
+                    onClick={() => navigate('/staff/categories/add')}
+                  >
+                    + Add Category
+                  </Button>
+                </div>
+              ) : (
                 <SortableContext
                   items={categories.map((cat) => cat._id)}
                   strategy={verticalListSortingStrategy}
@@ -200,27 +209,23 @@ export const CategoryManagement: React.FC = () => {
                     ))}
                   </div>
                 </SortableContext>
-              </DndContext>
-            )}
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Right Side - Static Preview (No Scroll, 90vh) */}
-        <div className="category-preview-panel">
-          <div className="preview-header">
-            <h2 className="preview-title">Live Preview</h2>
-            <p className="preview-subtitle">Customer view</p>
-          </div>
-          <div className="phone-preview-container">
-            <div className="phone-frame">
-              <div className="phone-notch"></div>
-              <div className="phone-content">
-                <CategoryPreview categories={categories} />
+          {/* Right Side - Live Preview with Drag & Drop */}
+          <div className="category-preview-panel">
+            <div className="phone-preview-container">
+              <div className="phone-frame">
+                <div className="phone-notch"></div>
+                <div className="phone-content">
+                  <CategoryPreview categories={categories} />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </DndContext>
     </div>
   );
 };

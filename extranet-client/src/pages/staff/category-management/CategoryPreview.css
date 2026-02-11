@@ -1,28 +1,37 @@
 /* src/pages/staff/CategoryPreview.css */
 
-.category-preview-container {
-  padding: 16px;
+.category-preview-wrapper {
   height: 100%;
   width: 100%;
-  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
 }
 
 .category-preview-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  grid-auto-rows: 120px;
+  gap: 6px;
+  grid-auto-rows: 75px;
   grid-auto-flow: dense;
+  padding: 8px;
+  position: relative;
+  min-height: 100%;
 }
 
 .category-preview-card {
   position: relative;
-  border-radius: 12px;
+  border-radius: 7px;
   overflow: hidden;
-  cursor: pointer;
+  cursor: grab;
   transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
   background: #f7fafc;
+  touch-action: none;
+}
+
+.category-preview-card:active {
+  cursor: grabbing;
 }
 
 .category-preview-card.large {
@@ -33,10 +42,17 @@
   grid-row: span 1;
 }
 
-.category-preview-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+.category-preview-card:hover:not(.dragging) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.12);
   z-index: 1;
+}
+
+.category-preview-card.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+  z-index: 1000 !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .category-preview-image {
@@ -44,6 +60,9 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .category-preview-placeholder {
@@ -53,10 +72,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
+  user-select: none;
 }
 
 .category-preview-placeholder-icon {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   opacity: 0.7;
 }
 
@@ -66,14 +87,16 @@
   left: 0;
   right: 0;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
-  padding: 12px;
+  padding: 6px 7px;
   color: white;
+  pointer-events: none;
+  user-select: none;
 }
 
 .category-preview-name {
-  font-size: 0.875rem;
+  font-size: 0.6875rem;
   font-weight: 700;
-  margin: 0 0 4px 0;
+  margin: 0 0 1px 0;
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   overflow: hidden;
@@ -82,7 +105,7 @@
 }
 
 .category-preview-count {
-  font-size: 0.6875rem;
+  font-size: 0.5625rem;
   margin: 0;
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -90,24 +113,42 @@
 
 .preview-empty-state {
   height: 100%;
-  min-height: 300px;
+  min-height: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 25px 16px;
   text-align: center;
   color: #9ca3af;
 }
 
 .preview-empty-icon {
-  font-size: 3rem;
-  margin-bottom: 12px;
+  font-size: 2.2rem;
+  margin-bottom: 8px;
   opacity: 0.5;
 }
 
 .preview-empty-state p {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   margin: 0;
   color: #6b7280;
+}
+
+/* Custom scrollbar for preview */
+.category-preview-wrapper::-webkit-scrollbar {
+  width: 3px;
+}
+
+.category-preview-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.category-preview-wrapper::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.category-preview-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
