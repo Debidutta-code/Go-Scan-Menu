@@ -7,6 +7,7 @@ import { Category } from '../../../types/menu.types';
 import { Button } from '../../../components/ui/Button';
 import { CategoryPreview } from './CategoryPreview';
 import { CategoryListSkeleton } from './CategoryListSkeleton';
+import { CategoryModal } from './CategoryModal';
 import {
   DndContext,
   closestCenter,
@@ -33,6 +34,10 @@ export const CategoryManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -108,6 +113,25 @@ export const CategoryManagement: React.FC = () => {
     }
   };
 
+  const handleAddCategory = () => {
+    setEditingCategoryId(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditCategory = (categoryId: string) => {
+    setEditingCategoryId(categoryId);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setEditingCategoryId(null);
+  };
+
+  const handleModalSuccess = () => {
+    loadCategories();
+  };
+
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       logout();
@@ -133,7 +157,7 @@ export const CategoryManagement: React.FC = () => {
         <div className="header-actions">
           <Button
             variant="primary"
-            onClick={() => navigate('/staff/categories/add')}
+            onClick={handleAddCategory}
           >
             + Add Category
           </Button>
@@ -173,7 +197,7 @@ export const CategoryManagement: React.FC = () => {
                   </p>
                   <Button
                     variant="primary"
-                    onClick={() => navigate('/staff/categories/add')}
+                    onClick={handleAddCategory}
                   >
                     + Add Category
                   </Button>
@@ -188,9 +212,7 @@ export const CategoryManagement: React.FC = () => {
                       <SortableCategoryItem
                         key={category._id}
                         category={category}
-                        onEdit={() =>
-                          navigate(`/staff/categories/edit/${category._id}`)
-                        }
+                        onEdit={() => handleEditCategory(category._id)}
                       />
                     ))}
                   </div>
@@ -216,6 +238,14 @@ export const CategoryManagement: React.FC = () => {
           </div>
         </div>
       </DndContext>
+
+      {/* Category Modal */}
+      <CategoryModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        categoryId={editingCategoryId}
+        onSuccess={handleModalSuccess}
+      />
     </div>
   );
 };
