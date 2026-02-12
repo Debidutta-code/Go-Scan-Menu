@@ -1,0 +1,262 @@
+/* src/pages/staff/CategoryModalSkeleton.css */
+
+.category-modal-skeleton-wrapper {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+/* Form Side Skeleton */
+.category-modal-skeleton-form-side {
+  flex: 1;
+  padding: 34px 28px;
+  background: #ffffff;
+  overflow-y: auto;
+}
+
+.category-modal-skeleton-header {
+  margin-bottom: 22px;
+}
+
+.category-modal-skeleton-title {
+  height: 24px;
+  width: 60%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.category-modal-skeleton-subtitle {
+  height: 14px;
+  width: 80%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.category-modal-skeleton-form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.category-modal-skeleton-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.category-modal-skeleton-label {
+  height: 14px;
+  width: 30%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.category-modal-skeleton-input {
+  height: 38px;
+  width: 100%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+.category-modal-skeleton-textarea {
+  height: 70px;
+  width: 100%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+.category-modal-skeleton-select {
+  height: 38px;
+  width: 100%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+.category-modal-skeleton-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-modal-skeleton-checkbox {
+  height: 16px;
+  width: 16px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.category-modal-skeleton-checkbox-label {
+  height: 14px;
+  width: 120px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.category-modal-skeleton-help-text {
+  height: 12px;
+  width: 70%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-top: 3px;
+}
+
+.category-modal-skeleton-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.category-modal-skeleton-button {
+  flex: 1;
+  height: 38px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+/* Preview Side Skeleton */
+.category-modal-skeleton-preview-side {
+  flex: 1;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  padding: 34px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.category-modal-skeleton-preview-header {
+  margin-bottom: 17px;
+}
+
+.category-modal-skeleton-preview-title {
+  height: 16px;
+  width: 40%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.5) 25%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.5) 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.category-modal-skeleton-preview-subtitle {
+  height: 12px;
+  width: 60%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.5) 25%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.5) 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.category-modal-skeleton-preview-card-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-modal-skeleton-preview-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 280px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.category-modal-skeleton-preview-image {
+  width: 100%;
+  height: 154px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #d1d5db 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+}
+
+.category-modal-skeleton-preview-content {
+  padding: 17px;
+}
+
+.category-modal-skeleton-preview-name {
+  height: 20px;
+  width: 70%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.category-modal-skeleton-preview-desc-1 {
+  height: 12px;
+  width: 100%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.category-modal-skeleton-preview-desc-2 {
+  height: 12px;
+  width: 80%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.category-modal-skeleton-preview-badges {
+  display: flex;
+  gap: 6px;
+}
+
+.category-modal-skeleton-preview-badge {
+  height: 24px;
+  width: 100px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: category-modal-skeleton-shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes category-modal-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .category-modal-skeleton-preview-side {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .category-modal-skeleton-form-side {
+    padding: 22px 16px;
+  }
+}

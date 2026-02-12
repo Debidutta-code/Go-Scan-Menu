@@ -4,6 +4,7 @@ import { useStaffAuth } from '../../../contexts/StaffAuthContext';
 import { MenuService } from '../../../services/menu.service';
 import { InputField } from '../../../components/ui/InputField';
 import { Button } from '../../../components/ui/Button';
+import { CategoryModalSkeleton } from './CategoryModalSkeleton';
 import './CategoryModal.css';
 
 interface CategoryModalProps {
@@ -143,7 +144,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     <div className="category-modal-overlay" onClick={handleOverlayClick}>
       <div className="category-modal-container">
         {/* Close button */}
-        <button className="category-modal-close" onClick={onClose} disabled={loading}>
+        <button className="category-modal-close" onClick={onClose} disabled={loading || loadingData}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path
               d="M18 6L6 18M6 6L18 18"
@@ -155,24 +156,21 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
           </svg>
         </button>
 
-        <div className="category-modal-content">
-          {/* Left side: Form */}
-          <div className="category-modal-form-side">
-            <div className="category-modal-header">
-              <h2 className="category-modal-title">
-                {isEditMode ? 'Edit Category' : 'Create New Category'}
-              </h2>
-              <p className="category-modal-subtitle">
-                {isEditMode ? 'Update category details' : 'Add a new category to your menu'}
-              </p>
-            </div>
-
-            {loadingData ? (
-              <div className="category-modal-loading">
-                <div className="loading-spinner"></div>
-                <p>Loading category...</p>
+        {loadingData ? (
+          <CategoryModalSkeleton />
+        ) : (
+          <div className="category-modal-content">
+            {/* Left side: Form */}
+            <div className="category-modal-form-side">
+              <div className="category-modal-header">
+                <h2 className="category-modal-title">
+                  {isEditMode ? 'Edit Category' : 'Create New Category'}
+                </h2>
+                <p className="category-modal-subtitle">
+                  {isEditMode ? 'Update category details' : 'Add a new category to your menu'}
+                </p>
               </div>
-            ) : (
+
               <form onSubmit={handleSubmit} className="category-modal-form">
                 <InputField
                   label="Category Name"
@@ -260,50 +258,50 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                   </Button>
                 </div>
               </form>
-            )}
-          </div>
-
-          {/* Right side: Preview */}
-          <div className="category-modal-preview-side">
-            <div className="preview-header">
-              <h3 className="preview-title">Live Preview</h3>
-              {/* <p className="preview-subtitle">How it will appear in your menu</p> */}
             </div>
 
-            <div className="category-preview-card-wrapper">
-              <div className="category-preview-card-modal">
-                {formData.image && (
-                  <div className="preview-image-container">
-                    <img
-                      src={formData.image}
-                      alt="Category preview"
-                      className="preview-image"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
-                <div className="preview-content">
-                  <h4 className="preview-category-name">
-                    {formData.name || 'Category Name'}
-                  </h4>
-                  <p className="preview-description">
-                    {formData.description || 'Category description will appear here'}
-                  </p>
-                  <div className="preview-badges">
-                    <span className="preview-scope-badge">
-                      {formData.scope === 'restaurant' ? '🏢 Restaurant-wide' : '🏪 Branch-specific'}
-                    </span>
-                    <span className={`preview-status-badge ${formData.isActive ? 'active' : 'inactive'}`}>
-                      {formData.isActive ? '● Active' : '○ Inactive'}
-                    </span>
+            {/* Right side: Preview */}
+            <div className="category-modal-preview-side">
+              <div className="preview-header">
+                <h3 className="preview-title">Live Preview</h3>
+                {/* <p className="preview-subtitle">How it will appear in your menu</p> */}
+              </div>
+
+              <div className="category-preview-card-wrapper">
+                <div className="category-preview-card-modal">
+                  {formData.image && (
+                    <div className="preview-image-container">
+                      <img
+                        src={formData.image}
+                        alt="Category preview"
+                        className="preview-image"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="preview-content">
+                    <h4 className="preview-category-name">
+                      {formData.name || 'Category Name'}
+                    </h4>
+                    <p className="preview-description">
+                      {formData.description || 'Category description will appear here'}
+                    </p>
+                    <div className="preview-badges">
+                      <span className="preview-scope-badge">
+                        {formData.scope === 'restaurant' ? '🏢 Restaurant-wide' : '🏪 Branch-specific'}
+                      </span>
+                      <span className={`preview-status-badge ${formData.isActive ? 'active' : 'inactive'}`}>
+                        {formData.isActive ? '● Active' : '○ Inactive'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
