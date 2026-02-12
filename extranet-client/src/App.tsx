@@ -19,7 +19,7 @@ import { StaffLoginPage } from './pages/auth/StaffLogin';
 import { StaffDashboard } from './pages/staff/StaffDashboard';
 import { MenuManagement } from './pages/staff/MenuManagement';
 import { CategoryManagement } from './pages/staff/category-management/CategoryManagement';
-import { AddEditCategory } from './pages/staff/AddEditCategory';
+import { AddEditCategory } from './pages/staff/category-management/AddEditCategory';
 import { AddEditMenuItem } from './pages/staff/AddEditMenuItem';
 import { StaffList } from './pages/staff/StaffList';
 import { AddStaff } from './pages/staff/AddStaff';

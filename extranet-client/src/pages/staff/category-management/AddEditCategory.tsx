@@ -1,10 +1,10 @@
 // src/pages/staff/AddEditCategory.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useStaffAuth } from '../../contexts/StaffAuthContext';
-import { MenuService } from '../../services/menu.service';
-import { InputField } from '../../components/ui/InputField';
-import { Button } from '../../components/ui/Button';
+import { useStaffAuth } from '../../../contexts/StaffAuthContext';
+import { MenuService } from '../../../services/menu.service';
+import { InputField } from '../../../components/ui/InputField';
+import { Button } from '../../../components/ui/Button';
 import './AddEditCategory.css';
 
 export const AddEditCategory: React.FC = () => {

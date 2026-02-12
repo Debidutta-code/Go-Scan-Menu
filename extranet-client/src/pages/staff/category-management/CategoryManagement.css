@@ -222,6 +222,104 @@
   min-height: 0;
 }
 
+/* Skeleton Loaders - Category List */
+.staff-category-sort-skeleton-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  animation: staff-category-sort-skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.staff-category-sort-skeleton-handle {
+  width: 20px;
+  height: 48px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: staff-category-sort-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.staff-category-sort-skeleton-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.staff-category-sort-skeleton-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.staff-category-sort-skeleton-title {
+  height: 20px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: staff-category-sort-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  width: 70%;
+}
+
+.staff-category-sort-skeleton-description {
+  height: 16px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: staff-category-sort-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  width: 90%;
+}
+
+.staff-category-sort-skeleton-meta {
+  display: flex;
+  gap: 12px;
+}
+
+.staff-category-sort-skeleton-badge {
+  height: 24px;
+  width: 100px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: staff-category-sort-skeleton-shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+.staff-category-sort-skeleton-button {
+  width: 60px;
+  height: 36px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: staff-category-sort-skeleton-shimmer 1.5s infinite;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+@keyframes staff-category-sort-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes staff-category-sort-skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
 /* Custom scrollbar for category list */
 .category-list-container::-webkit-scrollbar {
   width: 8px;

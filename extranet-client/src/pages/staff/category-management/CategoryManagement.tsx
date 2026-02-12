@@ -6,6 +6,7 @@ import { MenuService } from '../../../services/menu.service';
 import { Category } from '../../../types/menu.types';
 import { Button } from '../../../components/ui/Button';
 import { CategoryPreview } from './CategoryPreview';
+import { CategoryListSkeleton } from './CategoryListSkeleton';
 import {
   DndContext,
   closestCenter,
@@ -20,12 +21,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-  rectSortingStrategy,
 } from '@dnd-kit/sortable';
-// import {
-//   restrictToVerticalAxis,
-//   restrictToParentElement,
-// } from '@dnd-kit/modifiers';
 import { SortableCategoryItem } from './SortableCategoryItem';
 import './CategoryManagement.css';
 
@@ -41,7 +37,7 @@ export const CategoryManagement: React.FC = () => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Require 8px of movement before drag starts
+        distance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -85,10 +81,7 @@ export const CategoryManagement: React.FC = () => {
 
     const newCategories = arrayMove(categories, oldIndex, newIndex);
     
-    // Update local state immediately for instant feedback
     setCategories(newCategories);
-
-    // Update display orders in backend
     await updateDisplayOrders(newCategories);
   };
 
@@ -97,7 +90,6 @@ export const CategoryManagement: React.FC = () => {
 
     setSaving(true);
     try {
-      // Update display order for each category
       await Promise.all(
         reorderedCategories.map((category, index) =>
           MenuService.updateCategoryDisplayOrder(
@@ -110,7 +102,6 @@ export const CategoryManagement: React.FC = () => {
       );
     } catch (err: any) {
       setError('Failed to update category order');
-      // Reload categories to restore correct order
       await loadCategories();
     } finally {
       setSaving(false);
@@ -123,14 +114,6 @@ export const CategoryManagement: React.FC = () => {
       navigate('/staff/login');
     }
   };
-
-  if (loading) {
-    return (
-      <div className="category-management-layout">
-        <div className="loading-state">Loading categories...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="category-management-layout">
@@ -162,23 +145,26 @@ export const CategoryManagement: React.FC = () => {
 
       {/* Alert Messages */}
       {error && <div className="error-banner">{error}</div>}
-      {saving && <div className="saving-indicator">Saving changes...</div>}
 
-      {/* Main Content - Fixed Height with Shared DndContext */}
+      {/* Main Content */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
         <div className="category-management-content">
-          {/* Left Side - Scrollable Category List */}
+          {/* Left Side - Category List */}
           <div className="category-list-panel">
             <div className="panel-header">
-              <h2 className="panel-title">Categories ({categories.length})</h2>
+              <h2 className="panel-title">
+                Categories {!loading && `(${categories.length})`}
+              </h2>
             </div>
 
             <div className="category-list-container">
-              {categories.length === 0 ? (
+              {loading ? (
+                <CategoryListSkeleton />
+              ) : categories.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-icon">📋</div>
                   <p className="empty-title">No categories yet</p>
@@ -213,13 +199,17 @@ export const CategoryManagement: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Side - Live Preview with Drag & Drop */}
+          {/* Right Side - Live Preview */}
           <div className="category-preview-panel">
             <div className="phone-preview-container">
               <div className="phone-frame">
                 <div className="phone-notch"></div>
                 <div className="phone-content">
-                  <CategoryPreview categories={categories} />
+                  <CategoryPreview 
+                    categories={categories} 
+                    loading={loading}
+                    saving={saving}
+                  />
                 </div>
               </div>
             </div>
