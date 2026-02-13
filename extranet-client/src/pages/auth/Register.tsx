@@ -110,18 +110,11 @@ export const RegisterPage: React.FC<{}> = () => {
             />
           </div>
 
-          <button
-            onClick={handleRegister}
-            className="btn-primary"
-            disabled={loading}
-          >
+          <button onClick={handleRegister} className="btn-primary" disabled={loading}>
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
 
-          <button
-            className="btn-secondary"
-            disabled={loading}
-          >
+          <button className="btn-secondary" disabled={loading}>
             Back to Login
           </button>
         </div>

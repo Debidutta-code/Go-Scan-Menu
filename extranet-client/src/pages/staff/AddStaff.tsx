@@ -94,9 +94,9 @@ export const AddStaff: React.FC = () => {
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -128,7 +128,7 @@ export const AddStaff: React.FC = () => {
         <form onSubmit={handleSubmit} className="add-staff-form">
           <div className="form-section">
             <h3 className="section-title">Personal Information</h3>
-            
+
             <InputField
               label="Full Name"
               type="text"
@@ -164,7 +164,7 @@ export const AddStaff: React.FC = () => {
 
           <div className="form-section">
             <h3 className="section-title">Account Security</h3>
-            
+
             <div className="form-row">
               <InputField
                 label="Password"
@@ -190,9 +190,11 @@ export const AddStaff: React.FC = () => {
 
           <div className="form-section">
             <h3 className="section-title">Role & Access</h3>
-            
+
             <div className="form-group">
-              <label htmlFor="staffType" className="form-label">Staff Role</label>
+              <label htmlFor="staffType" className="form-label">
+                Staff Role
+              </label>
               <select
                 id="staffType"
                 value={formData.staffType}
@@ -201,7 +203,7 @@ export const AddStaff: React.FC = () => {
                 disabled={loading}
                 data-testid="staff-type-select"
               >
-                {STAFF_TYPE_OPTIONS.map(option => (
+                {STAFF_TYPE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>

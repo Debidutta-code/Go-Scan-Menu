@@ -75,7 +75,9 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
@@ -144,7 +146,11 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     <div className="category-modal-overlay" onClick={handleOverlayClick}>
       <div className="category-modal-container">
         {/* Close button */}
-        <button className="category-modal-close" onClick={onClose} disabled={loading || loadingData}>
+        <button
+          className="category-modal-close"
+          onClick={onClose}
+          disabled={loading || loadingData}
+        >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path
               d="M18 6L6 18M6 6L18 18"
@@ -245,12 +251,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 </div>
 
                 <div className="category-modal-actions">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onClose}
-                    disabled={loading}
-                  >
+                  <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
                     Cancel
                   </Button>
                   <Button type="submit" variant="primary" loading={loading}>
@@ -282,17 +283,19 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                     </div>
                   )}
                   <div className="preview-content">
-                    <h4 className="preview-category-name">
-                      {formData.name || 'Category Name'}
-                    </h4>
+                    <h4 className="preview-category-name">{formData.name || 'Category Name'}</h4>
                     <p className="preview-description">
                       {formData.description || 'Category description will appear here'}
                     </p>
                     <div className="preview-badges">
                       <span className="preview-scope-badge">
-                        {formData.scope === 'restaurant' ? '🏢 Restaurant-wide' : '🏪 Branch-specific'}
+                        {formData.scope === 'restaurant'
+                          ? '🏢 Restaurant-wide'
+                          : '🏪 Branch-specific'}
                       </span>
-                      <span className={`preview-status-badge ${formData.isActive ? 'active' : 'inactive'}`}>
+                      <span
+                        className={`preview-status-badge ${formData.isActive ? 'active' : 'inactive'}`}
+                      >
                         {formData.isActive ? '● Active' : '○ Inactive'}
                       </span>
                     </div>

@@ -53,16 +53,16 @@ export const QRTemplateRenderer: React.FC<QRTemplateRendererProps> = ({
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         if (!ctx || !canvas) return;
-        
+
         // Draw dimmed background image
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
+
         // Add overlay if specified
         if (template.decorativeElements?.includes('overlay-dark')) {
           ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
-        
+
         drawContent(ctx, canvas);
       };
       img.src = template.bgImage;
@@ -70,13 +70,13 @@ export const QRTemplateRenderer: React.FC<QRTemplateRendererProps> = ({
       // Parse and draw gradient (simplified - using solid color)
       const color1 = template.bgGradient.match(/#[0-9a-fA-F]{6}/g)?.[0] || '#ffffff';
       const color2 = template.bgGradient.match(/#[0-9a-fA-F]{6}/g)?.[1] || color1;
-      
+
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
       gradient.addColorStop(0, color1);
       gradient.addColorStop(1, color2);
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
+
       drawContent(ctx, canvas);
     } else {
       ctx.fillStyle = '#ffffff';
@@ -94,16 +94,21 @@ export const QRTemplateRenderer: React.FC<QRTemplateRendererProps> = ({
       ctx.strokeStyle = template.textColor;
       ctx.lineWidth = 8;
       ctx.strokeRect(margin, margin, canvas.width - margin * 2, canvas.height - margin * 2);
-      
+
       ctx.lineWidth = 3;
-      ctx.strokeRect(margin + 20, margin + 20, canvas.width - (margin + 20) * 2, canvas.height - (margin + 20) * 2);
+      ctx.strokeRect(
+        margin + 20,
+        margin + 20,
+        canvas.width - (margin + 20) * 2,
+        canvas.height - (margin + 20) * 2
+      );
     }
 
     if (template.decorativeElements?.includes('gold-border')) {
       ctx.strokeStyle = template.textColor;
       ctx.lineWidth = 12;
       ctx.strokeRect(margin, margin, canvas.width - margin * 2, canvas.height - margin * 2);
-      
+
       // Corner decorations
       const cornerSize = 80;
       ctx.lineWidth = 4;
@@ -172,7 +177,7 @@ export const QRTemplateRenderer: React.FC<QRTemplateRendererProps> = ({
     // Draw QR code background
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40);
-    
+
     ctx.strokeStyle = template.textColor;
     ctx.lineWidth = 4;
     ctx.strokeRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40);
@@ -187,20 +192,22 @@ export const QRTemplateRenderer: React.FC<QRTemplateRendererProps> = ({
     ctx.font = `bold 70px ${template.bodyFont}`;
     ctx.fillStyle = template.textColor;
     ctx.textAlign = 'center';
-    
+
     const infoY = qrY + qrSize + 100;
-    
+
     // Safely access restaurant name
-    const restaurantName = typeof table.restaurantId === 'string' 
-      ? 'Restaurant' 
-      : (table.restaurantId as any)?.name || 'Restaurant';
-    
-    const branchName = typeof table.branchId === 'string'
-      ? restaurantName
-      : (table.branchId as any)?.name || restaurantName;
-    
+    const restaurantName =
+      typeof table.restaurantId === 'string'
+        ? 'Restaurant'
+        : (table.restaurantId as any)?.name || 'Restaurant';
+
+    const branchName =
+      typeof table.branchId === 'string'
+        ? restaurantName
+        : (table.branchId as any)?.name || restaurantName;
+
     ctx.fillText(branchName, centerX, infoY);
-    
+
     ctx.font = `50px ${template.bodyFont}`;
     ctx.fillText(`Table ${table.tableNumber}`, centerX, infoY + 80);
 
@@ -227,14 +234,14 @@ export const QRTemplateRenderer: React.FC<QRTemplateRendererProps> = ({
       ctx.lineWidth = 6;
       const bambooX1 = margin + 60;
       const bambooX2 = canvas.width - margin - 60;
-      [bambooX1, bambooX2].forEach(x => {
+      [bambooX1, bambooX2].forEach((x) => {
         ctx.beginPath();
         ctx.moveTo(x, canvas.height - 400);
         ctx.lineTo(x, canvas.height - margin - 60);
         ctx.stroke();
-        
+
         // Nodes
-        [canvas.height - 350, canvas.height - 250, canvas.height - margin - 100].forEach(y => {
+        [canvas.height - 350, canvas.height - 250, canvas.height - margin - 100].forEach((y) => {
           ctx.beginPath();
           ctx.arc(x, y, 8, 0, Math.PI * 2);
           ctx.fill();
@@ -243,14 +250,15 @@ export const QRTemplateRenderer: React.FC<QRTemplateRendererProps> = ({
     }
   };
 
-  const imageSettings = logoSrc && logoDimensions
-    ? {
-        src: logoSrc,
-        width: logoDimensions.width,
-        height: logoDimensions.height,
-        excavate: true,
-      }
-    : undefined;
+  const imageSettings =
+    logoSrc && logoDimensions
+      ? {
+          src: logoSrc,
+          width: logoDimensions.width,
+          height: logoDimensions.height,
+          excavate: true,
+        }
+      : undefined;
 
   return (
     <div style={{ position: 'relative' }}>
@@ -267,16 +275,16 @@ export const QRTemplateRenderer: React.FC<QRTemplateRendererProps> = ({
       </div>
 
       {/* Rendered template canvas */}
-      <canvas 
+      <canvas
         ref={canvasRef}
         className="qr-template-canvas"
-        style={{ 
-          width: '100%', 
+        style={{
+          width: '100%',
           maxWidth: '400px',
           height: 'auto',
           border: '2px solid #e2e8f0',
           borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
         }}
       />
     </div>

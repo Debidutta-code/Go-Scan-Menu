@@ -71,7 +71,8 @@ export const Dashboard: React.FC = () => {
           {/* Optional: Quick Stats or Recent Activity Section */}
           <div className="quick-info">
             <p className="quick-info-text">
-              Tip: Use the <strong>Restaurants</strong> module to create new restaurant accounts or edit existing ones.
+              Tip: Use the <strong>Restaurants</strong> module to create new restaurant accounts or
+              edit existing ones.
             </p>
           </div>
         </div>

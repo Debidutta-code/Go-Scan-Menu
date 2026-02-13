@@ -241,7 +241,7 @@
   white-space: nowrap;
 }
 
-.checkbox-label-inline input[type="checkbox"] {
+.checkbox-label-inline input[type='checkbox'] {
   width: 16px;
   height: 16px;
   cursor: pointer;

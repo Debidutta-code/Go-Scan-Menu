@@ -80,9 +80,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
               label="Table Number"
               type="text"
               value={formData.tableNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, tableNumber: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, tableNumber: e.target.value })}
               placeholder="e.g., 1, A1, T-101"
               required
               data-testid="table-number-input"

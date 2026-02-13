@@ -11,18 +11,10 @@ interface SortableCategoryItemProps {
   onEdit: () => void;
 }
 
-export const SortableCategoryItem: React.FC<SortableCategoryItemProps> = ({
-  category,
-  onEdit,
-}) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: category._id });
+export const SortableCategoryItem: React.FC<SortableCategoryItemProps> = ({ category, onEdit }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: category._id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -75,18 +67,14 @@ export const SortableCategoryItem: React.FC<SortableCategoryItemProps> = ({
         <div className="category-item-main">
           <div className="category-item-info">
             <h3 className="category-item-name">{category.name}</h3>
-            <p className="category-item-description">
-              {category.description || 'No description'}
-            </p>
+            <p className="category-item-description">{category.description || 'No description'}</p>
           </div>
 
           <div className="category-item-meta">
             <span className="category-item-scope">
               {category.scope === 'restaurant' ? '🏢 Restaurant-wide' : '🏪 Branch-specific'}
             </span>
-            <span
-              className={`category-item-status ${category.isActive ? 'active' : 'inactive'}`}
-            >
+            <span className={`category-item-status ${category.isActive ? 'active' : 'inactive'}`}>
               {category.isActive ? '● Active' : '○ Inactive'}
             </span>
           </div>

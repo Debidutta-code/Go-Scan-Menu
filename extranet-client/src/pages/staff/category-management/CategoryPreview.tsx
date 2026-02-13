@@ -48,11 +48,7 @@ export const CategoryPreview: React.FC<CategoryPreviewProps> = ({
       >
         <div className="category-preview-grid">
           {activeCategories.map((category, index) => (
-            <SortablePreviewCard
-              key={category._id}
-              category={category}
-              isLarge={pattern[index]}
-            />
+            <SortablePreviewCard key={category._id} category={category} isLarge={pattern[index]} />
           ))}
         </div>
       </SortableContext>

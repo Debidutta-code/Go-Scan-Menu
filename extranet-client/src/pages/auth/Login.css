@@ -102,8 +102,12 @@
   background: #e5e7eb;
 }
 
-.login-page-divider::before { left: 0; }
-.login-page-divider::after { right: 0; }
+.login-page-divider::before {
+  left: 0;
+}
+.login-page-divider::after {
+  right: 0;
+}
 
 .login-page-divider-text {
   background: white;

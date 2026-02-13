@@ -38,10 +38,10 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     qrConfig: {
       fgColor: '#2c2416',
       bgColor: '#ffffff',
-      level: 'H'
-    }
+      level: 'H',
+    },
   },
-  
+
   modern_green: {
     id: 'modern_green',
     name: 'Fresh & Modern',
@@ -58,8 +58,8 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     qrConfig: {
       fgColor: '#1b5e20',
       bgColor: '#ffffff',
-      level: 'H'
-    }
+      level: 'H',
+    },
   },
 
   food_photo: {
@@ -78,8 +78,8 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     qrConfig: {
       fgColor: '#1e293b',
       bgColor: '#ffffff',
-      level: 'H'
-    }
+      level: 'H',
+    },
   },
 
   rustic_kraft: {
@@ -98,8 +98,8 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     qrConfig: {
       fgColor: '#3e2723',
       bgColor: '#ffffff',
-      level: 'H'
-    }
+      level: 'H',
+    },
   },
 
   minimal_white: {
@@ -118,8 +118,8 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     qrConfig: {
       fgColor: '#000000',
       bgColor: '#ffffff',
-      level: 'M'
-    }
+      level: 'M',
+    },
   },
 
   luxury_gold: {
@@ -138,8 +138,8 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     qrConfig: {
       fgColor: '#000000',
       bgColor: '#ffffff',
-      level: 'H'
-    }
+      level: 'H',
+    },
   },
 
   beach_vibes: {
@@ -158,8 +158,8 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     qrConfig: {
       fgColor: '#006064',
       bgColor: '#ffffff',
-      level: 'H'
-    }
+      level: 'H',
+    },
   },
 
   italian_bistro: {
@@ -178,8 +178,8 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     qrConfig: {
       fgColor: '#b71c1c',
       bgColor: '#ffffff',
-      level: 'H'
-    }
+      level: 'H',
+    },
   },
 
   coffee_house: {
@@ -198,8 +198,8 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     qrConfig: {
       fgColor: '#4e342e',
       bgColor: '#ffffff',
-      level: 'H'
-    }
+      level: 'H',
+    },
   },
 
   sushi_zen: {
@@ -218,9 +218,9 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     qrConfig: {
       fgColor: '#d32f2f',
       bgColor: '#ffffff',
-      level: 'H'
-    }
-  }
+      level: 'H',
+    },
+  },
 };
 
 // Helper functions
@@ -232,11 +232,18 @@ export const getTemplatesByCategory = (category: string): TemplateConfig[] => {
   if (category === 'all') {
     return Object.values(QR_TEMPLATES);
   }
-  return Object.values(QR_TEMPLATES).filter(t => t.category === category);
+  return Object.values(QR_TEMPLATES).filter((t) => t.category === category);
 };
 
 export const getTemplatesArray = (): Array<{ key: string; config: TemplateConfig }> => {
   return Object.entries(QR_TEMPLATES).map(([key, config]) => ({ key, config }));
 };
 
-export const TEMPLATE_CATEGORIES = ['all', 'elegant', 'modern', 'rustic', 'minimal', 'luxury'] as const;
+export const TEMPLATE_CATEGORIES = [
+  'all',
+  'elegant',
+  'modern',
+  'rustic',
+  'minimal',
+  'luxury',
+] as const;

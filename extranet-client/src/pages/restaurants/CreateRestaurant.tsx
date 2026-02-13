@@ -374,7 +374,9 @@ export const CreateRestaurant: React.FC = () => {
               label="Service Charge (%)"
               type="number"
               value={formData.serviceChargePercentage}
-              onChange={(e) => handleInputChange('serviceChargePercentage', parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                handleInputChange('serviceChargePercentage', parseFloat(e.target.value) || 0)
+              }
               disabled={loading}
               min="0"
               max="100"
@@ -394,12 +396,7 @@ export const CreateRestaurant: React.FC = () => {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            loading={loading}
-            data-testid="submit-button"
-          >
+          <Button type="submit" variant="primary" loading={loading} data-testid="submit-button">
             Create Restaurant
           </Button>
         </div>

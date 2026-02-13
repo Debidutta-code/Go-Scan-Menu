@@ -35,7 +35,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ table, onClose }) => {
 
   const loadData = async () => {
     if (!staff || !token) return;
-    
+
     setLoading(true);
     setError('');
 
@@ -50,7 +50,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ table, onClose }) => {
         setQrConfig(configResponse.data);
       } else {
         setQrConfig({
-          restaurantId: staff.restaurantId || "",
+          restaurantId: staff.restaurantId || '',
           designMode: 'simple',
           selectedStyle: 'classic',
           selectedTemplate: 'classic_tent',
@@ -99,10 +99,10 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ table, onClose }) => {
       <div className="qr-code-modal-component-overlay" onClick={onClose}>
         <div className="qr-code-modal-component-content" onClick={(e) => e.stopPropagation()}>
           <div className="qr-code-modal-component-header">
-            <h2 className="qr-code-modal-component-title">
-              QR Code – Table {table.tableNumber}
-            </h2>
-            <button className="qr-code-modal-component-close" onClick={onClose}>×</button>
+            <h2 className="qr-code-modal-component-title">QR Code – Table {table.tableNumber}</h2>
+            <button className="qr-code-modal-component-close" onClick={onClose}>
+              ×
+            </button>
           </div>
           <div className="qr-code-modal-component-body">
             <div className="qr-code-modal-component-loading">Loading QR code...</div>
@@ -117,10 +117,10 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ table, onClose }) => {
       <div className="qr-code-modal-component-overlay" onClick={onClose}>
         <div className="qr-code-modal-component-content" onClick={(e) => e.stopPropagation()}>
           <div className="qr-code-modal-component-header">
-            <h2 className="qr-code-modal-component-title">
-              QR Code – Table {table.tableNumber}
-            </h2>
-            <button className="qr-code-modal-component-close" onClick={onClose}>×</button>
+            <h2 className="qr-code-modal-component-title">QR Code – Table {table.tableNumber}</h2>
+            <button className="qr-code-modal-component-close" onClick={onClose}>
+              ×
+            </button>
           </div>
           <div className="qr-code-modal-component-body">
             <div className="qr-code-modal-component-error">{error}</div>
@@ -142,17 +142,21 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ table, onClose }) => {
         }
       : undefined;
 
-  const currentTemplate = qrConfig.designMode === 'template' ? getTemplate(qrConfig.selectedTemplate) : null;
+  const currentTemplate =
+    qrConfig.designMode === 'template' ? getTemplate(qrConfig.selectedTemplate) : null;
   const currentStyle = qrConfig.designMode === 'simple' ? QR_STYLES[qrConfig.selectedStyle] : null;
 
   return (
     <div className="qr-code-modal-component-overlay" onClick={onClose}>
-      <div className="qr-code-modal-component-content qr-preview-only" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="qr-code-modal-component-content qr-preview-only"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="qr-code-modal-component-header">
-          <h2 className="qr-code-modal-component-title">
-            QR Code – Table {table.tableNumber}
-          </h2>
-          <button className="qr-code-modal-component-close" onClick={onClose}>×</button>
+          <h2 className="qr-code-modal-component-title">QR Code – Table {table.tableNumber}</h2>
+          <button className="qr-code-modal-component-close" onClick={onClose}>
+            ×
+          </button>
         </div>
 
         <div className="qr-code-modal-component-body">
@@ -175,10 +179,10 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ table, onClose }) => {
                     template={currentTemplate}
                     table={table}
                     qrUrl={qrUrl}
-                    qrSettings={{ 
-                      fgColor: qrConfig.fgColor, 
-                      bgColor: qrConfig.bgColor, 
-                      level: qrConfig.level 
+                    qrSettings={{
+                      fgColor: qrConfig.fgColor,
+                      bgColor: qrConfig.bgColor,
+                      level: qrConfig.level,
                     }}
                     logoSrc={qrConfig.logoSrc}
                     logoDimensions={
@@ -199,10 +203,11 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ table, onClose }) => {
                 <div className="qr-info-row">
                   <span className="qr-info-label">Design Style:</span>
                   <span className="qr-info-value">
-                    {qrConfig.designMode === 'simple' 
-                      ? (qrConfig.customMode ? '🎨 Custom' : currentStyle?.name || 'Classic')
-                      : currentTemplate?.name || 'Classic'
-                    }
+                    {qrConfig.designMode === 'simple'
+                      ? qrConfig.customMode
+                        ? '🎨 Custom'
+                        : currentStyle?.name || 'Classic'
+                      : currentTemplate?.name || 'Classic'}
                   </span>
                 </div>
                 <div className="qr-info-row">
@@ -218,13 +223,9 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ table, onClose }) => {
               <div className="qr-url-section">
                 <label className="qr-url-label">QR URL:</label>
                 <div className="qr-url-input-group">
-                  <input
-                    className="qr-url-input"
-                    value={qrUrl}
-                    readOnly
-                  />
-                  <Button 
-                    variant="outline" 
+                  <input className="qr-url-input" value={qrUrl} readOnly />
+                  <Button
+                    variant="outline"
                     onClick={() => {
                       navigator.clipboard.writeText(qrUrl);
                       alert('URL copied to clipboard!');

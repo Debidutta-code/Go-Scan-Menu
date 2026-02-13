@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStaffAuth } from '../../contexts/StaffAuthContext';
 import { MenuService } from '../../services/menu.service';
-import { 
-  Category, 
-  DietaryType, 
-  NutritionTag, 
+import {
+  Category,
+  DietaryType,
+  NutritionTag,
   Allergen,
   DrinkTemperature,
   DrinkAlcoholContent,
@@ -17,7 +17,7 @@ import {
   NutritionTagLabels,
   DrinkTemperatureLabels,
   DrinkAlcoholContentLabels,
-  DrinkCaffeineContentLabels
+  DrinkCaffeineContentLabels,
 } from '../../types/menu.types';
 import { InputField } from '../../components/ui/InputField';
 import { Button } from '../../components/ui/Button';
@@ -57,9 +57,13 @@ export const AddEditMenuItem: React.FC = () => {
 
   const [selectedAllergens, setSelectedAllergens] = useState<Allergen[]>([]);
   const [selectedNutritionTags, setSelectedNutritionTags] = useState<NutritionTag[]>([]);
-  const [variants, setVariants] = useState<Array<{ name: string; price: string; isDefault: boolean }>>([]);
+  const [variants, setVariants] = useState<
+    Array<{ name: string; price: string; isDefault: boolean }>
+  >([]);
   const [addons, setAddons] = useState<Array<{ name: string; price: string }>>([]);
-  const [customizations, setCustomizations] = useState<Array<{ name: string; options: string; isRequired: boolean }>>([]);
+  const [customizations, setCustomizations] = useState<
+    Array<{ name: string; options: string; isRequired: boolean }>
+  >([]);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
@@ -118,26 +122,32 @@ export const AddEditMenuItem: React.FC = () => {
           }
 
           if (item.variants && item.variants.length > 0) {
-            setVariants(item.variants.map(v => ({
-              name: v.name,
-              price: v.price.toString(),
-              isDefault: v.isDefault
-            })));
+            setVariants(
+              item.variants.map((v) => ({
+                name: v.name,
+                price: v.price.toString(),
+                isDefault: v.isDefault,
+              }))
+            );
           }
 
           if (item.addons && item.addons.length > 0) {
-            setAddons(item.addons.map(a => ({
-              name: a.name,
-              price: a.price.toString()
-            })));
+            setAddons(
+              item.addons.map((a) => ({
+                name: a.name,
+                price: a.price.toString(),
+              }))
+            );
           }
 
           if (item.customizations && item.customizations.length > 0) {
-            setCustomizations(item.customizations.map(c => ({
-              name: c.name,
-              options: c.options.join(', '),
-              isRequired: c.isRequired
-            })));
+            setCustomizations(
+              item.customizations.map((c) => ({
+                name: c.name,
+                options: c.options.join(', '),
+                isRequired: c.isRequired,
+              }))
+            );
           }
         }
       }
@@ -151,7 +161,9 @@ export const AddEditMenuItem: React.FC = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
@@ -187,17 +199,13 @@ export const AddEditMenuItem: React.FC = () => {
 
   const handleAllergenToggle = (allergen: Allergen) => {
     setSelectedAllergens((prev) =>
-      prev.includes(allergen)
-        ? prev.filter((a) => a !== allergen)
-        : [...prev, allergen]
+      prev.includes(allergen) ? prev.filter((a) => a !== allergen) : [...prev, allergen]
     );
   };
 
   const handleNutritionTagToggle = (tag: NutritionTag) => {
     setSelectedNutritionTags((prev) =>
-      prev.includes(tag)
-        ? prev.filter((t) => t !== tag)
-        : [...prev, tag]
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 
@@ -258,11 +266,17 @@ export const AddEditMenuItem: React.FC = () => {
       newErrors.price = 'Please enter a valid price';
     }
 
-    if (formData.discountPrice && (isNaN(parseFloat(formData.discountPrice)) || parseFloat(formData.discountPrice) < 0)) {
+    if (
+      formData.discountPrice &&
+      (isNaN(parseFloat(formData.discountPrice)) || parseFloat(formData.discountPrice) < 0)
+    ) {
       newErrors.discountPrice = 'Please enter a valid discount price';
     }
 
-    if (formData.discountPrice && parseFloat(formData.discountPrice) >= parseFloat(formData.price)) {
+    if (
+      formData.discountPrice &&
+      parseFloat(formData.discountPrice) >= parseFloat(formData.price)
+    ) {
       newErrors.discountPrice = 'Discount price must be less than regular price';
     }
 
@@ -287,39 +301,63 @@ export const AddEditMenuItem: React.FC = () => {
         description: formData.description.trim() || undefined,
         categoryId: formData.categoryId,
         image: formData.image.trim() || undefined,
-        images: formData.images ? formData.images.split(',').map((img) => img.trim()).filter(Boolean) : [],
+        images: formData.images
+          ? formData.images
+              .split(',')
+              .map((img) => img.trim())
+              .filter(Boolean)
+          : [],
         price: parseFloat(formData.price),
         discountPrice: formData.discountPrice ? parseFloat(formData.discountPrice) : undefined,
         preparationTime: formData.preparationTime ? parseInt(formData.preparationTime) : undefined,
         calories: formData.calories ? parseInt(formData.calories) : undefined,
         spiceLevel: formData.spiceLevel || undefined,
-        tags: formData.tags ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+        tags: formData.tags
+          ? formData.tags
+              .split(',')
+              .map((t) => t.trim())
+              .filter(Boolean)
+          : [],
         allergens: selectedAllergens,
         nutritionTags: selectedNutritionTags,
         itemType: formData.itemType,
         dietaryType: formData.itemType === 'food' ? formData.dietaryType || undefined : undefined,
-        drinkTemperature: formData.itemType === 'drink' ? formData.drinkTemperature || undefined : undefined,
-        drinkAlcoholContent: formData.itemType === 'drink' ? formData.drinkAlcoholContent || undefined : undefined,
-        drinkCaffeineContent: formData.itemType === 'drink' ? formData.drinkCaffeineContent || undefined : undefined,
+        drinkTemperature:
+          formData.itemType === 'drink' ? formData.drinkTemperature || undefined : undefined,
+        drinkAlcoholContent:
+          formData.itemType === 'drink' ? formData.drinkAlcoholContent || undefined : undefined,
+        drinkCaffeineContent:
+          formData.itemType === 'drink' ? formData.drinkCaffeineContent || undefined : undefined,
         scope: formData.scope,
         isAvailable: formData.isAvailable,
-        availableQuantity: formData.availableQuantity ? parseInt(formData.availableQuantity) : undefined,
+        availableQuantity: formData.availableQuantity
+          ? parseInt(formData.availableQuantity)
+          : undefined,
         isActive: formData.isActive,
         displayOrder: formData.displayOrder ? parseInt(formData.displayOrder) : 0,
-        variants: variants.filter(v => v.name && v.price).map(v => ({
-          name: v.name,
-          price: parseFloat(v.price),
-          isDefault: v.isDefault
-        })),
-        addons: addons.filter(a => a.name && a.price).map(a => ({
-          name: a.name,
-          price: parseFloat(a.price)
-        })),
-        customizations: customizations.filter(c => c.name && c.options).map(c => ({
-          name: c.name,
-          options: c.options.split(',').map((o) => o.trim()).filter(Boolean),
-          isRequired: c.isRequired
-        })),
+        variants: variants
+          .filter((v) => v.name && v.price)
+          .map((v) => ({
+            name: v.name,
+            price: parseFloat(v.price),
+            isDefault: v.isDefault,
+          })),
+        addons: addons
+          .filter((a) => a.name && a.price)
+          .map((a) => ({
+            name: a.name,
+            price: parseFloat(a.price),
+          })),
+        customizations: customizations
+          .filter((c) => c.name && c.options)
+          .map((c) => ({
+            name: c.name,
+            options: c.options
+              .split(',')
+              .map((o) => o.trim())
+              .filter(Boolean),
+            isRequired: c.isRequired,
+          })),
       };
 
       if (isEditMode && id) {
@@ -514,7 +552,9 @@ export const AddEditMenuItem: React.FC = () => {
                         <span className="selection-card-icon">
                           {alcohol === DrinkAlcoholContent.ALCOHOLIC ? '🍺' : '🚫'}
                         </span>
-                        <span className="selection-card-label">{DrinkAlcoholContentLabels[alcohol]}</span>
+                        <span className="selection-card-label">
+                          {DrinkAlcoholContentLabels[alcohol]}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -534,7 +574,9 @@ export const AddEditMenuItem: React.FC = () => {
                         <span className="selection-card-icon">
                           {caffeine === DrinkCaffeineContent.CAFFEINATED ? '⚡' : '😴'}
                         </span>
-                        <span className="selection-card-label">{DrinkCaffeineContentLabels[caffeine]}</span>
+                        <span className="selection-card-label">
+                          {DrinkCaffeineContentLabels[caffeine]}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -554,7 +596,8 @@ export const AddEditMenuItem: React.FC = () => {
 
             <div className="form-group">
               <label className="form-label">
-                Additional Images <span className="optional-label">(Optional, comma-separated URLs)</span>
+                Additional Images{' '}
+                <span className="optional-label">(Optional, comma-separated URLs)</span>
               </label>
               <input
                 type="text"
@@ -669,7 +712,10 @@ export const AddEditMenuItem: React.FC = () => {
               <p className="field-help-text">Select all allergens present in this item</p>
               <div className="checkbox-card-grid">
                 {Object.values(Allergen).map((allergen) => (
-                  <label key={allergen} className={`checkbox-card ${selectedAllergens.includes(allergen) ? 'selected' : ''}`}>
+                  <label
+                    key={allergen}
+                    className={`checkbox-card ${selectedAllergens.includes(allergen) ? 'selected' : ''}`}
+                  >
                     <input
                       type="checkbox"
                       checked={selectedAllergens.includes(allergen)}
@@ -692,7 +738,10 @@ export const AddEditMenuItem: React.FC = () => {
               <p className="field-help-text">Select applicable nutrition tags</p>
               <div className="checkbox-card-grid">
                 {Object.values(NutritionTag).map((tag) => (
-                  <label key={tag} className={`checkbox-card ${selectedNutritionTags.includes(tag) ? 'selected' : ''}`}>
+                  <label
+                    key={tag}
+                    className={`checkbox-card ${selectedNutritionTags.includes(tag) ? 'selected' : ''}`}
+                  >
                     <input
                       type="checkbox"
                       checked={selectedNutritionTags.includes(tag)}
@@ -727,7 +776,9 @@ export const AddEditMenuItem: React.FC = () => {
                   + Add Variant
                 </Button>
               </div>
-              <p className="field-help-text">Add size or variant options (e.g., Small, Medium, Large)</p>
+              <p className="field-help-text">
+                Add size or variant options (e.g., Small, Medium, Large)
+              </p>
               {variants.map((variant, index) => (
                 <div key={index} className="dynamic-item-row">
                   <input
@@ -758,7 +809,12 @@ export const AddEditMenuItem: React.FC = () => {
                     />
                     <span>Default</span>
                   </label>
-                  <Button type="button" variant="outline" onClick={() => removeVariant(index)} disabled={loading}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => removeVariant(index)}
+                    disabled={loading}
+                  >
                     Remove
                   </Button>
                 </div>
@@ -773,7 +829,9 @@ export const AddEditMenuItem: React.FC = () => {
                   + Add Add-on
                 </Button>
               </div>
-              <p className="field-help-text">Add extra items customers can add (e.g., Extra Cheese, Bacon)</p>
+              <p className="field-help-text">
+                Add extra items customers can add (e.g., Extra Cheese, Bacon)
+              </p>
               {addons.map((addon, index) => (
                 <div key={index} className="dynamic-item-row">
                   <input
@@ -794,7 +852,12 @@ export const AddEditMenuItem: React.FC = () => {
                     step="0.01"
                     min="0"
                   />
-                  <Button type="button" variant="outline" onClick={() => removeAddon(index)} disabled={loading}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => removeAddon(index)}
+                    disabled={loading}
+                  >
                     Remove
                   </Button>
                 </div>
@@ -805,11 +868,18 @@ export const AddEditMenuItem: React.FC = () => {
             <div className="form-section">
               <div className="section-header">
                 <h3 className="section-title">Customizations (Optional)</h3>
-                <Button type="button" variant="outline" onClick={addCustomization} disabled={loading}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addCustomization}
+                  disabled={loading}
+                >
                   + Add Customization
                 </Button>
               </div>
-              <p className="field-help-text">Add customization options (e.g., "Toppings" with choices like "Lettuce, Tomato")</p>
+              <p className="field-help-text">
+                Add customization options (e.g., "Toppings" with choices like "Lettuce, Tomato")
+              </p>
               {customizations.map((customization, index) => (
                 <div key={index} className="dynamic-item-card">
                   <div className="dynamic-item-row">
@@ -831,7 +901,12 @@ export const AddEditMenuItem: React.FC = () => {
                       />
                       <span>Required</span>
                     </label>
-                    <Button type="button" variant="outline" onClick={() => removeCustomization(index)} disabled={loading}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => removeCustomization(index)}
+                      disabled={loading}
+                    >
                       Remove
                     </Button>
                   </div>
@@ -889,9 +964,7 @@ export const AddEditMenuItem: React.FC = () => {
                 />
                 <span>Item is active</span>
               </label>
-              <p className="field-help-text">
-                Inactive items won&apos;t be visible to customers
-              </p>
+              <p className="field-help-text">Inactive items won&apos;t be visible to customers</p>
             </div>
 
             <div className="form-group">
@@ -945,7 +1018,9 @@ export const AddEditMenuItem: React.FC = () => {
             <div className="preview-content">
               <div className="preview-header">
                 <h4 className="preview-item-name">{formData.name || 'Menu Item Name'}</h4>
-                <span className={`preview-availability ${formData.isAvailable ? 'available' : 'unavailable'}`}>
+                <span
+                  className={`preview-availability ${formData.isAvailable ? 'available' : 'unavailable'}`}
+                >
                   {formData.isAvailable ? 'Available' : 'Unavailable'}
                 </span>
               </div>
@@ -970,7 +1045,9 @@ export const AddEditMenuItem: React.FC = () => {
                 {formData.discountPrice ? (
                   <>
                     <span className="preview-original-price">${formData.price || '0.00'}</span>
-                    <span className="preview-discount-price">${formData.discountPrice || '0.00'}</span>
+                    <span className="preview-discount-price">
+                      ${formData.discountPrice || '0.00'}
+                    </span>
                   </>
                 ) : (
                   <span className="preview-current-price">${formData.price || '0.00'}</span>

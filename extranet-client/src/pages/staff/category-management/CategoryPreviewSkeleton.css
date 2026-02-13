@@ -31,13 +31,23 @@
   left: 0;
   right: 0;
   padding: 6px 7px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.3) 60%,
+    transparent 100%
+  );
 }
 
 .staff-category-sort-skeleton-preview-name {
   height: 10px;
   width: 70%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 25%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.3) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.3) 25%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.3) 75%
+  );
   background-size: 200% 100%;
   animation: staff-category-sort-skeleton-preview-shimmer 1.5s infinite;
   border-radius: 3px;
@@ -47,7 +57,12 @@
 .staff-category-sort-skeleton-preview-count {
   height: 8px;
   width: 40%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 25%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.3) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.3) 25%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.3) 75%
+  );
   background-size: 200% 100%;
   animation: staff-category-sort-skeleton-preview-shimmer 1.5s infinite;
   border-radius: 3px;

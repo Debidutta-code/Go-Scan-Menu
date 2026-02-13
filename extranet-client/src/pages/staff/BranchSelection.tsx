@@ -17,13 +17,13 @@ export const BranchSelection: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-    useEffect(() => {
+  useEffect(() => {
     if (staff && token) {
       loadBranches();
     }
   }, [staff, token]);
 
-    const loadBranches = async () => {
+  const loadBranches = async () => {
     if (!staff || !token) return;
 
     setLoading(true);
@@ -34,11 +34,15 @@ export const BranchSelection: React.FC = () => {
 
       if (response.success && response.data) {
         const branchList = response.data.branches || [];
-        
+
         // Filter branches based on staff's allowed branches
         let filteredBranches = branchList;
-        if (staff.staffType !== 'owner' && staff.allowedBranchIds && staff.allowedBranchIds.length > 0) {
-          filteredBranches = branchList.filter(branch => 
+        if (
+          staff.staffType !== 'owner' &&
+          staff.allowedBranchIds &&
+          staff.allowedBranchIds.length > 0
+        ) {
+          filteredBranches = branchList.filter((branch) =>
             staff.allowedBranchIds.includes(branch._id)
           );
         }
@@ -52,11 +56,11 @@ export const BranchSelection: React.FC = () => {
 
         // If single restaurant type but somehow has multiple branches, still redirect to first active branch
         if (staff.restaurant?.type === 'single' && filteredBranches.length > 0) {
-          const activeBranch = filteredBranches.find(b => b.isActive) || filteredBranches[0];
+          const activeBranch = filteredBranches.find((b) => b.isActive) || filteredBranches[0];
           navigate(`/staff/tables/${activeBranch._id}`, { replace: true });
           return;
         }
-        
+
         // Only set branches state if we're showing the selection UI (multiple branches for chain)
         setBranches(filteredBranches);
 
@@ -120,8 +124,10 @@ export const BranchSelection: React.FC = () => {
             </h1>
             {staff?.restaurant && (
               <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '4px' }}>
-                {staff.restaurant.name} 
-                {staff.restaurant.type === 'single' ? ' (Single Location)' : ' (Multiple Locations)'}
+                {staff.restaurant.name}
+                {staff.restaurant.type === 'single'
+                  ? ' (Single Location)'
+                  : ' (Multiple Locations)'}
               </p>
             )}
           </div>
@@ -140,7 +146,7 @@ export const BranchSelection: React.FC = () => {
         {branches.length === 0 ? (
           <div className="empty-state">
             <p>
-              {staff?.restaurant?.type === 'single' 
+              {staff?.restaurant?.type === 'single'
                 ? 'No branch found. Please contact your administrator to set up a branch for your restaurant.'
                 : 'No branches assigned to you. Please contact your administrator.'}
             </p>
@@ -158,9 +164,7 @@ export const BranchSelection: React.FC = () => {
                   <h3 className="branch-name" data-testid="branch-name">
                     {branch.name}
                   </h3>
-                  <span
-                    className={`branch-status ${branch.isActive ? 'active' : 'inactive'}`}
-                  >
+                  <span className={`branch-status ${branch.isActive ? 'active' : 'inactive'}`}>
                     {branch.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </div>

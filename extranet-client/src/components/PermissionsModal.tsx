@@ -69,12 +69,9 @@ export const PermissionsModal: React.FC<PermissionsModalProps> = ({
     try {
       setSaving(true);
       setError(null);
-      await StaffPermissionsService.updatePermissionsForStaffType(
-        token,
-        restaurantId,
-        staffType,
-        { permissions }
-      );
+      await StaffPermissionsService.updatePermissionsForStaffType(token, restaurantId, staffType, {
+        permissions,
+      });
       onSave?.();
       onClose();
     } catch (err: any) {
@@ -98,10 +95,13 @@ export const PermissionsModal: React.FC<PermissionsModalProps> = ({
   const toggleAllInCategory = (category: keyof IPermissions, value: boolean) => {
     if (!permissions) return;
     const categoryPerms = permissions[category] as Record<string, boolean>;
-    const updatedCategory = Object.keys(categoryPerms).reduce((acc, key) => {
-      acc[key] = value;
-      return acc;
-    }, {} as Record<string, boolean>);
+    const updatedCategory = Object.keys(categoryPerms).reduce(
+      (acc, key) => {
+        acc[key] = value;
+        return acc;
+      },
+      {} as Record<string, boolean>
+    );
 
     setPermissions({
       ...permissions,
@@ -117,9 +117,7 @@ export const PermissionsModal: React.FC<PermissionsModalProps> = ({
         <div className="modal-header">
           <div>
             <h2 className="modal-title">Manage Permissions</h2>
-            <p className="modal-subtitle">
-              {STAFF_TYPE_LABELS[staffType]} Role Permissions
-            </p>
+            <p className="modal-subtitle">{STAFF_TYPE_LABELS[staffType]} Role Permissions</p>
           </div>
           <button className="modal-close" onClick={onClose}>
             <X size={24} />

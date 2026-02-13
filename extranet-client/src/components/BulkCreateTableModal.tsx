@@ -72,7 +72,11 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
   const getPreview = () => {
     const count = formData.endNumber - formData.startNumber + 1;
     const examples = [];
-    for (let i = formData.startNumber; i <= Math.min(formData.startNumber + 2, formData.endNumber); i++) {
+    for (
+      let i = formData.startNumber;
+      i <= Math.min(formData.startNumber + 2, formData.endNumber);
+      i++
+    ) {
       examples.push(`${formData.prefix}${i}`);
     }
     if (count > 3) {

@@ -279,10 +279,7 @@ export const EditRestaurant: React.FC = () => {
           <p className="page-subtitle">{restaurant?.name || 'Loading...'}</p>
         </div>
         <div className="header-actions">
-          <Button
-            variant="outline"
-            onClick={() => navigate(`/restaurants/${id}`)}
-          >
+          <Button variant="outline" onClick={() => navigate(`/restaurants/${id}`)}>
             ← View Restaurant
           </Button>
         </div>
@@ -398,17 +395,13 @@ export const EditRestaurant: React.FC = () => {
                     <input
                       type="color"
                       value={themeData.primaryColor}
-                      onChange={(e) =>
-                        setThemeData({ ...themeData, primaryColor: e.target.value })
-                      }
+                      onChange={(e) => setThemeData({ ...themeData, primaryColor: e.target.value })}
                       className="color-picker"
                       disabled={saving}
                     />
                     <InputField
                       value={themeData.primaryColor.toUpperCase()}
-                      onChange={(e) =>
-                        setThemeData({ ...themeData, primaryColor: e.target.value })
-                      }
+                      onChange={(e) => setThemeData({ ...themeData, primaryColor: e.target.value })}
                       error={errors['primaryColor']}
                       disabled={saving}
                       placeholder="#3498DB"
@@ -448,17 +441,13 @@ export const EditRestaurant: React.FC = () => {
                     <input
                       type="color"
                       value={themeData.accentColor}
-                      onChange={(e) =>
-                        setThemeData({ ...themeData, accentColor: e.target.value })
-                      }
+                      onChange={(e) => setThemeData({ ...themeData, accentColor: e.target.value })}
                       className="color-picker"
                       disabled={saving}
                     />
                     <InputField
                       value={themeData.accentColor.toUpperCase()}
-                      onChange={(e) =>
-                        setThemeData({ ...themeData, accentColor: e.target.value })
-                      }
+                      onChange={(e) => setThemeData({ ...themeData, accentColor: e.target.value })}
                       error={errors['accentColor']}
                       disabled={saving}
                       placeholder="#E74C3C"
@@ -499,9 +488,7 @@ export const EditRestaurant: React.FC = () => {
                 <InputField
                   label="Banner Image URL"
                   value={themeData.bannerImage}
-                  onChange={(e) =>
-                    setThemeData({ ...themeData, bannerImage: e.target.value })
-                  }
+                  onChange={(e) => setThemeData({ ...themeData, bannerImage: e.target.value })}
                   error={errors['bannerImage']}
                   disabled={saving}
                   placeholder="https://example.com/banner.jpg"
@@ -512,9 +499,7 @@ export const EditRestaurant: React.FC = () => {
                   <label className="field-label">Custom CSS</label>
                   <textarea
                     value={themeData.customCSS}
-                    onChange={(e) =>
-                      setThemeData({ ...themeData, customCSS: e.target.value })
-                    }
+                    onChange={(e) => setThemeData({ ...themeData, customCSS: e.target.value })}
                     className="textarea-input"
                     rows={8}
                     disabled={saving}

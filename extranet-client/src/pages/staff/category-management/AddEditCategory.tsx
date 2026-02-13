@@ -56,7 +56,9 @@ export const AddEditCategory: React.FC = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
@@ -129,7 +131,11 @@ export const AddEditCategory: React.FC = () => {
       <div className="category-form-side">
         <div className="category-form-card">
           <div className="form-header">
-            <Button variant="outline" onClick={() => navigate('/staff/categories')} disabled={loading}>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/staff/categories')}
+              disabled={loading}
+            >
               ← Back
             </Button>
             <h1 className="form-title" data-testid="form-title">

@@ -1,11 +1,5 @@
 // src/contexts/StaffAuthContext.tsx
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { StaffService } from '../services/staff.service'; // Your staff service
 import { Staff } from '../types/staff.types';
 
@@ -18,13 +12,9 @@ interface StaffAuthContextType {
   isLoading: boolean;
 }
 
-const StaffAuthContext = createContext<StaffAuthContextType | undefined>(
-  undefined
-);
+const StaffAuthContext = createContext<StaffAuthContextType | undefined>(undefined);
 
-export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [staff, setStaff] = useState<Staff | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,7 +42,7 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({
     loadStoredAuth();
   }, []);
 
-    const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string) => {
     try {
       const response = await StaffService.login(email, password);
 
@@ -91,11 +81,7 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({
     isLoading,
   };
 
-  return (
-    <StaffAuthContext.Provider value={value}>
-      {children}
-    </StaffAuthContext.Provider>
-  );
+  return <StaffAuthContext.Provider value={value}>{children}</StaffAuthContext.Provider>;
 };
 
 // Custom hook

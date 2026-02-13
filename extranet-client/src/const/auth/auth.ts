@@ -1,1 +1,2 @@
-export const ILLUSTRATION_URL = 'https://res.cloudinary.com/da5p8dzn3/image/upload/v1767174798/Gemini_Generated_Image_dvzvchdvzvchdvzv_d1mmkk.png';
+export const ILLUSTRATION_URL =
+  'https://res.cloudinary.com/da5p8dzn3/image/upload/v1767174798/Gemini_Generated_Image_dvzvchdvzvchdvzv_d1mmkk.png';

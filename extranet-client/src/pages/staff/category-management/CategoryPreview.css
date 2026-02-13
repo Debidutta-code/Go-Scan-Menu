@@ -24,7 +24,9 @@
   border-radius: 7px;
   overflow: hidden;
   cursor: grab;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
   background: #f7fafc;
   touch-action: none;
@@ -86,7 +88,12 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 60%,
+    transparent 100%
+  );
   padding: 6px 7px;
   color: white;
   pointer-events: none;
@@ -166,13 +173,23 @@
   left: 0;
   right: 0;
   padding: 6px 7px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 60%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.1) 60%,
+    transparent 100%
+  );
 }
 
 .staff-category-sort-skeleton-preview-name {
   height: 10px;
   width: 70%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 25%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.3) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.3) 25%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.3) 75%
+  );
   background-size: 200% 100%;
   animation: staff-category-sort-skeleton-preview-shimmer 1.5s infinite;
   border-radius: 3px;
@@ -182,7 +199,12 @@
 .staff-category-sort-skeleton-preview-count {
   height: 8px;
   width: 40%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 25%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.3) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.3) 25%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.3) 75%
+  );
   background-size: 200% 100%;
   animation: staff-category-sort-skeleton-preview-shimmer 1.5s infinite;
   border-radius: 3px;
@@ -231,7 +253,8 @@
 }
 
 @keyframes staff-category-sort-skeleton-preview-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

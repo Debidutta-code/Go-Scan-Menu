@@ -85,7 +85,7 @@ export const CategoryManagement: React.FC = () => {
     const newIndex = categories.findIndex((cat) => cat._id === over.id);
 
     const newCategories = arrayMove(categories, oldIndex, newIndex);
-    
+
     setCategories(newCategories);
     await updateDisplayOrders(newCategories);
   };
@@ -97,12 +97,7 @@ export const CategoryManagement: React.FC = () => {
     try {
       await Promise.all(
         reorderedCategories.map((category, index) =>
-          MenuService.updateCategoryDisplayOrder(
-            token,
-            staff.restaurantId,
-            category._id,
-            index
-          )
+          MenuService.updateCategoryDisplayOrder(token, staff.restaurantId, category._id, index)
         )
       );
     } catch (err: any) {
@@ -155,10 +150,7 @@ export const CategoryManagement: React.FC = () => {
           </div>
         </div>
         <div className="header-actions">
-          <Button
-            variant="primary"
-            onClick={handleAddCategory}
-          >
+          <Button variant="primary" onClick={handleAddCategory}>
             + Add Category
           </Button>
           <Button variant="outline" onClick={handleLogout}>
@@ -171,18 +163,12 @@ export const CategoryManagement: React.FC = () => {
       {error && <div className="error-banner">{error}</div>}
 
       {/* Main Content */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className="category-management-content">
           {/* Left Side - Category List */}
           <div className="category-list-panel">
             <div className="panel-header">
-              <h2 className="panel-title">
-                Categories {!loading && `(${categories.length})`}
-              </h2>
+              <h2 className="panel-title">Categories {!loading && `(${categories.length})`}</h2>
             </div>
 
             <div className="category-list-container">
@@ -195,10 +181,7 @@ export const CategoryManagement: React.FC = () => {
                   <p className="empty-description">
                     Start by adding your first category to organize your menu
                   </p>
-                  <Button
-                    variant="primary"
-                    onClick={handleAddCategory}
-                  >
+                  <Button variant="primary" onClick={handleAddCategory}>
                     + Add Category
                   </Button>
                 </div>
@@ -227,11 +210,7 @@ export const CategoryManagement: React.FC = () => {
               <div className="phone-frame">
                 <div className="phone-notch"></div>
                 <div className="phone-content">
-                  <CategoryPreview 
-                    categories={categories} 
-                    loading={loading}
-                    saving={saving}
-                  />
+                  <CategoryPreview categories={categories} loading={loading} saving={saving} />
                 </div>
               </div>
             </div>

@@ -13,11 +13,7 @@ interface EditTableModalProps {
   onSuccess: () => void;
 }
 
-export const EditTableModal: React.FC<EditTableModalProps> = ({
-  table,
-  onClose,
-  onSuccess,
-}) => {
+export const EditTableModal: React.FC<EditTableModalProps> = ({ table, onClose, onSuccess }) => {
   const { staff, token } = useStaffAuth();
   const [formData, setFormData] = useState({
     tableNumber: table.tableNumber,
@@ -81,9 +77,7 @@ export const EditTableModal: React.FC<EditTableModalProps> = ({
               label="Table Number"
               type="text"
               value={formData.tableNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, tableNumber: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, tableNumber: e.target.value })}
               placeholder="e.g., 1, A1, T-101"
               required
               data-testid="table-number-input"

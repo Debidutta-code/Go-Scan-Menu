@@ -151,7 +151,12 @@
 .category-modal-skeleton-preview-title {
   height: 16px;
   width: 40%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.5) 25%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.5) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.5) 25%,
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 0.5) 75%
+  );
   background-size: 200% 100%;
   animation: category-modal-skeleton-shimmer 1.5s infinite;
   border-radius: 4px;
@@ -161,7 +166,12 @@
 .category-modal-skeleton-preview-subtitle {
   height: 12px;
   width: 60%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.5) 25%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.5) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.5) 25%,
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 0.5) 75%
+  );
   background-size: 200% 100%;
   animation: category-modal-skeleton-shimmer 1.5s infinite;
   border-radius: 4px;
@@ -180,7 +190,9 @@
   overflow: hidden;
   width: 100%;
   max-width: 280px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .category-modal-skeleton-preview-image {

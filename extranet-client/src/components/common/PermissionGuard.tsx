@@ -13,7 +13,7 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   children,
   fallback = null,
 }) => {
-  const { staff } : any = useStaffAuth();
+  const { staff }: any = useStaffAuth();
 
   if (!staff || !staff.permissions || !staff.permissions[permission]) {
     return <>{fallback}</>;

@@ -85,7 +85,11 @@ export const RestaurantList: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!token) return;
 
-    if (!window.confirm('Are you sure you want to delete this restaurant? This action cannot be undone.')) {
+    if (
+      !window.confirm(
+        'Are you sure you want to delete this restaurant? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -123,8 +127,7 @@ export const RestaurantList: React.FC = () => {
     );
   };
 
-  const getTypeDisplay = (type: string) =>
-    type === 'single' ? 'Single Location' : 'Chain';
+  const getTypeDisplay = (type: string) => (type === 'single' ? 'Single Location' : 'Chain');
 
   return (
     <div className="restaurant-list-container">
@@ -211,7 +214,8 @@ export const RestaurantList: React.FC = () => {
 
       {/* Results Info */}
       <div className="results-info">
-        Showing {(currentPage - 1) * limit + 1}–{Math.min(currentPage * limit, total)} of {total} restaurants
+        Showing {(currentPage - 1) * limit + 1}–{Math.min(currentPage * limit, total)} of {total}{' '}
+        restaurants
       </div>
 
       {/* Content States */}
@@ -228,10 +232,7 @@ export const RestaurantList: React.FC = () => {
         <div className="empty-state">
           <h3>No restaurants found</h3>
           <p>No restaurants match your current filters.</p>
-          <button
-            className="btn-create"
-            onClick={() => navigate('/restaurants/create')}
-          >
+          <button className="btn-create" onClick={() => navigate('/restaurants/create')}>
             Create Your First Restaurant
           </button>
         </div>
@@ -267,13 +268,12 @@ export const RestaurantList: React.FC = () => {
                       </div>
                     </td>
                     <td>
-                      <span className="type-badge">
-                        {getTypeDisplay(restaurant.type)}
-                      </span>
+                      <span className="type-badge">{getTypeDisplay(restaurant.type)}</span>
                     </td>
                     <td>{getPlanBadge(restaurant.subscription.plan)}</td>
                     <td className="branches-cell">
-                      {restaurant.subscription.currentBranches} / {restaurant.subscription.maxBranches}
+                      {restaurant.subscription.currentBranches} /{' '}
+                      {restaurant.subscription.maxBranches}
                     </td>
                     <td>{getStatusBadge(restaurant.isActive)}</td>
                     <td>

@@ -9,18 +9,8 @@ interface SortablePreviewCardProps {
   isLarge: boolean;
 }
 
-export const SortablePreviewCard: React.FC<SortablePreviewCardProps> = ({
-  category,
-  isLarge,
-}) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ 
+export const SortablePreviewCard: React.FC<SortablePreviewCardProps> = ({ category, isLarge }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: category._id,
   });
 

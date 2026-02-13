@@ -20,9 +20,7 @@ export const CategoryPreviewSkeleton: React.FC<CategoryPreviewSkeletonProps> = (
         {skeletonPattern.map((isLarge, index) => (
           <div
             key={index}
-            className={`staff-category-sort-skeleton-preview-card ${
-              isLarge ? 'large' : 'small'
-            }`}
+            className={`staff-category-sort-skeleton-preview-card ${isLarge ? 'large' : 'small'}`}
           >
             <div className="staff-category-sort-skeleton-preview-image"></div>
             <div className="staff-category-sort-skeleton-preview-overlay">

@@ -64,16 +64,10 @@ function App() {
   return (
     <StaffAuthProvider>
       <Routes>
-
         {/* ================= ROOT ================= */}
         <Route
           path="/"
-          element={
-            <Navigate
-              to={superAdmin ? '/dashboard' : '/staff/login'}
-              replace
-            />
-          }
+          element={<Navigate to={superAdmin ? '/dashboard' : '/staff/login'} replace />}
         />
 
         {/* ================= SUPER ADMIN AUTH ================= */}
@@ -255,7 +249,7 @@ function App() {
           }
         />
 
-                {/* ================= PUBLIC MENU ================= */}
+        {/* ================= PUBLIC MENU ================= */}
         {/* With QR Code */}
         <Route path="/menu/:restaurantSlug/:branchCode/:qrCode" element={<PublicLayout />}>
           <Route index element={<MenuPage />} />
@@ -263,7 +257,7 @@ function App() {
           <Route path="cart" element={<CartPage />} />
           <Route path="payment" element={<PaymentPage />} />
         </Route>
-        
+
         {/* Without QR Code */}
         <Route path="/menu/:restaurantSlug/:branchCode" element={<PublicLayout />}>
           <Route index element={<MenuPage />} />
@@ -275,14 +269,8 @@ function App() {
         {/* ================= 404 ================= */}
         <Route
           path="*"
-          element={
-            <Navigate
-              to={superAdmin ? '/dashboard' : '/staff/login'}
-              replace
-            />
-          }
+          element={<Navigate to={superAdmin ? '/dashboard' : '/staff/login'} replace />}
         />
-
       </Routes>
     </StaffAuthProvider>
   );
