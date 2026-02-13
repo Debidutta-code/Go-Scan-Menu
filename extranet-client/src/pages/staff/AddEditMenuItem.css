@@ -439,3 +439,263 @@
     flex-direction: column;
   }
 }
+
+/* Add these new styles to your existing AddEditMenuItem.css */
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.preview-dietary {
+  display: inline-block;
+  font-size: 13px;
+  padding: 4px 10px;
+  background: white;
+  border-radius: 8px;
+  color: #059669;
+  font-weight: 500;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #d1fae5;
+}
+
+.preview-section {
+  margin: 16px 0;
+}
+
+.preview-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+}
+
+.allergen-tag {
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fecaca !important;
+}
+
+.nutrition-tag {
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+/* Radio Card Group (for Item Type) */
+.radio-card-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.radio-card {
+  position: relative;
+  cursor: pointer;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  background: white;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radio-card:hover {
+  border-color: #6366f1;
+  background: #f5f3ff;
+}
+
+.radio-card.selected {
+  border-color: #6366f1;
+  background: #eef2ff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.radio-card-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.radio-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio-card-icon {
+  font-size: 2rem;
+}
+
+.radio-card-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.radio-card.selected .radio-card-label {
+  color: #6366f1;
+}
+
+/* Selection Card Grid (for Dietary Types, Drink Properties) */
+.selection-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.selection-card-grid.two-column {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.selection-card {
+  position: relative;
+  cursor: pointer;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  background: white;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.selection-card:hover:not(:disabled) {
+  border-color: #6366f1;
+  background: #f5f3ff;
+  transform: translateY(-2px);
+}
+
+.selection-card.selected {
+  border-color: #6366f1;
+  background: #eef2ff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.selection-card.error {
+  border-color: #dc2626;
+}
+
+.selection-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selection-card-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.selection-card-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.selection-card.selected .selection-card-label {
+  color: #6366f1;
+}
+
+/* Checkbox Card Grid (for Allergens, Nutrition Tags) */
+.checkbox-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.checkbox-card {
+  position: relative;
+  cursor: pointer;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: white;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-card:hover {
+  border-color: #6366f1;
+  background: #f5f3ff;
+}
+
+.checkbox-card.selected {
+  border-color: #6366f1;
+  background: #eef2ff;
+}
+
+.checkbox-card-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-card-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.checkbox-card-check {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: transparent;
+  background: white;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.checkbox-card.selected .checkbox-card-check {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: white;
+}
+
+.checkbox-card-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  flex: 1;
+}
+
+.checkbox-card.selected .checkbox-card-label {
+  color: #6366f1;
+  font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .selection-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .checkbox-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .radio-card-group {
+    grid-template-columns: 1fr;
+  }
+}

@@ -3,7 +3,7 @@ import { MenuItemRepository } from '@/repositories/menuitem.repository';
 import { CategoryRepository } from '@/repositories/category.repository';
 import { RestaurantRepository } from '@/repositories/restaurant.repository';
 import { BranchRepository } from '@/repositories/branch.repository';
-import { IMenuItem } from '@/models/MenuItem.model';
+import { IMenuItem, DietaryType, Allergen, NutritionTag, DrinkTemperature, DrinkAlcoholContent, DrinkCaffeineContent } from '@/models/MenuItem.model';
 import { AppError } from '@/utils/AppError';
 import { Types } from 'mongoose';
 
@@ -36,7 +36,13 @@ export class MenuItemService {
       calories?: number;
       spiceLevel?: IMenuItem['spiceLevel'];
       tags?: string[];
-      allergens?: string[];
+      allergens?: Allergen[];
+      nutritionTags?: NutritionTag[];
+      itemType: 'food' | 'drink';
+      dietaryType?: DietaryType;
+      drinkTemperature?: DrinkTemperature;
+      drinkAlcoholContent?: DrinkAlcoholContent;
+      drinkCaffeineContent?: DrinkCaffeineContent;
       variants?: IMenuItem['variants'];
       addons?: IMenuItem['addons'];
       customizations?: IMenuItem['customizations'];
@@ -55,6 +61,11 @@ export class MenuItemService {
     const category = await this.categoryRepo.findById(data.categoryId);
     if (!category || !category.isActive) {
       throw new AppError('Category not found or inactive', 404);
+    }
+
+    // Validate item type specific fields
+    if (data.itemType === 'food' && !data.dietaryType) {
+      throw new AppError('Dietary type is required for food items', 400);
     }
 
     // Enforce scope rules
@@ -106,12 +117,18 @@ export class MenuItemService {
       price: data.price,
       discountPrice: data.discountPrice,
       scope: data.scope,
-      branchPricing: [], // Always start with empty array, use updateBranchPricing to add overrides
+      branchPricing: [],
       preparationTime: data.preparationTime,
       calories: data.calories,
       spiceLevel: data.spiceLevel,
       tags: data.tags || [],
       allergens: data.allergens || [],
+      nutritionTags: data.nutritionTags || [],
+      itemType: data.itemType,
+      dietaryType: data.itemType === 'food' ? data.dietaryType : undefined,
+      drinkTemperature: data.itemType === 'drink' ? data.drinkTemperature : undefined,
+      drinkAlcoholContent: data.itemType === 'drink' ? data.drinkAlcoholContent : undefined,
+      drinkCaffeineContent: data.itemType === 'drink' ? data.drinkCaffeineContent : undefined,
       variants: data.variants || [],
       addons: data.addons || [],
       customizations: data.customizations || [],
@@ -156,10 +173,8 @@ export class MenuItemService {
   }
 
   async getAllMenuItemsForMenu(restaurantId: string, branchId?: string) {
-    // Returns both restaurant-wide and branch-specific items
     const items = await this.menuItemRepo.findAllForMenu(restaurantId, branchId);
 
-    // If branchId provided, apply branch pricing
     if (branchId) {
       return items.map((item: any) => {
         const branchPrice = item.branchPricing.find(
@@ -194,6 +209,13 @@ export class MenuItemService {
 
     if (menuItem.restaurantId.toString() !== restaurantId) {
       throw new AppError('Menu item does not belong to this restaurant', 403);
+    }
+
+    // Validate item type changes
+    if (data.itemType && data.itemType !== menuItem.itemType) {
+      if (data.itemType === 'food' && !data.dietaryType) {
+        throw new AppError('Dietary type is required for food items', 400);
+      }
     }
 
     const updatedMenuItem = await this.menuItemRepo.update(id, data);
@@ -241,18 +263,15 @@ export class MenuItemService {
       throw new AppError('Menu item does not belong to this restaurant', 403);
     }
 
-    // Only restaurant-wide items can have branch pricing
     if (menuItem.scope !== 'restaurant') {
       throw new AppError('Only restaurant-wide items can have branch-specific pricing', 400);
     }
 
-    // Verify branch exists and belongs to restaurant
     const branch = await this.branchRepo.findByIdAndRestaurant(branchId, restaurantId);
     if (!branch || !branch.isActive) {
       throw new AppError('Branch not found or inactive', 404);
     }
 
-    // Validate pricing
     if (pricing.price < 0) {
       throw new AppError('Price cannot be negative', 400);
     }

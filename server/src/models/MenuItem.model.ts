@@ -1,6 +1,53 @@
 // src/models/MenuItem.model.ts
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { NextFunction } from 'express';
+
+export enum DietaryType {
+  VEG = 'VEG',
+  EGG = 'EGG',
+  NON_VEG = 'NON_VEG',
+  JAIN = 'JAIN',
+  VEGAN = 'VEGAN',
+  GLUTEN_FREE = 'GLUTEN_FREE',
+}
+
+export enum NutritionTag {
+  HIGH_PROTEIN = 'HIGH_PROTEIN',
+  LOW_CALORIES = 'LOW_CALORIES',
+  LOW_FAT = 'LOW_FAT',
+  LOW_SUGAR = 'LOW_SUGAR',
+  HIGH_FIBER = 'HIGH_FIBER',
+  KETO_FRIENDLY = 'KETO_FRIENDLY',
+  LOW_CARB = 'LOW_CARB',
+}
+
+export enum Allergen {
+  DAIRY = 'DAIRY',
+  GLUTEN = 'GLUTEN',
+  PEANUTS = 'PEANUTS',
+  TREE_NUTS = 'TREE_NUTS',
+  EGGS = 'EGGS',
+  SOY = 'SOY',
+  SESAME = 'SESAME',
+  FISH = 'FISH',
+  SHELLFISH = 'SHELLFISH',
+  MUSTARD = 'MUSTARD',
+  ALLIUM = 'ALLIUM',
+}
+
+export enum DrinkTemperature {
+  HOT = 'HOT',
+  COLD = 'COLD',
+}
+
+export enum DrinkAlcoholContent {
+  ALCOHOLIC = 'ALCOHOLIC',
+  NON_ALCOHOLIC = 'NON_ALCOHOLIC',
+}
+
+export enum DrinkCaffeineContent {
+  CAFFEINATED = 'CAFFEINATED',
+  NON_CAFFEINATED = 'NON_CAFFEINATED',
+}
 
 export interface IMenuItem extends Document {
   restaurantId: Types.ObjectId;
@@ -23,7 +70,13 @@ export interface IMenuItem extends Document {
   calories?: number;
   spiceLevel?: 'mild' | 'medium' | 'hot' | 'extra_hot';
   tags: string[];
-  allergens: string[];
+  allergens: Allergen[];
+  nutritionTags: NutritionTag[];
+  itemType: 'food' | 'drink';
+  dietaryType?: DietaryType;
+  drinkTemperature?: DrinkTemperature;
+  drinkAlcoholContent?: DrinkAlcoholContent;
+  drinkCaffeineContent?: DrinkCaffeineContent;
   variants: Array<{
     name: string;
     price: number;
@@ -138,9 +191,37 @@ const menuItemSchema = new Schema<IMenuItem>(
     allergens: [
       {
         type: String,
-        trim: true,
+        enum: Object.values(Allergen),
       },
     ],
+    nutritionTags: [
+      {
+        type: String,
+        enum: Object.values(NutritionTag),
+      },
+    ],
+    itemType: {
+      type: String,
+      enum: ['food', 'drink'],
+      required: true,
+      default: 'food',
+    },
+    dietaryType: {
+      type: String,
+      enum: Object.values(DietaryType),
+    },
+    drinkTemperature: {
+      type: String,
+      enum: Object.values(DrinkTemperature),
+    },
+    drinkAlcoholContent: {
+      type: String,
+      enum: Object.values(DrinkAlcoholContent),
+    },
+    drinkCaffeineContent: {
+      type: String,
+      enum: Object.values(DrinkCaffeineContent),
+    },
     variants: [
       {
         name: {
@@ -232,6 +313,21 @@ menuItemSchema.pre('save', async function (this: IMenuItem) {
 
   if (item.scope === 'branch' && item.branchPricing?.length) {
     throw new Error('Branch-scoped items should not have branchPricing array');
+  }
+
+  // Validate item type specific fields
+  if (item.itemType === 'food') {
+    if (!item.dietaryType) {
+      throw new Error('Food items must have a dietary type');
+    }
+    // Clear drink-specific fields if any
+    item.drinkTemperature = undefined;
+    item.drinkAlcoholContent = undefined;
+    item.drinkCaffeineContent = undefined;
+  } else if (item.itemType === 'drink') {
+    // Clear food-specific fields if any
+    item.dietaryType = undefined;
+    item.spiceLevel = undefined;
   }
 
   if (item.isModified('categoryId') || item.isModified('scope') || item.isNew) {

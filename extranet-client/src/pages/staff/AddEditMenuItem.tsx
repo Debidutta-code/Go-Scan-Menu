@@ -3,7 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStaffAuth } from '../../contexts/StaffAuthContext';
 import { MenuService } from '../../services/menu.service';
-import { Category } from '../../types/menu.types';
+import { 
+  Category, 
+  DietaryType, 
+  NutritionTag, 
+  Allergen,
+  DrinkTemperature,
+  DrinkAlcoholContent,
+  DrinkCaffeineContent,
+  DietaryTypeLabels,
+  DietaryTypeIcons,
+  AllergenLabels,
+  NutritionTagLabels,
+  DrinkTemperatureLabels,
+  DrinkAlcoholContentLabels,
+  DrinkCaffeineContentLabels
+} from '../../types/menu.types';
 import { InputField } from '../../components/ui/InputField';
 import { Button } from '../../components/ui/Button';
 import './AddEditMenuItem.css';
@@ -28,7 +43,11 @@ export const AddEditMenuItem: React.FC = () => {
     calories: '',
     spiceLevel: '' as '' | 'mild' | 'medium' | 'hot' | 'extra_hot',
     tags: '',
-    allergens: '',
+    itemType: 'food' as 'food' | 'drink',
+    dietaryType: '' as '' | DietaryType,
+    drinkTemperature: '' as '' | DrinkTemperature,
+    drinkAlcoholContent: '' as '' | DrinkAlcoholContent,
+    drinkCaffeineContent: '' as '' | DrinkCaffeineContent,
     scope: 'restaurant' as 'restaurant' | 'branch',
     isAvailable: true,
     availableQuantity: '',
@@ -36,6 +55,8 @@ export const AddEditMenuItem: React.FC = () => {
     displayOrder: '0',
   });
 
+  const [selectedAllergens, setSelectedAllergens] = useState<Allergen[]>([]);
+  const [selectedNutritionTags, setSelectedNutritionTags] = useState<NutritionTag[]>([]);
   const [variants, setVariants] = useState<Array<{ name: string; price: string; isDefault: boolean }>>([]);
   const [addons, setAddons] = useState<Array<{ name: string; price: string }>>([]);
   const [customizations, setCustomizations] = useState<Array<{ name: string; options: string; isRequired: boolean }>>([]);
@@ -55,13 +76,11 @@ export const AddEditMenuItem: React.FC = () => {
 
     setLoadingData(true);
     try {
-      // Load categories
       const categoriesResponse = await MenuService.getCategories(token, staff.restaurantId);
       if (categoriesResponse.success && categoriesResponse.data) {
         setCategories(categoriesResponse.data.categories || []);
       }
 
-      // Load menu item if edit mode
       if (isEditMode && id) {
         const response = await MenuService.getMenuItem(token, staff.restaurantId, id);
         if (response.success && response.data) {
@@ -77,8 +96,12 @@ export const AddEditMenuItem: React.FC = () => {
             preparationTime: item.preparationTime?.toString() || '',
             calories: item.calories?.toString() || '',
             spiceLevel: item.spiceLevel || '',
-            tags: item.tags.join(', '),
-            allergens: item.allergens?.join(', ') || '',
+            tags: item.tags?.join(', ') || '',
+            itemType: item.itemType || 'food',
+            dietaryType: item.dietaryType || '',
+            drinkTemperature: item.drinkTemperature || '',
+            drinkAlcoholContent: item.drinkAlcoholContent || '',
+            drinkCaffeineContent: item.drinkCaffeineContent || '',
             scope: item.scope,
             isAvailable: item.isAvailable,
             availableQuantity: item.availableQuantity?.toString() || '',
@@ -86,7 +109,14 @@ export const AddEditMenuItem: React.FC = () => {
             displayOrder: item.displayOrder?.toString() || '0',
           });
 
-          // Load variants
+          if (item.allergens && Array.isArray(item.allergens)) {
+            setSelectedAllergens(item.allergens as Allergen[]);
+          }
+
+          if (item.nutritionTags && Array.isArray(item.nutritionTags)) {
+            setSelectedNutritionTags(item.nutritionTags as NutritionTag[]);
+          }
+
           if (item.variants && item.variants.length > 0) {
             setVariants(item.variants.map(v => ({
               name: v.name,
@@ -95,7 +125,6 @@ export const AddEditMenuItem: React.FC = () => {
             })));
           }
 
-          // Load addons
           if (item.addons && item.addons.length > 0) {
             setAddons(item.addons.map(a => ({
               name: a.name,
@@ -103,7 +132,6 @@ export const AddEditMenuItem: React.FC = () => {
             })));
           }
 
-          // Load customizations
           if (item.customizations && item.customizations.length > 0) {
             setCustomizations(item.customizations.map(c => ({
               name: c.name,
@@ -133,13 +161,46 @@ export const AddEditMenuItem: React.FC = () => {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
-    // Clear error for this field
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
-  // Variant handlers
+  const handleDietaryTypeSelect = (type: DietaryType) => {
+    setFormData((prev) => ({ ...prev, dietaryType: type }));
+    if (errors.dietaryType) {
+      setErrors((prev) => ({ ...prev, dietaryType: '' }));
+    }
+  };
+
+  const handleDrinkTemperatureSelect = (temp: DrinkTemperature) => {
+    setFormData((prev) => ({ ...prev, drinkTemperature: temp }));
+  };
+
+  const handleDrinkAlcoholSelect = (alcohol: DrinkAlcoholContent) => {
+    setFormData((prev) => ({ ...prev, drinkAlcoholContent: alcohol }));
+  };
+
+  const handleDrinkCaffeineSelect = (caffeine: DrinkCaffeineContent) => {
+    setFormData((prev) => ({ ...prev, drinkCaffeineContent: caffeine }));
+  };
+
+  const handleAllergenToggle = (allergen: Allergen) => {
+    setSelectedAllergens((prev) =>
+      prev.includes(allergen)
+        ? prev.filter((a) => a !== allergen)
+        : [...prev, allergen]
+    );
+  };
+
+  const handleNutritionTagToggle = (tag: NutritionTag) => {
+    setSelectedNutritionTags((prev) =>
+      prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag]
+    );
+  };
+
   const addVariant = () => {
     setVariants([...variants, { name: '', price: '', isDefault: false }]);
   };
@@ -154,7 +215,6 @@ export const AddEditMenuItem: React.FC = () => {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  // Addon handlers
   const addAddon = () => {
     setAddons([...addons, { name: '', price: '' }]);
   };
@@ -169,7 +229,6 @@ export const AddEditMenuItem: React.FC = () => {
     setAddons(addons.filter((_, i) => i !== index));
   };
 
-  // Customization handlers
   const addCustomization = () => {
     setCustomizations([...customizations, { name: '', options: '', isRequired: false }]);
   };
@@ -207,6 +266,10 @@ export const AddEditMenuItem: React.FC = () => {
       newErrors.discountPrice = 'Discount price must be less than regular price';
     }
 
+    if (formData.itemType === 'food' && !formData.dietaryType) {
+      newErrors.dietaryType = 'Please select a dietary type for food items';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -231,7 +294,13 @@ export const AddEditMenuItem: React.FC = () => {
         calories: formData.calories ? parseInt(formData.calories) : undefined,
         spiceLevel: formData.spiceLevel || undefined,
         tags: formData.tags ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
-        allergens: formData.allergens ? formData.allergens.split(',').map((a) => a.trim()).filter(Boolean) : [],
+        allergens: selectedAllergens,
+        nutritionTags: selectedNutritionTags,
+        itemType: formData.itemType,
+        dietaryType: formData.itemType === 'food' ? formData.dietaryType || undefined : undefined,
+        drinkTemperature: formData.itemType === 'drink' ? formData.drinkTemperature || undefined : undefined,
+        drinkAlcoholContent: formData.itemType === 'drink' ? formData.drinkAlcoholContent || undefined : undefined,
+        drinkCaffeineContent: formData.itemType === 'drink' ? formData.drinkCaffeineContent || undefined : undefined,
         scope: formData.scope,
         isAvailable: formData.isAvailable,
         availableQuantity: formData.availableQuantity ? parseInt(formData.availableQuantity) : undefined,
@@ -281,7 +350,6 @@ export const AddEditMenuItem: React.FC = () => {
 
   return (
     <div className="add-edit-menuitem-split-container">
-      {/* Left side: Form */}
       <div className="menuitem-form-side">
         <div className="menuitem-form-card">
           <div className="form-header">
@@ -295,6 +363,48 @@ export const AddEditMenuItem: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="menuitem-form">
+            {/* Item Type Selection */}
+            <div className="form-group">
+              <label className="form-label">
+                Item Type <span className="required-label">*</span>
+              </label>
+              <div className="radio-card-group">
+                <label className={`radio-card ${formData.itemType === 'food' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="itemType"
+                    value="food"
+                    checked={formData.itemType === 'food'}
+                    onChange={handleChange}
+                    disabled={loading || isEditMode}
+                    className="radio-card-input"
+                  />
+                  <div className="radio-card-content">
+                    <span className="radio-card-icon">🍽️</span>
+                    <span className="radio-card-label">Food</span>
+                  </div>
+                </label>
+                <label className={`radio-card ${formData.itemType === 'drink' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="itemType"
+                    value="drink"
+                    checked={formData.itemType === 'drink'}
+                    onChange={handleChange}
+                    disabled={loading || isEditMode}
+                    className="radio-card-input"
+                  />
+                  <div className="radio-card-content">
+                    <span className="radio-card-icon">🥤</span>
+                    <span className="radio-card-label">Drink</span>
+                  </div>
+                </label>
+              </div>
+              {isEditMode && (
+                <p className="field-help-text">Item type cannot be changed after creation</p>
+              )}
+            </div>
+
             <InputField
               label="Item Name"
               type="text"
@@ -343,6 +453,94 @@ export const AddEditMenuItem: React.FC = () => {
                 placeholder="Brief description of this menu item"
               />
             </div>
+
+            {/* Conditional Fields Based on Item Type */}
+            {formData.itemType === 'food' && (
+              <div className="form-group">
+                <label className="form-label">
+                  Dietary Type <span className="required-label">*</span>
+                </label>
+                <div className="selection-card-grid">
+                  {Object.values(DietaryType).map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => handleDietaryTypeSelect(type)}
+                      disabled={loading}
+                      className={`selection-card ${formData.dietaryType === type ? 'selected' : ''} ${errors.dietaryType ? 'error' : ''}`}
+                    >
+                      <span className="selection-card-icon">{DietaryTypeIcons[type]}</span>
+                      <span className="selection-card-label">{DietaryTypeLabels[type]}</span>
+                    </button>
+                  ))}
+                </div>
+                {errors.dietaryType && <span className="error-text">{errors.dietaryType}</span>}
+              </div>
+            )}
+
+            {formData.itemType === 'drink' && (
+              <>
+                <div className="form-group">
+                  <label className="form-label">Temperature (Optional)</label>
+                  <div className="selection-card-grid two-column">
+                    {Object.values(DrinkTemperature).map((temp) => (
+                      <button
+                        key={temp}
+                        type="button"
+                        onClick={() => handleDrinkTemperatureSelect(temp)}
+                        disabled={loading}
+                        className={`selection-card ${formData.drinkTemperature === temp ? 'selected' : ''}`}
+                      >
+                        <span className="selection-card-icon">
+                          {temp === DrinkTemperature.HOT ? '🔥' : '❄️'}
+                        </span>
+                        <span className="selection-card-label">{DrinkTemperatureLabels[temp]}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Alcohol Content (Optional)</label>
+                  <div className="selection-card-grid two-column">
+                    {Object.values(DrinkAlcoholContent).map((alcohol) => (
+                      <button
+                        key={alcohol}
+                        type="button"
+                        onClick={() => handleDrinkAlcoholSelect(alcohol)}
+                        disabled={loading}
+                        className={`selection-card ${formData.drinkAlcoholContent === alcohol ? 'selected' : ''}`}
+                      >
+                        <span className="selection-card-icon">
+                          {alcohol === DrinkAlcoholContent.ALCOHOLIC ? '🍺' : '🚫'}
+                        </span>
+                        <span className="selection-card-label">{DrinkAlcoholContentLabels[alcohol]}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Caffeine Content (Optional)</label>
+                  <div className="selection-card-grid two-column">
+                    {Object.values(DrinkCaffeineContent).map((caffeine) => (
+                      <button
+                        key={caffeine}
+                        type="button"
+                        onClick={() => handleDrinkCaffeineSelect(caffeine)}
+                        disabled={loading}
+                        className={`selection-card ${formData.drinkCaffeineContent === caffeine ? 'selected' : ''}`}
+                      >
+                        <span className="selection-card-icon">
+                          {caffeine === DrinkCaffeineContent.CAFFEINATED ? '⚡' : '😴'}
+                        </span>
+                        <span className="selection-card-label">{DrinkCaffeineContentLabels[caffeine]}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
 
             <InputField
               label="Image URL"
@@ -417,27 +615,42 @@ export const AddEditMenuItem: React.FC = () => {
                 disabled={loading}
                 min="0"
                 placeholder="Optional"
-              />Tags (comma-separated)
+              />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Spice Level</label>
-                <select
-                  name="spiceLevel"
-                  value={formData.spiceLevel}
+            {formData.itemType === 'food' && (
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Spice Level</label>
+                  <select
+                    name="spiceLevel"
+                    value={formData.spiceLevel}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="form-select"
+                  >
+                    <option value="">None</option>
+                    <option value="mild">Mild</option>
+                    <option value="medium">Medium</option>
+                    <option value="hot">Hot</option>
+                    <option value="extra_hot">Extra Hot</option>
+                  </select>
+                </div>
+
+                <InputField
+                  label="Available Quantity"
+                  type="number"
+                  name="availableQuantity"
+                  value={formData.availableQuantity}
                   onChange={handleChange}
                   disabled={loading}
-                  className="form-select"
-                >
-                  <option value="">None</option>
-                  <option value="mild">Mild</option>
-                  <option value="medium">Medium</option>
-                  <option value="hot">Hot</option>
-                  <option value="extra_hot">Extra Hot</option>
-                </select>
+                  min="0"
+                  placeholder="Optional (leave empty for unlimited)"
+                />
               </div>
+            )}
 
+            {formData.itemType === 'drink' && (
               <InputField
                 label="Available Quantity"
                 type="number"
@@ -448,6 +661,52 @@ export const AddEditMenuItem: React.FC = () => {
                 min="0"
                 placeholder="Optional (leave empty for unlimited)"
               />
+            )}
+
+            {/* Allergens Section */}
+            <div className="form-section">
+              <h3 className="section-title">Allergens (Optional)</h3>
+              <p className="field-help-text">Select all allergens present in this item</p>
+              <div className="checkbox-card-grid">
+                {Object.values(Allergen).map((allergen) => (
+                  <label key={allergen} className={`checkbox-card ${selectedAllergens.includes(allergen) ? 'selected' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedAllergens.includes(allergen)}
+                      onChange={() => handleAllergenToggle(allergen)}
+                      disabled={loading}
+                      className="checkbox-card-input"
+                    />
+                    <div className="checkbox-card-content">
+                      <span className="checkbox-card-check">✓</span>
+                      <span className="checkbox-card-label">{AllergenLabels[allergen]}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Nutrition Tags Section */}
+            <div className="form-section">
+              <h3 className="section-title">Nutrition Tags (Optional)</h3>
+              <p className="field-help-text">Select applicable nutrition tags</p>
+              <div className="checkbox-card-grid">
+                {Object.values(NutritionTag).map((tag) => (
+                  <label key={tag} className={`checkbox-card ${selectedNutritionTags.includes(tag) ? 'selected' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedNutritionTags.includes(tag)}
+                      onChange={() => handleNutritionTagToggle(tag)}
+                      disabled={loading}
+                      className="checkbox-card-input"
+                    />
+                    <div className="checkbox-card-content">
+                      <span className="checkbox-card-check">✓</span>
+                      <span className="checkbox-card-label">{NutritionTagLabels[tag]}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
             </div>
 
             <InputField
@@ -457,17 +716,7 @@ export const AddEditMenuItem: React.FC = () => {
               value={formData.tags}
               onChange={handleChange}
               disabled={loading}
-              placeholder="e.g., vegetarian, spicy, gluten-free"
-            />
-
-            <InputField
-              label="Allergens (comma-separated)"
-              type="text"
-              name="allergens"
-              value={formData.allergens}
-              onChange={handleChange}
-              disabled={loading}
-              placeholder="e.g., nuts, dairy, eggs, gluten"
+              placeholder="e.g., popular, chef-special, seasonal"
             />
 
             {/* Variants Section */}
@@ -706,10 +955,15 @@ export const AddEditMenuItem: React.FC = () => {
               {selectedCategory && (
                 <span className="preview-category">{selectedCategory.name}</span>
               )}
+              {formData.itemType === 'food' && formData.dietaryType && (
+                <span className="preview-dietary">
+                  {DietaryTypeIcons[formData.dietaryType]} {DietaryTypeLabels[formData.dietaryType]}
+                </span>
+              )}
               {formData.preparationTime && (
                 <span className="preview-prep-time">⏱️ {formData.preparationTime} min</span>
               )}
-              {formData.spiceLevel && (
+              {formData.itemType === 'food' && formData.spiceLevel && (
                 <span className="preview-spice">🌶️ {formData.spiceLevel}</span>
               )}
               <div className="preview-pricing">
@@ -722,6 +976,30 @@ export const AddEditMenuItem: React.FC = () => {
                   <span className="preview-current-price">${formData.price || '0.00'}</span>
                 )}
               </div>
+              {selectedAllergens.length > 0 && (
+                <div className="preview-section">
+                  <p className="preview-section-title">Allergens:</p>
+                  <div className="preview-tags">
+                    {selectedAllergens.map((allergen) => (
+                      <span key={allergen} className="preview-tag allergen-tag">
+                        {AllergenLabels[allergen]}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {selectedNutritionTags.length > 0 && (
+                <div className="preview-section">
+                  <p className="preview-section-title">Nutrition:</p>
+                  <div className="preview-tags">
+                    {selectedNutritionTags.map((tag) => (
+                      <span key={tag} className="preview-tag nutrition-tag">
+                        {NutritionTagLabels[tag]}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
               {formData.tags && (
                 <div className="preview-tags">
                   {formData.tags.split(',').map((tag, idx) => (
