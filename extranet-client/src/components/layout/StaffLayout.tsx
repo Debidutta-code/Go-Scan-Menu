@@ -1,6 +1,6 @@
 // src/components/layout/StaffLayout.tsx
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Menu as MenuIcon } from 'lucide-react';
 import { StaffSidebar } from './StaffSidebar';
 import { StaffNavbar } from './StaffNavbar';
@@ -14,6 +14,7 @@ const StaffLayoutContent: React.FC<{
     isMobile: boolean;
 }> = ({ isSidebarOpen, toggleSidebar, isMobile }) => {
     const { title, breadcrumbs, actions } = usePageHeaderContext();
+    const location = useLocation();
 
     return (
         <>
@@ -39,7 +40,7 @@ const StaffLayoutContent: React.FC<{
             )}
 
             <main className="staff-main-content">
-                <Outlet />
+                <Outlet key={location.pathname} />
             </main>
         </>
     );
