@@ -17,7 +17,7 @@ import { EditRestaurant } from './pages/restaurants/EditRestaurant';
 /* ===================== STAFF PAGES ===================== */
 import { StaffLoginPage } from './pages/auth/StaffLogin';
 import { StaffDashboard } from './pages/staff/StaffDashboard';
-import { MenuManagement } from './pages/staff/MenuManagement';
+import { MenuManagement } from './pages/staff/menu-management/pages/';
 import { CategoryManagement } from './pages/staff/category-management/CategoryManagement';
 import { AddEditCategory } from './pages/staff/category-management/AddEditCategory';
 import { AddEditMenuItem } from './pages/staff/AddEditMenuItem';

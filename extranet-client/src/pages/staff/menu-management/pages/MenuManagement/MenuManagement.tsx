@@ -6,6 +6,7 @@ import { MenuItem, Category } from '../../types/menu.types';
 import { Button } from '../../../../../components/ui/Button';
 import { MenuItemCard } from '../../components/MenuItemCard/MenuItemCard';
 import { getCategoryId } from '../../utils/category-helpers';
+import { MenuModal } from './MenuModal';
 import './MenuManagement.css';
 
 export const MenuManagement: React.FC = () => {
@@ -17,6 +18,10 @@ export const MenuManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingMenuItemId, setEditingMenuItemId] = useState<string | null>(null);
 
   useEffect(() => {
     if (staff && token) {
@@ -86,12 +91,31 @@ export const MenuManagement: React.FC = () => {
     }
   };
 
+  const handleAddMenuItem = () => {
+    setEditingMenuItemId(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditMenuItem = (itemId: string) => {
+    setEditingMenuItemId(itemId);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setEditingMenuItemId(null);
+  };
+
+  const handleModalSuccess = () => {
+    loadData();
+  };
+
   const filteredMenuItems =
     selectedCategory === 'all'
       ? menuItems
       : menuItems.filter((item) => getCategoryId(item.categoryId) === selectedCategory);
 
-  if (loading) {
+  if (loading && menuItems.length === 0) {
     return (
       <div className="menu-management-container">
         <div className="loading-state">Loading menu data...</div>
@@ -121,7 +145,7 @@ export const MenuManagement: React.FC = () => {
           </Button>
           <Button
             variant="primary"
-            onClick={() => navigate('/staff/menu/add')}
+            onClick={handleAddMenuItem}
             data-testid="add-menu-item-button"
           >
             + Add Menu Item
@@ -157,7 +181,7 @@ export const MenuManagement: React.FC = () => {
         {filteredMenuItems.length === 0 ? (
           <div className="empty-state">
             <p>No menu items found. Start by adding your first menu item!</p>
-            <Button variant="primary" onClick={() => navigate('/staff/menu/add')}>
+            <Button variant="primary" onClick={handleAddMenuItem}>
               + Add Menu Item
             </Button>
           </div>
@@ -168,7 +192,7 @@ export const MenuManagement: React.FC = () => {
                 key={item._id}
                 item={item}
                 categories={categories}
-                onEdit={(id) => navigate(`/staff/menu/edit/${id}`)}
+                onEdit={handleEditMenuItem}
                 onDelete={handleDeleteMenuItem}
                 onToggleAvailability={handleToggleAvailability}
               />
@@ -176,6 +200,14 @@ export const MenuManagement: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Menu Modal */}
+      <MenuModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        menuItemId={editingMenuItemId}
+        onSuccess={handleModalSuccess}
+      />
     </div>
   );
 };
