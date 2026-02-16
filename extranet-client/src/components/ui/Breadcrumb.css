@@ -1,0 +1,64 @@
+/* src/components/ui/Breadcrumb.css */
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.breadcrumb-link {
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.breadcrumb-link:hover {
+    color: #0f172a;
+    background-color: #f1f5f9;
+}
+
+.breadcrumb-link.icon-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.breadcrumb-text {
+    color: #0f172a;
+    font-weight: 500;
+    padding: 2px 4px;
+}
+
+.breadcrumb-separator {
+    color: #cbd5e1;
+    display: flex;
+    /* Ensure it aligns properly */
+    flex-shrink: 0;
+}
+
+/* Ensure consistent height alignment */
+.breadcrumb-item svg {
+    display: block;
+}

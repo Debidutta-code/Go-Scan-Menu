@@ -1,6 +1,6 @@
 // src/components/layout/StaffNavbar.tsx
 import React from 'react';
-import { Menu, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { useStaffAuth } from '../../contexts/StaffAuthContext';
 import './StaffNavbar.css';
 
@@ -30,6 +30,7 @@ export const StaffNavbar: React.FC<StaffNavbarProps> = ({
                     </button>
                 )}
 
+                {/* Company Brand - show when mobile or sidebar is collapsed */}
                 {(isMobile || !isSidebarOpen) && (
                     <div className="navbar-company-brand">
                         {!isMobile && <div className="navbar-logo-icon">GS</div>}

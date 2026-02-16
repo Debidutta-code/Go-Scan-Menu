@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '../../../contexts/StaffAuthContext';
+import { usePageHeader } from '../../../contexts/PageHeaderContext';
 import { MenuService } from '../../../services/menu.service';
 import { Category } from '../../../types/menu.types';
 import { Button } from '../../../components/ui/Button';
+import { Breadcrumb } from '../../../components/ui/Breadcrumb';
 import { CategoryPreview } from './CategoryPreview';
 import { CategoryListSkeleton } from './CategoryListSkeleton';
 import { CategoryModal } from './CategoryModal';
@@ -134,31 +136,27 @@ export const CategoryManagement: React.FC = () => {
     }
   };
 
+  // Set Page Header
+  usePageHeader(
+    'Category Management',
+    [
+      { label: 'Menu', to: '/staff/menu' },
+      { label: 'Category Management' }
+    ],
+    (
+      <>
+        <Button variant="primary" onClick={handleAddCategory} size="sm">
+          + Add Category
+        </Button>
+        <Button variant="outline" onClick={handleLogout} size="sm">
+          Logout
+        </Button>
+      </>
+    )
+  );
+
   return (
     <div className="category-management-layout">
-      {/* Fixed Header */}
-      <div className="category-management-header">
-        <div className="header-left">
-          <Button variant="outline" onClick={() => navigate('/staff/menu')}>
-            ← Back to Menu
-          </Button>
-          <div>
-            <h1 className="page-title">Category Management</h1>
-            <p className="page-subtitle">
-              Drag and drop to reorder • Changes are saved automatically
-            </p>
-          </div>
-        </div>
-        <div className="header-actions">
-          <Button variant="primary" onClick={handleAddCategory}>
-            + Add Category
-          </Button>
-          <Button variant="outline" onClick={handleLogout}>
-            Logout
-          </Button>
-        </div>
-      </div>
-
       {/* Alert Messages */}
       {error && <div className="error-banner">{error}</div>}
 

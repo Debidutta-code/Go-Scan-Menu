@@ -5,6 +5,7 @@ export type ButtonVariant = 'primary' | 'outline' | 'ghost' | 'danger';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
+  size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   loading?: boolean;
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       variant = 'primary',
+      size = 'md',
       fullWidth = false,
       loading = false,
       disabled,
@@ -32,6 +34,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={`
           btn
           btn-${variant}
+          btn-${size}
           ${fullWidth ? 'full-width' : ''}
           ${loading ? 'loading' : ''}
           ${className}

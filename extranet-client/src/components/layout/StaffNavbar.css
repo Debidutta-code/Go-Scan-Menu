@@ -17,6 +17,37 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    flex: 1;
+    /* Allow it to take available space */
+    min-width: 0;
+    /* Prevent overflow */
+}
+
+.navbar-page-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.navbar-breadcrumb {
+    margin-bottom: 0 !important;
+    /* Override default */
+    font-size: 0.75rem;
+}
+
+.navbar-page-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.staff-navbar-center-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 16px;
 }
 
 /* Toggle/Hamburger Button */

@@ -5,6 +5,45 @@ import { Menu as MenuIcon } from 'lucide-react';
 import { StaffSidebar } from './StaffSidebar';
 import { StaffNavbar } from './StaffNavbar';
 import './StaffLayout.css';
+import { PageHeaderProvider, usePageHeaderContext } from '../../contexts/PageHeaderContext';
+import { Breadcrumb } from '../ui/Breadcrumb';
+
+const StaffLayoutContent: React.FC<{
+    isSidebarOpen: boolean;
+    toggleSidebar: () => void;
+    isMobile: boolean;
+}> = ({ isSidebarOpen, toggleSidebar, isMobile }) => {
+    const { title, breadcrumbs, actions } = usePageHeaderContext();
+
+    return (
+        <>
+            <StaffNavbar
+                isSidebarOpen={isSidebarOpen}
+                toggleSidebar={toggleSidebar}
+                isMobile={isMobile}
+            />
+
+            {/* Page Header Section */}
+            {title && (
+                <div className="page-header">
+                    <div className="page-header-top">
+                        {breadcrumbs.length > 0 && (
+                            <Breadcrumb items={breadcrumbs} className="page-breadcrumb" />
+                        )}
+                    </div>
+                    <div className="page-header-content">
+                        <h1 className="page-title">{title}</h1>
+                        {actions && <div className="page-actions">{actions}</div>}
+                    </div>
+                </div>
+            )}
+
+            <main className="staff-main-content">
+                <Outlet />
+            </main>
+        </>
+    );
+};
 
 export const StaffLayout: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -48,14 +87,13 @@ export const StaffLayout: React.FC = () => {
             />
 
             <div className="staff-layout-content-wrapper">
-                <StaffNavbar
-                    isSidebarOpen={isSidebarOpen}
-                    toggleSidebar={toggleSidebar}
-                    isMobile={isMobile}
-                />
-                <main className="staff-main-content">
-                    <Outlet />
-                </main>
+                <PageHeaderProvider>
+                    <StaffLayoutContent
+                        isSidebarOpen={isSidebarOpen}
+                        toggleSidebar={toggleSidebar}
+                        isMobile={isMobile}
+                    />
+                </PageHeaderProvider>
             </div>
         </div>
     );
