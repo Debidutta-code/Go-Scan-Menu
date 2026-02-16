@@ -1,0 +1,338 @@
+/* src/components/layout/StaffSidebar.css */
+
+:root {
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #334155;
+    --sidebar-text-active: #2563eb;
+    --sidebar-bg-active: #eff6ff;
+    --sidebar-border: #e2e8f0;
+    --sidebar-hover: #f8fafc;
+    --transition-speed: 0.3s;
+}
+
+.staff-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+    display: flex;
+    flex-direction: column;
+    transition: width var(--transition-speed) ease;
+    z-index: 50;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
+}
+
+.staff-sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+/* Header / Logo Area */
+.sidebar-header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--sidebar-border);
+    justify-content: space-between;
+}
+
+.staff-sidebar.collapsed .sidebar-header {
+    padding: 0;
+    justify-content: center;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.company-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    opacity: 1;
+    transition: opacity var(--transition-speed);
+}
+
+.staff-sidebar.collapsed .company-name {
+    opacity: 0;
+    width: 0;
+    display: none;
+}
+
+/* Toggle Button */
+.toggle-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-btn:hover {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text);
+}
+
+.staff-sidebar.collapsed .toggle-btn {
+    display: none;
+    /* Hide toggle inside when collapsed, maybe move it outside or use header */
+}
+
+/* Navigation Links */
+.sidebar-nav {
+    flex: 1;
+    padding: 24px 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.staff-sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 12px;
+}
+
+.nav-item:hover {
+    background-color: var(--sidebar-hover);
+    color: #0f172a;
+    transform: translateX(4px);
+}
+
+.staff-sidebar.collapsed .nav-item:hover {
+    transform: none;
+    background-color: var(--sidebar-hover);
+}
+
+.nav-item.active {
+    background-color: var(--sidebar-bg-active);
+    color: var(--sidebar-text-active);
+    font-weight: 600;
+}
+
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+    width: 3px;
+    background-color: var(--sidebar-text-active);
+    border-radius: 0 4px 4px 0;
+}
+
+.staff-sidebar.collapsed .nav-item.active::before {
+    display: none;
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.nav-label {
+    font-size: 15px;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+
+.staff-sidebar.collapsed .nav-label {
+    display: none;
+}
+
+.nav-item.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.coming-soon-badge {
+    font-size: 10px;
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: auto;
+}
+
+.staff-sidebar.collapsed .coming-soon-badge {
+    display: none;
+}
+
+/* User Profile & Logout Section (Bottom) */
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid var(--sidebar-border);
+    background: #f8fafc;
+}
+
+.staff-sidebar.collapsed .sidebar-footer {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.staff-sidebar.collapsed .user-profile {
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.user-info {
+    overflow: hidden;
+}
+
+.staff-sidebar.collapsed .user-info {
+    display: none;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.user-role {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 8px;
+    color: #ef4444;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.logout-btn:hover {
+    background: #fef2f2;
+    border-color: #fee2e2;
+}
+
+.staff-sidebar.collapsed .logout-btn {
+    padding: 10px;
+    width: 40px;
+    height: 40px;
+}
+
+.logout-text {
+    display: block;
+}
+
+.staff-sidebar.collapsed .logout-text {
+    display: none;
+}
+
+/* Mobile Toggle (Hamburger) - visible only on mobile */
+.mobile-toggle {
+    display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .staff-sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+    }
+
+    .staff-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .staff-sidebar.collapsed {
+        width: 260px;
+        /* On mobile, collapsed actually means hidden or full width if open */
+    }
+
+    .mobile-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 40;
+        display: none;
+    }
+
+    .mobile-overlay.open {
+        display: block;
+    }
+}

@@ -28,6 +28,7 @@ import { RolePermissions } from './pages/staff/RolePermissions';
 import { BranchSelection } from './pages/staff/BranchSelection';
 import { TableManagement } from './pages/staff/TableManagement';
 import { QRManagement } from './pages/staff/QRManagement';
+import { StaffLayout } from './components/layout/StaffLayout';
 
 /* ===================== PUBLIC ===================== */
 import { PublicLayout } from './public-app/layouts/PublicLayout';
@@ -126,128 +127,131 @@ function App() {
         <Route path="/staff/login" element={<StaffLoginPage />} />
 
         {/* ================= STAFF PORTAL ================= */}
-        <Route
-          path="/staff/dashboard"
-          element={
-            <ProtectedStaffRoute>
-              <StaffDashboard />
-            </ProtectedStaffRoute>
-          }
-        />
+        {/* ================= STAFF PORTAL ================= */}
+        <Route element={<StaffLayout />}>
+          <Route
+            path="/staff/dashboard"
+            element={
+              <ProtectedStaffRoute>
+                <StaffDashboard />
+              </ProtectedStaffRoute>
+            }
+          />
 
-        {/* Menu */}
-        <Route
-          path="/staff/menu"
-          element={
-            <ProtectedStaffRoute>
-              <MenuManagement />
-            </ProtectedStaffRoute>
-          }
-        />
-        <Route
-          path="/staff/menu/add"
-          element={
-            <ProtectedStaffRoute>
-              <AddEditMenuItem />
-            </ProtectedStaffRoute>
-          }
-        />
-        <Route
-          path="/staff/menu/edit/:id"
-          element={
-            <ProtectedStaffRoute>
-              <AddEditMenuItem />
-            </ProtectedStaffRoute>
-          }
-        />
+          {/* Menu */}
+          <Route
+            path="/staff/menu"
+            element={
+              <ProtectedStaffRoute>
+                <MenuManagement />
+              </ProtectedStaffRoute>
+            }
+          />
+          <Route
+            path="/staff/menu/add"
+            element={
+              <ProtectedStaffRoute>
+                <AddEditMenuItem />
+              </ProtectedStaffRoute>
+            }
+          />
+          <Route
+            path="/staff/menu/edit/:id"
+            element={
+              <ProtectedStaffRoute>
+                <AddEditMenuItem />
+              </ProtectedStaffRoute>
+            }
+          />
 
-        {/* Categories */}
-        <Route
-          path="/staff/categories"
-          element={
-            <ProtectedStaffRoute>
-              <CategoryManagement />
-            </ProtectedStaffRoute>
-          }
-        />
-        <Route
-          path="/staff/categories/add"
-          element={
-            <ProtectedStaffRoute>
-              <AddEditCategory />
-            </ProtectedStaffRoute>
-          }
-        />
-        <Route
-          path="/staff/categories/edit/:id"
-          element={
-            <ProtectedStaffRoute>
-              <AddEditCategory />
-            </ProtectedStaffRoute>
-          }
-        />
+          {/* Categories */}
+          <Route
+            path="/staff/categories"
+            element={
+              <ProtectedStaffRoute>
+                <CategoryManagement />
+              </ProtectedStaffRoute>
+            }
+          />
+          <Route
+            path="/staff/categories/add"
+            element={
+              <ProtectedStaffRoute>
+                <AddEditCategory />
+              </ProtectedStaffRoute>
+            }
+          />
+          <Route
+            path="/staff/categories/edit/:id"
+            element={
+              <ProtectedStaffRoute>
+                <AddEditCategory />
+              </ProtectedStaffRoute>
+            }
+          />
 
-        {/* Staff */}
-        <Route
-          path="/staff/team"
-          element={
-            <ProtectedStaffRoute>
-              <StaffList />
-            </ProtectedStaffRoute>
-          }
-        />
-        <Route
-          path="/staff/team/add"
-          element={
-            <ProtectedStaffRoute>
-              <AddStaff />
-            </ProtectedStaffRoute>
-          }
-        />
-        <Route
-          path="/staff/team/edit/:id"
-          element={
-            <ProtectedStaffRoute>
-              <EditStaff />
-            </ProtectedStaffRoute>
-          }
-        />
+          {/* Staff */}
+          <Route
+            path="/staff/team"
+            element={
+              <ProtectedStaffRoute>
+                <StaffList />
+              </ProtectedStaffRoute>
+            }
+          />
+          <Route
+            path="/staff/team/add"
+            element={
+              <ProtectedStaffRoute>
+                <AddStaff />
+              </ProtectedStaffRoute>
+            }
+          />
+          <Route
+            path="/staff/team/edit/:id"
+            element={
+              <ProtectedStaffRoute>
+                <EditStaff />
+              </ProtectedStaffRoute>
+            }
+          />
 
-        {/* Permissions */}
-        <Route
-          path="/staff/permissions"
-          element={
-            <ProtectedStaffRoute>
-              <RolePermissions />
-            </ProtectedStaffRoute>
-          }
-        />
+          {/* Permissions */}
+          <Route
+            path="/staff/permissions"
+            element={
+              <ProtectedStaffRoute>
+                <RolePermissions />
+              </ProtectedStaffRoute>
+            }
+          />
 
-        {/* Tables */}
-        <Route
-          path="/staff/tables"
-          element={
-            <ProtectedStaffRoute>
-              <BranchSelection />
-            </ProtectedStaffRoute>
-          }
-        />
-        <Route
-          path="/staff/tables/:branchId"
-          element={
-            <ProtectedStaffRoute>
-              <TableManagement />
-            </ProtectedStaffRoute>
-          }
-        />
-        <Route
-          path="/staff/tables/:branchId/qr-settings"
-          element={
-            <ProtectedStaffRoute>
-              <QRManagement />
-            </ProtectedStaffRoute>
-          }
-        />
+          {/* Tables */}
+          <Route
+            path="/staff/tables"
+            element={
+              <ProtectedStaffRoute>
+                <BranchSelection />
+              </ProtectedStaffRoute>
+            }
+          />
+          <Route
+            path="/staff/tables/:branchId"
+            element={
+              <ProtectedStaffRoute>
+                <TableManagement />
+              </ProtectedStaffRoute>
+            }
+          />
+          <Route
+            path="/staff/tables/:branchId/qr-settings"
+            element={
+              <ProtectedStaffRoute>
+                <QRManagement />
+              </ProtectedStaffRoute>
+            }
+          />
+        </Route>
 
         {/* ================= PUBLIC MENU ================= */}
         {/* With QR Code */}

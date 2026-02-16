@@ -64,20 +64,6 @@ export const StaffDashboard: React.FC = () => {
 
   return (
     <div className="staff-dashboard-container">
-      {/* Header */}
-      <div className="staff-dashboard-header">
-        <div className="header-content">
-          <h1 className="dashboard-title" data-testid="staff-dashboard-title">
-            GoScanMenu Staff Portal
-          </h1>
-          <div className="header-actions">
-            <Button variant="outline" onClick={handleLogout} data-testid="logout-button">
-              Logout
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* Welcome Section */}
       <div className="welcome-section">
         <h2 className="welcome-title">Welcome, {staff.name}!</h2>
