@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Menu as MenuIcon } from 'lucide-react';
 import { StaffSidebar } from './StaffSidebar';
+import { StaffNavbar } from './StaffNavbar';
 import './StaffLayout.css';
 
 export const StaffLayout: React.FC = () => {
@@ -39,17 +40,6 @@ export const StaffLayout: React.FC = () => {
 
     return (
         <div className={`staff-layout ${!isSidebarOpen && !isMobile ? 'collapsed' : ''}`}>
-            {/* Mobile Header */}
-            {isMobile && (
-                <header className="mobile-header">
-                    <button className="mobile-menu-btn" onClick={toggleSidebar}>
-                        <MenuIcon size={24} />
-                    </button>
-                    <span className="font-bold text-lg">Go Scan Menu</span>
-                    <div className="w-6" /> {/* Spacer for balance */}
-                </header>
-            )}
-
             <StaffSidebar
                 isOpen={isSidebarOpen}
                 toggleSidebar={toggleSidebar}
@@ -57,9 +47,16 @@ export const StaffLayout: React.FC = () => {
                 closeMobileSidebar={closeMobileSidebar}
             />
 
-            <main className="staff-main-content">
-                <Outlet />
-            </main>
+            <div className="staff-layout-content-wrapper">
+                <StaffNavbar
+                    isSidebarOpen={isSidebarOpen}
+                    toggleSidebar={toggleSidebar}
+                    isMobile={isMobile}
+                />
+                <main className="staff-main-content">
+                    <Outlet />
+                </main>
+            </div>
         </div>
     );
 };

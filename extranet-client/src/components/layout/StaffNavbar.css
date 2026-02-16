@@ -1,0 +1,138 @@
+/* src/components/layout/StaffNavbar.css */
+
+.staff-navbar {
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid var(--sidebar-border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    justify-content: space-between;
+    flex-shrink: 0;
+    /* Prevent shrinking in flex container */
+    transition: all 0.3s ease;
+}
+
+.staff-navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Toggle/Hamburger Button */
+.navbar-toggle-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-toggle-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.navbar-company-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.navbar-logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.navbar-company-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    display: block;
+    /* Always block if rendered */
+}
+
+/* Right Side - Profile */
+.staff-navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.profile-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.profile-dropdown-trigger:hover {
+    background: #f8fafc;
+}
+
+.navbar-avatar {
+    width: 36px;
+    height: 36px;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px #e2e8f0;
+}
+
+.navbar-user-info {
+    text-align: left;
+    display: none;
+    /* Hide text on small screens */
+}
+
+@media (min-width: 768px) {
+    .navbar-user-info {
+        display: block;
+    }
+}
+
+.navbar-user-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.navbar-user-role {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    text-transform: capitalize;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .staff-navbar {
+        padding: 0 16px;
+    }
+}

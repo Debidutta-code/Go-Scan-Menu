@@ -22,8 +22,9 @@
     border-right: 1px solid var(--sidebar-border);
     display: flex;
     flex-direction: column;
-    transition: width var(--transition-speed) ease;
-    z-index: 50;
+    transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
+    z-index: 100;
+    /* Higher than navbar */
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
 }
 
@@ -82,15 +83,15 @@
     display: none;
 }
 
-/* Toggle Button */
+/* Toggle Button (Desktop) */
 .toggle-btn {
     background: transparent;
-    border: none;
+    border: 1px solid #e2e8f0;
     cursor: pointer;
-    color: #94a3b8;
+    color: #64748b;
     padding: 4px;
-    border-radius: 4px;
-    transition: background 0.2s, color 0.2s;
+    border-radius: 6px;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -99,11 +100,25 @@
 .toggle-btn:hover {
     background: var(--sidebar-hover);
     color: var(--sidebar-text);
+    border-color: #cbd5e1;
 }
 
 .staff-sidebar.collapsed .toggle-btn {
+    display: flex;
+    /* Show it! */
+    margin: 0 auto;
+    border: none;
+    /* Make it look cleaner */
+}
+
+/* Mobile Close Button */
+.mobile-close-btn {
     display: none;
-    /* Hide toggle inside when collapsed, maybe move it outside or use header */
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    padding: 8px;
 }
 
 /* Navigation Links */
@@ -218,53 +233,6 @@
     align-items: center;
 }
 
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.staff-sidebar.collapsed .user-profile {
-    justify-content: center;
-    margin-bottom: 12px;
-}
-
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    color: #64748b;
-    flex-shrink: 0;
-}
-
-.user-info {
-    overflow: hidden;
-}
-
-.staff-sidebar.collapsed .user-info {
-    display: none;
-}
-
-.user-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #0f172a;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-
-.user-role {
-    font-size: 12px;
-    color: #64748b;
-}
-
 .logout-btn {
     width: 100%;
     display: flex;
@@ -309,16 +277,29 @@
 @media (max-width: 768px) {
     .staff-sidebar {
         transform: translateX(-100%);
-        width: 260px;
+        width: 280px;
+        /* Standard width on mobile */
+        box-shadow: none;
+        /* Shadow handled by overlay or when open */
     }
 
     .staff-sidebar.mobile-open {
         transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
     }
 
     .staff-sidebar.collapsed {
-        width: 260px;
-        /* On mobile, collapsed actually means hidden or full width if open */
+        width: 280px;
+        /* On mobile, collapse state is irrelevant if hidden, but when open it should be full width */
+    }
+
+    .mobile-close-btn {
+        display: block;
+    }
+
+    /* Hide desktop toggle on mobile */
+    .toggle-btn {
+        display: none;
     }
 
     .mobile-overlay {
@@ -327,9 +308,11 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.4);
-        z-index: 40;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 90;
+        /* Below sidebar, above everything else */
         display: none;
+        backdrop-filter: blur(2px);
     }
 
     .mobile-overlay.open {

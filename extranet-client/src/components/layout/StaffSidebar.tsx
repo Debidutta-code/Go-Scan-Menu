@@ -106,13 +106,25 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
             <div className={sidebarClass}>
                 {/* Header */}
                 <div className="sidebar-header">
-                    <div className="logo-container">
-                        <div className="logo-icon">GS</div>
-                        <span className="company-name">Go Scan Menu</span>
-                    </div>
-                    {!isMobile && (
-                        <button className="toggle-btn" onClick={toggleSidebar}>
-                            {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                    {(!isOpen && !isMobile) ? (
+                        <button className="toggle-btn collapsed-toggle" onClick={toggleSidebar} aria-label="Open Sidebar">
+                            <Menu size={24} />
+                        </button>
+                    ) : (
+                        <div className="logo-container">
+                            <div className="logo-icon">GS</div>
+                            <span className="company-name">Go Scan Menu</span>
+                        </div>
+                    )}
+
+                    {!isMobile && isOpen && (
+                        <button className="toggle-btn" onClick={toggleSidebar} aria-label="Collapse Sidebar">
+                            <ChevronLeft size={20} />
+                        </button>
+                    )}
+                    {isMobile && (
+                        <button className="mobile-close-btn" onClick={closeMobileSidebar} aria-label="Close Sidebar">
+                            <ChevronLeft size={24} />
                         </button>
                     )}
                 </div>
@@ -149,17 +161,6 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
 
                 {/* Footer / User Profile */}
                 <div className="sidebar-footer">
-                    <div className="user-profile">
-                        <div className="avatar">
-                            {staff?.name?.charAt(0).toUpperCase() || 'S'}
-                        </div>
-                        <div className="user-info">
-                            <div className="user-name">{staff?.name}</div>
-                            <div className="user-role">
-                                {staff?.staffType?.replace(/_/g, ' ')}
-                            </div>
-                        </div>
-                    </div>
                     <button className="logout-btn" onClick={handleLogout}>
                         <LogOut size={18} />
                         <span className="logout-text">Logout</span>
