@@ -16,6 +16,10 @@ const StaffLayoutContent: React.FC<{
     const { title, breadcrumbs, actions } = usePageHeaderContext();
     const location = useLocation();
 
+    useEffect(() => {
+        console.log('StaffLayoutContent location changed:', location.pathname);
+    }, [location]);
+
     return (
         <>
             <StaffNavbar

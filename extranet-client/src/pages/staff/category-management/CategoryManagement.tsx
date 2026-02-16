@@ -1,5 +1,5 @@
 // src/pages/staff/CategoryManagement.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '../../../contexts/StaffAuthContext';
 import { usePageHeader } from '../../../contexts/PageHeaderContext';
@@ -51,6 +51,13 @@ export const CategoryManagement: React.FC = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  useEffect(() => {
+    console.log('CategoryManagement mounted');
+    return () => {
+      console.log('CategoryManagement unmounted');
+    };
+  }, []);
 
   useEffect(() => {
     if (staff && token) {
@@ -110,49 +117,53 @@ export const CategoryManagement: React.FC = () => {
     }
   };
 
-  const handleAddCategory = () => {
+  /* Handlers */
+  const handleAddCategory = useCallback(() => {
     setEditingCategoryId(null);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleEditCategory = (categoryId: string) => {
+  const handleEditCategory = useCallback((categoryId: string) => {
     setEditingCategoryId(categoryId);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleModalClose = () => {
+  const handleModalClose = useCallback(() => {
     setIsModalOpen(false);
     setEditingCategoryId(null);
-  };
+  }, []);
 
-  const handleModalSuccess = () => {
+  const handleModalSuccess = useCallback(() => {
     loadCategories();
-  };
+  }, [staff, token]); // Re-create if auth changes, though unlikely needed
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     if (window.confirm('Are you sure you want to logout?')) {
       logout();
       navigate('/staff/login');
     }
-  };
+  }, [logout, navigate]);
+
+  // Page Header Actions
+  const headerActions = React.useMemo(() => (
+    <>
+      <Button variant="primary" onClick={handleAddCategory} size="sm">
+        + Add Category
+      </Button>
+      <Button variant="outline" onClick={handleLogout} size="sm">
+        Logout
+      </Button>
+    </>
+  ), [handleAddCategory, handleLogout]);
 
   // Set Page Header
   usePageHeader(
     'Category Management',
-    [
+    React.useMemo(() => [
       { label: 'Menu', to: '/staff/menu' },
       { label: 'Category Management' }
-    ],
-    (
-      <>
-        <Button variant="primary" onClick={handleAddCategory} size="sm">
-          + Add Category
-        </Button>
-        <Button variant="outline" onClick={handleLogout} size="sm">
-          Logout
-        </Button>
-      </>
-    )
+    ], []),
+    headerActions
   );
 
   return (
