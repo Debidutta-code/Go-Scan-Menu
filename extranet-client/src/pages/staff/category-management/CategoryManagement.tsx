@@ -1,8 +1,7 @@
-// src/pages/staff/CategoryManagement.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Smartphone, EyeOff, X } from 'lucide-react';
 import { useStaffAuth } from '../../../contexts/StaffAuthContext';
-import { usePageHeader } from '../../../contexts/PageHeaderContext';
 import { MenuService } from '../../../services/menu.service';
 import { Category } from '../../../types/menu.types';
 import { Button } from '../../../components/ui/Button';
@@ -30,12 +29,18 @@ import './CategoryManagement.css';
 
 export const CategoryManagement: React.FC = () => {
   const navigate = useNavigate();
-  const { staff, token, logout } = useStaffAuth();
+  const { staff, token } = useStaffAuth();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Preview toggle state
+  const [showPreview, setShowPreview] = useState(window.innerWidth > 1024);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -135,41 +140,32 @@ export const CategoryManagement: React.FC = () => {
 
   const handleModalSuccess = useCallback(() => {
     loadCategories();
-  }, [staff, token]); // Re-create if auth changes, though unlikely needed
-
-  const handleLogout = useCallback(() => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout();
-      navigate('/staff/login');
-    }
-  }, [logout, navigate]);
-
-  // Page Header Actions
-  const headerActions = React.useMemo(() => (
-    <>
-      <Button variant="primary" onClick={handleAddCategory} size="sm">
-        + Add Category
-      </Button>
-      <Button variant="outline" onClick={handleLogout} size="sm">
-        Logout
-      </Button>
-    </>
-  ), [handleAddCategory, handleLogout]);
-
-  // Set Page Header
-  usePageHeader(
-    'Category Management',
-    React.useMemo(() => [
-      { label: 'Menu', to: '/staff/menu' },
-      { label: 'Category Management' }
-    ], []),
-    headerActions
-  );
+  }, [staff, token]);
 
   return (
     <div className="category-management-layout">
       {/* Alert Messages */}
       {error && <div className="error-banner">{error}</div>}
+
+      {/* Page Actions Toolbar */}
+      <div className="category-page-toolbar">
+        <h1 className="category-page-title">Category Management</h1>
+
+        <div className="category-toolbar-actions">
+          <div className="category-search-container">
+            <input
+              type="text"
+              placeholder="Search categories..."
+              className="category-search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button variant="primary" onClick={handleAddCategory} size="sm">
+            + Add Category
+          </Button>
+        </div>
+      </div>
 
       {/* Main Content */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

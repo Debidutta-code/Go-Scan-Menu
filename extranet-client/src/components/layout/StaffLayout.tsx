@@ -6,7 +6,7 @@ import { StaffSidebar } from './StaffSidebar';
 import { StaffNavbar } from './StaffNavbar';
 import './StaffLayout.css';
 import { PageHeaderProvider, usePageHeaderContext } from '../../contexts/PageHeaderContext';
-import { Breadcrumb } from '../ui/Breadcrumb';
+
 
 const StaffLayoutContent: React.FC<{
     isSidebarOpen: boolean;
@@ -28,20 +28,7 @@ const StaffLayoutContent: React.FC<{
                 isMobile={isMobile}
             />
 
-            {/* Page Header Section */}
-            {title && (
-                <div className="page-header">
-                    <div className="page-header-top">
-                        {breadcrumbs.length > 0 && (
-                            <Breadcrumb items={breadcrumbs} className="page-breadcrumb" />
-                        )}
-                    </div>
-                    <div className="page-header-content">
-                        <h1 className="page-title">{title}</h1>
-                        {actions && <div className="page-actions">{actions}</div>}
-                    </div>
-                </div>
-            )}
+            {/* Page Header Section Removed - Title moved to Navbar */}
 
             <main className="staff-main-content">
                 <Outlet key={location.pathname} />
