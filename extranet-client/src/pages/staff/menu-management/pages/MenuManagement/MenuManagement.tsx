@@ -115,90 +115,91 @@ export const MenuManagement: React.FC = () => {
       ? menuItems
       : menuItems.filter((item) => getCategoryId(item.categoryId) === selectedCategory);
 
-  if (loading && menuItems.length === 0) {
-    return (
-      <div className="menu-management-container">
-        <div className="loading-state">Loading menu data...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="menu-management-container">
-      {/* Header */}
-      <div className="menu-header">
-        <div className="header-left">
-          <Button variant="outline" onClick={() => navigate('/staff/dashboard')}>
-            ← Back to Dashboard
-          </Button>
-          <h1 className="page-title" data-testid="menu-management-title">
-            Menu Management
-          </h1>
-        </div>
-        <div className="header-actions">
+    <div className="menu-management-layout">
+      {/* Page Actions Toolbar */}
+      <div className="menu-page-toolbar">
+        <h1 className="menu-page-title" data-testid="menu-management-title">
+          Menu Management
+        </h1>
+
+        <div className="menu-toolbar-actions">
+          {/* Category Filter */}
+          <div className="menu-filter-container">
+            <select
+              className="menu-filter-select"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              data-testid="category-filter"
+            >
+              <option value="all">All Categories</option>
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <Button
-            variant="primary"
+            variant="outline"
             onClick={() => navigate('/staff/categories')}
             data-testid="manage-categories-button"
+            size="sm"
           >
             Manage Categories
           </Button>
+
           <Button
             variant="primary"
             onClick={handleAddMenuItem}
             data-testid="add-menu-item-button"
+            size="sm"
           >
-            + Add Menu Item
-          </Button>
-          <Button variant="outline" onClick={handleLogout}>
-            Logout
+            + Add Item
           </Button>
         </div>
       </div>
 
       {error && <div className="error-banner">{error}</div>}
 
-      {/* Category Filter */}
-      <div className="filter-section">
-        <label className="filter-label">Filter by Category:</label>
-        <select
-          className="category-filter"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          data-testid="category-filter"
-        >
-          <option value="all">All Categories</option>
-          {categories.map((category) => (
-            <option key={category._id} value={category._id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Main Content */}
+      <div className="menu-management-content">
+        <div className="menu-list-panel">
+          <div className="panel-header">
+            <h2 className="panel-title">Menu Items ({filteredMenuItems.length})</h2>
+          </div>
 
-      {/* Menu Items Grid */}
-      <div className="menu-items-section">
-        {filteredMenuItems.length === 0 ? (
-          <div className="empty-state">
-            <p>No menu items found. Start by adding your first menu item!</p>
-            <Button variant="primary" onClick={handleAddMenuItem}>
-              + Add Menu Item
-            </Button>
+          <div className="menu-list-container">
+            {loading && menuItems.length === 0 ? (
+              <div className="loading-state">Loading menu data...</div>
+            ) : filteredMenuItems.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">🍽️</div>
+                <p className="empty-title">No menu items yet</p>
+                <p className="empty-description">
+                  Start by adding items to your menu
+                </p>
+                <Button variant="primary" onClick={handleAddMenuItem}>
+                  + Add Menu Item
+                </Button>
+              </div>
+            ) : (
+              <div className="menu-items-grid">
+                {filteredMenuItems.map((item) => (
+                  <MenuItemCard
+                    key={item._id}
+                    item={item}
+                    categories={categories}
+                    onEdit={handleEditMenuItem}
+                    onDelete={handleDeleteMenuItem}
+                    onToggleAvailability={handleToggleAvailability}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="menu-items-grid">
-            {filteredMenuItems.map((item) => (
-              <MenuItemCard
-                key={item._id}
-                item={item}
-                categories={categories}
-                onEdit={handleEditMenuItem}
-                onDelete={handleDeleteMenuItem}
-                onToggleAvailability={handleToggleAvailability}
-              />
-            ))}
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Menu Modal */}
