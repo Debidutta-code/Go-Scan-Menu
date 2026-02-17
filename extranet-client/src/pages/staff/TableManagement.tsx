@@ -148,55 +148,72 @@ export const TableManagement: React.FC = () => {
     };
   };
 
-  const statusCounts = getStatusCounts();
+  // Group tables by location
+  const groupTablesByLocation = (tablesToGroup: Table[]) => {
+    const grouped: Record<string, Table[]> = {};
+    tablesToGroup.forEach((table) => {
+      const location = table.location;
+      if (!grouped[location]) {
+        grouped[location] = [];
+      }
+      grouped[location].push(table);
+    });
 
-  if (loading) {
-    return (
-      <div className="table-management-container">
-        <div className="loading-state">Loading table data...</div>
-      </div>
-    );
-  }
+    // Sort tables within each location by table number
+    Object.keys(grouped).forEach((location) => {
+      grouped[location].sort((a, b) => {
+        const aNum = parseInt(a.tableNumber.replace(/\D/g, ''), 10);
+        const bNum = parseInt(b.tableNumber.replace(/\D/g, ''), 10);
+        return aNum - bNum;
+      });
+    });
+
+    return grouped;
+  };
+
+  const statusCounts = getStatusCounts();
+  const groupedTables = groupTablesByLocation(filteredTables);
 
   return (
-    <div className="table-management-container">
-      {/* Header */}
-      <div className="table-header">
-        <div className="header-left">
-          <Button
-            variant="outline"
-            onClick={() => {
-              // For single restaurants, go back to dashboard instead of branch selection
-              if (staff?.restaurant?.type === 'single') {
-                navigate('/staff/dashboard');
-              } else {
-                navigate('/staff/tables');
-              }
-            }}
-          >
-            ← {staff?.restaurant?.type === 'single' ? 'Back to Dashboard' : 'Back to Branches'}
-          </Button>
-          <div>
-            <h1 className="page-title" data-testid="table-management-title">
-              Table Management
-            </h1>
-            {branch && <p className="branch-subtitle">{branch.name}</p>}
+    <div className="table-management-layout">
+      {/* Page Toolbar */}
+      <div className="table-page-toolbar">
+        <h1 className="table-page-title" data-testid="table-management-title">
+          Table Management {branch && `- ${branch.name}`}
+        </h1>
+
+        <div className="table-toolbar-actions">
+          {/* Status Filter Dropdown */}
+          <div className="table-filter-container">
+            <select
+              className="table-filter-select"
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              data-testid="status-filter"
+            >
+              <option value="all">All ({statusCounts.all})</option>
+              <option value="available">Available ({statusCounts.available})</option>
+              <option value="occupied">Occupied ({statusCounts.occupied})</option>
+              <option value="reserved">Reserved ({statusCounts.reserved})</option>
+              <option value="maintenance">Maintenance ({statusCounts.maintenance})</option>
+            </select>
           </div>
-        </div>
-        <div className="header-actions">
+
           {canManageTables() && (
             <>
               <Button
                 variant="outline"
                 onClick={() => navigate(`/staff/tables/${branchId}/qr-settings`)}
                 data-testid="manage-qr-button"
+                size="sm"
               >
-                🎨 Manage QR Codes
+                🎨 QR Codes
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setCreateModalOpen(true)}
                 data-testid="add-table-button"
+                size="sm"
               >
                 + Add Table
               </Button>
@@ -204,8 +221,9 @@ export const TableManagement: React.FC = () => {
                 variant="primary"
                 onClick={() => setBulkCreateModalOpen(true)}
                 data-testid="bulk-add-button"
+                size="sm"
               >
-                + Bulk Add Tables
+                + Bulk Add
               </Button>
             </>
           )}
@@ -214,138 +232,122 @@ export const TableManagement: React.FC = () => {
 
       {error && <div className="error-banner">{error}</div>}
 
-      {/* Status Filter */}
-      <div className="status-filter-section">
-        <div className="status-tabs">
-          <button
-            className={`status-tab ${selectedStatus === 'all' ? 'active' : ''}`}
-            onClick={() => setSelectedStatus('all')}
-            data-testid="filter-all"
-          >
-            All ({statusCounts.all})
-          </button>
-          <button
-            className={`status-tab ${selectedStatus === 'available' ? 'active' : ''}`}
-            onClick={() => setSelectedStatus('available')}
-            data-testid="filter-available"
-          >
-            Available ({statusCounts.available})
-          </button>
-          <button
-            className={`status-tab ${selectedStatus === 'occupied' ? 'active' : ''}`}
-            onClick={() => setSelectedStatus('occupied')}
-            data-testid="filter-occupied"
-          >
-            Occupied ({statusCounts.occupied})
-          </button>
-          <button
-            className={`status-tab ${selectedStatus === 'reserved' ? 'active' : ''}`}
-            onClick={() => setSelectedStatus('reserved')}
-            data-testid="filter-reserved"
-          >
-            Reserved ({statusCounts.reserved})
-          </button>
-          <button
-            className={`status-tab ${selectedStatus === 'maintenance' ? 'active' : ''}`}
-            onClick={() => setSelectedStatus('maintenance')}
-            data-testid="filter-maintenance"
-          >
-            Maintenance ({statusCounts.maintenance})
-          </button>
-        </div>
-      </div>
+      {/* Main Content */}
+      <div className="table-management-content">
+        <div className="table-list-panel">
+          <div className="panel-header">
+            <h2 className="panel-title">
+              Tables ({filteredTables.length})
+            </h2>
+          </div>
 
-      {/* Tables Grid */}
-      <div className="tables-section">
-        {filteredTables.length === 0 ? (
-          <div className="empty-state">
-            <p>No tables found for this branch.</p>
-            {canManageTables() && (
-              <Button variant="primary" onClick={() => setCreateModalOpen(true)}>
-                + Add Your First Table
-              </Button>
+          <div className="table-list-container">
+            {loading ? (
+              <div className="loading-state">Loading table data...</div>
+            ) : filteredTables.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">🪑</div>
+                <p className="empty-title">No tables found</p>
+                <p className="empty-description">
+                  {canManageTables()
+                    ? 'Start by adding your first table'
+                    : 'No tables available in this branch'}
+                </p>
+                {canManageTables() && (
+                  <Button variant="primary" onClick={() => setCreateModalOpen(true)}>
+                    + Add Your First Table
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="tables-by-location">
+                {Object.keys(groupedTables).sort().map((location) => (
+                  <div key={location} className="location-group">
+                    <div className="location-header">
+                      <h3 className="location-name">
+                        📍 {location.charAt(0).toUpperCase() + location.slice(1)}
+                      </h3>
+                      <span className="location-count">
+                        {groupedTables[location].length} {groupedTables[location].length === 1 ? 'table' : 'tables'}
+                      </span>
+                    </div>
+
+                    <div className="location-tables-grid">
+                      {groupedTables[location].map((table) => (
+                        <div
+                          key={table._id}
+                          className={`table-card-compact status-${table.status}`}
+                          data-testid={`table-card-${table._id}`}
+                        >
+                          <div className="table-card-main">
+                            <div className="table-card-top">
+                              <div className="table-number-compact" data-testid="table-number">
+                                {table.tableNumber}
+                              </div>
+                              <span className={`status-dot status-${table.status}`} title={table.status}></span>
+                            </div>
+
+                            <div className="table-capacity">
+                              {Array.from({ length: table.capacity }, (_, i) => (
+                                <span key={i} className="person-icon">👤</span>
+                              ))}
+                            </div>
+
+                            <select
+                              className="status-select-compact"
+                              value={table.status}
+                              onChange={(e) =>
+                                handleUpdateStatus(table._id, e.target.value as Table['status'])
+                              }
+                              data-testid="status-select"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <option value="available">Available</option>
+                              <option value="occupied">Occupied</option>
+                              <option value="reserved">Reserved</option>
+                              <option value="maintenance">Maintenance</option>
+                            </select>
+                          </div>
+
+                          <div className="table-card-actions">
+                            <Button
+                              variant="outline"
+                              onClick={() => handleShowQR(table)}
+                              data-testid="show-qr-button"
+                              size="sm"
+                            >
+                              QR
+                            </Button>
+                            {canManageTables() && (
+                              <Button
+                                variant="outline"
+                                onClick={() => handleEdit(table)}
+                                data-testid="edit-table-button"
+                                size="sm"
+                              >
+                                Edit
+                              </Button>
+                            )}
+                            {canDeleteTables() && (
+                              <Button
+                                variant="danger"
+                                onClick={() => handleDeleteTable(table._id, table.tableNumber)}
+                                data-testid="delete-table-button"
+                                size="sm"
+                              >
+                                Del
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-        ) : (
-          <div className="tables-grid">
-            {filteredTables.map((table) => (
-              <div
-                key={table._id}
-                className={`table-card status-${table.status}`}
-                data-testid={`table-card-${table._id}`}
-              >
-                <div className="table-card-header">
-                  <h3 className="table-number" data-testid="table-number">
-                    Table {table.tableNumber}
-                  </h3>
-                  <span className={`status-badge status-${table.status}`}>
-                    {table.status}
-                  </span>
-                </div>
-
-                <div className="table-info">
-                  <div className="info-item">
-                    <span className="info-icon">🪡</span>
-                    <span className="info-text">Capacity: {table.capacity}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-icon">📍</span>
-                    <span className="info-text">
-                      {table.location.charAt(0).toUpperCase() + table.location.slice(1)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Status Actions */}
-                <div className="status-actions">
-                  <label className="status-label">Change Status:</label>
-                  <select
-                    className="status-select"
-                    value={table.status}
-                    onChange={(e) =>
-                      handleUpdateStatus(table._id, e.target.value as Table['status'])
-                    }
-                    data-testid="status-select"
-                  >
-                    <option value="available">Available</option>
-                    <option value="occupied">Occupied</option>
-                    <option value="reserved">Reserved</option>
-                    <option value="maintenance">Maintenance</option>
-                  </select>
-                </div>
-
-                {/* Actions */}
-                <div className="table-actions">
-                  <Button
-                    variant="outline"
-                    onClick={() => handleShowQR(table)}
-                    data-testid="show-qr-button"
-                  >
-                    QR Code
-                  </Button>
-                  {canManageTables() && (
-                    <Button
-                      variant="outline"
-                      onClick={() => handleEdit(table)}
-                      data-testid="edit-table-button"
-                    >
-                      Edit
-                    </Button>
-                  )}
-                  {canDeleteTables() && (
-                    <Button
-                      variant="danger"
-                      onClick={() => handleDeleteTable(table._id, table.tableNumber)}
-                      data-testid="delete-table-button"
-                    >
-                      Delete
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Modals */}

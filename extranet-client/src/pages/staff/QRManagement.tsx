@@ -8,8 +8,8 @@ import { BranchService } from '../../services/branch.service';
 import { Branch } from '../../types/table.types';
 import { Button } from '../../components/ui/Button';
 import { QR_STYLES, getQRStylesArray } from '../../config/qrStyles.config';
-import { 
-  getTemplate, 
+import {
+  getTemplate,
   getTemplatesArray,
   TEMPLATE_CATEGORIES,
 } from '../../config/qrTemplates.config';
@@ -154,7 +154,7 @@ export const QRManagement: React.FC = () => {
       };
 
       const response = await QRConfigService.saveQRConfig(token, staff.restaurantId, configData);
-      
+
       if (response.success) {
         setSuccessMessage('QR design saved successfully! All tables will use this design.');
         setTimeout(() => setSuccessMessage(''), 3000);
@@ -224,11 +224,11 @@ export const QRManagement: React.FC = () => {
   const imageSettings =
     logoSrc && logoDimensions
       ? {
-          src: logoSrc,
-          width: logoDimensions.width,
-          height: logoDimensions.height,
-          excavate: true,
-        }
+        src: logoSrc,
+        width: logoDimensions.width,
+        height: logoDimensions.height,
+        excavate: true,
+      }
       : undefined;
 
   const stylesArray = getQRStylesArray();
@@ -237,8 +237,8 @@ export const QRManagement: React.FC = () => {
   const hasMoreStyles = stylesArray.length > initialStyleCount;
 
   const templatesArray = getTemplatesArray();
-  const filteredTemplates = selectedCategory === 'all' 
-    ? templatesArray 
+  const filteredTemplates = selectedCategory === 'all'
+    ? templatesArray
     : templatesArray.filter(t => t.config.category === selectedCategory);
   const initialTemplateCount = 6;
   const displayedTemplates = showAllTemplates ? filteredTemplates : filteredTemplates.slice(0, initialTemplateCount);
@@ -270,37 +270,25 @@ export const QRManagement: React.FC = () => {
   }
 
   return (
-    <div className="qr-management-container">
-      {/* Header */}
-      <div className="qr-management-header">
-        <div className="header-left">
+    <div className="qr-management-layout">
+      {/* Page Toolbar */}
+      <div className="qr-page-toolbar">
+        <h1 className="qr-page-title" data-testid="qr-management-title">
+          QR Code Design Manager {branch && `- ${branch.name}`}
+        </h1>
+
+        <div className="qr-toolbar-actions">
+          <Button variant="outline" onClick={handleResetConfig} size="sm">
+            Reset
+          </Button>
           <Button
-            variant="outline"
-            onClick={() => navigate(`/staff/tables/${branchId}`)}
-          >
-            ← Back to Tables
-          </Button>
-          <div>
-            <h1 className="page-title" data-testid="qr-management-title">
-              QR Code Design Manager
-            </h1>
-            {branch && <p className="branch-subtitle">{branch.name}</p>}
-            <p className="subtitle-description">
-              Customize the QR code design for all tables across all branches
-            </p>
-          </div>
-        </div>
-        <div className="header-actions">
-          <Button variant="outline" onClick={handleResetConfig}>
-            Reset to Default
-          </Button>
-          <Button 
-            variant="primary" 
-            onClick={handleSaveConfig} 
+            variant="primary"
+            onClick={handleSaveConfig}
             disabled={saving}
             data-testid="save-qr-config-btn"
+            size="sm"
           >
-            {saving ? 'Saving...' : '💾 Save Design'}
+            {saving ? 'Saving...' : '💾 Save'}
           </Button>
         </div>
       </div>
