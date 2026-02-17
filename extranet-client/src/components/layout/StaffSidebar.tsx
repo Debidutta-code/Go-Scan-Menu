@@ -1,6 +1,6 @@
 // src/components/layout/StaffSidebar.tsx
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
     Menu,
@@ -25,6 +25,22 @@ interface StaffSidebarProps {
     closeMobileSidebar: () => void;
 }
 
+interface SubMenuItem {
+    label: string;
+    path: string;
+    permission?: boolean | null;
+}
+
+interface MenuItem {
+    label: string;
+    icon: React.ReactNode;
+    path: string;
+    permission?: boolean | null;
+    disabled?: boolean;
+    badge?: string;
+    subItems?: SubMenuItem[];
+}
+
 export const StaffSidebar: React.FC<StaffSidebarProps> = ({
     isOpen,
     toggleSidebar,
@@ -33,6 +49,8 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
 }) => {
     const { staff, logout } = useStaffAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const [expandedMenus, setExpandedMenus] = useState<string[]>(['Menu Management']);
 
     const handleLogout = () => {
         if (window.confirm('Are you sure you want to logout?')) {
@@ -41,7 +59,21 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
         }
     };
 
-    const menuItems = [
+    const toggleSubMenu = (label: string) => {
+        if (!isOpen && !isMobile) {
+            toggleSidebar(); // Auto-open sidebar if collapsed
+            setExpandedMenus([label]);
+            return;
+        }
+
+        setExpandedMenus(prev =>
+            prev.includes(label)
+                ? prev.filter(item => item !== label)
+                : [...prev, label]
+        );
+    };
+
+    const menuItems: MenuItem[] = [
         {
             label: 'Dashboard',
             icon: <LayoutDashboard size={20} />,
@@ -51,8 +83,20 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
         {
             label: 'Menu Management',
             icon: <Menu size={20} />,
-            path: '/staff/menu',
-            permission: staff?.permissions?.menu?.view
+            path: '#', // Parent item doesn't navigate
+            permission: staff?.permissions?.menu?.view,
+            subItems: [
+                {
+                    label: 'Categories',
+                    path: '/staff/categories',
+                    permission: staff?.permissions?.menu?.view
+                },
+                {
+                    label: 'Menu Items',
+                    path: '/staff/menu',
+                    permission: staff?.permissions?.menu?.view
+                }
+            ]
         },
         {
             label: 'Staff',
@@ -140,6 +184,43 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
                                     <span className="nav-icon">{item.icon}</span>
                                     <span className="nav-label">{item.label}</span>
                                     {item.badge && isOpen && <span className="coming-soon-badge">{item.badge}</span>}
+                                </div>
+                            );
+                        }
+
+                        // Handle item with sub-menus
+                        if (item.subItems) {
+                            const isExpanded = expandedMenus.includes(item.label);
+                            const isActiveParent = item.subItems.some(sub => location.pathname.startsWith(sub.path));
+
+                            return (
+                                <div key={index} className="nav-group">
+                                    <div
+                                        className={`nav-item ${isActiveParent ? 'active-parent' : ''} ${isExpanded ? 'expanded' : ''}`}
+                                        onClick={() => toggleSubMenu(item.label)}
+                                    >
+                                        <span className="nav-icon">{item.icon}</span>
+                                        <span className="nav-label">{item.label}</span>
+                                        {(isOpen || isMobile) && (
+                                            <span className="nav-chevron">
+                                                <ChevronRight size={16} />
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Sub-menu items */}
+                                    <div className={`sub-menu ${isExpanded ? 'open' : ''}`}>
+                                        {item.subItems.map((subItem, subIndex) => (
+                                            <NavLink
+                                                key={subIndex}
+                                                to={subItem.path}
+                                                className={({ isActive }) => `sub-nav-item ${isActive ? 'active' : ''}`}
+                                                onClick={isMobile ? closeMobileSidebar : undefined}
+                                            >
+                                                <span className="sub-nav-label">{subItem.label}</span>
+                                            </NavLink>
+                                        ))}
+                                    </div>
                                 </div>
                             );
                         }

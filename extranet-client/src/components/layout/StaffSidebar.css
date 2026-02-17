@@ -319,3 +319,115 @@
         display: block;
     }
 }
+
+/* Sub-menu Styles */
+.nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+}
+
+.nav-chevron {
+    margin-left: auto;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.nav-item.expanded .nav-chevron {
+    transform: rotate(90deg);
+}
+
+.sub-menu {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease-out, margin-top 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-left: 16px;
+    /* Indent sub-items */
+    /* border-left: 2px solid #e2e8f0; REMOVED as per user request */
+    margin-top: 0;
+}
+
+.sub-menu.open {
+    max-height: 300px;
+    opacity: 1;
+    margin-top: 4px;
+    padding-bottom: 4px;
+}
+
+.sub-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 14px;
+    position: relative;
+    padding-left: 24px;
+    /* Space for the dot */
+}
+
+.sub-nav-item:hover {
+    background-color: var(--sidebar-hover);
+    color: #0f172a;
+    transform: translateX(4px);
+}
+
+.sub-nav-item.active {
+    background-color: transparent;
+    color: var(--sidebar-text-active);
+    font-weight: 500;
+}
+
+/* Add dot for visual hierarchy (mostly for active interaction) */
+.sub-nav-item::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    /* Position the dot */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #cbd5e1;
+    /* Inactive grey dot */
+    transition: background-color 0.2s;
+}
+
+.sub-nav-item:hover::before {
+    background-color: #94a3b8;
+}
+
+.sub-nav-item.active::before {
+    background-color: var(--sidebar-text-active);
+    /* Active blue dot */
+    width: 8px;
+    height: 8px;
+}
+
+.staff-sidebar.collapsed .sub-menu,
+.staff-sidebar.collapsed .nav-chevron {
+    display: none;
+}
+
+/* Parent Active State - subtle to keep hierarchy connected */
+.nav-item.active-parent {
+    color: var(--sidebar-text-active);
+    font-weight: 600;
+    background-color: transparent;
+}
+
+.nav-item.active-parent .nav-icon {
+    color: var(--sidebar-text-active);
+}
