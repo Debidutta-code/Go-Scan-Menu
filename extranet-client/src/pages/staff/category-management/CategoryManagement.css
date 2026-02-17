@@ -446,31 +446,111 @@
   }
 }
 
+/* Responsive Preview Toggle */
+.preview-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4b5563;
+  border-color: #d1d5db;
+}
+
+.preview-toggle-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.preview-close-btn {
+  display: none;
+  /* Hidden on desktop */
+}
+
+/* Visibility State */
+.category-preview-panel.hidden {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .category-management-content {
-    flex-direction: column;
+    flex-direction: row;
+    /* Keep side-by-side but handle preview as overlay */
+  }
+
+  .preview-toggle-btn .btn-text {
+    display: none;
+    /* Show icon only on smaller screens if space is tight, or keep text */
   }
 
   .category-list-panel {
     max-width: none;
+    /* Full width when preview hidden */
     border-right: none;
-    border-bottom: 1px solid #e5e7eb;
-    height: 50vh;
+    width: 100%;
   }
 
+  /* Make preview an overlay modal on small screens */
   .category-preview-panel {
-    height: 50vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    height: 100vh;
+    /* Full viewport height */
+    padding: 20px;
   }
 
-  .phone-preview-container {
-    padding: 8px;
+  .category-preview-panel.hidden {
+    display: none;
+  }
+
+  .category-preview-panel.visible {
+    display: flex;
+    animation: fadeIn 0.2s ease-out;
   }
 
   .phone-frame {
-    width: 100%;
-    max-width: 260px;
-    height: auto;
-    max-height: calc(50vh - 80px);
+    height: 85vh;
+    /* Increase height for better view in modal */
+    max-height: 800px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .preview-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    color: #111827;
+    cursor: pointer;
+    z-index: 1010;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s;
+  }
+
+  .preview-close-btn:hover {
+    transform: scale(1.1);
+    background: #f9fafb;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 

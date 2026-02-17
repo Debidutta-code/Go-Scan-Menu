@@ -152,6 +152,15 @@ export const CategoryManagement: React.FC = () => {
         <h1 className="category-page-title">Category Management</h1>
 
         <div className="category-toolbar-actions">
+          <Button
+            variant="outline"
+            className="preview-toggle-btn"
+            onClick={() => setShowPreview(!showPreview)}
+          >
+            {showPreview ? <EyeOff size={18} /> : <Smartphone size={18} />}
+            <span className="btn-text">{showPreview ? 'Hide Preview' : 'View Mobile'}</span>
+          </Button>
+
           <div className="category-search-container">
             <input
               type="text"
@@ -210,7 +219,14 @@ export const CategoryManagement: React.FC = () => {
           </div>
 
           {/* Right Side - Live Preview */}
-          <div className="category-preview-panel">
+          <div className={`category-preview-panel ${showPreview ? 'visible' : 'hidden'}`}>
+            <button
+              className="preview-close-btn"
+              onClick={() => setShowPreview(false)}
+              aria-label="Close Preview"
+            >
+              <X size={24} />
+            </button>
             <div className="phone-preview-container">
               <div className="phone-frame">
                 <div className="phone-notch"></div>
