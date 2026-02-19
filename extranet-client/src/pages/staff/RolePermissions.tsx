@@ -203,16 +203,48 @@ export const RolePermissions: React.FC = () => {
     };
 
     return (
-        <div className="role-permissions-container" data-testid="role-permissions-page">
-            <div className="permissions-header">
-                <div>
-                    <h1 className="permissions-title">Role Permissions</h1>
-                    <p className="permissions-subtitle">
-                        Configure permissions for each staff role. All staff members with the same role will have these permissions.
-                    </p>
+        <div className="role-permissions-layout" data-testid="role-permissions-page">
+            {/* Page Actions Toolbar */}
+            <div className="permissions-page-toolbar">
+                <h1 className="permissions-page-title">Role Permissions</h1>
+
+                <div className="permissions-toolbar-actions">
+                    <div className="role-selector-wrapper">
+                        <label htmlFor="roleSelect" className="role-selector-label">
+                            Role:
+                        </label>
+                        <select
+                            id="roleSelect"
+                            value={selectedRole}
+                            onChange={(e) => setSelectedRole(e.target.value as StaffType)}
+                            className="role-selector"
+                            disabled={loading || fetchLoading}
+                            data-testid="role-selector"
+                        >
+                            {STAFF_TYPE_OPTIONS.map(option => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <Button
+                        variant="primary"
+                        onClick={handleSave}
+                        loading={loading}
+                        disabled={loading || fetchLoading}
+                        size="sm"
+                        className="save-btn"
+                        data-testid="save-permissions-button"
+                    >
+                        <Save size={18} />
+                        Save Changes
+                    </Button>
                 </div>
             </div>
 
+            {/* Alert Messages */}
             {error && (
                 <div className="error-banner" data-testid="error-message">
                     <AlertCircle size={18} />
@@ -226,87 +258,56 @@ export const RolePermissions: React.FC = () => {
                 </div>
             )}
 
-            <div className="role-selector-card">
-                <label htmlFor="roleSelect" className="role-selector-label">
-                    Select Role to Configure
-                </label>
-                <select
-                    id="roleSelect"
-                    value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value as StaffType)}
-                    className="role-selector"
-                    disabled={loading || fetchLoading}
-                    data-testid="role-selector"
-                >
-                    {STAFF_TYPE_OPTIONS.map(option => (
-                        <option key={option.value} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            {/* Main Content */}
+            <div className="role-permissions-content">
+                {fetchLoading ? (
+                    <div className="loading-state">Loading permissions...</div>
+                ) : (
+                    <div className="permissions-grid">
+                        {PERMISSION_CATEGORIES.map(category => {
+                            const categoryPerms = permissions[category.key as keyof IPermissions] as any;
+                            const allChecked = category.permissions.every(p => categoryPerms[p.key]);
 
-            {fetchLoading ? (
-                <div className="loading-state">Loading permissions...</div>
-            ) : (
-                <div className="permissions-grid">
-                    {PERMISSION_CATEGORIES.map(category => {
-                        const categoryPerms = permissions[category.key as keyof IPermissions] as any;
-                        const allChecked = category.permissions.every(p => categoryPerms[p.key]);
-                        const someChecked = category.permissions.some(p => categoryPerms[p.key]);
-
-                        return (
-                            <div key={category.key} className="permission-category-card" data-testid={`category-${category.key}`}>
-                                <div className="category-header">
-                                    <div>
-                                        <h3 className="category-title">{category.label}</h3>
-                                        <p className="category-description">{category.description}</p>
-                                    </div>
-                                    <button
-                                        className="select-all-button"
-                                        onClick={() => handleSelectAll(category.key, !allChecked)}
-                                        disabled={loading}
-                                        data-testid={`select-all-${category.key}`}
-                                    >
-                                        {allChecked ? 'Deselect All' : 'Select All'}
-                                    </button>
-                                </div>
-
-                                <div className="permissions-list">
-                                    {category.permissions.map(permission => (
-                                        <label
-                                            key={permission.key}
-                                            className="permission-checkbox-label"
-                                            data-testid={`permission-${category.key}-${permission.key}`}
+                            return (
+                                <div key={category.key} className="permission-category-card" data-testid={`category-${category.key}`}>
+                                    <div className="category-header">
+                                        <div>
+                                            <h3 className="category-title">{category.label}</h3>
+                                            <p className="category-description">{category.description}</p>
+                                        </div>
+                                        <button
+                                            className="select-all-button"
+                                            onClick={() => handleSelectAll(category.key, !allChecked)}
+                                            disabled={loading}
+                                            data-testid={`select-all-${category.key}`}
                                         >
-                                            <input
-                                                type="checkbox"
-                                                checked={categoryPerms[permission.key] || false}
-                                                onChange={(e) => handlePermissionChange(category.key, permission.key, e.target.checked)}
-                                                disabled={loading}
-                                                className="permission-checkbox"
-                                            />
-                                            <span className="permission-label-text">{permission.label}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+                                            {allChecked ? 'Deselect All' : 'Select All'}
+                                        </button>
+                                    </div>
 
-            <div className="permissions-actions">
-                <Button
-                    variant="primary"
-                    onClick={handleSave}
-                    loading={loading}
-                    disabled={loading || fetchLoading}
-                    data-testid="save-permissions-button"
-                >
-                    <Save size={18} />
-                    Save Permissions
-                </Button>
+                                    <div className="permissions-list">
+                                        {category.permissions.map(permission => (
+                                            <label
+                                                key={permission.key}
+                                                className="permission-checkbox-label"
+                                                data-testid={`permission-${category.key}-${permission.key}`}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={categoryPerms[permission.key] || false}
+                                                    onChange={(e) => handlePermissionChange(category.key, permission.key, e.target.checked)}
+                                                    disabled={loading}
+                                                    className="permission-checkbox"
+                                                />
+                                                <span className="permission-label-text">{permission.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
         </div>
     );

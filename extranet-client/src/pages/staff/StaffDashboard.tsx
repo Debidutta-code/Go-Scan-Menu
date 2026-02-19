@@ -1,209 +1,184 @@
 // src/pages/staff/StaffDashboard.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Users,
+  Menu as MenuIcon,
+  Settings,
+  Table as TableIcon,
+  Lock,
+  ShoppingBag,
+  TrendingUp,
+  DollarSign,
+  Clock,
+  ChevronRight,
+  TrendingDown
+} from 'lucide-react';
 import { useStaffAuth } from '../../contexts/StaffAuthContext';
-import { Button } from '../../components/ui/Button';
 import './StaffDashboard.css';
+
+const DUMMY_STATS = [
+  { label: 'Today\'s Orders', value: '24', trend: '+12%', trendUp: true, icon: ShoppingBag },
+  { label: 'Today\'s Revenue', value: '$1,250', trend: '+8.5%', trendUp: true, icon: DollarSign },
+  { label: 'Avg. Order Value', value: '$52.10', trend: '-2%', trendUp: false, icon: TrendingUp },
+  { label: 'Active Customers', value: '18', trend: '+4', trendUp: true, icon: Users },
+];
+
+const DUMMY_ORDERS = [
+  { id: '#ORD-7291', customer: 'John Doe', items: 3, total: '$45.00', status: 'completed', time: '10 mins ago' },
+  { id: '#ORD-7290', customer: 'Sarah Smith', items: 1, total: '$12.50', status: 'pending', time: '15 mins ago' },
+  { id: '#ORD-7289', customer: 'Michael Chen', items: 5, total: '$89.00', status: 'completed', time: '25 mins ago' },
+  { id: '#ORD-7288', customer: 'Emma Wilson', items: 2, total: '$34.00', status: 'cancelled', time: '45 mins ago' },
+  { id: '#ORD-7287', customer: 'James Brown', items: 4, total: '$62.00', status: 'completed', time: '1 hour ago' },
+];
+
+const POPULAR_ITEMS = [
+  { rank: 1, name: 'Margherita Pizza', category: 'Main Course', sales: 42 },
+  { rank: 2, name: 'Truffle Pasta', category: 'Main Course', sales: 38 },
+  { rank: 3, name: 'Caesar Salad', category: 'Starters', sales: 31 },
+  { rank: 4, name: 'Iced Caramel Latte', category: 'Beverages', sales: 28 },
+  { rank: 5, name: 'Chocolate Lava Cake', category: 'Desserts', sales: 25 },
+];
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { staff, logout } = useStaffAuth();
-
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout();
-      navigate('/staff/login');
-    }
-  };
-
-  const getRolePermissions = () => {
-    if (!staff || !staff.permissions) return [];
-
-    const permissions = [];
-    const perms = staff.permissions;
-
-    // Menu permissions
-    if (perms.menu?.view) permissions.push('View Menu');
-    if (perms.menu?.create) permissions.push('Create Menu Items');
-    if (perms.menu?.update) permissions.push('Update Menu Items');
-    if (perms.menu?.delete) permissions.push('Delete Menu Items');
-    if (perms.menu?.manageCategories) permissions.push('Manage Categories');
-
-    // Order permissions
-    if (perms.orders?.view) permissions.push('View Orders');
-    if (perms.orders?.create) permissions.push('Create Orders');
-    if (perms.orders?.update) permissions.push('Update Orders');
-    if (perms.orders?.managePayment) permissions.push('Manage Payments');
-
-    // Staff permissions
-    if (perms.staff?.view) permissions.push('View Staff');
-    if (perms.staff?.create) permissions.push('Create Staff');
-    if (perms.staff?.update) permissions.push('Update Staff');
-    if (perms.staff?.manageRoles) permissions.push('Manage Roles');
-
-    // Reports permissions
-    if (perms.reports?.view) permissions.push('View Reports');
-    if (perms.reports?.export) permissions.push('Export Reports');
-    if (perms.reports?.viewFinancials) permissions.push('View Financials');
-
-    // Settings permissions
-    if (perms.settings?.view) permissions.push('View Settings');
-    if (perms.settings?.updateRestaurant) permissions.push('Update Restaurant');
-    if (perms.settings?.updateBranch) permissions.push('Update Branch');
-
-    return permissions;
-  };
+  const { staff } = useStaffAuth();
 
   if (!staff) {
     return (
-      <div className="staff-dashboard-container">
-        <div className="loading-state">Loading...</div>
+      <div className="staff-dashboard-layout">
+        <div className="loading-state">Loading dashboard...</div>
       </div>
     );
   }
 
   return (
-    <div className="staff-dashboard-container">
-      {/* Welcome Section */}
-      <div className="welcome-section">
-        <h2 className="welcome-title">Welcome, {staff.name}!</h2>
-        <p className="welcome-subtitle">
-          Role: <span className="role-badge">
-            {staff.staffType
-              .replace(/_/g, ' ')
-              .replace(/\b\w/g, (letter) => letter.toUpperCase())}
-          </span>
-        </p>
-      </div>
+    <div className="staff-dashboard-layout">
+      {/* Page Actions Toolbar */}
+      <div className="dashboard-page-toolbar">
+        <div className="toolbar-left">
+          <h1 className="dashboard-page-title">Dashboard Overview</h1>
+          <p className="stat-label">Welcome back, {staff.name}</p>
+        </div>
 
-      {/* Staff Info Card */}
-      <div className="info-card">
-        <h3 className="card-title">Your Information</h3>
-        <div className="info-grid">
-          <div className="info-item">
-            <label className="info-label">Email</label>
-            <p className="info-value" data-testid="staff-email">{staff.email}</p>
-          </div>
-          <div className="info-item">
-            <label className="info-label">Phone</label>
-            <p className="info-value">{staff.phone}</p>
-          </div>
-          <div className="info-item">
-            <label className="info-label">Staff Type</label>
-            <p className="info-value">
-              {staff.staffType
-                .replace(/_/g, ' ')
-                .replace(/\b\w/g, (letter) => letter.toUpperCase())}
-            </p>
-          </div>
-          <div className="info-item">
-            <label className="info-label">Status</label>
-            <p className="info-value">
-              <span className={`status-badge ${staff.isActive ? 'active' : 'inactive'}`}>
-                {staff.isActive ? 'Active' : 'Inactive'}
-              </span>
-            </p>
-          </div>
+        <div className="dashboard-toolbar-actions">
+          <span className="status-badge active">System Live</span>
         </div>
       </div>
 
-      {/* Permissions Card */}
-      <div className="info-card">
-        <h3 className="card-title">Your Permissions</h3>
-        <div className="permissions-list">
-          {getRolePermissions().length > 0 ? (
-            getRolePermissions().map((permission) => (
-              <div key={permission} className="permission-item">
-                <span className="permission-icon">✓</span>
-                <span className="permission-text">{permission}</span>
+      {/* Main Content */}
+      <div className="dashboard-content">
+
+        {/* Stats Row */}
+        <div className="stats-grid">
+          {DUMMY_STATS.map((stat, idx) => (
+            <div key={idx} className="stat-card">
+              <div className="stat-label">{stat.label}</div>
+              <div className="stat-value">{stat.value}</div>
+              <div className={`stat-trend ${stat.trendUp ? 'up' : 'down'}`}>
+                {stat.trendUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                {stat.trend} <span style={{ color: '#9ca3af', fontWeight: 400 }}>vs yesterday</span>
               </div>
-            ))
-          ) : (
-            <p className="no-permissions">No special permissions assigned</p>
-          )}
+            </div>
+          ))}
         </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div className="quick-actions-section">
-        <h3 className="section-title">Quick Actions</h3>
-        <div className="actions-grid">
-          {staff.permissions?.menu?.view && (
-            <button
-              className="action-card"
-              onClick={() => navigate('/staff/menu')}
-              data-testid="menu-management-button"
-            >
-              <div className="action-icon">📋</div>
-              <h4 className="action-title">Menu Management</h4>
-              <p className="action-description">Add, edit, and manage menu items</p>
-            </button>
-          )}
+        {/* Interactive Center Grid */}
+        <div className="dashboard-interactive-grid">
 
-          {staff.permissions?.staff?.view && (
-            <button
-              className="action-card"
-              onClick={() => navigate('/staff/team')}
-              data-testid="staff-management-button"
-            >
-              <div className="action-icon">👥</div>
-              <h4 className="action-title">Staff Management</h4>
-              <p className="action-description">Manage team members and roles</p>
-            </button>
-          )}
+          {/* Recent Orders Panel */}
+          <div className="dashboard-panel">
+            <div className="panel-header">
+              <h3 className="panel-title">Recent Orders</h3>
+              <button className="select-all-button">View All</button>
+            </div>
+            <div className="panel-content">
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DUMMY_ORDERS.map(order => (
+                    <tr key={order.id}>
+                      <td style={{ fontWeight: 600 }}>{order.id}</td>
+                      <td>{order.customer}</td>
+                      <td>{order.total}</td>
+                      <td>
+                        <span className={`status-pill ${order.status}`}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td style={{ color: '#6b7280' }}>{order.time}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-          {staff.permissions?.staff?.manageRoles && (
-            <button
-              className="action-card"
-              onClick={() => navigate('/staff/permissions')}
-              data-testid="permissions-management-button"
-            >
-              <div className="action-icon">🔐</div>
-              <h4 className="action-title">Role Permissions</h4>
-              <p className="action-description">Configure role-based permissions</p>
-            </button>
-          )}
-
-          {staff.permissions?.tables?.view && (
-            <button
-              className="action-card"
-              onClick={() => navigate('/staff/tables')}
-              data-testid="table-management-button"
-            >
-              <div className="action-icon">🪑</div>
-              <h4 className="action-title">Table Management</h4>
-              <p className="action-description">Manage tables and QR codes</p>
-            </button>
-          )}
-
-          {staff.permissions?.orders?.view && (
-            <button className="action-card" disabled>
-              <div className="action-icon">🛎️</div>
-              <h4 className="action-title">Orders</h4>
-              <p className="action-description">View and manage orders</p>
-              <span className="coming-soon">Coming Soon</span>
-            </button>
-          )}
-
-          {staff.permissions?.reports?.view && (
-            <button className="action-card" disabled>
-              <div className="action-icon">📊</div>
-              <h4 className="action-title">Reports</h4>
-              <p className="action-description">View sales and analytics</p>
-              <span className="coming-soon">Coming Soon</span>
-            </button>
-          )}
-
-          {staff.permissions?.settings?.view && (
-            <button className="action-card" disabled>
-              <div className="action-icon">⚙️</div>
-              <h4 className="action-title">Settings</h4>
-              <p className="action-description">Configure restaurant settings</p>
-              <span className="coming-soon">Coming Soon</span>
-            </button>
-          )}
+          {/* Popular Items Panel */}
+          <div className="dashboard-panel">
+            <div className="panel-header">
+              <h3 className="panel-title">Most Popular</h3>
+              <button className="select-all-button">Full Report</button>
+            </div>
+            <div className="panel-content popular-list">
+              {POPULAR_ITEMS.map(item => (
+                <div key={item.rank} className="popular-item">
+                  <div className="popular-item-info">
+                    <span className="item-rank">#{item.rank}</span>
+                    <div>
+                      <div className="item-name">{item.name}</div>
+                      <div className="item-sales">{item.category}</div>
+                    </div>
+                  </div>
+                  <div className="item-sales" style={{ fontWeight: 600 }}>
+                    {item.sales} sold
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
         </div>
+
+        {/* Quick Actions Row */}
+        <div className="quick-actions-section">
+          <h3 className="panel-title" style={{ marginBottom: '16px' }}>System Management</h3>
+          <div className="quick-actions-grid">
+            <div className="quick-action-button" onClick={() => navigate('/staff/menu')}>
+              <div className="action-icon-circle"><MenuIcon size={20} /></div>
+              <span className="action-label">Menu Management</span>
+            </div>
+
+            <div className="quick-action-button" onClick={() => navigate('/staff/tables')}>
+              <div className="action-icon-circle"><TableIcon size={20} /></div>
+              <span className="action-label">Table / QR</span>
+            </div>
+
+            <div className="quick-action-button" onClick={() => navigate('/staff/team')}>
+              <div className="action-icon-circle"><Users size={20} /></div>
+              <span className="action-label">Team Members</span>
+            </div>
+
+            <div className="quick-action-button" onClick={() => navigate('/staff/permissions')}>
+              <div className="action-icon-circle"><Lock size={20} /></div>
+              <span className="action-label">Access Control</span>
+            </div>
+
+            <div className="quick-action-button">
+              <div className="action-icon-circle"><Settings size={20} /></div>
+              <span className="action-label">Settings</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
