@@ -154,6 +154,7 @@ export const CategoryManagement: React.FC = () => {
         <div className="category-toolbar-actions">
           <Button
             variant="outline"
+            size="sm"
             className="preview-toggle-btn"
             onClick={() => setShowPreview(!showPreview)}
           >
