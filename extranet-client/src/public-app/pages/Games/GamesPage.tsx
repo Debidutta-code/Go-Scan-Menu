@@ -32,6 +32,14 @@ export const GamesPage: React.FC = () => {
             icon: '🏗️',
             path: `${getBasePath()}/games/stack-game`,
             color: '#ed8936'
+        },
+        {
+            id: 'brick-game',
+            title: 'Brick Smasher',
+            description: 'Classic brick breaking action! Smash them all!',
+            icon: '🧱',
+            path: `${getBasePath()}/games/brick-game`,
+            color: '#47d1ff'
         }
     ];
 

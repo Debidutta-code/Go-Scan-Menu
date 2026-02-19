@@ -39,6 +39,7 @@ import { PaymentPage } from './public-app/pages/Payment/PaymentPage';
 import { GamesPage } from './public-app/pages/Games/GamesPage';
 import { GamesManagement as MemoryGame } from './public-app/games/memory-game/GamesManagement';
 import { StackGame } from '@/public-app/games/stack-game/StackGame';
+import { BrickGame } from '@/public-app/games/brick-game/BrickGame';
 
 /* ===================== PROTECTED ROUTES ===================== */
 
@@ -266,6 +267,7 @@ function App() {
           <Route path="games" element={<GamesPage />} />
           <Route path="games/memory-game" element={<MemoryGame />} />
           <Route path="games/stack-game" element={<StackGame />} />
+          <Route path="games/brick-game" element={<BrickGame />} />
         </Route>
 
         {/* Without QR Code */}
@@ -277,6 +279,7 @@ function App() {
           <Route path="games" element={<GamesPage />} />
           <Route path="games/memory-game" element={<MemoryGame />} />
           <Route path="games/stack-game" element={<StackGame />} />
+          <Route path="games/brick-game" element={<BrickGame />} />
         </Route>
 
         {/* ================= 404 ================= */}
