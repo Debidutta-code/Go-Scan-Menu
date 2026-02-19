@@ -36,6 +36,9 @@ import { MenuPage } from './public-app/pages/Menu/MenuPage';
 import { OrdersPage } from './public-app/pages/Orders/OrdersPage';
 import { CartPage } from './public-app/pages/Cart/CartPage';
 import { PaymentPage } from './public-app/pages/Payment/PaymentPage';
+import { GamesPage } from './public-app/pages/Games/GamesPage';
+import { GamesManagement as MemoryGame } from './public-app/games/memory-game/GamesManagement';
+import { StackGame } from '@/public-app/games/stack-game/StackGame';
 
 /* ===================== PROTECTED ROUTES ===================== */
 
@@ -260,6 +263,9 @@ function App() {
           <Route path="orders" element={<OrdersPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="payment" element={<PaymentPage />} />
+          <Route path="games" element={<GamesPage />} />
+          <Route path="games/memory-game" element={<MemoryGame />} />
+          <Route path="games/stack-game" element={<StackGame />} />
         </Route>
 
         {/* Without QR Code */}
@@ -268,6 +274,9 @@ function App() {
           <Route path="orders" element={<OrdersPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="payment" element={<PaymentPage />} />
+          <Route path="games" element={<GamesPage />} />
+          <Route path="games/memory-game" element={<MemoryGame />} />
+          <Route path="games/stack-game" element={<StackGame />} />
         </Route>
 
         {/* ================= 404 ================= */}

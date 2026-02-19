@@ -32,6 +32,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       path: getBasePath(),
     },
     {
+      id: 'games',
+      label: 'Games',
+      icon: '🎮',
+      path: `${getBasePath()}/games`,
+    },
+    {
       id: 'orders',
       label: 'Orders',
       icon: '📋',
