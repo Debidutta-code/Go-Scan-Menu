@@ -56,6 +56,14 @@ export const GamesPage: React.FC = () => {
             icon: '⚡',
             path: `${getBasePath()}/games/fastest-finger`,
             color: '#ff0090'
+        },
+        {
+            id: 'rise-up',
+            title: 'Rise Up',
+            description: 'Protect the balloon at all costs! 4 levels of challenge.',
+            icon: '🎈',
+            path: `${getBasePath()}/games/rise-up`,
+            color: '#00ccff'
         }
     ];
 
