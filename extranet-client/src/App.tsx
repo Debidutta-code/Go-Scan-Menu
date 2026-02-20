@@ -41,6 +41,7 @@ import { GamesManagement as MemoryGame } from './public-app/games/memory-game/Ga
 import { StackGame } from '@/public-app/games/stack-game/StackGame';
 import { BrickGame } from '@/public-app/games/brick-game/BrickGame';
 import { FingerPickGame } from './public-app/games/random-finger-pick/FingerPickGame';
+import { FastestFingerGame } from './public-app/games/fastest-finger/FastestFingerGame';
 
 /* ===================== PROTECTED ROUTES ===================== */
 
@@ -283,6 +284,7 @@ function App() {
           <Route path="games/stack-game" element={<StackGame />} />
           <Route path="games/brick-game" element={<BrickGame />} />
           <Route path="games/finger-pick" element={<FingerPickGame />} />
+          <Route path="games/fastest-finger" element={<FastestFingerGame />} />
         </Route>
 
         {/* ================= 404 ================= */}

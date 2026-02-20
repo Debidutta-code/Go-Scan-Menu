@@ -48,6 +48,14 @@ export const GamesPage: React.FC = () => {
             icon: '👆',
             path: `${getBasePath()}/games/finger-pick`,
             color: '#ff4d4d'
+        },
+        {
+            id: 'fastest-finger',
+            title: 'Fastest Finger',
+            description: '1v1 Tap Battle! Who has the quickest fingers?',
+            icon: '⚡',
+            path: `${getBasePath()}/games/fastest-finger`,
+            color: '#ff0090'
         }
     ];
 
