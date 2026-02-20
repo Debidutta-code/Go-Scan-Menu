@@ -117,8 +117,8 @@ export const FingerPickGame: React.FC = () => {
     }, []);
 
     const handleTouchStart = (e: React.TouchEvent) => { if (winner !== null) return; e.preventDefault(); updateTouches(e.touches); };
-    const handleTouchMove  = (e: React.TouchEvent) => { if (winner !== null) return; e.preventDefault(); updateTouches(e.touches); };
-    const handleTouchEnd   = (e: React.TouchEvent) => { if (winner !== null) return; e.preventDefault(); updateTouches(e.touches); };
+    const handleTouchMove = (e: React.TouchEvent) => { if (winner !== null) return; e.preventDefault(); updateTouches(e.touches); };
+    const handleTouchEnd = (e: React.TouchEvent) => { if (winner !== null) return; e.preventDefault(); updateTouches(e.touches); };
 
     /* Start / reset countdown when finger count changes */
     useEffect(() => {
@@ -187,9 +187,15 @@ export const FingerPickGame: React.FC = () => {
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
-        const prevent = (e: TouchEvent) => e.preventDefault();
+        const prevent = (e: TouchEvent) => {
+            // Allow touches on buttons so they remain interactive
+            if (e.target instanceof HTMLElement && e.target.closest('button')) {
+                return;
+            }
+            e.preventDefault();
+        };
         el.addEventListener('touchstart', prevent, { passive: false });
-        el.addEventListener('touchmove',  prevent, { passive: false });
+        el.addEventListener('touchmove', prevent, { passive: false });
         return () => { el.removeEventListener('touchstart', prevent); el.removeEventListener('touchmove', prevent); };
     }, []);
 
@@ -227,8 +233,8 @@ export const FingerPickGame: React.FC = () => {
                         {touches.length === 0
                             ? 'Place 2 or more fingers to begin'
                             : touches.length === 1
-                            ? 'Need one more finger...'
-                            : `${touches.length} players locked in!`}
+                                ? 'Need one more finger...'
+                                : `${touches.length} players locked in!`}
                     </p>
                     {touches.length >= 2 && (
                         <span className="finger-count">{touches.length} FINGERS DETECTED</span>
