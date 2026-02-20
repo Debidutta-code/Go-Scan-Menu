@@ -271,6 +271,7 @@ function App() {
           <Route path="games/stack-game" element={<StackGame />} />
           <Route path="games/brick-game" element={<BrickGame />} />
           <Route path="games/finger-pick" element={<FingerPickGame />} />
+          <Route path="games/fastest-finger" element={<FastestFingerGame />} />
         </Route>
 
         {/* Without QR Code */}
