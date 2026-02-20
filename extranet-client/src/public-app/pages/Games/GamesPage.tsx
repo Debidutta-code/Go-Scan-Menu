@@ -73,6 +73,14 @@ export const GamesPage: React.FC = () => {
             path: `${getBasePath()}/games/chidiya-udd`,
             color: '#FFD93D'
         },
+        {
+            id: 'tic-tac-toe',
+            title: 'Tic Tac Toe',
+            description: 'Classic 2-player strategy. Top is ✕, Bottom is ○. First to 3 wins!',
+            icon: '⊞',
+            path: `${getBasePath()}/games/tic-tac-toe`,
+            color: '#ff6b6b'
+        },
     ];
 
     return (
