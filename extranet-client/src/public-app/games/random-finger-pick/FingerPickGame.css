@@ -1,10 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600&display=swap');
+
+:root {
+    --neon-cyan: #00f5ff;
+    --neon-pink: #ff0090;
+    --neon-yellow: #ffe600;
+    --neon-green: #39ff14;
+    --bg-dark: #050510;
+    --grid-color: rgba(0, 245, 255, 0.055);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Container ── */
 .finger-pick-container {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #000;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: var(--bg-dark);
+    background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 60px 60px;
     overflow: hidden;
     touch-action: none;
     user-select: none;
@@ -13,149 +29,417 @@
     align-items: center;
 }
 
+/* Ambient glow blobs */
+.finger-pick-container::before,
+.finger-pick-container::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(130px);
+    pointer-events: none;
+    z-index: 0;
+}
+.finger-pick-container::before {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0, 245, 255, 0.13) 0%, transparent 70%);
+    top: -180px; left: -180px;
+}
+.finger-pick-container::after {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(255, 0, 144, 0.13) 0%, transparent 70%);
+    bottom: -160px; right: -160px;
+}
+
+/* ── Particle canvas ── */
+#particle-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ── Scanlines ── */
+.scanlines {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0, 0, 0, 0.07) 3px,
+        rgba(0, 0, 0, 0.07) 4px
+    );
+}
+
+/* ── Header overlay ── */
 .game-info-overlay {
     position: absolute;
-    top: 20%;
+    top: 0;
     width: 100%;
     text-align: center;
     color: #fff;
-    z-index: 10;
+    z-index: 20;
+    pointer-events: none;
+    padding-top: 44px;
+}
+
+.game-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.1rem, 4.5vw, 1.8rem);
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    color: var(--neon-cyan);
+    text-shadow:
+        0 0 8px var(--neon-cyan),
+        0 0 24px var(--neon-cyan),
+        0 0 70px rgba(0, 245, 255, 0.35);
+}
+
+.game-subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 8px;
+}
+
+.finger-count {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: rgba(0, 245, 255, 0.75);
+    border: 1px solid rgba(0, 245, 255, 0.22);
+    border-radius: 40px;
+    padding: 5px 18px;
+    background: rgba(0, 245, 255, 0.05);
+}
+
+/* ── Countdown ring ── */
+.countdown-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 15;
     pointer-events: none;
 }
 
-.game-info-overlay h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    opacity: 0.8;
+.countdown-ring {
+    position: relative;
+    width: min(42vw, 260px);
+    height: min(42vw, 260px);
 }
 
-.game-info-overlay p {
-    font-size: 1rem;
-    opacity: 0.6;
+.countdown-ring svg {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    transform: rotate(-90deg);
 }
 
-.countdown-display {
-    font-size: 6rem;
-    font-weight: 800;
-    margin-top: 2rem;
+.ring-bg {
+    fill: none;
+    stroke: rgba(0, 245, 255, 0.08);
+    stroke-width: 5;
+}
+
+.ring-fill {
+    fill: none;
+    stroke: var(--neon-cyan);
+    stroke-width: 5;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 6px var(--neon-cyan));
+    transition: stroke-dashoffset 0.95s linear;
+}
+
+.countdown-number {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(4rem, 16vw, 7rem);
+    font-weight: 900;
     color: #fff;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-    animation: pulse 1s infinite;
+    text-shadow: 0 0 20px var(--neon-cyan), 0 0 70px var(--neon-cyan);
+    animation: cdPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.4);
 }
 
+.countdown-label {
+    margin-top: 22px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(0.7rem, 2.5vw, 0.95rem);
+    letter-spacing: 0.35em;
+    color: rgba(0, 245, 255, 0.55);
+    text-transform: uppercase;
+}
+
+/* ── Winner screen ── */
 .winner-announcement {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
     pointer-events: auto;
+    background: radial-gradient(ellipse 55% 45% at 50% 50%, rgba(57, 255, 20, 0.07) 0%, transparent 70%);
+    animation: fadeInBg 0.4s ease;
+}
+
+.win-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(0.55rem, 2vw, 0.78rem);
+    letter-spacing: 0.5em;
+    color: var(--neon-green);
+    opacity: 0;
+    animation: slideUp 0.5s 0.1s forwards;
 }
 
 .win-text {
-    font-size: 2.5rem;
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2.5rem, 11vw, 5.5rem);
     font-weight: 900;
-    color: #4dff79;
-    text-shadow: 0 0 30px rgba(77, 255, 121, 0.6);
-    margin-bottom: 2rem;
-    animation: bounce 1s ease infinite;
+    letter-spacing: 0.1em;
+    color: var(--neon-green);
+    text-shadow:
+        0 0 10px var(--neon-green),
+        0 0 35px var(--neon-green),
+        0 0 90px rgba(57, 255, 20, 0.45);
+    opacity: 0;
+    animation: winPop 0.7s 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.winner-color-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    margin-top: 14px;
+    opacity: 0;
+    animation: slideUp 0.5s 0.4s forwards;
+}
+
+.win-divider {
+    width: 180px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+    margin: 18px auto;
+    opacity: 0;
+    animation: slideUp 0.5s 0.5s forwards;
 }
 
 .reset-btn {
-    padding: 1rem 2rem;
-    font-size: 1.2rem;
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(0.7rem, 2.2vw, 0.85rem);
     font-weight: 700;
-    background: #fff;
-    color: #000;
-    border: none;
-    border-radius: 50px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 14px 42px;
+    background: transparent;
+    color: var(--neon-cyan);
+    border: 2px solid var(--neon-cyan);
+    border-radius: 4px;
     cursor: pointer;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: slideUp 0.5s 0.65s forwards;
+    box-shadow: 0 0 12px rgba(0, 245, 255, 0.25), inset 0 0 12px rgba(0, 245, 255, 0.04);
+    transition: color 0.22s ease, box-shadow 0.22s ease;
 }
 
-/* Touch Indicators */
+.reset-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--neon-cyan);
+    transform: translateX(-101%);
+    transition: transform 0.22s ease;
+    z-index: -1;
+}
+.reset-btn:hover::before { transform: translateX(0); }
+.reset-btn:hover { color: #000; box-shadow: 0 0 22px rgba(0, 245, 255, 0.55); }
+
+/* ── Touch indicators ── */
 .touch-indicator {
     position: absolute;
-    width: 100px;
-    height: 100px;
+    width: 110px; height: 110px;
     transform: translate(-50%, -50%);
     pointer-events: none;
-    z-index: 5;
+    z-index: 10;
+    transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease;
 }
 
+/* Outer spinning dashed ring */
+.plasma-ring-2 {
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    border: 1px dashed var(--touch-color);
+    opacity: 0.3;
+    animation: spinRing 7s linear infinite reverse;
+}
+
+/* Conic gradient plasma ring */
+.plasma-ring {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    animation: spinRing 2.5s linear infinite;
+    background: conic-gradient(var(--touch-color), transparent 50%, var(--touch-color));
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px));
+    filter: drop-shadow(0 0 4px var(--touch-color));
+    opacity: 0.8;
+}
+
+/* Main circle */
 .inner-circle {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--touch-color);
+    inset: 10px;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.25), var(--touch-color) 65%, rgba(0,0,0,0.5));
     border-radius: 50%;
-    opacity: 0.6;
-    border: 4px solid #fff;
-    box-shadow: 0 0 20px var(--touch-color);
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    border: 3px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 18px var(--touch-color), inset 0 0 15px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+.finger-icon {
+    font-size: 26px;
+    opacity: 0.65;
+    line-height: 1;
+    filter: drop-shadow(0 0 4px #fff);
+}
+
+/* Ripple layers */
 .ripple {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent;
-    border: 2px solid var(--touch-color);
+    inset: 0;
     border-radius: 50%;
-    animation: ripple-effect 1.5s infinite;
+    border: 2px solid var(--touch-color);
+    animation: rippleOut 2s ease-out infinite;
+    opacity: 0;
+}
+.ripple:nth-child(4) { animation-delay: 0s; }
+.ripple:nth-child(5) { animation-delay: 0.65s; }
+.ripple:nth-child(6) { animation-delay: 1.3s; }
+
+/* Player label */
+.player-num {
+    position: absolute;
+    bottom: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    color: var(--touch-color);
+    text-shadow: 0 0 8px var(--touch-color);
+    white-space: nowrap;
 }
 
+/* Winner state */
 .touch-indicator.winner .inner-circle {
-    transform: scale(1.5);
-    opacity: 1;
-    border-width: 8px;
-    box-shadow: 0 0 50px var(--touch-color);
-    z-index: 100;
-}
-
-.touch-indicator.winner .ripple {
+    animation: winnerPulse 0.55s ease infinite alternate;
+    border-color: #fff;
     border-width: 4px;
-    animation-duration: 0.8s;
+}
+.touch-indicator.winner .plasma-ring {
+    animation: spinRing 0.7s linear infinite;
+    inset: -16px;
+    opacity: 1;
+}
+.touch-indicator.winner .plasma-ring-2 {
+    opacity: 0.55;
+    animation-duration: 1.2s;
+}
+.touch-indicator.winner {
+    filter: drop-shadow(0 0 18px var(--touch-color));
+    z-index: 25;
 }
 
+/* Loser state */
 .touch-indicator.loser {
-    opacity: 0.2;
-    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.15;
+    transform: translate(-50%, -50%) scale(0.7);
+    filter: grayscale(1);
 }
 
-@keyframes ripple-effect {
-    0% {
-        transform: scale(1);
-        opacity: 0.8;
-    }
-
-    100% {
-        transform: scale(2.5);
-        opacity: 0;
-    }
+/* Screen shake */
+.container-shake {
+    animation: shake 0.18s ease;
 }
 
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.1);
-    }
-
-    100% {
-        transform: scale(1);
-    }
+/* ── Confetti ── */
+.confetti-piece {
+    position: absolute;
+    border-radius: 2px;
+    z-index: 28;
+    pointer-events: none;
+    animation: confettiFall var(--dur, 2s) var(--delay, 0s) ease-in forwards;
 }
 
-@keyframes bounce {
+/* ── Keyframes ── */
+@keyframes spinRing {
+    to { transform: rotate(360deg); }
+}
 
-    0%,
-    100% {
-        transform: translateY(0);
-    }
+@keyframes rippleOut {
+    0%   { transform: scale(1);   opacity: 0.7; }
+    100% { transform: scale(3.5); opacity: 0; }
+}
 
-    50% {
-        transform: translateY(-20px);
-    }
+@keyframes winnerPulse {
+    from { box-shadow: 0 0 20px var(--touch-color), 0 0 50px var(--touch-color); transform: scale(1.4); }
+    to   { box-shadow: 0 0 40px var(--touch-color), 0 0 100px var(--touch-color); transform: scale(1.6); }
+}
+
+@keyframes cdPop {
+    from { transform: scale(1.4); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes winPop {
+    0%   { transform: scale(0.4) rotate(-6deg); opacity: 0; }
+    80%  { transform: scale(1.06) rotate(1deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg);    opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(18px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes fadeInBg {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes shake {
+    0%   { transform: translate(0, 0); }
+    20%  { transform: translate(-5px, 2px); }
+    40%  { transform: translate(5px, -2px); }
+    60%  { transform: translate(-3px, 3px); }
+    80%  { transform: translate(3px, -1px); }
+    100% { transform: translate(0, 0); }
+}
+
+@keyframes confettiFall {
+    0%   { transform: translate(0, -60px) rotate(0deg);   opacity: 1; }
+    100% { transform: translate(var(--dx, 0px), 100vh) rotate(720deg); opacity: 0; }
+}
+
+@media (max-width: 480px) {
+    .touch-indicator { width: 88px; height: 88px; }
+    .plasma-ring { inset: -6px; }
+    .plasma-ring-2 { inset: -16px; }
 }
