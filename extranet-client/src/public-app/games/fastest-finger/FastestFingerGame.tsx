@@ -3,16 +3,24 @@ import './FastestFingerGame.css';
 
 type GameState = 'IDLE' | 'COUNTDOWN' | 'PLAYING' | 'RESULT';
 
+interface TapEffect {
+    id: number;
+    x: number;
+    y: number;
+}
+
 export const FastestFingerGame: React.FC = () => {
     const [gameState, setGameState] = useState<GameState>('IDLE');
     const [countdown, setCountdown] = useState(3);
     const [gameTimer, setGameTimer] = useState(10);
     const [scores, setScores] = useState({ top: 0, bottom: 0 });
+    const [tapEffects, setTapEffects] = useState<TapEffect[]>([]);
 
     const timerRef = useRef<any>(null);
 
     const startGame = () => {
         setScores({ top: 0, bottom: 0 });
+        setTapEffects([]);
         setGameState('COUNTDOWN');
         setCountdown(3);
     };
@@ -38,8 +46,24 @@ export const FastestFingerGame: React.FC = () => {
         };
     }, [gameState, countdown, gameTimer]);
 
-    const handleTap = (player: 'top' | 'bottom') => {
+    const handleTap = (player: 'top' | 'bottom', e: React.MouseEvent | React.TouchEvent) => {
         if (gameState !== 'PLAYING') return;
+
+        // Get tap position
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+
+        const newEffect = {
+            id: Date.now(),
+            x: clientX,
+            y: clientY
+        };
+
+        setTapEffects(prev => [...prev, newEffect]);
+        setTimeout(() => {
+            setTapEffects(prev => prev.filter(effect => effect.id !== newEffect.id));
+        }, 400);
+
         setScores((prev) => ({
             ...prev,
             [player]: prev[player] + 1,
@@ -57,7 +81,14 @@ export const FastestFingerGame: React.FC = () => {
             {/* Top Player Section */}
             <div
                 className={`player-section top-player ${gameState === 'PLAYING' ? 'active' : ''}`}
-                onClick={() => handleTap('top')}
+                onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleTap('top', e);
+                }}
+                onTouchStart={(e) => {
+                    e.preventDefault();
+                    handleTap('top', e);
+                }}
             >
                 <div className="score-display rotated">{scores.top}</div>
                 <div className="tap-hint rotated">{gameState === 'PLAYING' ? 'TAP TAP TAP!' : ''}</div>
@@ -105,11 +136,27 @@ export const FastestFingerGame: React.FC = () => {
             {/* Bottom Player Section */}
             <div
                 className={`player-section bottom-player ${gameState === 'PLAYING' ? 'active' : ''}`}
-                onClick={() => handleTap('bottom')}
+                onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleTap('bottom', e);
+                }}
+                onTouchStart={(e) => {
+                    e.preventDefault();
+                    handleTap('bottom', e);
+                }}
             >
                 <div className="score-display">{scores.bottom}</div>
                 <div className="tap-hint">{gameState === 'PLAYING' ? 'TAP TAP TAP!' : ''}</div>
             </div>
+
+            {/* Tap Effects */}
+            {tapEffects.map(effect => (
+                <div
+                    key={effect.id}
+                    className="tap-effect"
+                    style={{ left: effect.x - 50, top: effect.y - 50 }}
+                />
+            ))}
 
             <div className="scanlines"></div>
         </div>
