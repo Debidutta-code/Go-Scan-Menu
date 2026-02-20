@@ -1,10 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;700&display=swap');
+
+:root {
+    --pink: #ff0090;
+    --cyan: #00f5ff;
+    --green: #39ff14;
+    --bg: #050510;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Container ── */
 .fastest-finger-container {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #050510;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: var(--bg);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -12,6 +22,7 @@
     user-select: none;
 }
 
+/* ── Player sections ── */
 .player-section {
     flex: 1;
     display: flex;
@@ -19,64 +30,104 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    transition: background-color 0.2s ease;
-    cursor: pointer;
+    overflow: hidden;
+    transition: background-color 0.15s ease;
+    cursor: default;
 }
 
 .top-player {
-    background-color: rgba(255, 0, 144, 0.05);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 0, 144, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .bottom-player {
-    background-color: rgba(0, 245, 255, 0.05);
-    border-top: 2px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 245, 255, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.player-section.active:active {
-    background-color: rgba(255, 255, 255, 0.1);
-}
+.top-player.active    { background-color: rgba(255, 0, 144, 0.08); cursor: pointer; }
+.bottom-player.active { background-color: rgba(0, 245, 255, 0.08); cursor: pointer; }
 
-.top-player.active {
-    background-color: rgba(255, 0, 144, 0.15);
-}
+.top-player.leading    { background-color: rgba(255, 0, 144, 0.14); }
+.bottom-player.leading { background-color: rgba(0, 245, 255, 0.14); }
 
-.bottom-player.active {
-    background-color: rgba(0, 245, 255, 0.15);
+/* Ambient radial glow */
+.player-bg-glow {
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    filter: blur(80px);
 }
+.top-glow    { background: var(--pink); top: -100px; left: 50%; transform: translateX(-50%); }
+.bottom-glow { background: var(--cyan);  bottom: -100px; left: 50%; transform: translateX(-50%); }
+.active .player-bg-glow { opacity: 0.08; }
+.leading .player-bg-glow { opacity: 0.15; }
 
+/* ── Score ── */
 .score-display {
     font-family: 'Orbitron', monospace;
-    font-size: 8rem;
+    font-size: clamp(5rem, 18vw, 9rem);
     font-weight: 900;
     color: #fff;
-    opacity: 0.8;
+    opacity: 0.9;
+    pointer-events: none;
+    transition: transform 0.1s ease;
+    line-height: 1;
+}
+
+.top-player .score-display    { text-shadow: 0 0 40px rgba(255, 0, 144, 0.6); }
+.bottom-player .score-display  { text-shadow: 0 0 40px rgba(0, 245, 255, 0.6); }
+
+.score-display.score-pop {
+    animation: scorePop 0.15s ease-out;
+}
+
+/* ── Tap hint ── */
+.tap-hint {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(0.8rem, 2.5vw, 1.1rem);
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: #fff;
+    opacity: 0.35;
+    margin-top: 12px;
+    pointer-events: none;
+    text-transform: uppercase;
+    animation: tapHintPulse 1s ease-in-out infinite;
+}
+
+/* ── Leading badge ── */
+.leading-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    padding: 5px 14px;
+    border-radius: 40px;
+    margin-top: 10px;
     pointer-events: none;
 }
 
-.top-player .score-display {
-    text-shadow: 0 0 30px rgba(255, 0, 144, 0.5);
+.top-player .leading-badge {
+    color: var(--pink);
+    border: 1px solid rgba(255, 0, 144, 0.4);
+    background: rgba(255, 0, 144, 0.08);
+    text-shadow: 0 0 10px var(--pink);
+}
+.bottom-player .leading-badge {
+    color: var(--cyan);
+    border: 1px solid rgba(0, 245, 255, 0.4);
+    background: rgba(0, 245, 255, 0.08);
+    text-shadow: 0 0 10px var(--cyan);
 }
 
-.bottom-player .score-display {
-    text-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
-}
+/* ── Rotate for top player ── */
+.rotated { transform: rotate(180deg); }
+.score-display.rotated.score-pop { animation: scorePopRotated 0.15s ease-out; }
 
-.rotated {
-    transform: rotate(180deg);
-}
-
-.tap-hint {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    color: #fff;
-    opacity: 0.5;
-    margin-top: 1rem;
-}
-
-/* Middle UI Overlay */
+/* ── Middle UI ── */
 .middle-ui {
     position: absolute;
     top: 50%;
@@ -88,166 +139,292 @@
     width: 100%;
 }
 
+/* ── Idle overlay ── */
 .overlay-content {
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
-    padding: 3rem;
-    border-radius: 20px;
+    background: rgba(5, 5, 20, 0.92);
+    backdrop-filter: blur(16px);
+    padding: 2.5rem 3rem;
+    border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     pointer-events: auto;
     display: inline-block;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
 }
 
-.middle-ui h1 {
+.idle-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    animation: float 2s ease-in-out infinite;
+}
+
+.overlay-content h1 {
     font-family: 'Orbitron', monospace;
     color: #fff;
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.3);
 }
 
-.middle-ui p {
-    color: rgba(255, 255, 255, 0.6);
+.overlay-content p {
+    font-family: 'Rajdhani', sans-serif;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
     margin-bottom: 2rem;
 }
 
-.start-btn,
-.reset-btn {
-    padding: 1rem 2.5rem;
-    font-size: 1.2rem;
-    font-weight: 700;
-    background: #fff;
-    color: #000;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+.start-btn, .reset-btn {
     font-family: 'Orbitron', monospace;
+    font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    padding: 14px 36px;
+    background: transparent;
+    color: var(--cyan);
+    border: 2px solid var(--cyan);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 14px rgba(0, 245, 255, 0.2), inset 0 0 14px rgba(0, 245, 255, 0.04);
+    transition: color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.start-btn::before, .reset-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--cyan);
+    transform: translateX(-101%);
+    transition: transform 0.22s ease;
+    z-index: -1;
+}
+.start-btn:hover::before, .reset-btn:hover::before { transform: translateX(0); }
+.start-btn:hover, .reset-btn:hover { color: #000; box-shadow: 0 0 24px rgba(0, 245, 255, 0.5); }
+
+/* ── Countdown ── */
+.countdown-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
 }
 
 .countdown-number {
     font-family: 'Orbitron', monospace;
-    font-size: 8rem;
+    font-size: clamp(6rem, 22vw, 10rem);
     font-weight: 900;
     color: #fff;
-    text-shadow: 0 0 50px rgba(255, 255, 255, 0.5);
-    animation: pulse 1s infinite;
+    text-shadow: 0 0 30px var(--cyan), 0 0 80px rgba(0, 245, 255, 0.3);
+    animation: cdPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.4);
+    line-height: 1;
 }
 
+.countdown-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.4em;
+    color: rgba(0, 245, 255, 0.55);
+    margin-top: 12px;
+    text-transform: uppercase;
+}
+
+/* ── GO! flash ── */
+.go-flash {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(5rem, 20vw, 9rem);
+    font-weight: 900;
+    color: var(--green);
+    text-shadow: 0 0 20px var(--green), 0 0 60px rgba(57, 255, 20, 0.5);
+    animation: goFlash 0.7s ease-out forwards;
+    pointer-events: none;
+}
+
+/* ── Timer bar ── */
 .game-timer {
     width: 100%;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.05);
+    height: 56px;
+    background: rgba(255, 255, 255, 0.04);
     position: relative;
     overflow: hidden;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    pointer-events: none;
 }
 
 .timer-bar {
     height: 100%;
-    background: linear-gradient(90deg, #ff0090, #00f5ff);
-    transition: width 0.1s linear;
+    transition: width 0.05s linear, background 0.5s ease;
+}
+
+.timer-bar-glow {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    background: inherit;
+    filter: blur(12px);
+    opacity: 0.4;
+    transition: width 0.05s linear;
+    pointer-events: none;
 }
 
 .timer-text {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     font-family: 'Orbitron', monospace;
     color: #fff;
     font-weight: 900;
-    font-size: 1.5rem;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    font-size: 1.4rem;
+    text-shadow: 0 0 12px rgba(0,0,0,0.8);
+    letter-spacing: 0.1em;
+    pointer-events: none;
 }
 
+/* ── Result overlay ── */
 .result-overlay {
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(15px);
-    padding: 3rem;
-    border-radius: 30px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(5, 5, 20, 0.95);
+    backdrop-filter: blur(18px);
+    padding: 2.5rem 3rem;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     pointer-events: auto;
     display: inline-block;
-    min-width: 300px;
+    min-width: 320px;
+    box-shadow: 0 0 80px rgba(0,0,0,0.7);
+    animation: resultPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.result-top    { border-color: rgba(255, 0, 144, 0.35); box-shadow: 0 0 60px rgba(255, 0, 144, 0.15), 0 0 80px rgba(0,0,0,0.7); }
+.result-bottom { border-color: rgba(0, 245, 255, 0.35); box-shadow: 0 0 60px rgba(0, 245, 255, 0.15), 0 0 80px rgba(0,0,0,0.7); }
+.result-draw   { border-color: rgba(255, 230, 0, 0.35); box-shadow: 0 0 60px rgba(255, 230, 0, 0.1), 0 0 80px rgba(0,0,0,0.7); }
+
+.trophy-icon {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    animation: float 1.5s ease-in-out infinite;
 }
 
 .winner-text {
     font-family: 'Orbitron', monospace;
-    font-size: 2rem;
-    color: #39ff14;
-    margin-bottom: 2rem;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    color: var(--green);
+    margin-bottom: 1.8rem;
+    letter-spacing: 0.1em;
     text-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
 }
 
 .final-scores {
     display: flex;
-    justify-content: space-around;
-    margin-bottom: 2.5rem;
-    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .score-item {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 6px;
 }
 
 .score-item span {
-    font-size: 0.8rem;
-    letter-spacing: 0.2em;
-    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
 }
 
 .score-item strong {
-    font-size: 3rem;
-    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2rem, 7vw, 3rem);
+    font-weight: 900;
+    line-height: 1;
 }
 
+.score-winner strong {
+    text-shadow: 0 0 20px currentColor;
+    transform: scale(1.1);
+    display: inline-block;
+}
+
+.score-divider {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.2);
+    padding-top: 20px;
+}
+
+/* ── Tap effects ── */
+.tap-effect {
+    position: absolute;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: tapPulse 0.5s ease-out forwards;
+    z-index: 50;
+}
+
+.tap-top    { background: radial-gradient(circle, rgba(255,0,144,0.7), rgba(255,0,144,0.1)); box-shadow: 0 0 20px rgba(255,0,144,0.4); }
+.tap-bottom { background: radial-gradient(circle, rgba(0,245,255,0.7), rgba(0,245,255,0.1)); box-shadow: 0 0 20px rgba(0,245,255,0.4); }
+
+/* ── Scanlines ── */
 .scanlines {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: repeating-linear-gradient(0deg,
-            transparent,
-            transparent 2px,
-            rgba(0, 0, 0, 0.1) 2px,
-            rgba(0, 0, 0, 0.1) 4px);
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0, 0, 0, 0.07) 3px,
+        rgba(0, 0, 0, 0.07) 4px
+    );
     z-index: 200;
 }
 
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.1);
-    }
-
-    100% {
-        transform: scale(1);
-    }
+/* ── Keyframes ── */
+@keyframes cdPop {
+    from { transform: scale(1.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
 }
 
-@keyframes tap-pulse {
-    0% {
-        transform: scale(1);
-        opacity: 0.5;
-    }
-
-    100% {
-        transform: scale(1.5);
-        opacity: 0;
-    }
+@keyframes goFlash {
+    0%   { transform: scale(0.6); opacity: 0; }
+    40%  { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1.3); opacity: 0; }
 }
 
-.tap-effect {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 50%;
-    pointer-events: none;
-    animation: tap-pulse 0.4s ease-out forwards;
+@keyframes tapPulse {
+    0%   { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes scorePop {
+    0%   { transform: scale(1.25); }
+    100% { transform: scale(1); }
+}
+
+@keyframes scorePopRotated {
+    0%   { transform: rotate(180deg) scale(1.25); }
+    100% { transform: rotate(180deg) scale(1); }
+}
+
+@keyframes tapHintPulse {
+    0%, 100% { opacity: 0.3; }
+    50%       { opacity: 0.6; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+}
+
+@keyframes resultPop {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
 }
