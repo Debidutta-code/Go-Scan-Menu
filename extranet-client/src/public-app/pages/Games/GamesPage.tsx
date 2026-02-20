@@ -40,6 +40,14 @@ export const GamesPage: React.FC = () => {
             icon: '🧱',
             path: `${getBasePath()}/games/brick-game`,
             color: '#47d1ff'
+        },
+        {
+            id: 'finger-pick',
+            title: 'Random Finger Pick',
+            description: 'Local multiplayer fun! Tap to see who wins.',
+            icon: '👆',
+            path: `${getBasePath()}/games/finger-pick`,
+            color: '#ff4d4d'
         }
     ];
 
