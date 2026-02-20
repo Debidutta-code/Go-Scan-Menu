@@ -56,7 +56,7 @@ export const QRManagement: React.FC = () => {
   const maxLogoSize = qrSize * (logoScale / 100);
 
   // Dummy QR URL for preview
-  const dummyQrUrl = 'https://example.com/menu/restaurant/branch/table-1';
+  const dummyQrUrl = `${window.location.origin}/menu/restaurant/branch/table-1`;
 
   // Apply preset style when selected (simple mode)
   useEffect(() => {

@@ -198,7 +198,7 @@ export class TableService {
 
     // Construct the URL that will be encoded in QR code
     // Frontend will parse this URL to call the API
-    const qrUrl = `${process.env.FRONTEND_URL || 'http://localhost:4015'}/menu/${restaurant.slug}/${branch.code}/${table.qrCode}`;
+    const qrUrl = `${process.env.CLIENT_URL || process.env.FRONTEND_URL || 'http://localhost:4015'}/menu/${restaurant.slug}/${branch.code}/${table.qrCode}`;
 
     return qrUrl;
   }
