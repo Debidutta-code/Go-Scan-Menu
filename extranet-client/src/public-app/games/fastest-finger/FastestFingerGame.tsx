@@ -46,17 +46,13 @@ export const FastestFingerGame: React.FC = () => {
         };
     }, [gameState, countdown, gameTimer]);
 
-    const handleTap = (player: 'top' | 'bottom', e: React.MouseEvent | React.TouchEvent) => {
+    const handleTap = (player: 'top' | 'bottom', x: number, y: number) => {
         if (gameState !== 'PLAYING') return;
 
-        // Get tap position
-        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
-
         const newEffect = {
-            id: Date.now(),
-            x: clientX,
-            y: clientY
+            id: Date.now() + Math.random(),
+            x: x,
+            y: y
         };
 
         setTapEffects(prev => [...prev, newEffect]);
@@ -81,14 +77,12 @@ export const FastestFingerGame: React.FC = () => {
             {/* Top Player Section */}
             <div
                 className={`player-section top-player ${gameState === 'PLAYING' ? 'active' : ''}`}
-                onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleTap('top', e);
+                onPointerDown={(e) => {
+                    // Pointer events handle both touch and mouse
+                    // and allow for multi-touch naturally
+                    handleTap('top', e.clientX, e.clientY);
                 }}
-                onTouchStart={(e) => {
-                    e.preventDefault();
-                    handleTap('top', e);
-                }}
+                style={{ touchAction: 'none' }}
             >
                 <div className="score-display rotated">{scores.top}</div>
                 <div className="tap-hint rotated">{gameState === 'PLAYING' ? 'TAP TAP TAP!' : ''}</div>
@@ -136,14 +130,10 @@ export const FastestFingerGame: React.FC = () => {
             {/* Bottom Player Section */}
             <div
                 className={`player-section bottom-player ${gameState === 'PLAYING' ? 'active' : ''}`}
-                onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleTap('bottom', e);
+                onPointerDown={(e) => {
+                    handleTap('bottom', e.clientX, e.clientY);
                 }}
-                onTouchStart={(e) => {
-                    e.preventDefault();
-                    handleTap('bottom', e);
-                }}
+                style={{ touchAction: 'none' }}
             >
                 <div className="score-display">{scores.bottom}</div>
                 <div className="tap-hint">{gameState === 'PLAYING' ? 'TAP TAP TAP!' : ''}</div>
