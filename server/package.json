@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "prettier": "prettier --write \"src/**/*.{ts,json}\"",
     "tree": "npx tree-node-cli -I \"node_modules|dist\" -S > structure.txt",
-    "build": "tsc"
+    "build": "npm install && tsc"
   },
   "keywords": [],
   "author": "",
