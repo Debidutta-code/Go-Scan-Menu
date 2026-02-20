@@ -43,6 +43,7 @@ import { BrickGame } from '@/public-app/games/brick-game/BrickGame';
 import { FingerPickGame } from './public-app/games/random-finger-pick/FingerPickGame';
 import { FastestFingerGame } from './public-app/games/fastest-finger/FastestFingerGame';
 import { RiseUpGame } from './public-app/games/rise-up/RiseUpGame';
+import { ChidiyaUddGame } from './public-app/games/chidiya-udd/ChidiyaUddGame';
 
 /* ===================== PROTECTED ROUTES ===================== */
 
@@ -274,6 +275,7 @@ function App() {
           <Route path="games/finger-pick" element={<FingerPickGame />} />
           <Route path="games/fastest-finger" element={<FastestFingerGame />} />
           <Route path="games/rise-up" element={<RiseUpGame />} />
+          <Route path="games/chidiya-udd" element={<ChidiyaUddGame />} />
         </Route>
 
         {/* Without QR Code */}
@@ -289,6 +291,7 @@ function App() {
           <Route path="games/finger-pick" element={<FingerPickGame />} />
           <Route path="games/fastest-finger" element={<FastestFingerGame />} />
           <Route path="games/rise-up" element={<RiseUpGame />} />
+          <Route path="games/chidiya-udd" element={<ChidiyaUddGame />} />
         </Route>
 
         {/* ================= 404 ================= */}

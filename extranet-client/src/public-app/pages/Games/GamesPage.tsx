@@ -64,7 +64,15 @@ export const GamesPage: React.FC = () => {
             icon: '🎈',
             path: `${getBasePath()}/games/rise-up`,
             color: '#00ccff'
-        }
+        },
+        {
+            id: 'chidiya-udd',
+            title: 'Chidiya Udd',
+            description: 'Lift if it flies, stay if it doesn\'t! Classic 2-player reflex game.',
+            icon: '🐦',
+            path: `${getBasePath()}/games/chidiya-udd`,
+            color: '#FFD93D'
+        },
     ];
 
     return (
