@@ -273,6 +273,7 @@ function App() {
           <Route path="games/brick-game" element={<BrickGame />} />
           <Route path="games/finger-pick" element={<FingerPickGame />} />
           <Route path="games/fastest-finger" element={<FastestFingerGame />} />
+          <Route path="games/rise-up" element={<RiseUpGame />} />
         </Route>
 
         {/* Without QR Code */}
@@ -287,6 +288,7 @@ function App() {
           <Route path="games/brick-game" element={<BrickGame />} />
           <Route path="games/finger-pick" element={<FingerPickGame />} />
           <Route path="games/fastest-finger" element={<FastestFingerGame />} />
+          <Route path="games/rise-up" element={<RiseUpGame />} />
         </Route>
 
         {/* ================= 404 ================= */}
