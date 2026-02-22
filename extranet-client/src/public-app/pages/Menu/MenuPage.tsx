@@ -4,13 +4,15 @@ import { CategoryGrid } from '../../components/menu/CategoryGrid/CategoryGrid';
 import { CategorySection } from '../../components/menu/CategorySection/CategorySection';
 import { MenuItemDetail } from '../../components/menu/MenuItemDetail/MenuItemDetail';
 import { usePublicApp } from '../../contexts/PublicAppContext';
+import { useCart } from '../../contexts/CartContext';
 import { useScrollSpy } from '../../hooks/useScrollSpy';
-import { MenuItem, Variant } from '../../types/menu.types';
+import { MenuItem, Variant, Addon } from '../../types/menu.types';
 import { ALL_CATEGORIES_ID } from '../../utils/constants';
 import './MenuPage.css';
 
 export const MenuPage: React.FC = () => {
   const { menuData } = usePublicApp();
+  const { addItem } = useCart();
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES_ID);
 
@@ -35,11 +37,17 @@ export const MenuPage: React.FC = () => {
   };
 
   const handleAddClick = (item: MenuItem) => {
-    console.log('Add to cart:', item);
+    // If it has variants, we should open the detail view instead of adding directly
+    if (item.variants && item.variants.length > 0) {
+      setSelectedItem(item);
+    } else {
+      addItem(item);
+    }
   };
 
-  const handleAddToCart = (item: MenuItem, variant?: Variant, quantity?: number) => {
-    console.log('Add to cart:', { item, variant, quantity });
+  const handleAddToCart = (item: MenuItem, variant?: Variant, addons: Addon[] = [], quantity: number = 1) => {
+    addItem(item, variant, addons, quantity);
+    setSelectedItem(null);
   };
 
   return (

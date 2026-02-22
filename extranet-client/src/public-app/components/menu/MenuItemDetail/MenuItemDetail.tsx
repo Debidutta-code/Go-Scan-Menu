@@ -8,7 +8,7 @@ interface MenuItemDetailProps {
   currency: string;
   isOpen: boolean;
   onClose: () => void;
-  onAddToCart: (item: MenuItem, variant?: Variant, quantity?: number) => void;
+  onAddToCart: (item: MenuItem, variant?: Variant, addons?: any[], quantity?: number) => void;
 }
 
 export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
@@ -28,7 +28,7 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
     item.images && item.images.length > 0 ? item.images : item.image ? [item.image] : [];
 
   const handleAddToCart = () => {
-    onAddToCart(item, selectedVariant, quantity);
+    onAddToCart(item, selectedVariant, [], quantity);
     onClose();
   };
 
@@ -65,9 +65,8 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
                   {images.map((_, index) => (
                     <button
                       key={index}
-                      className={`menu-item-details-image-indicator ${
-                        index === currentImageIndex ? 'active' : ''
-                      }`}
+                      className={`menu-item-details-image-indicator ${index === currentImageIndex ? 'active' : ''
+                        }`}
                       onClick={() => setCurrentImageIndex(index)}
                       aria-label={`View image ${index + 1}`}
                     />
@@ -138,9 +137,8 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
                   {item.variants.map((variant) => (
                     <button
                       key={variant._id}
-                      className={`menu-item-details-variant-option ${
-                        selectedVariant?._id === variant._id ? 'active' : ''
-                      }`}
+                      className={`menu-item-details-variant-option ${selectedVariant?._id === variant._id ? 'active' : ''
+                        }`}
                       onClick={() => setSelectedVariant(variant)}
                     >
                       <span className="menu-item-details-variant-name">{variant.name}</span>
