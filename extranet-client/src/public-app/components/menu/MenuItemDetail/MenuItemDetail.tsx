@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MenuItem, Variant } from '../../../types/menu.types';
-import { formatPrice, getSpiceLevelEmoji } from '../../../utils/formatters';
+import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '../../../utils/formatters';
 import './MenuItemDetail.css';
 
 interface MenuItemDetailProps {
@@ -78,7 +78,14 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
 
           <div className="menu-item-details-info">
             <div className="menu-item-details-title-section">
-              <h2 className="menu-item-details-title">{item.name}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 className="menu-item-details-title">{item.name}</h2>
+                {item.dietaryType && (
+                  <span title={item.dietaryType} style={{ fontSize: '20px' }}>
+                    {getDietaryIcon(item.dietaryType)}
+                  </span>
+                )}
+              </div>
               {item.tags && item.tags.length > 0 && (
                 <div className="menu-item-details-tags">
                   {item.tags.map((tag, idx) => (

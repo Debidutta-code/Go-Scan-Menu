@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { usePublicApp } from '../../contexts/PublicAppContext';
 import { useCart } from '../../contexts/CartContext';
 import { Trash2, Plus, Minus, ShoppingBag, AlertCircle } from 'lucide-react';
+import { getDietaryIcon } from '../../utils/formatters';
 import './CartPage.css';
 
 export const CartPage: React.FC = () => {
@@ -69,7 +70,12 @@ export const CartPage: React.FC = () => {
             <div className="cart-item-info">
               <div className="cart-item-header">
                 <div style={{ minWidth: 0 }}>
-                  <h4 className="cart-item-name">{item.menuItem.name}</h4>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {item.menuItem.dietaryType && (
+                      <span style={{ fontSize: '14px' }}>{getDietaryIcon(item.menuItem.dietaryType)}</span>
+                    )}
+                    <h4 className="cart-item-name">{item.menuItem.name}</h4>
+                  </div>
                   {(item.variant || item.addons.length > 0) && (
                     <div className="cart-item-details">
                       {item.variant && <span>{item.variant.name}</span>}

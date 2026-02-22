@@ -197,6 +197,7 @@ export class PublicMenuService {
           customizations: item.customizations,
           isAvailable: item.isAvailable,
           availableQuantity: item.availableQuantity,
+          dietaryType: item.dietaryType,
         })),
       };
     });

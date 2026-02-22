@@ -16,6 +16,7 @@ export interface MenuItem {
   customizations?: Customization[];
   isAvailable: boolean;
   availableQuantity?: number;
+  dietaryType?: 'VEG' | 'NON_VEG' | 'EGG' | 'JAIN' | 'VEGAN' | 'GLUTEN_FREE';
 }
 
 export interface Variant {

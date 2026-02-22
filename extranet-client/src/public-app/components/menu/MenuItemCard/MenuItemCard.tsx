@@ -1,6 +1,6 @@
 import React from 'react';
 import { MenuItem } from '../../../types/menu.types';
-import { formatPrice, getSpiceLevelEmoji } from '../../../utils/formatters';
+import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '../../../utils/formatters';
 import { useCart } from '../../../contexts/CartContext';
 import './MenuItemCard.css';
 
@@ -60,6 +60,11 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
         ) : (
           <div className="menu-item-card-image-placeholder-horizontal">
             <span>🍽️</span>
+          </div>
+        )}
+        {item.dietaryType && (
+          <div className={`menu-item-dietary-badge ${item.dietaryType.toLowerCase()}`}>
+            {getDietaryIcon(item.dietaryType)}
           </div>
         )}
         {!item.isAvailable && (

@@ -19,3 +19,14 @@ export const getSpiceLevelEmoji = (spiceLevel?: string): string => {
   };
   return spiceLevel ? levels[spiceLevel] || '' : '';
 };
+export const getDietaryIcon = (dietaryType?: string): string => {
+  const icons: { [key: string]: string } = {
+    VEG: '🟢',
+    NON_VEG: '🔴',
+    EGG: '🥚',
+    JAIN: '🕉️',
+    VEGAN: '🌱',
+    GLUTEN_FREE: '🌾',
+  };
+  return dietaryType ? icons[dietaryType] || '' : '';
+};
