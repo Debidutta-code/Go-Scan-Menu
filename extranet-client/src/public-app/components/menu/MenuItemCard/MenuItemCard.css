@@ -159,7 +159,8 @@
 }
 
 .menu-item-card-quantity-btn-minus,
-.menu-item-card-quantity-btn-plus {
+.menu-item-card-quantity-btn-plus,
+.menu-item-card-add-btn {
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -175,7 +176,8 @@
   transition: all 0.2s;
 }
 
-.menu-item-card-quantity-btn-plus {
+.menu-item-card-quantity-btn-plus,
+.menu-item-card-add-btn {
   background-color: #1a202c;
   color: #ffffff;
   border-color: #1a202c;
@@ -219,7 +221,8 @@
   }
 
   .menu-item-card-quantity-btn-minus,
-  .menu-item-card-quantity-btn-plus {
+  .menu-item-card-quantity-btn-plus,
+  .menu-item-card-add-btn {
     width: 24px;
     height: 24px;
     font-size: 0.875rem;
