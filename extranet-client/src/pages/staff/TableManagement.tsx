@@ -1,5 +1,5 @@
 // src/pages/staff/TableManagement.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStaffAuth } from '../../contexts/StaffAuthContext';
 import { TableService } from '../../services/table.service';
@@ -29,6 +29,12 @@ export const TableManagement: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [bulkCreateModalOpen, setBulkCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+
+  // Hover state
+  const [hoveredTable, setHoveredTable] = useState<Table | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isOverCard = useRef(false);
 
   useEffect(() => {
     if (staff && token && branchId) {
@@ -81,6 +87,7 @@ export const TableManagement: React.FC = () => {
       if (response.success) {
         alert('Table deleted successfully');
         loadData();
+        setHoveredTable(null);
       }
     } catch (err: any) {
       alert(err.message || 'Failed to delete table');
@@ -99,6 +106,10 @@ export const TableManagement: React.FC = () => {
       );
       if (response.success) {
         loadData();
+        // Update local state for immediate feedback in hover card
+        if (hoveredTable && hoveredTable._id === tableId) {
+          setHoveredTable({ ...hoveredTable, status: newStatus });
+        }
       }
     } catch (err: any) {
       alert(err.message || 'Failed to update table status');
@@ -106,14 +117,15 @@ export const TableManagement: React.FC = () => {
   };
 
   const handleShowQR = (table: Table) => {
-    console.log("table data is ----- ", table);
     setSelectedTable(table);
     setQrModalOpen(true);
+    setHoveredTable(null);
   };
 
   const handleEdit = (table: Table) => {
     setSelectedTable(table);
     setEditModalOpen(true);
+    setHoveredTable(null);
   };
 
   const handleLogout = () => {
@@ -169,6 +181,26 @@ export const TableManagement: React.FC = () => {
     });
 
     return grouped;
+  };
+
+  const handleMouseEnterCube = (e: React.MouseEvent, table: Table) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setMousePos({ x: e.clientX, y: e.clientY });
+    setHoveredTable(table);
+  };
+
+  const handleMouseMoveCube = (e: React.MouseEvent) => {
+    if (!isOverCard.current) {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleMouseLeaveCube = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      if (!isOverCard.current) {
+        setHoveredTable(null);
+      }
+    }, 100);
   };
 
   const statusCounts = getStatusCounts();
@@ -237,7 +269,7 @@ export const TableManagement: React.FC = () => {
         <div className="table-list-panel">
           <div className="panel-header">
             <h2 className="panel-title">
-              Tables ({filteredTables.length})
+              Overall Statistics ({filteredTables.length} Tables Filtered)
             </h2>
           </div>
 
@@ -265,10 +297,10 @@ export const TableManagement: React.FC = () => {
                   <div key={location} className="location-group">
                     <div className="location-header">
                       <h3 className="location-name">
-                        📍 {location.charAt(0).toUpperCase() + location.slice(1)}
+                        {location.charAt(0).toUpperCase() + location.slice(1)}
                       </h3>
                       <span className="location-count">
-                        {groupedTables[location].length} {groupedTables[location].length === 1 ? 'table' : 'tables'}
+                        {groupedTables[location].length} Tables
                       </span>
                     </div>
 
@@ -276,69 +308,13 @@ export const TableManagement: React.FC = () => {
                       {groupedTables[location].map((table) => (
                         <div
                           key={table._id}
-                          className={`table-card-compact status-${table.status}`}
-                          data-testid={`table-card-${table._id}`}
+                          className={`table-cube status-${table.status}`}
+                          onMouseEnter={(e) => handleMouseEnterCube(e, table)}
+                          onMouseMove={handleMouseMoveCube}
+                          onMouseLeave={handleMouseLeaveCube}
+                          data-testid={`table-cube-${table._id}`}
                         >
-                          <div className="table-card-main">
-                            <div className="table-card-top">
-                              <div className="table-number-compact" data-testid="table-number">
-                                {table.tableNumber}
-                              </div>
-                              <span className={`status-dot status-${table.status}`} title={table.status}></span>
-                            </div>
-
-                            <div className="table-capacity">
-                              {Array.from({ length: table.capacity }, (_, i) => (
-                                <span key={i} className="person-icon">👤</span>
-                              ))}
-                            </div>
-
-                            <select
-                              className="status-select-compact"
-                              value={table.status}
-                              onChange={(e) =>
-                                handleUpdateStatus(table._id, e.target.value as Table['status'])
-                              }
-                              data-testid="status-select"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <option value="available">Available</option>
-                              <option value="occupied">Occupied</option>
-                              <option value="reserved">Reserved</option>
-                              <option value="maintenance">Maintenance</option>
-                            </select>
-                          </div>
-
-                          <div className="table-card-actions">
-                            <Button
-                              variant="outline"
-                              onClick={() => handleShowQR(table)}
-                              data-testid="show-qr-button"
-                              size="sm"
-                            >
-                              QR
-                            </Button>
-                            {canManageTables() && (
-                              <Button
-                                variant="outline"
-                                onClick={() => handleEdit(table)}
-                                data-testid="edit-table-button"
-                                size="sm"
-                              >
-                                Edit
-                              </Button>
-                            )}
-                            {canDeleteTables() && (
-                              <Button
-                                variant="danger"
-                                onClick={() => handleDeleteTable(table._id, table.tableNumber)}
-                                data-testid="delete-table-button"
-                                size="sm"
-                              >
-                                Del
-                              </Button>
-                            )}
-                          </div>
+                          {table.tableNumber}
                         </div>
                       ))}
                     </div>
@@ -349,6 +325,85 @@ export const TableManagement: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Interactive Hover Card */}
+      {hoveredTable && (
+        <div
+          className="table-hover-card"
+          style={{
+            left: mousePos.x,
+            top: mousePos.y
+          }}
+          onMouseEnter={() => {
+            isOverCard.current = true;
+            if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+          }}
+          onMouseLeave={() => {
+            isOverCard.current = false;
+            setHoveredTable(null);
+          }}
+        >
+          <div className="hover-card-header">
+            <h4 className="hover-card-title">Table {hoveredTable.tableNumber}</h4>
+            <span className={`hover-card-status-badge status-${hoveredTable.status}`}>
+              {hoveredTable.status}
+            </span>
+          </div>
+          <div className="hover-card-body">
+            <div className="hover-card-details">
+              <div className="detail-item">
+                <span className="detail-label">Capacity</span>
+                <span className="detail-value">{hoveredTable.capacity} Persons</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Location</span>
+                <span className="detail-value">{hoveredTable.location}</span>
+              </div>
+            </div>
+
+            <select
+              className="hover-card-status-select"
+              value={hoveredTable.status}
+              onChange={(e) =>
+                handleUpdateStatus(hoveredTable._id, e.target.value as Table['status'])
+              }
+            >
+              <option value="available">Set Available</option>
+              <option value="occupied">Set Occupied</option>
+              <option value="reserved">Set Reserved</option>
+              <option value="maintenance">Set Maintenance</option>
+            </select>
+
+            <div className="hover-card-actions">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleShowQR(hoveredTable)}
+              >
+                QR
+              </Button>
+              {canManageTables() && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEdit(hoveredTable)}
+                >
+                  Edit
+                </Button>
+              )}
+              {canDeleteTables() && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleDeleteTable(hoveredTable._id, hoveredTable.tableNumber)}
+                >
+                  Del
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       {qrModalOpen && selectedTable && (
