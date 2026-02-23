@@ -21,6 +21,7 @@ import {
 } from '../../types/menu.types';
 import { InputField } from '../../components/ui/InputField';
 import { Button } from '../../components/ui/Button';
+import { Switch } from '../../components/ui/Switch';
 import './AddEditMenuItem.css';
 
 export const AddEditMenuItem: React.FC = () => {
@@ -303,9 +304,9 @@ export const AddEditMenuItem: React.FC = () => {
         image: formData.image.trim() || undefined,
         images: formData.images
           ? formData.images
-              .split(',')
-              .map((img) => img.trim())
-              .filter(Boolean)
+            .split(',')
+            .map((img) => img.trim())
+            .filter(Boolean)
           : [],
         price: parseFloat(formData.price),
         discountPrice: formData.discountPrice ? parseFloat(formData.discountPrice) : undefined,
@@ -314,9 +315,9 @@ export const AddEditMenuItem: React.FC = () => {
         spiceLevel: formData.spiceLevel || undefined,
         tags: formData.tags
           ? formData.tags
-              .split(',')
-              .map((t) => t.trim())
-              .filter(Boolean)
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean)
           : [],
         allergens: selectedAllergens,
         nutritionTags: selectedNutritionTags,
@@ -968,17 +969,13 @@ export const AddEditMenuItem: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  name="isAvailable"
-                  checked={formData.isAvailable}
-                  onChange={handleChange}
-                  disabled={loading}
-                  className="form-checkbox"
-                />
-                <span>Available for ordering</span>
-              </label>
+              <label className="form-label">Availability</label>
+              <Switch
+                id="isAvailable"
+                checked={formData.isAvailable}
+                onChange={() => setFormData((prev) => ({ ...prev, isAvailable: !prev.isAvailable }))}
+                label={formData.isAvailable ? 'Available for ordering' : 'Unavailable'}
+              />
             </div>
 
             <div className="form-actions">

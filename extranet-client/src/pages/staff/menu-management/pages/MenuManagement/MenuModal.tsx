@@ -21,6 +21,7 @@ import {
 import { InputField } from '../../../../../components/ui/InputField';
 import { Button } from '../../../../../components/ui/Button';
 import { MenuPreview } from '../../components/MenuPreview/MenuPreview';
+import { Switch } from '../../../../../components/ui/Switch';
 import './MenuModal.css';
 
 interface MenuModalProps {

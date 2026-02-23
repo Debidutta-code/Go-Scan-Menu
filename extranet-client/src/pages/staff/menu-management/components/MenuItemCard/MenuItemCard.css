@@ -58,30 +58,6 @@
   line-height: 1.4;
 }
 
-.availability-toggle {
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  flex-shrink: 0;
-}
-
-.availability-toggle.available {
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #d1fae5;
-}
-
-.availability-toggle.unavailable {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fee2e2;
-}
 
 .item-description {
   font-size: 0.875rem;

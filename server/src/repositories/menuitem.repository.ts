@@ -102,7 +102,6 @@ export class MenuItemRepository {
     const query: any = {
       restaurantId,
       isActive: true,
-      isAvailable: true,
       $or: [
         // Restaurant-wide items (no branchId)
         { scope: 'restaurant', branchId: { $exists: false } },

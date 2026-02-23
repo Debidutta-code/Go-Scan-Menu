@@ -3,6 +3,7 @@ import { CategoryId, getCategoryName } from '../../utils/category-helpers';
 import './MenuItemCard.css';
 import { MenuItem } from '../../types/menu.types';
 import { Button } from '@/components/ui/Button';
+import { Switch } from '@/components/ui/Switch';
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -32,13 +33,12 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           <h3 className="item-name" data-testid="item-name">
             {item.name}
           </h3>
-          <button
-            className={`availability-toggle ${item.isAvailable ? 'available' : 'unavailable'}`}
-            onClick={() => onToggleAvailability(item._id, item.isAvailable)}
-            data-testid="toggle-availability"
-          >
-            {item.isAvailable ? 'Available' : 'Unavailable'}
-          </button>
+          <Switch
+            id="toggle-availability"
+            checked={item.isAvailable}
+            onChange={() => onToggleAvailability(item._id, item.isAvailable)}
+            label={item.isAvailable ? 'Available' : 'Unavailable'}
+          />
         </div>
 
         <p className="item-description">{item.description || 'No description'}</p>
