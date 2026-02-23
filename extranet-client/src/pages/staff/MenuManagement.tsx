@@ -18,7 +18,16 @@ export const MenuManagement: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
-    const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+
+    // Per-item debounce control
+    const debounceRef = React.useRef<{ [key: string]: any }>({});
+
+    useEffect(() => {
+        return () => {
+            // Cleanup timeouts on unmount
+            Object.values(debounceRef.current).forEach(clearTimeout);
+        };
+    }, []);
 
     useEffect(() => {
         if (staff && token) {
@@ -67,38 +76,46 @@ export const MenuManagement: React.FC = () => {
         }
     };
 
-    const handleToggleAvailability = async (itemId: string, currentStatus: boolean) => {
-        if (!staff || !token || processingIds.has(itemId)) return;
+    const handleToggleAvailability = (itemId: string, currentStatus: boolean) => {
+        if (!staff || !token) return;
 
-        // Optimistic Update
-        const previousMenuItems = [...menuItems];
+        const newStatus = !currentStatus;
+
+        // 1. Optimistic Update
         setMenuItems((prev) =>
             prev.map((item) =>
-                item._id === itemId ? { ...item, isAvailable: !currentStatus } : item
+                item._id === itemId ? { ...item, isAvailable: newStatus } : item
             )
         );
-        setProcessingIds((prev) => new Set(prev).add(itemId));
 
-        try {
-            const response = await MenuService.updateAvailability(
-                token,
-                staff.restaurantId._id,
-                itemId,
-                !currentStatus
-            );
-            if (!response.success) {
-                throw new Error('Failed to update availability');
-            }
-        } catch (err: any) {
-            setMenuItems(previousMenuItems);
-            alert(err.message || 'Failed to update availability');
-        } finally {
-            setProcessingIds((prev) => {
-                const next = new Set(prev);
-                next.delete(itemId);
-                return next;
-            });
+        // 2. Debounce API Call
+        if (debounceRef.current[itemId]) {
+            clearTimeout(debounceRef.current[itemId]);
         }
+
+        debounceRef.current[itemId] = setTimeout(async () => {
+            try {
+                const response = await MenuService.updateAvailability(
+                    token,
+                    staff.restaurantId._id,
+                    itemId,
+                    newStatus
+                );
+                if (!response.success) {
+                    throw new Error('Failed to update availability');
+                }
+            } catch (err: any) {
+                // Rollback
+                setMenuItems((prev) =>
+                    prev.map((item) =>
+                        item._id === itemId ? { ...item, isAvailable: currentStatus } : item
+                    )
+                );
+                alert(err.message || 'Failed to update availability');
+            } finally {
+                delete debounceRef.current[itemId];
+            }
+        }, 500);
     };
 
     const handleLogout = () => {
@@ -204,7 +221,7 @@ export const MenuManagement: React.FC = () => {
                 ) : (
                     <div className="menu-items-grid">
                         {filteredMenuItems.map((item) => (
-                            <div key={item._id} className={`menu-item-card ${processingIds.has(item._id) ? 'processing' : ''}`} data-testid={`menu-item-${item._id}`}>
+                            <div key={item._id} className="menu-item-card" data-testid={`menu-item-${item._id}`}>
                                 {/* Image handling - currently empty array from your example */}
                                 {item.images?.length > 0 && (
                                     <div className="item-image-container">
@@ -221,7 +238,6 @@ export const MenuManagement: React.FC = () => {
                                             className={`availability-toggle ${item.isAvailable ? 'available' : 'unavailable'}`}
                                             onClick={() => handleToggleAvailability(item._id, item.isAvailable)}
                                             data-testid="toggle-availability"
-                                            disabled={processingIds.has(item._id)}
                                         >
                                             {item.isAvailable ? 'Available' : 'Unavailable'}
                                         </button>

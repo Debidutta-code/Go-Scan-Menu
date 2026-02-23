@@ -22,7 +22,16 @@ export const MenuManagement: React.FC = () => {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMenuItemId, setEditingMenuItemId] = useState<string | null>(null);
-  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+
+  // Per-item debounce control
+  const debounceRef = React.useRef<{ [key: string]: any }>({});
+
+  useEffect(() => {
+    return () => {
+      // Cleanup timeouts on unmount
+      Object.values(debounceRef.current).forEach(clearTimeout);
+    };
+  }, []);
 
   useEffect(() => {
     if (staff && token) {
@@ -67,41 +76,47 @@ export const MenuManagement: React.FC = () => {
     }
   };
 
-  const handleToggleAvailability = async (itemId: string, currentStatus: boolean) => {
-    if (!staff || !token || processingIds.has(itemId)) return;
+  const handleToggleAvailability = (itemId: string, currentStatus: boolean) => {
+    if (!staff || !token) return;
 
-    // Optimistic Update
-    const previousMenuItems = [...menuItems];
+    const newStatus = !currentStatus;
+
+    // 1. Optimistic Update (Immediate UI response)
     setMenuItems((prev) =>
       prev.map((item) =>
-        item._id === itemId ? { ...item, isAvailable: !currentStatus } : item
+        item._id === itemId ? { ...item, isAvailable: newStatus } : item
       )
     );
-    setProcessingIds((prev) => new Set(prev).add(itemId));
 
-    try {
-      const response = await MenuAPI.updateAvailability(
-        token,
-        staff.restaurantId._id,
-        itemId,
-        !currentStatus
-      );
-
-      if (!response.success) {
-        throw new Error('Failed to update availability');
-      }
-      // Successfully updated, no need to refresh the whole page
-    } catch (err: any) {
-      // Rollback on failure
-      setMenuItems(previousMenuItems);
-      alert(err.message || 'Failed to update availability');
-    } finally {
-      setProcessingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(itemId);
-        return next;
-      });
+    // 2. Debounce API Call
+    if (debounceRef.current[itemId]) {
+      clearTimeout(debounceRef.current[itemId]);
     }
+
+    debounceRef.current[itemId] = setTimeout(async () => {
+      try {
+        const response = await MenuAPI.updateAvailability(
+          token,
+          staff.restaurantId._id,
+          itemId,
+          newStatus
+        );
+
+        if (!response.success) {
+          throw new Error('Failed to update availability');
+        }
+      } catch (err: any) {
+        // Rollback on absolute failure
+        setMenuItems((prev) =>
+          prev.map((item) =>
+            item._id === itemId ? { ...item, isAvailable: currentStatus } : item
+          )
+        );
+        alert(err.message || 'Failed to update availability');
+      } finally {
+        delete debounceRef.current[itemId];
+      }
+    }, 500); // 500ms debounce
   };
 
   const handleLogout = () => {
@@ -214,7 +229,6 @@ export const MenuManagement: React.FC = () => {
                     onEdit={handleEditMenuItem}
                     onDelete={handleDeleteMenuItem}
                     onToggleAvailability={handleToggleAvailability}
-                    isProcessing={processingIds.has(item._id)}
                   />
                 ))}
               </div>

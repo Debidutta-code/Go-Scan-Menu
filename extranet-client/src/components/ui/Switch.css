@@ -6,12 +6,6 @@
     user-select: none;
 }
 
-.switch-container.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
 .switch-track {
     position: relative;
     width: 44px;
