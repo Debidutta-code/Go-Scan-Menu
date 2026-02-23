@@ -68,7 +68,7 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     icon: '🍽️',
     description: 'Showcase your signature dish',
     category: 'modern',
-    bgImage: 'https://images.unsplash.com/photo-1631615535272-1106aa1b3854?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cmVzdGF1cmFudCUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D',
+    bgImage: 'https://static.vecteezy.com/system/resources/thumbnails/056/523/381/small/inviting-atmosphere-with-a-rustic-wooden-table-and-bokeh-lights-for-product-display-or-restaurant-background-photo.jpeg',
     textColor: '#ffffff',
     headingFont: 'Arial Black, sans-serif',
     bodyFont: 'Arial, sans-serif',
