@@ -50,17 +50,7 @@ export const TableManagement: React.FC = () => {
     setError('');
 
     try {
-      // Load branch details
-      const branchResponse = await BranchService.getBranch(
-        token,
-        staff.restaurantId,
-        branchId
-      );
-      if (branchResponse.success && branchResponse.data) {
-        setBranch(branchResponse.data);
-      }
-
-      // Load tables
+      // Load tables (now includes branch details)
       const tablesResponse = await TableService.getTables(
         token,
         staff.restaurantId,
@@ -68,8 +58,12 @@ export const TableManagement: React.FC = () => {
         1,
         1000
       );
+
       if (tablesResponse.success && tablesResponse.data) {
         setTables(tablesResponse.data.tables || []);
+        if (tablesResponse.data.branch) {
+          setBranch(tablesResponse.data.branch);
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load table data');

@@ -49,10 +49,13 @@ export interface UpdateTablePayload {
 
 export interface TableListResponse {
   tables: Table[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  branch?: Branch;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export interface BranchListResponse {

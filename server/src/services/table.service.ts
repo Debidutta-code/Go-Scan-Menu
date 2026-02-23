@@ -74,7 +74,15 @@ export class TableService {
   }
 
   async getTablesByBranch(branchId: string, page: number = 1, limit: number = 10, filter?: any) {
-    return this.tableRepo.findByBranch(branchId, filter, page, limit);
+    const [tablesData, branch] = await Promise.all([
+      this.tableRepo.findByBranch(branchId, filter, page, limit),
+      this.branchRepo.findById(branchId),
+    ]);
+
+    return {
+      ...tablesData,
+      branch,
+    };
   }
 
   async getTablesByRestaurant(

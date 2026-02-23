@@ -77,7 +77,7 @@ export const BranchSelection: React.FC = () => {
               1000
             );
             if (tablesResponse.success && tablesResponse.data) {
-              counts[branch._id] = tablesResponse.data.total || 0;
+              counts[branch._id] = tablesResponse.data.pagination?.total || 0;
             }
           } catch (err) {
             counts[branch._id] = 0;
