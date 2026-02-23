@@ -220,12 +220,35 @@
 }
 
 @keyframes cube-pulse {
-  0% { transform: scale(1); opacity: 0.4; }
-  50% { transform: scale(1.05); opacity: 0.1; }
-  100% { transform: scale(1); opacity: 0.4; }
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
 }
 
 /* Hover Card */
+@keyframes card-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .table-hover-card {
   position: fixed;
   z-index: 1000;
@@ -234,15 +257,9 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
   width: 280px;
   padding: 0;
-  transform: translate(15px, 15px);
   pointer-events: auto;
   overflow: hidden;
   animation: card-appear 0.2s ease-out;
-}
-
-@keyframes card-appear {
-  from { opacity: 0; transform: translate(15px, 20px) scale(0.95); }
-  to { opacity: 1; transform: translate(15px, 15px) scale(1); }
 }
 
 .hover-card-header {
@@ -269,10 +286,25 @@
   letter-spacing: 0.05em;
 }
 
-.hover-card-status-badge.status-available { background: #dcfce7; color: #15803d; }
-.hover-card-status-badge.status-occupied { background: #fee2e2; color: #b91c1c; }
-.hover-card-status-badge.status-reserved { background: #fef3c7; color: #b45309; }
-.hover-card-status-badge.status-maintenance { background: #f1f5f9; color: #475569; }
+.hover-card-status-badge.status-available {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.hover-card-status-badge.status-occupied {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.hover-card-status-badge.status-reserved {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.hover-card-status-badge.status-maintenance {
+  background: #f1f5f9;
+  color: #475569;
+}
 
 .hover-card-body {
   padding: 16px 20px;
@@ -292,8 +324,15 @@
   font-size: 0.85rem;
 }
 
-.detail-label { color: #64748b; font-weight: 500; }
-.detail-value { color: #1e293b; font-weight: 600; }
+.detail-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detail-value {
+  color: #1e293b;
+  font-weight: 600;
+}
 
 .hover-card-status-select {
   width: 100%;

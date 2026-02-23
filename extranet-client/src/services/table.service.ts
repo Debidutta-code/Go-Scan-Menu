@@ -130,8 +130,9 @@ export class TableService {
     payload: UpdateTablePayload
   ): Promise<ApiResponse<Table>> {
     try {
+      const rid = typeof restaurantId === 'string' ? restaurantId : restaurantId._id;
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}`,
+        `${env.API_BASE_URL}/restaurants/${rid}/tables/${tableId}`,
         {
           method: 'PUT',
           headers: this.getHeaders(token),
@@ -158,8 +159,9 @@ export class TableService {
     status: Table['status']
   ): Promise<ApiResponse<Table>> {
     try {
+      const rid = typeof restaurantId === 'string' ? restaurantId : restaurantId._id;
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/status`,
+        `${env.API_BASE_URL}/restaurants/${rid}/tables/${tableId}/status`,
         {
           method: 'PATCH',
           headers: this.getHeaders(token),

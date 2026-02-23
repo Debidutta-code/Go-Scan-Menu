@@ -185,15 +185,33 @@ export const TableManagement: React.FC = () => {
 
   const handleMouseEnterCube = (e: React.MouseEvent, table: Table) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    setMousePos({ x: e.clientX, y: e.clientY });
+
+    // Get the bounding box of the hovered element
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+
+    // Initial suggested position (below and slightly to the right)
+    let x = rect.left + 15;
+    let y = rect.bottom + 10;
+
+    // Viewport boundary check
+    const cardWidth = 280;
+    const cardHeight = 220; // Estimated height
+
+    // Flip if going off right side
+    if (x + cardWidth > window.innerWidth) {
+      x = rect.right - cardWidth - 15;
+    }
+
+    // Flip if going off bottom side
+    if (y + cardHeight > window.innerHeight) {
+      y = rect.top - cardHeight - 10;
+    }
+
+    setMousePos({ x, y });
     setHoveredTable(table);
   };
 
-  const handleMouseMoveCube = (e: React.MouseEvent) => {
-    if (!isOverCard.current) {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    }
-  };
+  // Remove handleMouseMoveCube since we want static positioning
 
   const handleMouseLeaveCube = () => {
     hoverTimeoutRef.current = setTimeout(() => {
@@ -310,7 +328,6 @@ export const TableManagement: React.FC = () => {
                           key={table._id}
                           className={`table-cube status-${table.status}`}
                           onMouseEnter={(e) => handleMouseEnterCube(e, table)}
-                          onMouseMove={handleMouseMoveCube}
                           onMouseLeave={handleMouseLeaveCube}
                           data-testid={`table-cube-${table._id}`}
                         >
