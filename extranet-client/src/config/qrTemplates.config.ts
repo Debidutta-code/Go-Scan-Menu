@@ -68,7 +68,7 @@ export const QR_TEMPLATES: Record<string, TemplateConfig> = {
     icon: '🍽️',
     description: 'Showcase your signature dish',
     category: 'modern',
-    bgImage: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
+    bgImage: 'https://lh3.googleusercontent.com/rd-gg-dl/AOI_d__4F-wdQZugrqyeEcdLYeW5lgHuaZTQYvad-lVCutiK1_OlQ3gupqkvT577twjXUoQRdrhc4daCoyZLFsoi6sGih2E_51ygesejwPmnzvjyspRacAyxlYjMbWwTunqlsHLV6BdJ_NGBhwYeuGKcZ2kVNfCYmCoXgMc_xVgMQHf3jrlJKYtHf-bInPD8zT3dyr1mdAAbBHPxI2gmNVRpUcNFdSn_NJiIv5DV01wlkacsKfVNJhNkIQUkI9qUT2KLsRXQunIMkCbbbs8f4woU-ZAmeQddkfvXF_iQL-IL9nna2pExyIV2iY7yyHCmHIp-nNrShUjqdhTmNuX-xK6V7_Z8mRSB5xptzfH2k0OqwbndZ0ldegvE-XEVO8WY3-p2f19DPdrTTVwLf-o2IcZx1ByGfcuMeSH9O7o2OhwNnWhSW_OuasSjvzySNrPRiB7A7dcBErci-dnJyPxURwy8m5bdGG4-NObyEE67VKy0oQKG76azbYVavsyHv5k1IIAF4yjX6U3WizfLjPmJ96VbuxdFrNvW2Ejd64-SOQQctYhQ8-S2tnb5XNC3Sga1Bg8AGEkUwMGjY4l8crS6X6V95s1I5F44f9sg1UKdXff71ZFIN9gK1vKlNyh9IbhrJONIWfqK2uV1pj494a9aG0bUo3D6H7jaKlbGTyOm8mx47vgVxKCsf9FMof9nfKOL-656vcNFRsSkpX-fu7Zt5-pnT64y5hiKUIDEbLLdUXDhj10PyysIGpS8MROIjRUhJSus68r-kKrZSwopLpwkctPFzBgACEdgYtpfJW-LIUils32_pa5yebJxTdMwRg14f0onk0ezuBXE-shRLROh-85djPJTvQ5nSPmbSIByuxSbbO_WLEgzCJp1dJqhDdOzXl3c807446mHieuwXbQ6btDAGNHdwK3IWB79-s3P4YDVQmVih2YdyKRsdFfPB4W9woyIxylwU9DzAEjCalSkCAtEfA1LSBmljWHu4cdTz2u95MzoPuwfSwQj23LAryw6ps26RNLDc9udkBQG6FjcHKQ-96JnFm-EG8dmZRz1nsjxiniPrd406TUvh7ERnM7ugCIwPsW9ueYRlukJ0JXHMkVkXCkXI_TFS_ez02CLVu0co2ASmrmb3uIDDA3sMUYdmgKswrwBnrjHsIA2wENqHuDPlKLo6PuiQ2VhtxLWyfGEWzvqEdqN9_PP=s1024-rj',
     textColor: '#ffffff',
     headingFont: 'Arial Black, sans-serif',
     bodyFont: 'Arial, sans-serif',
