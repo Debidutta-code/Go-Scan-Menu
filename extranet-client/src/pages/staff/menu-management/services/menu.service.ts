@@ -45,27 +45,35 @@ export class MenuService {
     }
   }
 
+  private static getRestaurantId(restaurantId: any): string {
+    if (!restaurantId) return '';
+    if (typeof restaurantId === 'string') return restaurantId;
+    return restaurantId._id || restaurantId.id || '';
+  }
+
   // Category APIs
   static async getCategories(token: string, restaurantId: any) {
-    console.log("category id", restaurantId._id);
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<CategoryListResponse>(
-      `/restaurants/${restaurantId._id}/categories`,
+      `/restaurants/${rId}/categories`,
       {},
       token
     );
   }
 
   static async getCategory(token: string, restaurantId: any, categoryId: string) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<Category>(
-      `/restaurants/${restaurantId._id}/categories/${categoryId}`,
+      `/restaurants/${rId}/categories/${categoryId}`,
       {},
       token
     );
   }
 
   static async createCategory(token: string, restaurantId: any, payload: CreateCategoryPayload) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<Category>(
-      `/restaurants/${restaurantId._id}/categories`,
+      `/restaurants/${rId}/categories`,
       {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -80,8 +88,9 @@ export class MenuService {
     categoryId: string,
     payload: Partial<CreateCategoryPayload>
   ) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<Category>(
-      `/restaurants/${restaurantId._id}/categories/${categoryId}`,
+      `/restaurants/${rId}/categories/${categoryId}`,
       {
         method: 'PUT',
         body: JSON.stringify(payload),
@@ -99,8 +108,9 @@ export class MenuService {
     restaurantId: any,
     scope: 'restaurant' | 'branch' = 'restaurant'
   ) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<{ count: number }>(
-      `/categories/public/${restaurantId._id}/count?scope=${scope}`,
+      `/categories/public/${rId}/count?scope=${scope}`,
       {},
       null // No token needed for public endpoint
     );
@@ -113,16 +123,18 @@ export class MenuService {
     page: number = 1,
     limit: number = 50
   ) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<MenuItemListResponse>(
-      `/restaurants/${restaurantId._id}/menu-items?page=${page}&limit=${limit}`,
+      `/restaurants/${rId}/menu-items?page=${page}&limit=${limit}`,
       {},
       token
     );
   }
 
   static async getMenuItem(token: string, restaurantId: any, menuItemId: string) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<MenuItem>(
-      `/restaurants/${restaurantId._id}/menu-items/${menuItemId}`,
+      `/restaurants/${rId}/menu-items/${menuItemId}`,
       {},
       token
     );
@@ -135,8 +147,9 @@ export class MenuService {
     page: number = 1,
     limit: number = 50
   ) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<MenuItemListResponse>(
-      `/restaurants/${restaurantId._id}/menu-items/category/${categoryId}?page=${page}&limit=${limit}`,
+      `/restaurants/${rId}/menu-items/category/${categoryId}?page=${page}&limit=${limit}`,
       {},
       token
     );
@@ -147,8 +160,9 @@ export class MenuService {
     restaurantId: any,
     payload: CreateMenuItemPayload
   ) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<MenuItem>(
-      `/restaurants/${restaurantId._id}/menu-items`,
+      `/restaurants/${rId}/menu-items`,
       {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -163,8 +177,9 @@ export class MenuService {
     menuItemId: string,
     payload: Partial<CreateMenuItemPayload>
   ) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<MenuItem>(
-      `/restaurants/${restaurantId._id}/menu-items/${menuItemId}`,
+      `/restaurants/${rId}/menu-items/${menuItemId}`,
       {
         method: 'PUT',
         body: JSON.stringify(payload),
@@ -179,8 +194,9 @@ export class MenuService {
     menuItemId: string,
     isAvailable: boolean
   ) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<MenuItem>(
-      `/restaurants/${restaurantId._id}/menu-items/${menuItemId}/availability`,
+      `/restaurants/${rId}/menu-items/${menuItemId}/availability`,
       {
         method: 'PATCH',
         body: JSON.stringify({ isAvailable }),
@@ -190,8 +206,9 @@ export class MenuService {
   }
 
   static async deleteMenuItem(token: string, restaurantId: any, menuItemId: string) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<MenuItem>(
-      `/restaurants/${restaurantId._id}/menu-items/${menuItemId}`,
+      `/restaurants/${rId}/menu-items/${menuItemId}`,
       {
         method: 'DELETE',
       },
@@ -205,8 +222,9 @@ export class MenuService {
     categoryId: string,
     displayOrder: number
   ) {
+    const rId = this.getRestaurantId(restaurantId);
     return this.request<Category>(
-      `/restaurants/${restaurantId._id}/categories/${categoryId}/display-order`,
+      `/restaurants/${rId}/categories/${categoryId}/display-order`,
       {
         method: 'PATCH',
         body: JSON.stringify({ displayOrder }),

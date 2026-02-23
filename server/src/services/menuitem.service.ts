@@ -20,6 +20,17 @@ export class MenuItemService {
     this.branchRepo = new BranchRepository();
   }
 
+  /**
+   * Helper to extract restaurantId as string from either ObjectId or populated document
+   */
+  private extractRestaurantId(restaurantId: any): string {
+    if (!restaurantId) return '';
+    if (typeof restaurantId === 'string') return restaurantId;
+    if (restaurantId._id) return restaurantId._id.toString();
+    if (typeof restaurantId.toString === 'function') return restaurantId.toString();
+    return '';
+  }
+
   async createMenuItem(
     restaurantId: string,
     data: {
@@ -207,7 +218,10 @@ export class MenuItemService {
       throw new AppError('Menu item not found', 404);
     }
 
-    if (menuItem.restaurantId.toString() !== restaurantId) {
+    const itemRestaurantId = this.extractRestaurantId(menuItem.restaurantId);
+    const requestRestaurantId = restaurantId.toString();
+
+    if (itemRestaurantId !== requestRestaurantId) {
       throw new AppError('Menu item does not belong to this restaurant', 403);
     }
 
@@ -236,7 +250,10 @@ export class MenuItemService {
       throw new AppError('Menu item not found', 404);
     }
 
-    if (menuItem.restaurantId.toString() !== restaurantId) {
+    const itemRestaurantId = this.extractRestaurantId(menuItem.restaurantId);
+    const requestRestaurantId = restaurantId.toString();
+
+    if (itemRestaurantId !== requestRestaurantId) {
       throw new AppError('Menu item does not belong to this restaurant', 403);
     }
 
@@ -259,7 +276,10 @@ export class MenuItemService {
       throw new AppError('Menu item not found', 404);
     }
 
-    if (menuItem.restaurantId.toString() !== restaurantId) {
+    const itemRestaurantId = this.extractRestaurantId(menuItem.restaurantId);
+    const requestRestaurantId = restaurantId.toString();
+
+    if (itemRestaurantId !== requestRestaurantId) {
       throw new AppError('Menu item does not belong to this restaurant', 403);
     }
 
@@ -298,7 +318,10 @@ export class MenuItemService {
       throw new AppError('Menu item not found', 404);
     }
 
-    if (menuItem.restaurantId.toString() !== restaurantId) {
+    const itemRestaurantId = this.extractRestaurantId(menuItem.restaurantId);
+    const requestRestaurantId = restaurantId.toString();
+
+    if (itemRestaurantId !== requestRestaurantId) {
       throw new AppError('Menu item does not belong to this restaurant', 403);
     }
 

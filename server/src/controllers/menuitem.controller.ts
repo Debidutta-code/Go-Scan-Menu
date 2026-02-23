@@ -11,7 +11,11 @@ export class MenuItemController {
   }
 
   createMenuItem = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    let restaurantId = req.params.restaurantId || (req.user as any)?.restaurantId;
+
+    if (restaurantId && typeof restaurantId !== 'string') {
+      restaurantId = restaurantId.toString();
+    }
 
     if (!restaurantId) {
       sendResponse(res, 400, {
@@ -51,7 +55,11 @@ export class MenuItemController {
   });
 
   getMenuItemsByRestaurant = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    let restaurantId = req.params.restaurantId || (req.user as any)?.restaurantId;
+
+    if (restaurantId && typeof restaurantId !== 'string') {
+      restaurantId = restaurantId.toString();
+    }
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
 
@@ -86,7 +94,11 @@ export class MenuItemController {
   });
 
   getAllMenuItemsForMenu = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    let restaurantId = req.params.restaurantId || (req.user as any)?.restaurantId;
+
+    if (restaurantId && typeof restaurantId !== 'string') {
+      restaurantId = restaurantId.toString();
+    }
     const branchId = req.query.branchId as string | undefined;
 
     const menuItems = await this.menuItemService.getAllMenuItemsForMenu(restaurantId!, branchId);
@@ -98,7 +110,11 @@ export class MenuItemController {
   });
 
   updateMenuItem = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    let restaurantId = req.params.restaurantId || (req.user as any)?.restaurantId;
+
+    if (restaurantId && typeof restaurantId !== 'string') {
+      restaurantId = restaurantId.toString();
+    }
     const menuItem = await this.menuItemService.updateMenuItem(
       req.params.id,
       restaurantId!,
@@ -112,7 +128,11 @@ export class MenuItemController {
   });
 
   updateAvailability = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    let restaurantId = req.params.restaurantId || (req.user as any)?.restaurantId;
+
+    if (restaurantId && typeof restaurantId !== 'string') {
+      restaurantId = restaurantId.toString();
+    }
     const { isAvailable } = req.body;
 
     if (isAvailable === undefined) {
@@ -135,7 +155,11 @@ export class MenuItemController {
   });
 
   updateBranchPricing = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
+    let restaurantId = ParamsUtil.getString(req.params.restaurantId) || (req.user as any)?.restaurantId;
+
+    if (restaurantId && typeof restaurantId !== 'string') {
+      restaurantId = restaurantId.toString();
+    }
     const branchId = ParamsUtil.getString(req.params.branchId);
     const { price, discountPrice, isAvailable } = req.body;
 
@@ -160,7 +184,11 @@ export class MenuItemController {
   });
 
   deleteMenuItem = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    let restaurantId = req.params.restaurantId || (req.user as any)?.restaurantId;
+
+    if (restaurantId && typeof restaurantId !== 'string') {
+      restaurantId = restaurantId.toString();
+    }
     const menuItem = await this.menuItemService.deleteMenuItem(req.params.id, restaurantId!);
 
     sendResponse(res, 200, {
