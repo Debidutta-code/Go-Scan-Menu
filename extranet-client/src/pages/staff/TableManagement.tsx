@@ -83,7 +83,8 @@ export const TableManagement: React.FC = () => {
     if (!window.confirm(`Are you sure you want to delete table "${tableNumber}"?`)) return;
 
     try {
-      const response = await TableService.deleteTable(token, staff.restaurantId, tableId);
+      const rid = typeof staff.restaurantId === 'string' ? staff.restaurantId : staff.restaurantId._id;
+      const response = await TableService.deleteTable(token, rid, tableId);
       if (response.success) {
         alert('Table deleted successfully');
         loadData();
@@ -98,9 +99,10 @@ export const TableManagement: React.FC = () => {
     if (!staff || !token) return;
 
     try {
+      const rid = typeof staff.restaurantId === 'string' ? staff.restaurantId : staff.restaurantId._id;
       const response = await TableService.updateTableStatus(
         token,
-        staff.restaurantId,
+        rid,
         tableId,
         newStatus
       );

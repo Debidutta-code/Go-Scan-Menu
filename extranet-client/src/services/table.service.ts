@@ -18,6 +18,12 @@ export class TableService {
     };
   }
 
+  private static getRestaurantId(restaurantId: any): string {
+    if (!restaurantId) return '';
+    if (typeof restaurantId === 'string') return restaurantId;
+    return restaurantId._id || restaurantId.id || '';
+  }
+
   static async getTables(
     token: string,
     restaurantId: any,
@@ -26,9 +32,10 @@ export class TableService {
     limit: number = 100
   ): Promise<ApiResponse<TableListResponse>> {
     try {
+      const rId = this.getRestaurantId(restaurantId);
       const endpoint = branchId
-        ? `/restaurants/${restaurantId._id}/tables/branch/${branchId}?page=${page}&limit=${limit}`
-        : `/restaurants/${restaurantId._id}/tables?page=${page}&limit=${limit}`;
+        ? `/restaurants/${rId}/tables/branch/${branchId}?page=${page}&limit=${limit}`
+        : `/restaurants/${rId}/tables?page=${page}&limit=${limit}`;
 
       const response = await fetch(`${env.API_BASE_URL}${endpoint}`, {
         method: 'GET',
@@ -54,8 +61,9 @@ export class TableService {
     payload: CreateTablePayload
   ): Promise<ApiResponse<Table>> {
     try {
+      const rId = this.getRestaurantId(restaurantId);
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables`,
+        `${env.API_BASE_URL}/restaurants/${rId}/tables`,
         {
           method: 'POST',
           headers: this.getHeaders(token),
@@ -91,7 +99,6 @@ export class TableService {
         });
       }
 
-      // Create tables one by one (backend doesn't have bulk endpoint)
       const createdTables: Table[] = [];
       const errors: string[] = [];
 
@@ -130,9 +137,9 @@ export class TableService {
     payload: UpdateTablePayload
   ): Promise<ApiResponse<Table>> {
     try {
-      const rid = typeof restaurantId === 'string' ? restaurantId : restaurantId._id;
+      const rId = this.getRestaurantId(restaurantId);
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rid}/tables/${tableId}`,
+        `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}`,
         {
           method: 'PUT',
           headers: this.getHeaders(token),
@@ -159,9 +166,9 @@ export class TableService {
     status: Table['status']
   ): Promise<ApiResponse<Table>> {
     try {
-      const rid = typeof restaurantId === 'string' ? restaurantId : restaurantId._id;
+      const rId = this.getRestaurantId(restaurantId);
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rid}/tables/${tableId}/status`,
+        `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}/status`,
         {
           method: 'PATCH',
           headers: this.getHeaders(token),
@@ -187,8 +194,9 @@ export class TableService {
     tableId: string
   ): Promise<ApiResponse<Table>> {
     try {
+      const rId = this.getRestaurantId(restaurantId);
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}`,
+        `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}`,
         {
           method: 'DELETE',
           headers: this.getHeaders(token),
@@ -213,8 +221,9 @@ export class TableService {
     tableId: string
   ): Promise<ApiResponse<Table>> {
     try {
+      const rId = this.getRestaurantId(restaurantId);
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/regenerate-qr`,
+        `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}/regenerate-qr`,
         {
           method: 'POST',
           headers: this.getHeaders(token),
@@ -239,8 +248,9 @@ export class TableService {
     tableId: string
   ): Promise<ApiResponse<{ qrUrl: string }>> {
     try {
+      const rId = this.getRestaurantId(restaurantId);
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/qr-data`,
+        `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}/qr-data`,
         {
           method: 'GET',
           headers: this.getHeaders(token),
@@ -264,6 +274,7 @@ export class TableService {
     restaurantId: any,
     tableId: string
   ): string {
-    return `${env.API_BASE_URL}/restaurants/${restaurantId._id}/tables/${tableId}/qr-image?token=${token}`;
+    const rId = this.getRestaurantId(restaurantId);
+    return `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}/qr-image?token=${token}`;
   }
 }

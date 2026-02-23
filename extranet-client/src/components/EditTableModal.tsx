@@ -44,7 +44,7 @@ export const EditTableModal: React.FC<EditTableModalProps> = ({ table, onClose, 
     try {
       const response = await TableService.updateTable(
         token,
-        staff.restaurantId,
+        table.restaurantId,
         table._id,
         formData
       );
