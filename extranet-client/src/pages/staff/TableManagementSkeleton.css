@@ -1,0 +1,112 @@
+/* src/pages/staff/TableManagementSkeleton.css */
+
+.table-management-skeleton {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #fdfdfd;
+}
+
+.skeleton-shimmer {
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: table-skeleton-shimmer 1.5s infinite linear;
+    border-radius: 4px;
+}
+
+@keyframes table-skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    background: white;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.skeleton-title {
+    width: 300px;
+    height: 32px;
+}
+
+.skeleton-toolbar-actions {
+    display: flex;
+    gap: 16px;
+}
+
+.skeleton-button {
+    width: 100px;
+    height: 38px;
+    border-radius: 8px;
+}
+
+.skeleton-content {
+    padding: 32px;
+    flex: 1;
+}
+
+.skeleton-panel-header {
+    width: 250px;
+    height: 20px;
+    margin-bottom: 32px;
+}
+
+.skeleton-location-group {
+    margin-bottom: 40px;
+}
+
+.skeleton-location-header {
+    width: 180px;
+    height: 28px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 12px;
+}
+
+.skeleton-cube {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 60px;
+    border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+    .skeleton-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px 20px;
+        gap: 16px;
+    }
+
+    .skeleton-toolbar-actions {
+        width: 100%;
+    }
+
+    .skeleton-title {
+        width: 200px;
+    }
+
+    .skeleton-content {
+        padding: 20px;
+    }
+
+    .skeleton-grid {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        gap: 8px;
+    }
+}
