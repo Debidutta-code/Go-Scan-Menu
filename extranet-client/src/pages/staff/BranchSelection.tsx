@@ -6,6 +6,7 @@ import { BranchService } from '../../services/branch.service';
 import { TableService } from '../../services/table.service';
 import { Branch } from '../../types/table.types';
 import { Button } from '../../components/ui/Button';
+import { BranchSelectionSkeleton } from './BranchSelectionSkeleton';
 import './BranchSelection.css';
 
 export const BranchSelection: React.FC = () => {
@@ -103,11 +104,7 @@ export const BranchSelection: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="branch-selection-container">
-        <div className="loading-state">Loading branches...</div>
-      </div>
-    );
+    return <BranchSelectionSkeleton />;
   }
 
   return (
