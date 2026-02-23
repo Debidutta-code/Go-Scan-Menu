@@ -11,6 +11,7 @@ interface MenuItemCardProps {
   onEdit: (itemId: string) => void;
   onDelete: (itemId: string, itemName: string) => void;
   onToggleAvailability: (itemId: string, currentStatus: boolean) => void;
+  isProcessing?: boolean;
 }
 
 export const MenuItemCard: React.FC<MenuItemCardProps> = ({
@@ -19,9 +20,10 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
   onEdit,
   onDelete,
   onToggleAvailability,
+  isProcessing = false,
 }) => {
   return (
-    <div className="menu-item-card" data-testid={`menu-item-${item._id}`}>
+    <div className={`menu-item-card ${isProcessing ? 'processing' : ''}`} data-testid={`menu-item-${item._id}`}>
       {item.images?.length > 0 && (
         <div className="item-image-container">
           <img src={item.images[0]} alt={item.name} className="item-image" />
@@ -38,6 +40,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
             checked={item.isAvailable}
             onChange={() => onToggleAvailability(item._id, item.isAvailable)}
             label={item.isAvailable ? 'Available' : 'Unavailable'}
+            disabled={isProcessing}
           />
         </div>
 

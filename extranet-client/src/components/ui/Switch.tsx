@@ -6,13 +6,14 @@ interface SwitchProps {
     onChange: () => void;
     label?: string;
     id?: string;
+    disabled?: boolean;
 }
 
-export const Switch: React.FC<SwitchProps> = ({ checked, onChange, label, id }) => {
+export const Switch: React.FC<SwitchProps> = ({ checked, onChange, label, id, disabled }) => {
     return (
         <div
-            className="switch-container"
-            onClick={onChange}
+            className={`switch-container ${disabled ? 'disabled' : ''}`}
+            onClick={() => !disabled && onChange()}
             data-testid={id}
         >
             <div className={`switch-track ${checked ? 'checked' : ''}`}>

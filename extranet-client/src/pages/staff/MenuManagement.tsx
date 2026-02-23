@@ -18,6 +18,7 @@ export const MenuManagement: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         if (staff && token) {
@@ -67,7 +68,16 @@ export const MenuManagement: React.FC = () => {
     };
 
     const handleToggleAvailability = async (itemId: string, currentStatus: boolean) => {
-        if (!staff || !token) return;
+        if (!staff || !token || processingIds.has(itemId)) return;
+
+        // Optimistic Update
+        const previousMenuItems = [...menuItems];
+        setMenuItems((prev) =>
+            prev.map((item) =>
+                item._id === itemId ? { ...item, isAvailable: !currentStatus } : item
+            )
+        );
+        setProcessingIds((prev) => new Set(prev).add(itemId));
 
         try {
             const response = await MenuService.updateAvailability(
@@ -76,11 +86,18 @@ export const MenuManagement: React.FC = () => {
                 itemId,
                 !currentStatus
             );
-            if (response.success) {
-                loadData();
+            if (!response.success) {
+                throw new Error('Failed to update availability');
             }
         } catch (err: any) {
+            setMenuItems(previousMenuItems);
             alert(err.message || 'Failed to update availability');
+        } finally {
+            setProcessingIds((prev) => {
+                const next = new Set(prev);
+                next.delete(itemId);
+                return next;
+            });
         }
     };
 
@@ -114,7 +131,7 @@ export const MenuManagement: React.FC = () => {
             ? menuItems
             : menuItems.filter((item) => getCategoryId(item.categoryId) === selectedCategory);
 
-    if (loading) {
+    if (loading && menuItems.length === 0) {
         return (
             <div className="menu-management-container">
                 <div className="loading-state">Loading menu data...</div>
@@ -187,7 +204,7 @@ export const MenuManagement: React.FC = () => {
                 ) : (
                     <div className="menu-items-grid">
                         {filteredMenuItems.map((item) => (
-                            <div key={item._id} className="menu-item-card" data-testid={`menu-item-${item._id}`}>
+                            <div key={item._id} className={`menu-item-card ${processingIds.has(item._id) ? 'processing' : ''}`} data-testid={`menu-item-${item._id}`}>
                                 {/* Image handling - currently empty array from your example */}
                                 {item.images?.length > 0 && (
                                     <div className="item-image-container">
@@ -204,6 +221,7 @@ export const MenuManagement: React.FC = () => {
                                             className={`availability-toggle ${item.isAvailable ? 'available' : 'unavailable'}`}
                                             onClick={() => handleToggleAvailability(item._id, item.isAvailable)}
                                             data-testid="toggle-availability"
+                                            disabled={processingIds.has(item._id)}
                                         >
                                             {item.isAvailable ? 'Available' : 'Unavailable'}
                                         </button>

@@ -22,6 +22,7 @@ export const MenuManagement: React.FC = () => {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMenuItemId, setEditingMenuItemId] = useState<string | null>(null);
+  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (staff && token) {
@@ -67,7 +68,16 @@ export const MenuManagement: React.FC = () => {
   };
 
   const handleToggleAvailability = async (itemId: string, currentStatus: boolean) => {
-    if (!staff || !token) return;
+    if (!staff || !token || processingIds.has(itemId)) return;
+
+    // Optimistic Update
+    const previousMenuItems = [...menuItems];
+    setMenuItems((prev) =>
+      prev.map((item) =>
+        item._id === itemId ? { ...item, isAvailable: !currentStatus } : item
+      )
+    );
+    setProcessingIds((prev) => new Set(prev).add(itemId));
 
     try {
       const response = await MenuAPI.updateAvailability(
@@ -76,11 +86,21 @@ export const MenuManagement: React.FC = () => {
         itemId,
         !currentStatus
       );
-      if (response.success) {
-        loadData();
+
+      if (!response.success) {
+        throw new Error('Failed to update availability');
       }
+      // Successfully updated, no need to refresh the whole page
     } catch (err: any) {
+      // Rollback on failure
+      setMenuItems(previousMenuItems);
       alert(err.message || 'Failed to update availability');
+    } finally {
+      setProcessingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
     }
   };
 
@@ -194,6 +214,7 @@ export const MenuManagement: React.FC = () => {
                     onEdit={handleEditMenuItem}
                     onDelete={handleDeleteMenuItem}
                     onToggleAvailability={handleToggleAvailability}
+                    isProcessing={processingIds.has(item._id)}
                   />
                 ))}
               </div>
