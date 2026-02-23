@@ -10,6 +10,7 @@ import { QRCodeModal } from '../../components/QRCodeModal';
 import { CreateTableModal } from '../../components/CreateTableModal';
 import { BulkCreateTableModal } from '../../components/BulkCreateTableModal';
 import { EditTableModal } from '../../components/EditTableModal';
+import { TableManagementSkeleton } from './TableManagementSkeleton';
 import './TableManagement.css';
 
 export const TableManagement: React.FC = () => {
@@ -282,10 +283,12 @@ export const TableManagement: React.FC = () => {
         </div>
       </div>
 
+      {loading && <TableManagementSkeleton />}
+
       {error && <div className="error-banner">{error}</div>}
 
       {/* Main Content */}
-      <div className="table-management-content">
+      <div className="table-management-content" style={{ display: loading ? 'none' : 'flex' }}>
         <div className="table-list-panel">
           <div className="panel-header">
             <h2 className="panel-title">
@@ -294,9 +297,7 @@ export const TableManagement: React.FC = () => {
           </div>
 
           <div className="table-list-container">
-            {loading ? (
-              <div className="loading-state">Loading table data...</div>
-            ) : filteredTables.length === 0 ? (
+            {filteredTables.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">🪑</div>
                 <p className="empty-title">No tables found</p>
