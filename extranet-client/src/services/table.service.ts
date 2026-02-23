@@ -97,7 +97,7 @@ export class TableService {
 
       for (const tableData of tables) {
         try {
-          const result = await this.createTable(token, restaurantId._id, branchId, tableData);
+          const result = await this.createTable(token, restaurantId, branchId, tableData);
           if (result.success && result.data) {
             createdTables.push(result.data);
           }
