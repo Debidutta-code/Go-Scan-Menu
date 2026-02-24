@@ -20,4 +20,7 @@ router.get('/restaurant/:restaurantSlug', publicMenuController.getRestaurantInfo
 // Create order (public)
 router.post('/orders/:restaurantId', orderController.createOrder);
 
+// Get orders by table (public)
+router.get('/orders/table/:tableId', orderController.getOrdersByTable);
+
 export default router;
