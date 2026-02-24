@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePublicApp } from '../../contexts/PublicAppContext';
 import { useCart } from '../../contexts/CartContext';
 import { Trash2, Plus, Minus, ShoppingBag, AlertCircle } from 'lucide-react';
 import { getDietaryIcon } from '../../utils/formatters';
+import { PublicOrderService } from '../../services/order.service';
 import './CartPage.css';
 
 export const CartPage: React.FC = () => {
   const { menuData } = usePublicApp();
-  const { cart, updateQuantity, removeItem, totalAmount } = useCart();
+  const { cart, updateQuantity, removeItem, totalAmount, clearCart } = useCart();
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
+  const navigate = useNavigate();
   const currency = menuData.branch.settings.currency;
 
   const handleMinus = (id: string, quantity: number) => {
@@ -23,6 +28,42 @@ export const CartPage: React.FC = () => {
     if (itemToRemove) {
       removeItem(itemToRemove);
       setItemToRemove(null);
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (!menuData.table?.id) {
+      setOrderError('Table information missing. Please scan the QR code again.');
+      return;
+    }
+
+    setIsPlacingOrder(true);
+    setOrderError(null);
+
+    const orderData = {
+      branchId: menuData.branch.id,
+      tableId: menuData.table.id,
+      orderType: 'dine-in' as const,
+      items: cart.map(item => ({
+        menuItemId: item.menuItem.id,
+        quantity: item.quantity,
+        variantName: item.variant?.name,
+        addons: item.addons.map(a => ({ name: a.name, price: a.price })),
+      }))
+    };
+
+    try {
+      const response = await PublicOrderService.createOrder(menuData.restaurant.id, orderData);
+      if (response.success) {
+        clearCart();
+        navigate('/orders', { state: { orderSuccess: true, orderDetails: response.data } });
+      } else {
+        setOrderError(response.error || 'Failed to place order. Please try again.');
+      }
+    } catch (err) {
+      setOrderError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 

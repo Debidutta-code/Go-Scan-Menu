@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { PublicMenuController } from '@/controllers/public.menu.controller';
+import { OrderController } from '@/controllers/order.controller';
 
 const router = Router();
 const publicMenuController = new PublicMenuController();
+const orderController = new OrderController();
 
 // Public routes - no authentication required
 
@@ -14,5 +16,8 @@ router.get('/menu/:restaurantSlug/:branchCode', publicMenuController.getMenuByBr
 
 // Get restaurant basic info
 router.get('/restaurant/:restaurantSlug', publicMenuController.getRestaurantInfo);
+
+// Create order (public)
+router.post('/orders/:restaurantId', orderController.createOrder);
 
 export default router;
