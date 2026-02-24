@@ -174,4 +174,16 @@ export class OrderRepository {
     });
     return count > 0;
   }
+
+  /**
+   * Check if table has any active orders other than the specified one
+   */
+  async hasOtherActiveOrders(tableId: string, excludeOrderId: string): Promise<boolean> {
+    const count = await Order.countDocuments({
+      tableId,
+      _id: { $ne: new Types.ObjectId(excludeOrderId) },
+      status: { $nin: ['completed', 'cancelled'] },
+    });
+    return count > 0;
+  }
 }

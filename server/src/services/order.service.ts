@@ -82,9 +82,6 @@ export class OrderService {
         throw new AppError('Order must contain at least one item', 400);
       }
 
-      // Validate table is available for new order
-      await this.validateTableAvailability(data.tableId);
-
       // Process order items
       const processedItems = await Promise.all(
         data.items.map(async (item) => {
@@ -416,17 +413,20 @@ export class OrderService {
         }
 
         try {
-          // Reset table status to available
-          await this.tableRepo.updateStatus(tableIdStr, 'available');
+          // Reset table status to available only if NO other active orders exist
+          const hasOthers = await this.orderRepo.hasOtherActiveOrders(tableIdStr, id);
+          if (!hasOthers) {
+            await this.tableRepo.updateStatus(tableIdStr, 'available');
 
-          // End customer session if exists
-          const session = await this.sessionRepo.findActiveSessionByTable(tableIdStr);
-          if (session) {
-            await this.sessionRepo.update(session.sessionId, {
-              activeOrderId: undefined,
-              endTime: new Date(),
-              isActive: false,
-            });
+            // End customer session if exists
+            const session = await this.sessionRepo.findActiveSessionByTable(tableIdStr);
+            if (session) {
+              await this.sessionRepo.update(session.sessionId, {
+                activeOrderId: undefined,
+                endTime: new Date(),
+                isActive: false,
+              });
+            }
           }
         } catch (sessionError) {
           console.error('Failed to end session or free table on order completion:', sessionError);
@@ -522,8 +522,11 @@ export class OrderService {
     }
 
     try {
-      // Reset table status to available
-      await this.tableRepo.updateStatus(tableIdStr, 'available');
+      // Reset table status to available only if NO other active orders exist
+      const hasOthers = await this.orderRepo.hasOtherActiveOrders(tableIdStr, id);
+      if (!hasOthers) {
+        await this.tableRepo.updateStatus(tableIdStr, 'available');
+      }
     } catch (tableError) {
       console.error('Failed to free table on cancellation:', tableError);
       // Non-critical — order is already cancelled
@@ -579,17 +582,6 @@ export class OrderService {
     }
   }
 
-  /**
-   * Validate table is available for new order
-   */
-  private async validateTableAvailability(tableId: string): Promise<void> {
-    // Use repository method instead of direct query
-    const hasActiveOrder = await this.orderRepo.hasActiveOrders(tableId);
-
-    if (hasActiveOrder) {
-      throw new AppError('This table already has an active order', 400);
-    }
-  }
 
   /**
    * Validate status transition is allowed
