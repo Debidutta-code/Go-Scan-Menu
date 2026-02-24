@@ -45,6 +45,7 @@ import { FastestFingerGame } from './public-app/games/fastest-finger/FastestFing
 import { RiseUpGame } from './public-app/games/rise-up/RiseUpGame';
 import { ChidiyaUddGame } from './public-app/games/chidiya-udd/ChidiyaUddGame';
 import { TicTacToeGame } from './public-app/games/tic-tac-toe/TicTacToeGame';
+import { GalaxyShooter } from './public-app/games/galaxy-shooter/GalaxyShooter';
 
 /* ===================== PROTECTED ROUTES ===================== */
 
@@ -278,6 +279,7 @@ function App() {
           <Route path="games/rise-up" element={<RiseUpGame />} />
           <Route path="games/chidiya-udd" element={<ChidiyaUddGame />} />
           <Route path="games/tic-tac-toe" element={<TicTacToeGame />} />
+          <Route path="games/galaxy-shooter" element={<GalaxyShooter />} />
         </Route>
 
         {/* Without QR Code */}
@@ -295,6 +297,7 @@ function App() {
           <Route path="games/rise-up" element={<RiseUpGame />} />
           <Route path="games/chidiya-udd" element={<ChidiyaUddGame />} />
           <Route path="games/tic-tac-toe" element={<TicTacToeGame />} />
+          <Route path="games/galaxy-shooter" element={<GalaxyShooter />} />
         </Route>
 
         {/* ================= 404 ================= */}

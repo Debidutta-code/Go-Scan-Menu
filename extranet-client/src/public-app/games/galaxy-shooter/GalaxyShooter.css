@@ -1,0 +1,255 @@
+.gs-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: #000008;
+    font-family: 'Courier New', 'Lucida Console', monospace;
+}
+
+.gs-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+/* ── HUD ────────────────────────────────────────────────────────────────────── */
+.gs-hud {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
+    gap: 8px;
+}
+
+.gs-pill {
+    background: rgba(0, 10, 40, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 20px;
+    padding: 5px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(6px);
+    min-width: 70px;
+}
+
+.gs-wave-pill {
+    border-color: rgba(168, 85, 247, 0.35);
+}
+
+.gs-pill-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: rgba(148, 210, 255, 0.55);
+}
+
+.gs-pill-value {
+    font-size: 17px;
+    font-weight: 700;
+    color: #e0f2fe;
+    letter-spacing: 0.04em;
+}
+
+.gs-lives {
+    color: #f87171;
+    letter-spacing: 0.1em;
+}
+
+/* ── Overlay ────────────────────────────────────────────────────────────────── */
+.gs-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 20, 0.82);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    animation: gsIn 0.35s ease-out;
+}
+
+@keyframes gsIn {
+    from { opacity: 0; transform: scale(0.93); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.gs-card {
+    width: 88%;
+    max-width: 340px;
+    padding: 36px 28px 32px;
+    background: rgba(2, 8, 40, 0.88);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 20px;
+    box-shadow:
+        0 0 40px rgba(56, 189, 248, 0.08),
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    text-align: center;
+}
+
+.gs-gameover-card {
+    border-color: rgba(248, 113, 113, 0.25);
+    box-shadow:
+        0 0 40px rgba(239, 68, 68, 0.08),
+        0 20px 60px rgba(0, 0, 0, 0.7);
+}
+
+/* ── Idle title ─────────────────────────────────────────────────────────────── */
+.gs-title-group {
+    margin-bottom: 20px;
+}
+
+.gs-eyebrow {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.45em;
+    color: rgba(56, 189, 248, 0.7);
+    margin-bottom: 2px;
+    font-weight: 700;
+}
+
+.gs-title {
+    font-size: 46px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    margin: 0;
+    background: linear-gradient(135deg, #ffffff 0%, #7dd3fc 40%, #a855f7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 0 20px rgba(56,189,248,0.4));
+}
+
+.gs-title-line {
+    width: 48px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+    margin: 10px auto 0;
+    border-radius: 2px;
+}
+
+.gs-desc {
+    color: rgba(186, 230, 253, 0.65);
+    font-size: 13px;
+    margin: 0 0 18px;
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+}
+
+.gs-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.gs-legend span {
+    font-size: 11px;
+    color: rgba(186, 230, 253, 0.55);
+    letter-spacing: 0.04em;
+}
+
+.gs-hi {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: rgba(168, 85, 247, 0.7);
+    margin: 0 0 18px;
+    font-weight: 700;
+}
+
+/* ── Game Over ──────────────────────────────────────────────────────────────── */
+.gs-over-title {
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    margin: 0 0 22px;
+    background: linear-gradient(135deg, #f87171, #fb923c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.gs-score-row {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-bottom: 12px;
+}
+
+.gs-score-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.gs-score-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: rgba(148, 163, 184, 0.55);
+    font-weight: 700;
+}
+
+.gs-score-val {
+    font-size: 36px;
+    font-weight: 900;
+    color: #e0f2fe;
+    line-height: 1;
+}
+
+.gs-hi-val {
+    color: #c084fc;
+}
+
+.gs-wave-reached {
+    font-size: 12px;
+    color: rgba(148, 163, 184, 0.45);
+    letter-spacing: 0.08em;
+    margin: 0 0 22px;
+}
+
+/* ── Button ─────────────────────────────────────────────────────────────────── */
+.gs-btn {
+    width: 100%;
+    padding: 14px 0;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.35);
+}
+
+.gs-btn:hover, .gs-btn:active {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(14, 165, 233, 0.5);
+}
+
+.gs-retry-btn {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+}
+
+.gs-retry-btn:hover, .gs-retry-btn:active {
+    box-shadow: 0 8px 28px rgba(239, 68, 68, 0.5);
+}

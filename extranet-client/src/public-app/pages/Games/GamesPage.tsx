@@ -81,6 +81,14 @@ export const GamesPage: React.FC = () => {
             path: `${getBasePath()}/games/tic-tac-toe`,
             color: '#ff6b6b'
         },
+        {
+            id: 'galaxy-shooter',
+            title: 'Galaxy Shooter',
+            description: 'Blast alien waves in deep space! Dodge bullets & survive!',
+            icon: '🚀',
+            path: `${getBasePath()}/games/galaxy-shooter`,
+            color: '#6366f1'
+        },
     ];
 
     return (
