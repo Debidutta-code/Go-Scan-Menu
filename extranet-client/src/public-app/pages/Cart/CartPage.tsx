@@ -61,7 +61,7 @@ export const CartPage: React.FC = () => {
       console.log('Order response:', response);
       if (response.success) {
         clearCart();
-        navigate('/orders', { state: { orderSuccess: true, orderDetails: response.data } });
+        navigate('../orders', { state: { orderSuccess: true, orderDetails: response.data } });
       } else {
         setOrderError(response.error || 'Failed to place order. Please try again.');
       }

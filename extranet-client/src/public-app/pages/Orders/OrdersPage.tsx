@@ -40,7 +40,7 @@ export const OrdersPage: React.FC = () => {
             </div>
           </div>
 
-          <Link to="/" className="checkout-btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
+          <Link to="../" className="checkout-btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
             Back to Menu
           </Link>
         </div>
@@ -56,7 +56,7 @@ export const OrdersPage: React.FC = () => {
         </div>
         <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px' }}>No active orders</h3>
         <p style={{ color: '#64748b', marginBottom: '24px' }}>You haven't placed any orders yet.</p>
-        <Link to="/" className="checkout-btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
+        <Link to="../" className="checkout-btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
           Browse Menu
         </Link>
       </div>
