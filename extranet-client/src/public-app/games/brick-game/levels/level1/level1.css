@@ -1,7 +1,6 @@
-.brick-game-container {
+.level1-container {
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -66,6 +65,19 @@ canvas {
     font-variant-numeric: tabular-nums;
 }
 
+.level-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #47D1FF22, #A088FF22);
+    border: 1px solid rgba(71, 209, 255, 0.4);
+    color: #47D1FF;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+}
+
 .game-overlay-screen {
     position: absolute;
     inset: 0;
@@ -82,7 +94,7 @@ canvas {
     text-align: center;
     max-width: 320px;
     width: 85%;
-    padding: 40px 28px;
+    padding: 36px 28px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
@@ -90,8 +102,8 @@ canvas {
 }
 
 .overlay-content h2 {
-    font-size: 32px;
-    margin-bottom: 12px;
+    font-size: 30px;
+    margin: 0 0 10px;
     font-weight: 800;
     background: linear-gradient(45deg, #47D1FF, #A088FF);
     -webkit-background-clip: text;
@@ -115,26 +127,16 @@ canvas {
 
 .overlay-content p {
     color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 16px;
+    margin: 0 0 10px;
     line-height: 1.5;
     font-size: 14px;
 }
 
-.final-score-label {
-    font-size: 11px !important;
+.score-display {
+    font-size: 22px !important;
     font-weight: 700;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.35) !important;
-    margin-bottom: 4px !important;
-    text-transform: uppercase;
-}
-
-.final-score-value {
-    font-size: 48px !important;
-    font-weight: 800 !important;
     color: #D1FF47 !important;
-    margin-bottom: 28px !important;
-    line-height: 1;
+    margin-bottom: 20px !important;
 }
 
 .start-btn {
@@ -148,6 +150,7 @@ canvas {
     cursor: pointer;
     transition: all 0.2s ease;
     width: 100%;
+    margin-top: 10px;
     letter-spacing: 0.05em;
 }
 
@@ -156,14 +159,17 @@ canvas {
     box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
 }
 
+.next-btn {
+    background: linear-gradient(135deg, #47FFB3, #47D1FF);
+    color: #0f0f1a;
+    font-size: 15px;
+}
+
+.next-btn:hover {
+    box-shadow: 0 8px 24px rgba(71, 255, 179, 0.35);
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.95); }
     to   { opacity: 1; transform: scale(1); }
-}
-
-@media (max-width: 600px) {
-    .overlay-content {
-        width: 85%;
-        padding: 30px 20px;
-    }
 }

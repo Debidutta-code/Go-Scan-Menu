@@ -1,7 +1,6 @@
-.brick-game-container {
+.level2-container {
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -14,8 +13,8 @@
     position: absolute;
     inset: 0;
     background-image:
-        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        linear-gradient(rgba(255, 80, 80, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 80, 80, 0.06) 1px, transparent 1px);
     background-size: 40px 40px;
     pointer-events: none;
     z-index: 0;
@@ -43,8 +42,8 @@ canvas {
 }
 
 .stat-pill {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 45, 120, 0.08);
+    border: 1px solid rgba(255, 45, 120, 0.2);
     padding: 6px 16px;
     border-radius: 20px;
     display: flex;
@@ -56,7 +55,7 @@ canvas {
 .stat-pill .label {
     font-size: 10px;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 140, 66, 0.7);
     letter-spacing: 0.05em;
 }
 
@@ -66,10 +65,23 @@ canvas {
     font-variant-numeric: tabular-nums;
 }
 
+.level-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #FF2D7822, #FF8C4222);
+    border: 1px solid rgba(255, 45, 120, 0.5);
+    color: #FF8C42;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+}
+
 .game-overlay-screen {
     position: absolute;
     inset: 0;
-    background: rgba(15, 15, 26, 0.88);
+    background: rgba(26, 15, 15, 0.9);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
@@ -82,64 +94,58 @@ canvas {
     text-align: center;
     max-width: 320px;
     width: 85%;
-    padding: 40px 28px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 36px 28px;
+    background: rgba(255, 45, 120, 0.04);
+    border: 1px solid rgba(255, 45, 120, 0.15);
     border-radius: 24px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
 }
 
 .overlay-content h2 {
-    font-size: 32px;
-    margin-bottom: 12px;
+    font-size: 30px;
+    margin: 0 0 12px;
     font-weight: 800;
-    background: linear-gradient(45deg, #47D1FF, #A088FF);
+    background: linear-gradient(45deg, #FF2D78, #FF8C42);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .overlay-content h2.lose {
-    background: linear-gradient(45deg, #FF4D4D, #FFB347);
+    background: linear-gradient(45deg, #FF4D4D, #FF2D78);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .overlay-content h2.win {
-    background: linear-gradient(45deg, #47FFB3, #D1FF47);
+    background: linear-gradient(45deg, #FFD166, #FF8C42);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .overlay-content p {
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 16px;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0 0 8px;
     line-height: 1.5;
     font-size: 14px;
 }
 
-.final-score-label {
-    font-size: 11px !important;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.35) !important;
-    margin-bottom: 4px !important;
-    text-transform: uppercase;
+.overlay-content p strong {
+    color: #FF2D78;
 }
 
-.final-score-value {
-    font-size: 48px !important;
-    font-weight: 800 !important;
-    color: #D1FF47 !important;
-    margin-bottom: 28px !important;
-    line-height: 1;
+.score-display {
+    font-size: 22px !important;
+    font-weight: 700;
+    color: #FFD166 !important;
+    margin: 8px 0 20px !important;
 }
 
 .start-btn {
-    background: white;
-    color: black;
+    background: linear-gradient(135deg, #FF2D78, #FF8C42);
+    color: white;
     border: none;
     padding: 14px 28px;
     border-radius: 12px;
@@ -148,22 +154,25 @@ canvas {
     cursor: pointer;
     transition: all 0.2s ease;
     width: 100%;
+    margin-top: 14px;
     letter-spacing: 0.05em;
 }
 
 .start-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 24px rgba(255, 45, 120, 0.4);
+}
+
+.next-btn {
+    background: linear-gradient(135deg, #FFD166, #FF8C42);
+    color: #1a0f0f;
+}
+
+.next-btn:hover {
+    box-shadow: 0 8px 24px rgba(255, 209, 102, 0.4);
 }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.95); }
     to   { opacity: 1; transform: scale(1); }
-}
-
-@media (max-width: 600px) {
-    .overlay-content {
-        width: 85%;
-        padding: 30px 20px;
-    }
 }
