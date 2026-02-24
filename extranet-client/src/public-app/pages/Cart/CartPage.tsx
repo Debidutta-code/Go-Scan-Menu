@@ -32,7 +32,9 @@ export const CartPage: React.FC = () => {
   };
 
   const handleCheckout = async () => {
+    console.log('Checkout initiated', { menuData, cart });
     if (!menuData.table?.id) {
+      console.warn('Table ID missing');
       setOrderError('Table information missing. Please scan the QR code again.');
       return;
     }
@@ -52,8 +54,11 @@ export const CartPage: React.FC = () => {
       }))
     };
 
+    console.log('Placing order with data:', orderData);
+
     try {
       const response = await PublicOrderService.createOrder(menuData.restaurant.id, orderData);
+      console.log('Order response:', response);
       if (response.success) {
         clearCart();
         navigate('/orders', { state: { orderSuccess: true, orderDetails: response.data } });
@@ -61,6 +66,7 @@ export const CartPage: React.FC = () => {
         setOrderError(response.error || 'Failed to place order. Please try again.');
       }
     } catch (err) {
+      console.error('Order placement error:', err);
       setOrderError('An unexpected error occurred. Please try again.');
     } finally {
       setIsPlacingOrder(false);
@@ -161,14 +167,24 @@ export const CartPage: React.FC = () => {
       </div>
 
       <div className="cart-footer">
+        {orderError && (
+          <div className="order-error-message" style={{ color: '#ef4444', marginBottom: '10px', fontSize: '14px', textAlign: 'center' }}>
+            <AlertCircle size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+            {orderError}
+          </div>
+        )}
         <div className="cart-summary">
           <span className="summary-label">Total Amount</span>
           <span className="summary-value">
             {currency} {totalAmount.toFixed(2)}
           </span>
         </div>
-        <button className="checkout-btn">
-          Checkout Now
+        <button
+          className="checkout-btn"
+          onClick={handleCheckout}
+          disabled={isPlacingOrder}
+        >
+          {isPlacingOrder ? 'Placing Order...' : 'Checkout Now'}
         </button>
       </div>
 
