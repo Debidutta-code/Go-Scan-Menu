@@ -46,6 +46,7 @@ import { RiseUpGame } from './public-app/games/rise-up/RiseUpGame';
 import { ChidiyaUddGame } from './public-app/games/chidiya-udd/ChidiyaUddGame';
 import { TicTacToeGame } from './public-app/games/tic-tac-toe/TicTacToeGame';
 import { GalaxyShooter } from './public-app/games/galaxy-shooter/GalaxyShooter';
+import NotFound from './pages/NotFound/NotFound';
 
 /* ===================== PROTECTED ROUTES ===================== */
 
@@ -301,10 +302,7 @@ function App() {
         </Route>
 
         {/* ================= 404 ================= */}
-        <Route
-          path="*"
-          element={<Navigate to={superAdmin ? '/dashboard' : '/staff/login'} replace />}
-        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </StaffAuthProvider>
   );
