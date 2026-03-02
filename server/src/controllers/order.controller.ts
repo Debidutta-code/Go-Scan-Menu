@@ -72,6 +72,27 @@ export class OrderController {
     });
   });
 
+  getOrdersFullByBranch = catchAsync(async (req: Request, res: Response) => {
+    const { branchId } = req.params;
+    const status = req.query.status as string | undefined;
+    const orderType = req.query.orderType as 'dine-in' | 'takeaway' | undefined;
+    const paymentStatus = req.query.paymentStatus as string | undefined;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+
+    const result = await this.orderService.getOrdersFullByBranch(
+      branchId,
+      { status, orderType, paymentStatus },
+      page,
+      limit
+    );
+
+    sendResponse(res, 200, {
+      message: 'Orders (full details) retrieved successfully',
+      data: result,
+    });
+  });
+
   getOrdersByTable = catchAsync(async (req: Request, res: Response) => {
     const { tableId } = req.params;
     const status = req.query.status as string | undefined;

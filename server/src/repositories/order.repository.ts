@@ -62,6 +62,44 @@ export class OrderRepository {
     };
   }
 
+  async findByBranchFull(
+    branchId: string,
+    filter: { status?: string; orderType?: string; paymentStatus?: string } = {},
+    page: number = 1,
+    limit: number = 20
+  ) {
+    const skip = (page - 1) * limit;
+    const query: any = { branchId };
+
+    if (filter.status) query.status = filter.status;
+    if (filter.orderType) query.orderType = filter.orderType;
+    if (filter.paymentStatus) query.paymentStatus = filter.paymentStatus;
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .populate('restaurantId')
+        .populate('branchId')
+        .populate('tableId')
+        .populate('assignedStaffId')
+        .populate('items.menuItemId')
+        .populate('taxes.taxId')
+        .skip(skip)
+        .limit(limit)
+        .sort({ orderTime: -1 }),
+      Order.countDocuments(query),
+    ]);
+
+    return {
+      orders,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   async findByTable(tableId: string, status?: string, page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
     const query: any = { tableId };

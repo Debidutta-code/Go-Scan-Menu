@@ -27,6 +27,14 @@ router.post('/', orderController.createOrder);
 // Get orders by branch
 router.get('/branch/:branchId', orderController.getOrdersByBranch);
 
+// Get orders by branch (full details) - Restricted to management staff
+router.get(
+  '/branch/:branchId/full',
+  AuthMiddleware.authenticate,
+  ...canViewOrders,
+  orderController.getOrdersFullByBranch
+);
+
 // Get orders by table
 router.get('/table/:tableId', ...canViewOrders, orderController.getOrdersByTable);
 

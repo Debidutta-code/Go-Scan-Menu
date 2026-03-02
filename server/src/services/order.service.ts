@@ -367,6 +367,14 @@ export class OrderService {
   ) {
     return this.orderRepo.findByBranch(branchId, filter, page, limit);
   }
+  async getOrdersFullByBranch(
+    branchId: string,
+    filter: { status?: string; orderType?: string; paymentStatus?: string },
+    page: number = 1,
+    limit: number = 20
+  ) {
+    return this.orderRepo.findByBranchFull(branchId, filter, page, limit);
+  }
   async getOrdersByTable(tableId: string, status?: string, page: number = 1, limit: number = 20) {
     return this.orderRepo.findByTable(tableId, status, page, limit);
   }
