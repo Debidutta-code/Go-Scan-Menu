@@ -1,9 +1,9 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RootRedirect } from './guards';
-import { AdminRoutes } from './adminRoutes';
-import { StaffRoutes } from './staffRoutes';
-import { PublicMenuRoutes } from './publicRoutes';
+import { renderAdminRoutes } from './adminRoutes';
+import { renderStaffRoutes } from './staffRoutes';
+import { renderPublicMenuRoutes } from './publicRoutes';
 import NotFound from '../pages/NotFound/NotFound';
 
 export const AppRoutes = () => {
@@ -13,13 +13,13 @@ export const AppRoutes = () => {
             <Route path="/" element={<RootRedirect />} />
 
             {/* ================= ADMIN ================= */}
-            {AdminRoutes()}
+            {renderAdminRoutes()}
 
             {/* ================= STAFF ================= */}
-            {StaffRoutes()}
+            {renderStaffRoutes()}
 
             {/* ================= PUBLIC ================= */}
-            {PublicMenuRoutes()}
+            {renderPublicMenuRoutes()}
 
             {/* ================= 404 ================= */}
             <Route path="*" element={<NotFound />} />

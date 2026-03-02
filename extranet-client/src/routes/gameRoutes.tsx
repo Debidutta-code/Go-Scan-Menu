@@ -10,18 +10,14 @@ import { ChidiyaUddGame } from '../public-app/games/chidiya-udd/ChidiyaUddGame';
 import { TicTacToeGame } from '../public-app/games/tic-tac-toe/TicTacToeGame';
 import { GalaxyShooter } from '../public-app/games/galaxy-shooter/GalaxyShooter';
 
-export const GameRoutes = () => {
-    return (
-        <>
-            <Route path="games/memory-game" element={<MemoryGame />} />
-            <Route path="games/stack-game" element={<StackGame />} />
-            <Route path="games/brick-game" element={<BrickGame />} />
-            <Route path="games/finger-pick" element={<FingerPickGame />} />
-            <Route path="games/fastest-finger" element={<FastestFingerGame />} />
-            <Route path="games/rise-up" element={<RiseUpGame />} />
-            <Route path="games/chidiya-udd" element={<ChidiyaUddGame />} />
-            <Route path="games/tic-tac-toe" element={<TicTacToeGame />} />
-            <Route path="games/galaxy-shooter" element={<GalaxyShooter />} />
-        </>
-    );
-};
+export const renderGameRoutes = () => [
+    <Route key="memory" path="games/memory-game" element={<MemoryGame />} />,
+    <Route key="stack" path="games/stack-game" element={<StackGame />} />,
+    <Route key="brick" path="games/brick-game" element={<BrickGame />} />,
+    <Route key="finger" path="games/finger-pick" element={<FingerPickGame />} />,
+    <Route key="fastest" path="games/fastest-finger" element={<FastestFingerGame />} />,
+    <Route key="rise" path="games/rise-up" element={<RiseUpGame />} />,
+    <Route key="chidiya" path="games/chidiya-udd" element={<ChidiyaUddGame />} />,
+    <Route key="tictactoe" path="games/tic-tac-toe" element={<TicTacToeGame />} />,
+    <Route key="galaxy" path="games/galaxy-shooter" element={<GalaxyShooter />} />,
+];

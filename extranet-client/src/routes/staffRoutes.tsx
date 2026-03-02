@@ -16,52 +16,50 @@ import { TableManagement } from '../pages/staff/TableManagement';
 import { QRManagement } from '../pages/staff/QRManagement';
 import { StaffLayout } from '../components/layout/StaffLayout';
 
-export const StaffRoutes = () => {
-    return (
-        <>
-            {/* ================= STAFF AUTH ================= */}
-            <Route
-                path="/staff/login"
-                element={
-                    <PublicStaffRoute>
-                        <StaffLoginPage />
-                    </PublicStaffRoute>
-                }
-            />
+export const renderStaffRoutes = () => [
+    /* ================= STAFF AUTH ================= */
+    <Route
+        key="staff-login"
+        path="/staff/login"
+        element={
+            <PublicStaffRoute>
+                <StaffLoginPage />
+            </PublicStaffRoute>
+        }
+    />,
 
-            {/* ================= STAFF PORTAL ================= */}
-            <Route
-                element={
-                    <ProtectedStaffRoute>
-                        <StaffLayout />
-                    </ProtectedStaffRoute>
-                }
-            >
-                <Route path="/staff/dashboard" element={<StaffDashboard />} />
+    /* ================= STAFF PORTAL ================= */
+    <Route
+        key="staff-portal"
+        element={
+            <ProtectedStaffRoute>
+                <StaffLayout />
+            </ProtectedStaffRoute>
+        }
+    >
+        <Route path="/staff/dashboard" element={<StaffDashboard />} />
 
-                {/* Menu */}
-                <Route path="/staff/menu" element={<MenuManagement />} />
-                <Route path="/staff/menu/add" element={<AddEditMenuItem />} />
-                <Route path="/staff/menu/edit/:id" element={<AddEditMenuItem />} />
+        {/* Menu */}
+        <Route path="/staff/menu" element={<MenuManagement />} />
+        <Route path="/staff/menu/add" element={<AddEditMenuItem />} />
+        <Route path="/staff/menu/edit/:id" element={<AddEditMenuItem />} />
 
-                {/* Categories */}
-                <Route path="/staff/categories" element={<CategoryManagement />} />
-                <Route path="/staff/categories/add" element={<AddEditCategory />} />
-                <Route path="/staff/categories/edit/:id" element={<AddEditCategory />} />
+        {/* Categories */}
+        <Route path="/staff/categories" element={<CategoryManagement />} />
+        <Route path="/staff/categories/add" element={<AddEditCategory />} />
+        <Route path="/staff/categories/edit/:id" element={<AddEditCategory />} />
 
-                {/* Staff */}
-                <Route path="/staff/team" element={<StaffList />} />
-                <Route path="/staff/team/add" element={<AddStaff />} />
-                <Route path="/staff/team/edit/:id" element={<EditStaff />} />
+        {/* Staff */}
+        <Route path="/staff/team" element={<StaffList />} />
+        <Route path="/staff/team/add" element={<AddStaff />} />
+        <Route path="/staff/team/edit/:id" element={<EditStaff />} />
 
-                {/* Permissions */}
-                <Route path="/staff/permissions" element={<RolePermissions />} />
+        {/* Permissions */}
+        <Route path="/staff/permissions" element={<RolePermissions />} />
 
-                {/* Tables */}
-                <Route path="/staff/tables" element={<BranchSelection />} />
-                <Route path="/staff/tables/:branchId" element={<TableManagement />} />
-                <Route path="/staff/tables/:branchId/qr-settings" element={<QRManagement />} />
-            </Route>
-        </>
-    );
-};
+        {/* Tables */}
+        <Route path="/staff/tables" element={<BranchSelection />} />
+        <Route path="/staff/tables/:branchId" element={<TableManagement />} />
+        <Route path="/staff/tables/:branchId/qr-settings" element={<QRManagement />} />
+    </Route>
+];
