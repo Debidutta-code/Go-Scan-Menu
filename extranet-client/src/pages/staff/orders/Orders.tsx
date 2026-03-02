@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '../../../contexts/StaffAuthContext';
 import { OrderService, IOrder } from '../../../services/order.service';
+import { BranchService } from '../../../services/branch.service';
+import { Branch } from '../../../types/table.types';
 import {
     Search,
     Filter,
@@ -25,6 +27,7 @@ export const Orders: React.FC = () => {
     const { branchId: paramBranchId } = useParams<{ branchId: string }>();
     const { staff, token } = useStaffAuth();
     const [orders, setOrders] = useState<IOrder[]>([]);
+    const [branchInfo, setBranchInfo] = useState<Branch | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -37,6 +40,35 @@ export const Orders: React.FC = () => {
             navigate('/staff/tables');
         }
     }, [targetBranchId, staff, navigate]);
+
+    // Fetch Branch Info
+    const fetchBranchInfo = useCallback(async () => {
+        if (!token || !staff || !targetBranchId) return;
+
+        try {
+            const rid = typeof staff.restaurantId === 'string'
+                ? { _id: staff.restaurantId }
+                : staff.restaurantId;
+
+            if (!rid || !rid._id) {
+                console.error('Restaurant ID not found for branch fetch');
+                return;
+            }
+
+            const response = await BranchService.getBranch(token, rid, targetBranchId);
+            if (response.success && response.data) {
+                setBranchInfo(response.data);
+            }
+        } catch (err) {
+            console.error('Failed to load branch info:', err);
+        }
+    }, [token, staff, targetBranchId]);
+
+    useEffect(() => {
+        if (token && staff && targetBranchId) {
+            fetchBranchInfo();
+        }
+    }, [fetchBranchInfo, token, staff, targetBranchId]);
 
     // Filters & Pagination
     const [status, setStatus] = useState<string>('');
@@ -123,7 +155,14 @@ export const Orders: React.FC = () => {
         <div className="orders-container">
             <div className="orders-header">
                 <div className="header-left">
-                    <h1>Orders Management</h1>
+                    <h1>
+                        Orders Management
+                        {branchInfo && (
+                            <span className="branch-badge">
+                                {branchInfo.name} ({branchInfo.code})
+                            </span>
+                        )}
+                    </h1>
                     <p>Track and manage your branch orders in real-time</p>
                 </div>
                 <div className="header-right">

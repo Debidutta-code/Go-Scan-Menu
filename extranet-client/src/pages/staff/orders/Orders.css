@@ -27,10 +27,24 @@
 }
 
 .header-left h1 {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
     font-size: 28px;
     font-weight: 700;
     color: #111827;
     margin-bottom: 8px;
+}
+
+.branch-badge {
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 99px;
+    border: 1px solid #c7d2fe;
 }
 
 .header-left p {
