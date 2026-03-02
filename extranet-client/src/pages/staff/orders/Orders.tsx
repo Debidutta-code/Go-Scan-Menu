@@ -4,6 +4,7 @@ import { useStaffAuth } from '../../../contexts/StaffAuthContext';
 import { OrderService, IOrder } from '../../../services/order.service';
 import { BranchService } from '../../../services/branch.service';
 import { Branch } from '../../../types/table.types';
+import { OrderDetailPanel } from './OrderDetailPanel';
 import {
     RefreshCcw,
     Clock,
@@ -32,6 +33,7 @@ export const Orders: React.FC = () => {
     const [orders, setOrders] = useState<IOrder[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
 
     // Filters & Pagination
     const [status, setStatus] = useState<string>('');
@@ -255,7 +257,11 @@ export const Orders: React.FC = () => {
                         </thead>
                         <tbody>
                             {orders.map((order) => (
-                                <tr key={order._id}>
+                                <tr
+                                    key={order._id}
+                                    className="ord-row-clickable"
+                                    onClick={() => setSelectedOrder(order)}
+                                >
                                     <td className="ord-order-num">{order.orderNumber}</td>
                                     <td>#{order.tableNumber}</td>
                                     <td>{order.orderType === 'dine-in' ? 'Dine-in' : 'Takeaway'}</td>
@@ -297,6 +303,8 @@ export const Orders: React.FC = () => {
                     </button>
                 </div>
             )}
+
+            <OrderDetailPanel order={selectedOrder} onClose={() => setSelectedOrder(null)} />
         </div>
     );
 };
