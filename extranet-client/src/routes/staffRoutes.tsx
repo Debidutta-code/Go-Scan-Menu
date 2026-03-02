@@ -14,7 +14,7 @@ import { RolePermissions } from '../pages/staff/RolePermissions';
 import { BranchSelection } from '../pages/staff/BranchSelection';
 import { TableManagement } from '../pages/staff/TableManagement';
 import { QRManagement } from '../pages/staff/QRManagement';
-import { Orders } from '../pages/staff/orders/Orders';
+import { Orders } from '../pages/staff/order-management/Orders';
 import { StaffLayout } from '../components/layout/StaffLayout';
 
 export const renderStaffRoutes = () => [
