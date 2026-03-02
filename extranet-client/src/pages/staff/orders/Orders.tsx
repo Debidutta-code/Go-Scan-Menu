@@ -25,18 +25,18 @@ export const Orders: React.FC = () => {
     const { branchId: paramBranchId } = useParams<{ branchId: string }>();
     const { staff, token } = useStaffAuth();
     const [orders, setOrders] = useState<IOrder[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const targetBranchId = paramBranchId || staff?.branchId;
 
     useEffect(() => {
-        if (!loading && !targetBranchId && staff) {
+        if (!targetBranchId && staff) {
             // If no branch is selected, send them to tables selection for now
             // (In a real app, we'd have a specific orders branch selection)
             navigate('/staff/tables');
         }
-    }, [targetBranchId, staff, loading, navigate]);
+    }, [targetBranchId, staff, navigate]);
 
     // Filters & Pagination
     const [status, setStatus] = useState<string>('');
@@ -45,7 +45,10 @@ export const Orders: React.FC = () => {
     const [limit] = useState(10);
 
     const fetchOrders = useCallback(async () => {
-        if (!token || !staff || !targetBranchId) return;
+        if (!token || !staff || !targetBranchId) {
+            setLoading(false);
+            return;
+        }
 
         setLoading(true);
         setError('');
@@ -80,12 +83,14 @@ export const Orders: React.FC = () => {
     }, [token, staff, targetBranchId, status, page, limit]);
 
     useEffect(() => {
-        fetchOrders();
+        if (token && staff && targetBranchId) {
+            fetchOrders();
 
-        // Auto-refresh every 60 seconds
-        const interval = setInterval(fetchOrders, 60000);
-        return () => clearInterval(interval);
-    }, [fetchOrders]);
+            // Auto-refresh every 60 seconds
+            const interval = setInterval(fetchOrders, 60000);
+            return () => clearInterval(interval);
+        }
+    }, [fetchOrders, token, staff, targetBranchId]);
 
     const getStatusColor = (status: string) => {
         switch (status) {

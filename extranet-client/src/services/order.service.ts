@@ -102,12 +102,13 @@ export class OrderService {
 
     static async updatePaymentStatus(
         token: string,
+        restaurantId: string,
         orderId: string,
         paymentStatus: string,
         paymentMethod?: string
     ): Promise<ApiResponse<IOrder>> {
         return ApiService.request<IOrder>(
-            `/orders/${orderId}/payment`,
+            `/restaurants/${restaurantId}/orders/${orderId}/payment`,
             {
                 method: 'PATCH',
                 body: JSON.stringify({ paymentStatus, paymentMethod }),
