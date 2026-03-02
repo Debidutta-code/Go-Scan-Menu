@@ -1,6 +1,5 @@
-// src/pages/staff/orders/Orders.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '../../../contexts/StaffAuthContext';
 import { OrderService, IOrder } from '../../../services/order.service';
 import {
@@ -22,10 +21,22 @@ import { Button } from '../../../components/ui/Button';
 import './Orders.css';
 
 export const Orders: React.FC = () => {
+    const navigate = useNavigate();
+    const { branchId: paramBranchId } = useParams<{ branchId: string }>();
     const { staff, token } = useStaffAuth();
     const [orders, setOrders] = useState<IOrder[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const targetBranchId = paramBranchId || staff?.branchId;
+
+    useEffect(() => {
+        if (!loading && !targetBranchId && staff) {
+            // If no branch is selected, send them to tables selection for now
+            // (In a real app, we'd have a specific orders branch selection)
+            navigate('/staff/tables');
+        }
+    }, [targetBranchId, staff, loading, navigate]);
 
     // Filters & Pagination
     const [status, setStatus] = useState<string>('');
@@ -34,15 +45,24 @@ export const Orders: React.FC = () => {
     const [limit] = useState(10);
 
     const fetchOrders = useCallback(async () => {
-        if (!token || !staff?.branchId) return;
+        if (!token || !staff || !targetBranchId) return;
 
         setLoading(true);
         setError('');
 
         try {
+            const rid = typeof staff.restaurantId === 'string'
+                ? staff.restaurantId
+                : staff.restaurantId?._id;
+
+            if (!rid) {
+                throw new Error('Restaurant ID not found');
+            }
+
             const response = await OrderService.getBranchOrdersFull(
                 token,
-                staff.branchId,
+                rid,
+                targetBranchId,
                 { status },
                 page,
                 limit
@@ -57,7 +77,7 @@ export const Orders: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [token, staff?.branchId, status, page, limit]);
+    }, [token, staff, targetBranchId, status, page, limit]);
 
     useEffect(() => {
         fetchOrders();

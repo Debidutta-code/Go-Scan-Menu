@@ -64,6 +64,7 @@ export interface IOrderListResponse {
 export class OrderService {
     static async getBranchOrdersFull(
         token: string,
+        restaurantId: string,
         branchId: string,
         filters: { status?: string; orderType?: string; paymentStatus?: string } = {},
         page: number = 1,
@@ -77,7 +78,7 @@ export class OrderService {
         queryParams.append('limit', limit.toString());
 
         return ApiService.request<IOrderListResponse>(
-            `/orders/branch/${branchId}/full?${queryParams.toString()}`,
+            `/restaurants/${restaurantId}/orders/branch/${branchId}/full?${queryParams.toString()}`,
             { method: 'GET' },
             token
         );
@@ -85,11 +86,12 @@ export class OrderService {
 
     static async updateOrderStatus(
         token: string,
+        restaurantId: string,
         orderId: string,
         status: string
     ): Promise<ApiResponse<IOrder>> {
         return ApiService.request<IOrder>(
-            `/orders/${orderId}/status`,
+            `/restaurants/${restaurantId}/orders/${orderId}/status`,
             {
                 method: 'PATCH',
                 body: JSON.stringify({ status }),

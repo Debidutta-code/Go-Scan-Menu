@@ -42,6 +42,7 @@ export const renderStaffRoutes = () => [
 
         {/* Orders */}
         <Route path="/staff/orders" element={<Orders />} />
+        <Route path="/staff/orders/:branchId" element={<Orders />} />
 
         {/* Menu */}
         <Route path="/staff/menu" element={<MenuManagement />} />
