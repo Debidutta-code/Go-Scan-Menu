@@ -119,10 +119,8 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
         {
             label: 'Orders',
             icon: <ShoppingBag size={20} />,
-            path: '#',
-            permission: staff?.permissions?.orders?.view,
-            disabled: true,
-            badge: 'Soon'
+            path: '/staff/orders',
+            permission: staff?.permissions?.orders?.view
         },
         {
             label: 'Reports',

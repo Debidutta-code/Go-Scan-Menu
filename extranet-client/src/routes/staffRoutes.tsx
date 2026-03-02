@@ -14,6 +14,7 @@ import { RolePermissions } from '../pages/staff/RolePermissions';
 import { BranchSelection } from '../pages/staff/BranchSelection';
 import { TableManagement } from '../pages/staff/TableManagement';
 import { QRManagement } from '../pages/staff/QRManagement';
+import { Orders } from '../pages/staff/orders/Orders';
 import { StaffLayout } from '../components/layout/StaffLayout';
 
 export const renderStaffRoutes = () => [
@@ -38,6 +39,9 @@ export const renderStaffRoutes = () => [
         }
     >
         <Route path="/staff/dashboard" element={<StaffDashboard />} />
+
+        {/* Orders */}
+        <Route path="/staff/orders" element={<Orders />} />
 
         {/* Menu */}
         <Route path="/staff/menu" element={<MenuManagement />} />
