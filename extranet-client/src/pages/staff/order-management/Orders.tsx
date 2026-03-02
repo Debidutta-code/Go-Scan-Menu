@@ -200,6 +200,21 @@ export const Orders: React.FC = () => {
         setSelectedOrder(updated);
     }, [token, staff]);
 
+    const handlePaymentUpdate = useCallback(async (orderId: string, paymentStatus: string) => {
+        if (!token || !staff) throw new Error('Not authenticated');
+        const rid = typeof staff.restaurantId === 'string'
+            ? staff.restaurantId : staff.restaurantId?._id;
+        if (!rid) throw new Error('Restaurant ID not found');
+
+        const response = await OrderService.updatePaymentStatus(token, rid, orderId, paymentStatus);
+        if (!response.success || !response.data) {
+            throw new Error((response as any).message || 'Failed to update payment status');
+        }
+        const updated = response.data;
+        setOrders(prev => prev.map(o => o._id === orderId ? updated : o));
+        setSelectedOrder(updated);
+    }, [token, staff]);
+
     // ── Branch selection screen ────────────────────────────────
     if (!targetBranchId) {
         return (
@@ -483,6 +498,7 @@ export const Orders: React.FC = () => {
                 order={selectedOrder}
                 onClose={() => setSelectedOrder(null)}
                 onStatusUpdate={handleStatusUpdate}
+                onPaymentUpdate={handlePaymentUpdate}
                 onCancel={handleCancelOrder}
             />
         </div>

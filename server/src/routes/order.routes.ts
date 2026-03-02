@@ -53,7 +53,8 @@ router.patch('/:id/items/:itemId/status', ...canManageOrders, orderController.up
 // Update payment status
 router.patch(
   '/:id/payment',
-  // ...canManageOrders,
+  AuthMiddleware.authenticate,
+  ...canManageOrders,
   orderController.updatePaymentStatus
 );
 

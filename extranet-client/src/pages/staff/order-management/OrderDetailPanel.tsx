@@ -6,6 +6,7 @@ interface OrderDetailPanelProps {
     order: IOrder | null;
     onClose: () => void;
     onStatusUpdate: (orderId: string, newStatus: string) => Promise<void>;
+    onPaymentUpdate: (orderId: string, paymentStatus: string) => Promise<void>;
     onCancel: (orderId: string) => Promise<void>;
 }
 
@@ -34,14 +35,22 @@ const PAY_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 /** Returns the next status label and new status value for the primary action */
-function getNextAction(status: IOrder['status']): { label: string; nextStatus: string } | null {
+function getNextAction(order: IOrder): { label: string; actionType: 'status' | 'payment'; nextValue: string } | null {
+    const { status, paymentStatus } = order;
     switch (status) {
-        case 'pending': return { label: 'Confirm Order (Start Preparing)', nextStatus: 'confirmed' };
-        case 'confirmed': return { label: 'Mark as Served', nextStatus: 'served' };
-        case 'preparing': return { label: 'Mark as Served', nextStatus: 'served' };
-        case 'ready': return { label: 'Mark as Served', nextStatus: 'served' };
-        case 'served': return { label: 'Mark as Completed', nextStatus: 'completed' };
-        default: return null;
+        case 'pending':
+            return { label: 'Confirm Order (Start Preparing)', actionType: 'status', nextValue: 'confirmed' };
+        case 'confirmed':
+        case 'preparing':
+        case 'ready':
+            return { label: 'Mark as Served', actionType: 'status', nextValue: 'served' };
+        case 'served':
+            if (paymentStatus !== 'paid') {
+                return { label: 'Confirm Payment (Mark as Paid)', actionType: 'payment', nextValue: 'paid' };
+            }
+            return { label: 'Mark as Completed', actionType: 'status', nextValue: 'completed' };
+        default:
+            return null;
     }
 }
 
@@ -49,6 +58,7 @@ export const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
     order,
     onClose,
     onStatusUpdate,
+    onPaymentUpdate,
     onCancel,
 }) => {
     const [actionLoading, setActionLoading] = useState(false);
@@ -59,7 +69,7 @@ export const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
 
     const sc = STATUS_CONFIG[order.status];
     const pc = PAY_CONFIG[order.paymentStatus];
-    const nextAction = getNextAction(order.status);
+    const nextAction = getNextAction(order);
     const canCancel = order.status === 'pending';
 
     const handleNextAction = async () => {
@@ -67,9 +77,13 @@ export const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
         setActionError('');
         setActionLoading(true);
         try {
-            await onStatusUpdate(order._id, nextAction.nextStatus);
+            if (nextAction.actionType === 'status') {
+                await onStatusUpdate(order._id, nextAction.nextValue);
+            } else {
+                await onPaymentUpdate(order._id, nextAction.nextValue);
+            }
         } catch (err: any) {
-            setActionError(err.message || 'Failed to update status');
+            setActionError(err.message || 'Action failed');
         } finally {
             setActionLoading(false);
         }
