@@ -598,14 +598,15 @@ export class OrderService {
     currentStatus: IOrder['status'],
     newStatus: IOrder['status']
   ): void {
+    // Simplified flow: pending → confirmed (kitchen preparing) → served → completed
     const allowedTransitions: Record<IOrder['status'], IOrder['status'][]> = {
       pending: ['confirmed', 'cancelled'],
-      confirmed: ['preparing', 'cancelled'],
-      preparing: ['ready', 'cancelled'],
-      ready: ['served', 'cancelled'],
+      confirmed: ['served'],
+      preparing: ['served'],   // legacy support if any orders are mid-flow
+      ready: ['served'],   // legacy support
       served: ['completed'],
-      completed: [], // Cannot transition from completed
-      cancelled: [], // Cannot transition from cancelled
+      completed: [],           // terminal
+      cancelled: [],           // terminal
     };
 
     const allowed = allowedTransitions[currentStatus] || [];
@@ -619,12 +620,17 @@ export class OrderService {
    * Validate order can be cancelled
    */
   private validateCancellation(order: IOrder): void {
-    if (order.status === 'completed') {
-      throw new AppError('Cannot cancel completed order', 400);
-    }
-
     if (order.status === 'cancelled') {
       throw new AppError('Order is already cancelled', 400);
+    }
+
+    if (order.status === 'completed') {
+      throw new AppError('Cannot cancel a completed order', 400);
+    }
+
+    // Only allow cancellation while still in pending (not yet confirmed)
+    if (order.status !== 'pending') {
+      throw new AppError('Order can only be cancelled while in pending state (before confirmation)', 400);
     }
 
     if (order.paymentStatus === 'paid') {

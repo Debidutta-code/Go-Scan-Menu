@@ -14,19 +14,19 @@ import {
 import './Orders.css';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
-    pending:   { label: 'Pending',   color: 'status-pending',   dot: '#f59e0b' },
+    pending: { label: 'Pending', color: 'status-pending', dot: '#f59e0b' },
     confirmed: { label: 'Confirmed', color: 'status-confirmed', dot: '#3b82f6' },
     preparing: { label: 'Preparing', color: 'status-preparing', dot: '#8b5cf6' },
-    ready:     { label: 'Ready',     color: 'status-ready',     dot: '#10b981' },
-    served:    { label: 'Served',    color: 'status-served',    dot: '#06b6d4' },
+    ready: { label: 'Ready', color: 'status-ready', dot: '#10b981' },
+    served: { label: 'Served', color: 'status-served', dot: '#06b6d4' },
     completed: { label: 'Completed', color: 'status-completed', dot: '#6b7280' },
     cancelled: { label: 'Cancelled', color: 'status-cancelled', dot: '#ef4444' },
 };
 
 const PAY_CONFIG: Record<string, { label: string; color: string }> = {
     pending: { label: 'Unpaid', color: 'pay-pending' },
-    paid:    { label: 'Paid',   color: 'pay-paid'    },
-    failed:  { label: 'Failed', color: 'pay-failed'  },
+    paid: { label: 'Paid', color: 'pay-paid' },
+    failed: { label: 'Failed', color: 'pay-failed' },
 };
 
 const fmt = (ds: string) =>
@@ -183,6 +183,40 @@ export const Orders: React.FC = () => {
         next.has(id) ? next.delete(id) : next.add(id);
         setSelectedIds(next);
     };
+
+    /** Update an order's status and reflect immediately in local state */
+    const handleStatusUpdate = useCallback(async (orderId: string, newStatus: string) => {
+        if (!token || !staff) throw new Error('Not authenticated');
+        const rid = typeof staff.restaurantId === 'string'
+            ? staff.restaurantId : staff.restaurantId?._id;
+        if (!rid) throw new Error('Restaurant ID not found');
+
+        const response = await OrderService.updateOrderStatus(token, rid, orderId, newStatus);
+        if (!response.success || !response.data) {
+            throw new Error((response as any).message || 'Failed to update status');
+        }
+        const updated = response.data;
+        // Update in-place in orders list
+        setOrders(prev => prev.map(o => o._id === orderId ? updated : o));
+        // Keep panel open with refreshed data
+        setSelectedOrder(updated);
+    }, [token, staff]);
+
+    /** Cancel an order (only valid in pending state) */
+    const handleCancelOrder = useCallback(async (orderId: string) => {
+        if (!token || !staff) throw new Error('Not authenticated');
+        const rid = typeof staff.restaurantId === 'string'
+            ? staff.restaurantId : staff.restaurantId?._id;
+        if (!rid) throw new Error('Restaurant ID not found');
+
+        const response = await OrderService.cancelOrder(token, rid, orderId);
+        if (!response.success || !response.data) {
+            throw new Error((response as any).message || 'Failed to cancel order');
+        }
+        const updated = response.data;
+        setOrders(prev => prev.map(o => o._id === orderId ? updated : o));
+        setSelectedOrder(updated);
+    }, [token, staff]);
 
     // ── Branch selection screen ────────────────────────────────
     if (!targetBranchId) {
@@ -407,7 +441,7 @@ export const Orders: React.FC = () => {
                                                     type="checkbox"
                                                     className="o-checkbox"
                                                     checked={isSelected}
-                                                    onChange={() => {}}
+                                                    onChange={() => { }}
                                                 />
                                             </td>
                                             <td>
@@ -498,7 +532,12 @@ export const Orders: React.FC = () => {
                 </div>
             )}
 
-            <OrderDetailPanel order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+            <OrderDetailPanel
+                order={selectedOrder}
+                onClose={() => setSelectedOrder(null)}
+                onStatusUpdate={handleStatusUpdate}
+                onCancel={handleCancelOrder}
+            />
         </div>
     );
 };

@@ -1,10 +1,12 @@
-import React from 'react';
-import { X, Clock, CheckCircle2, Package, User, Utensils } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Clock, CheckCircle2, Package, User, Utensils, ChevronRight, Ban, Loader2 } from 'lucide-react';
 import { IOrder } from '../../../services/order.service';
 
 interface OrderDetailPanelProps {
     order: IOrder | null;
     onClose: () => void;
+    onStatusUpdate: (orderId: string, newStatus: string) => Promise<void>;
+    onCancel: (orderId: string) => Promise<void>;
 }
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -31,11 +33,60 @@ const PAY_CONFIG: Record<string, { label: string; color: string }> = {
     failed: { label: 'Failed', color: 'pay-failed' },
 };
 
-export const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({ order, onClose }) => {
+/** Returns the next status label and new status value for the primary action */
+function getNextAction(status: IOrder['status']): { label: string; nextStatus: string } | null {
+    switch (status) {
+        case 'pending': return { label: 'Confirm Order (Start Preparing)', nextStatus: 'confirmed' };
+        case 'confirmed': return { label: 'Mark as Served', nextStatus: 'served' };
+        case 'preparing': return { label: 'Mark as Served', nextStatus: 'served' };
+        case 'ready': return { label: 'Mark as Served', nextStatus: 'served' };
+        case 'served': return { label: 'Mark as Completed', nextStatus: 'completed' };
+        default: return null;
+    }
+}
+
+export const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
+    order,
+    onClose,
+    onStatusUpdate,
+    onCancel,
+}) => {
+    const [actionLoading, setActionLoading] = useState(false);
+    const [cancelLoading, setCancelLoading] = useState(false);
+    const [actionError, setActionError] = useState('');
+
     if (!order) return null;
 
     const sc = STATUS_CONFIG[order.status];
     const pc = PAY_CONFIG[order.paymentStatus];
+    const nextAction = getNextAction(order.status);
+    const canCancel = order.status === 'pending';
+
+    const handleNextAction = async () => {
+        if (!nextAction) return;
+        setActionError('');
+        setActionLoading(true);
+        try {
+            await onStatusUpdate(order._id, nextAction.nextStatus);
+        } catch (err: any) {
+            setActionError(err.message || 'Failed to update status');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleCancel = async () => {
+        if (!canCancel) return;
+        setActionError('');
+        setCancelLoading(true);
+        try {
+            await onCancel(order._id);
+        } catch (err: any) {
+            setActionError(err.message || 'Failed to cancel order');
+        } finally {
+            setCancelLoading(false);
+        }
+    };
 
     return (
         <>
@@ -225,6 +276,43 @@ export const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({ order, onClo
                     )}
 
                 </div>
+
+                {/* ── Action Footer ─────────────────────────────────── */}
+                {(nextAction || canCancel) && (
+                    <div className="odp-footer">
+                        {actionError && (
+                            <div className="odp-action-error">{actionError}</div>
+                        )}
+                        <div className="odp-footer-actions">
+                            {canCancel && (
+                                <button
+                                    className="odp-btn odp-btn--cancel"
+                                    onClick={handleCancel}
+                                    disabled={cancelLoading || actionLoading}
+                                >
+                                    {cancelLoading
+                                        ? <Loader2 size={14} className="spin" />
+                                        : <Ban size={14} />
+                                    }
+                                    Cancel Order
+                                </button>
+                            )}
+                            {nextAction && (
+                                <button
+                                    className="odp-btn odp-btn--primary"
+                                    onClick={handleNextAction}
+                                    disabled={actionLoading || cancelLoading}
+                                >
+                                    {actionLoading
+                                        ? <Loader2 size={14} className="spin" />
+                                        : <ChevronRight size={14} />
+                                    }
+                                    {nextAction.label}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );

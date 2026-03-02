@@ -100,6 +100,22 @@ export class OrderService {
         );
     }
 
+    static async cancelOrder(
+        token: string,
+        restaurantId: string,
+        orderId: string,
+        cancellationReason?: string
+    ): Promise<ApiResponse<IOrder>> {
+        return ApiService.request<IOrder>(
+            `/restaurants/${restaurantId}/orders/${orderId}/cancel`,
+            {
+                method: 'PATCH',
+                body: JSON.stringify({ cancellationReason }),
+            },
+            token
+        );
+    }
+
     static async updatePaymentStatus(
         token: string,
         restaurantId: string,
