@@ -19,7 +19,7 @@ const fmtDate = (ds: string) =>
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
     pending: { label: 'Pending', color: 'status-pending', dot: '#f59e0b' },
-    confirmed: { label: 'Confirmed', color: 'status-confirmed', dot: '#3b82f6' },
+    confirmed: { label: 'Preparing', color: 'status-confirmed', dot: '#3b82f6' },
     preparing: { label: 'Preparing', color: 'status-preparing', dot: '#8b5cf6' },
     ready: { label: 'Ready', color: 'status-ready', dot: '#10b981' },
     served: { label: 'Served', color: 'status-served', dot: '#06b6d4' },

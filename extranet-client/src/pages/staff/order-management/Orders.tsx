@@ -9,13 +9,13 @@ import {
     RefreshCcw, Clock, CheckCircle2, AlertCircle,
     ChevronRight, ChevronLeft, Utensils, Building2,
     Filter, Search, X, TrendingUp, ShoppingBag,
-    DollarSign, AlertTriangle, Eye, Printer, CheckCheck
+    DollarSign, AlertTriangle, Eye
 } from 'lucide-react';
 import './Orders.css';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
     pending: { label: 'Pending', color: 'status-pending', dot: '#f59e0b' },
-    confirmed: { label: 'Confirmed', color: 'status-confirmed', dot: '#3b82f6' },
+    confirmed: { label: 'Preparing', color: 'status-confirmed', dot: '#3b82f6' },
     preparing: { label: 'Preparing', color: 'status-preparing', dot: '#8b5cf6' },
     ready: { label: 'Ready', color: 'status-ready', dot: '#10b981' },
     served: { label: 'Served', color: 'status-served', dot: '#06b6d4' },
@@ -66,7 +66,6 @@ export const Orders: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [status, setStatus] = useState<string>('');
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -149,7 +148,6 @@ export const Orders: React.FC = () => {
             if (response.success && response.data) {
                 setOrders(response.data.orders);
                 setTotalPages(response.data.pagination.totalPages);
-                setSelectedIds(new Set());
             }
         } catch (err: any) {
             setError(err.message || 'Failed to load orders');
@@ -166,23 +164,7 @@ export const Orders: React.FC = () => {
         }
     }, [fetchOrders, token, staff, targetBranchId]);
 
-    const allSelected = filteredOrders.length > 0 && filteredOrders.every(o => selectedIds.has(o._id));
-    const someSelected = selectedIds.size > 0;
 
-    const toggleAll = () => {
-        if (allSelected) {
-            setSelectedIds(new Set());
-        } else {
-            setSelectedIds(new Set(filteredOrders.map(o => o._id)));
-        }
-    };
-
-    const toggleOne = (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        const next = new Set(selectedIds);
-        next.has(id) ? next.delete(id) : next.add(id);
-        setSelectedIds(next);
-    };
 
     /** Update an order's status and reflect immediately in local state */
     const handleStatusUpdate = useCallback(async (orderId: string, newStatus: string) => {
@@ -278,7 +260,6 @@ export const Orders: React.FC = () => {
                     </h1>
                     <span className="o-subtitle">
                         {loading ? 'Refreshing…' : `${filteredOrders.length} order${filteredOrders.length !== 1 ? 's' : ''}`}
-                        {someSelected && <span className="o-sel-hint"> · {selectedIds.size} selected</span>}
                     </span>
                 </div>
 
@@ -314,21 +295,7 @@ export const Orders: React.FC = () => {
                         </select>
                     </div>
 
-                    {/* Bulk action bar */}
-                    {someSelected && (
-                        <div className="o-bulk-bar">
-                            <span className="o-bulk-count">{selectedIds.size} selected</span>
-                            <button className="o-bulk-btn o-bulk-btn--confirm">
-                                <CheckCheck size={13} /> Confirm All
-                            </button>
-                            <button className="o-bulk-btn o-bulk-btn--print">
-                                <Printer size={13} /> Print
-                            </button>
-                            <button className="o-bulk-btn o-bulk-btn--cancel">
-                                <X size={13} /> Cancel
-                            </button>
-                        </div>
-                    )}
+
 
                     <button
                         className={`o-refresh-btn ${loading ? 'o-refresh-btn--loading' : ''}`}
@@ -403,14 +370,6 @@ export const Orders: React.FC = () => {
                         <table className="o-table">
                             <thead>
                                 <tr>
-                                    <th className="o-th-check">
-                                        <input
-                                            type="checkbox"
-                                            className="o-checkbox"
-                                            checked={allSelected}
-                                            onChange={toggleAll}
-                                        />
-                                    </th>
                                     <th>Order #</th>
                                     <th>Table</th>
                                     <th>Type</th>
@@ -426,24 +385,12 @@ export const Orders: React.FC = () => {
                                 {filteredOrders.map((order) => {
                                     const sc = STATUS_CONFIG[order.status];
                                     const pc = PAY_CONFIG[order.paymentStatus];
-                                    const isSelected = selectedIds.has(order._id);
                                     return (
                                         <tr
                                             key={order._id}
-                                            className={`o-row ${isSelected ? 'o-row--selected' : ''}`}
+                                            className="o-row"
                                             onClick={() => setSelectedOrder(order)}
                                         >
-                                            <td
-                                                className="o-td-check"
-                                                onClick={e => toggleOne(order._id, e)}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    className="o-checkbox"
-                                                    checked={isSelected}
-                                                    onChange={() => { }}
-                                                />
-                                            </td>
                                             <td>
                                                 <span className="o-order-num">{order.orderNumber}</span>
                                             </td>

@@ -207,76 +207,8 @@
     white-space: nowrap;
 }
 
-/* ── Bulk bar ────────────────────────────────────────────── */
-.o-bulk-bar {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: #1e293b;
-    border-radius: var(--o-radius-sm);
-    padding: 0 8px;
-    animation: bulkIn .18s ease;
-    flex-shrink: 0;
-    white-space: nowrap;
-    height: 34px;
-}
 
-@keyframes bulkIn {
-    from {
-        opacity: 0;
-        transform: translateX(6px);
-    }
 
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.o-bulk-count {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #94a3b8;
-    padding-right: 6px;
-    border-right: 1px solid #334155;
-    margin-right: 2px;
-    white-space: nowrap;
-}
-
-.o-bulk-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 9px;
-    border-radius: 4px;
-    font-size: 0.72rem;
-    font-family: var(--o-font);
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: opacity .15s;
-    white-space: nowrap;
-    height: 26px;
-}
-
-.o-bulk-btn:hover {
-    opacity: .82;
-}
-
-.o-bulk-btn--confirm {
-    background: #22c55e;
-    color: #fff;
-}
-
-.o-bulk-btn--print {
-    background: #64748b;
-    color: #fff;
-}
-
-.o-bulk-btn--cancel {
-    background: #ef4444;
-    color: #fff;
-}
 
 /* ── Refresh button ──────────────────────────────────────── */
 .o-refresh-btn {
@@ -473,11 +405,6 @@
     white-space: nowrap;
 }
 
-.o-th-check {
-    width: 40px;
-    padding-right: 0;
-}
-
 .o-table tbody tr {
     border-bottom: 1px solid var(--o-border-soft);
 }
@@ -486,10 +413,6 @@
     padding: 11px 14px;
     color: var(--o-text-secondary);
     white-space: nowrap;
-}
-
-.o-td-check {
-    padding-right: 0;
 }
 
 .o-row {
@@ -501,21 +424,8 @@
     background: #f7f8ff;
 }
 
-.o-row--selected {
-    background: #eef1ff !important;
-}
+/* Checkbox column was here */
 
-.o-row--selected td {
-    color: var(--o-text-primary);
-}
-
-/* Checkbox */
-.o-checkbox {
-    width: 15px;
-    height: 15px;
-    accent-color: var(--o-accent);
-    cursor: pointer;
-}
 
 /* Order number */
 .o-order-num {
