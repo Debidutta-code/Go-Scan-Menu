@@ -227,7 +227,11 @@ export const TableManagement: React.FC = () => {
       {/* Page Toolbar */}
       <div className="table-page-toolbar">
         <h1 className="table-page-title" data-testid="table-management-title">
-          Table Management {branch && `- ${branch.name}`}
+          Table Management {loading ? (
+            <span className="branch-name-skeleton"></span>
+          ) : (
+            branch && `- ${branch.name}`
+          )}
         </h1>
 
         <div className="table-toolbar-actions">

@@ -37,6 +37,30 @@
   color: #1a1a1b;
   margin: 0;
   letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.branch-name-skeleton {
+  display: inline-block;
+  width: 120px;
+  height: 24px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: table-skeleton-shimmer 1.5s infinite linear;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+@keyframes table-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .table-toolbar-actions {

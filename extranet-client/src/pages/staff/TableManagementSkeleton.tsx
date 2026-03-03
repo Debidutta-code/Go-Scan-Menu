@@ -5,16 +5,6 @@ import './TableManagementSkeleton.css';
 export const TableManagementSkeleton: React.FC = () => {
     return (
         <div className="table-management-skeleton">
-            <div className="skeleton-toolbar">
-                <div className="skeleton-title skeleton-shimmer"></div>
-                <div className="skeleton-toolbar-actions">
-                    <div className="skeleton-button skeleton-shimmer"></div>
-                    <div className="skeleton-button skeleton-shimmer"></div>
-                    <div className="skeleton-button skeleton-shimmer"></div>
-                    <div className="skeleton-button skeleton-shimmer"></div>
-                </div>
-            </div>
-
             <div className="skeleton-content">
                 <div className="skeleton-panel-header skeleton-shimmer"></div>
 

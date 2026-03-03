@@ -268,7 +268,11 @@ export const QRManagement: React.FC = () => {
       {/* Page Toolbar */}
       <div className="qr-page-toolbar">
         <h1 className="qr-page-title" data-testid="qr-management-title">
-          QR Code Design Manager {branch && `- ${branch.name}`}
+          QR Code Design Manager {loading ? (
+            <span className="branch-name-skeleton"></span>
+          ) : (
+            branch && `- ${branch.name}`
+          )}
         </h1>
 
         <div className="qr-toolbar-actions">
