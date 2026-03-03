@@ -221,9 +221,6 @@ export const TableManagement: React.FC = () => {
   const statusCounts = getStatusCounts();
   const groupedTables = groupTablesByLocation(filteredTables);
 
-  if (loading) {
-    return <TableManagementSkeleton />;
-  }
 
   return (
     <div className="table-management-layout">
@@ -281,10 +278,12 @@ export const TableManagement: React.FC = () => {
         </div>
       </div>
 
+      {loading && <TableManagementSkeleton />}
+
       {error && <div className="error-banner">{error}</div>}
 
       {/* Main Content */}
-      <div className="table-management-content">
+      <div className="table-management-content" style={{ display: loading ? 'none' : 'flex' }}>
         <div className="table-list-panel">
           <div className="panel-header">
             <h2 className="panel-title">

@@ -14,7 +14,7 @@ import {
   TEMPLATE_CATEGORIES,
 } from '../../config/qrTemplates.config';
 import { QRTemplateRenderer } from '../../components/QRTemplateRenderer';
-import { QRManagementSkeleton } from './QRManagementSkeleton';
+import { TableManagementSkeleton } from './TableManagementSkeleton';
 import './QRManagement.css';
 
 export const QRManagement: React.FC = () => {
@@ -262,9 +262,6 @@ export const QRManagement: React.FC = () => {
     updatedAt: new Date().toISOString(),
   };
 
-  if (loading) {
-    return <QRManagementSkeleton />;
-  }
 
   return (
     <div className="qr-management-layout">
@@ -290,10 +287,12 @@ export const QRManagement: React.FC = () => {
         </div>
       </div>
 
+      {loading && <TableManagementSkeleton />}
+
       {error && <div className="error-banner">{error}</div>}
       {successMessage && <div className="success-banner">{successMessage}</div>}
 
-      <div className="qr-management-content">
+      <div className="qr-management-content" style={{ display: loading ? 'none' : 'flex' }}>
         {/* Left Side - Settings */}
         <div className="qr-settings-panel">
           {/* Design Mode Toggle */}
