@@ -113,7 +113,11 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
         {
             label: 'Tables & QR',
             icon: <Armchair size={20} />,
-            path: '/staff/tables',
+            path: staff?.branchId
+                ? `/staff/tables/${staff.branchId}`
+                : (staff?.allowedBranchIds?.length === 1)
+                    ? `/staff/tables/${staff.allowedBranchIds[0]}`
+                    : '/staff/tables',
             permission: staff?.permissions?.tables?.view
         },
         {

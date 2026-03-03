@@ -14,6 +14,7 @@ import {
   TEMPLATE_CATEGORIES,
 } from '../../config/qrTemplates.config';
 import { QRTemplateRenderer } from '../../components/QRTemplateRenderer';
+import { QRManagementSkeleton } from './QRManagementSkeleton';
 import './QRManagement.css';
 
 export const QRManagement: React.FC = () => {
@@ -262,11 +263,7 @@ export const QRManagement: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="qr-management-container">
-        <div className="loading-state">Loading QR configuration...</div>
-      </div>
-    );
+    return <QRManagementSkeleton />;
   }
 
   return (
