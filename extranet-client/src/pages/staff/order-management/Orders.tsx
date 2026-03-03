@@ -64,7 +64,7 @@ export const Orders: React.FC = () => {
     const [branchesLoading, setBranchesLoading] = useState(false);
     const [branchInfo, setBranchInfo] = useState<Branch | null>(null);
     const [orders, setOrders] = useState<IOrder[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(!!(paramBranchId || staff?.branchId));
     const [error, setError] = useState('');
     const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
     const [status, setStatus] = useState<string>('');
@@ -222,9 +222,9 @@ export const Orders: React.FC = () => {
                 </div>
                 <div className="o-body">
                     {branchesLoading ? (
-                        <div className="o-empty">
-                            <div className="o-spinner" />
-                            <p>Loading branches…</p>
+                        <div className="o-branch-grid">
+                            <p className="o-branch-hint">Fetching your branches...</p>
+                            <SkeletonLoader variant="stats-card" count={3} />
                         </div>
                     ) : branches.length === 0 ? (
                         <div className="o-empty">
