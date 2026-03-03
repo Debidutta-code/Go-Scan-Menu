@@ -1,0 +1,132 @@
+/* ./skeleton-loader/SkeletonLoader.css */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #e5e7eb 25%,
+    #f3f4f6 50%,
+    #e5e7eb 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.6s infinite linear;
+  border-radius: 6px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Common sizes ───────────────────────────────────────────── */
+.skeleton-text {
+  height: 14px;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.skeleton-text-short {
+  width: 60%;
+  height: 14px;
+}
+
+.skeleton-text-medium {
+  width: 80%;
+  height: 16px;
+}
+
+.skeleton-text-tiny {
+  width: 50%;
+  height: 10px;
+  margin: 3px 0;
+}
+
+.skeleton-value {
+  width: 110px;
+  height: 24px;
+  margin-bottom: 4px;
+}
+
+.skeleton-label {
+  width: 90px;
+  height: 12px;
+}
+
+.skeleton-sub {
+  width: 60px;
+  height: 10px;
+}
+
+.skeleton-pill,
+.skeleton-badge {
+  width: 70px;
+  height: 22px;
+  border-radius: 999px;
+}
+
+.skeleton-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.skeleton-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+/* ── Stats card skeleton ────────────────────────────────────── */
+.skeleton-stats-card {
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  pointer-events: none;
+  opacity: 0.92;
+}
+
+.skeleton-stats-card .summary-icon {
+  background: #e5e7eb !important;
+}
+
+/* ── Table row skeleton ─────────────────────────────────────── */
+.skeleton-row td {
+  padding: 11px 14px;
+}
+
+.skeleton-time {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Order detail panel skeleton (optional future use) ──────── */
+.skeleton-detail-panel {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeleton-header {
+  height: 44px;
+  width: 100%;
+  border-radius: 8px;
+}
+
+.skeleton-meta-row {
+  height: 68px;
+  border-radius: 10px;
+}
+
+.skeleton-section-title {
+  height: 16px;
+  width: 120px;
+}
+
+.skeleton-item-row {
+  height: 64px;
+  border-radius: 8px;
+}

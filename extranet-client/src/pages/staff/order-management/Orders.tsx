@@ -11,6 +11,7 @@ import {
     Filter, Search, X, TrendingUp, ShoppingBag,
     DollarSign, AlertTriangle, Eye
 } from 'lucide-react';
+import { SkeletonLoader } from './skeleton-loader/SkeletonLoader';  // ← Adjust path if your folder structure is different
 import './Orders.css';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
@@ -164,9 +165,6 @@ export const Orders: React.FC = () => {
         }
     }, [fetchOrders, token, staff, targetBranchId]);
 
-
-
-    /** Update an order's status and reflect immediately in local state */
     const handleStatusUpdate = useCallback(async (orderId: string, newStatus: string) => {
         if (!token || !staff) throw new Error('Not authenticated');
         const rid = typeof staff.restaurantId === 'string'
@@ -178,13 +176,10 @@ export const Orders: React.FC = () => {
             throw new Error((response as any).message || 'Failed to update status');
         }
         const updated = response.data;
-        // Update in-place in orders list
         setOrders(prev => prev.map(o => o._id === orderId ? updated : o));
-        // Keep panel open with refreshed data
         setSelectedOrder(updated);
     }, [token, staff]);
 
-    /** Cancel an order (only valid in pending state) */
     const handleCancelOrder = useCallback(async (orderId: string) => {
         if (!token || !staff) throw new Error('Not authenticated');
         const rid = typeof staff.restaurantId === 'string'
@@ -261,7 +256,7 @@ export const Orders: React.FC = () => {
         );
     }
 
-    // ── Orders view ────────────────────────────────────────────
+    // ── Main Orders view ────────────────────────────────────────────
     return (
         <div className="o-layout">
             {/* Header */}
@@ -279,7 +274,6 @@ export const Orders: React.FC = () => {
                 </div>
 
                 <div className="o-header-actions">
-                    {/* Search */}
                     <div className="o-search">
                         <Search size={14} className="o-search-icon" />
                         <input
@@ -295,7 +289,6 @@ export const Orders: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Status filter */}
                     <div className="o-filter">
                         <Filter size={13} />
                         <select
@@ -310,8 +303,6 @@ export const Orders: React.FC = () => {
                         </select>
                     </div>
 
-
-
                     <button
                         className={`o-refresh-btn ${loading ? 'o-refresh-btn--loading' : ''}`}
                         onClick={fetchOrders}
@@ -323,7 +314,7 @@ export const Orders: React.FC = () => {
                 </div>
             </div>
 
-            {/* Error */}
+            {/* Error message */}
             {error && (
                 <div className="o-error">
                     <AlertCircle size={14} />
@@ -331,44 +322,66 @@ export const Orders: React.FC = () => {
                 </div>
             )}
 
-            {/* Stats row */}
+            {/* Stats cards with skeleton */}
             <div className="o-stats">
-                <SummaryCard
-                    icon={<ShoppingBag size={16} />}
-                    label="Total Orders"
-                    value={stats.total}
-                    sub="this view"
-                    accent="blue"
-                />
-                <SummaryCard
-                    icon={<TrendingUp size={16} />}
-                    label="Active Orders"
-                    value={stats.active}
-                    sub="in progress"
-                    accent="green"
-                />
-                <SummaryCard
-                    icon={<AlertTriangle size={16} />}
-                    label="Need Action"
-                    value={stats.pending}
-                    sub="pending"
-                    accent="amber"
-                />
-                <SummaryCard
-                    icon={<DollarSign size={16} />}
-                    label="Revenue"
-                    value={`$${stats.revenue.toFixed(2)}`}
-                    sub="total"
-                    accent="purple"
-                />
+                {loading ? (
+                    <SkeletonLoader variant="stats-card" count={4} />
+                ) : (
+                    <>
+                        <SummaryCard
+                            icon={<ShoppingBag size={16} />}
+                            label="Total Orders"
+                            value={stats.total}
+                            sub="this view"
+                            accent="blue"
+                        />
+                        <SummaryCard
+                            icon={<TrendingUp size={16} />}
+                            label="Active Orders"
+                            value={stats.active}
+                            sub="in progress"
+                            accent="green"
+                        />
+                        <SummaryCard
+                            icon={<AlertTriangle size={16} />}
+                            label="Need Action"
+                            value={stats.pending}
+                            sub="pending"
+                            accent="amber"
+                        />
+                        <SummaryCard
+                            icon={<DollarSign size={16} />}
+                            label="Revenue"
+                            value={`$${stats.revenue.toFixed(2)}`}
+                            sub="total"
+                            accent="purple"
+                        />
+                    </>
+                )}
             </div>
 
-            {/* Table */}
+            {/* Table / content area */}
             <div className="o-body">
-                {loading && !orders.length ? (
-                    <div className="o-empty">
-                        <div className="o-spinner" />
-                        <p>Loading orders…</p>
+                {loading && orders.length === 0 ? (
+                    <div className="o-table-wrap">
+                        <table className="o-table">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Table</th>
+                                    <th>Type</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th>Date / Time</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <SkeletonLoader variant="table-row" count={Math.min(10, limit)} />
+                            </tbody>
+                        </table>
                     </div>
                 ) : filteredOrders.length === 0 ? (
                     <div className="o-empty">
@@ -465,8 +478,8 @@ export const Orders: React.FC = () => {
                 )}
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+            {/* Pagination - only shown when we have real data */}
+            {!loading && totalPages > 1 && (
                 <div className="o-pagination">
                     <button
                         className="o-pg-btn"
