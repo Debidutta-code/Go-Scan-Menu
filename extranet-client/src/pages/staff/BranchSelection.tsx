@@ -7,6 +7,7 @@ import { TableService } from '../../services/table.service';
 import { Branch } from '../../types/table.types';
 import { Button } from '../../components/ui/Button';
 import { TableManagementSkeleton } from './TableManagementSkeleton';
+import './TableManagement.css';
 import './BranchSelection.css';
 
 export const BranchSelection: React.FC = () => {
@@ -104,7 +105,26 @@ export const BranchSelection: React.FC = () => {
   };
 
   if (loading) {
-    return <TableManagementSkeleton />;
+    return (
+      <div className="table-management-layout">
+        <div className="table-page-toolbar">
+          <h1 className="table-page-title">
+            Table Management <span className="branch-name-skeleton"></span>
+          </h1>
+          <div className="table-toolbar-actions">
+            <div className="table-filter-container">
+              <select className="table-filter-select" disabled>
+                <option>All</option>
+              </select>
+            </div>
+            <Button variant="outline" size="sm" disabled>🎨 QR Codes</Button>
+            <Button variant="outline" size="sm" disabled>+ Add Table</Button>
+            <Button variant="primary" size="sm" disabled>+ Bulk Add</Button>
+          </div>
+        </div>
+        <TableManagementSkeleton />
+      </div>
+    );
   }
 
   return (

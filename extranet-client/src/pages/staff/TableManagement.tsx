@@ -243,11 +243,11 @@ export const TableManagement: React.FC = () => {
               onChange={(e) => setSelectedStatus(e.target.value)}
               data-testid="status-filter"
             >
-              <option value="all">All ({statusCounts.all})</option>
-              <option value="available">Available ({statusCounts.available})</option>
-              <option value="occupied">Occupied ({statusCounts.occupied})</option>
-              <option value="reserved">Reserved ({statusCounts.reserved})</option>
-              <option value="maintenance">Maintenance ({statusCounts.maintenance})</option>
+              <option value="all">All {!loading && `(${statusCounts.all})`}</option>
+              <option value="available">Available {!loading && `(${statusCounts.available})`}</option>
+              <option value="occupied">Occupied {!loading && `(${statusCounts.occupied})`}</option>
+              <option value="reserved">Reserved {!loading && `(${statusCounts.reserved})`}</option>
+              <option value="maintenance">Maintenance {!loading && `(${statusCounts.maintenance})`}</option>
             </select>
           </div>
 
