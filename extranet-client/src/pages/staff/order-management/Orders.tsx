@@ -210,52 +210,6 @@ export const Orders: React.FC = () => {
         setSelectedOrder(updated);
     }, [token, staff]);
 
-    // ── Branch selection screen ────────────────────────────────
-    if (!targetBranchId) {
-        return (
-            <div className="o-layout">
-                <div className="o-header">
-                    <div className="o-header-left">
-                        <h1 className="o-title">Orders</h1>
-                        <span className="o-subtitle">Select a branch to manage</span>
-                    </div>
-                </div>
-                <div className="o-body">
-                    {branchesLoading ? (
-                        <div className="o-branch-grid">
-                            <p className="o-branch-hint">Fetching your branches...</p>
-                            <SkeletonLoader variant="stats-card" count={3} />
-                        </div>
-                    ) : branches.length === 0 ? (
-                        <div className="o-empty">
-                            <Building2 size={40} className="o-empty-icon" />
-                            <p className="o-empty-title">No branches available</p>
-                            <p className="o-empty-desc">Contact your administrator to get branch access.</p>
-                        </div>
-                    ) : (
-                        <div className="o-branch-grid">
-                            <p className="o-branch-hint">Select a branch to view its orders</p>
-                            {branches.map((branch) => (
-                                <div
-                                    key={branch._id}
-                                    className="o-branch-card"
-                                    onClick={() => navigate(`/staff/orders/${branch._id}`)}
-                                >
-                                    <div className="o-branch-icon"><Building2 size={20} /></div>
-                                    <div className="o-branch-details">
-                                        <span className="o-branch-name">{branch.name}</span>
-                                        <span className="o-branch-code">{branch.code}</span>
-                                    </div>
-                                    <ChevronRight size={16} className="o-branch-arrow" />
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    }
-
     // ── Main Orders view ────────────────────────────────────────────
     return (
         <div className="o-layout">
@@ -264,12 +218,12 @@ export const Orders: React.FC = () => {
                 <div className="o-header-left">
                     <h1 className="o-title">
                         Orders
-                        {branchInfo && (
+                        {branchInfo && targetBranchId && (
                             <span className="o-branch-pill">{branchInfo.name} · {branchInfo.code}</span>
                         )}
                     </h1>
                     <span className="o-subtitle">
-                        {loading ? 'Refreshing…' : `${filteredOrders.length} order${filteredOrders.length !== 1 ? 's' : ''}`}
+                        {!targetBranchId ? 'Select a branch to manage' : loading ? 'Refreshing…' : `${filteredOrders.length} order${filteredOrders.length !== 1 ? 's' : ''}`}
                     </span>
                 </div>
 
@@ -281,6 +235,7 @@ export const Orders: React.FC = () => {
                             placeholder="Search order, table…"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
+                            disabled={!targetBranchId}
                         />
                         {search && (
                             <button className="o-search-clear" onClick={() => setSearch('')}>
@@ -295,6 +250,7 @@ export const Orders: React.FC = () => {
                             className="o-filter-select"
                             value={status}
                             onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+                            disabled={!targetBranchId}
                         >
                             <option value="">All Statuses</option>
                             {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
@@ -306,7 +262,7 @@ export const Orders: React.FC = () => {
                     <button
                         className={`o-refresh-btn ${loading ? 'o-refresh-btn--loading' : ''}`}
                         onClick={fetchOrders}
-                        disabled={loading}
+                        disabled={loading || !targetBranchId}
                     >
                         <RefreshCcw size={14} className={loading ? 'spin' : ''} />
                         <span>Refresh</span>
@@ -324,7 +280,7 @@ export const Orders: React.FC = () => {
 
             {/* Stats cards with skeleton */}
             <div className="o-stats">
-                {loading ? (
+                {loading || !targetBranchId ? (
                     <SkeletonLoader variant="stats-card" count={4} />
                 ) : (
                     <>
@@ -362,7 +318,7 @@ export const Orders: React.FC = () => {
 
             {/* Table / content area */}
             <div className="o-body">
-                {loading && orders.length === 0 ? (
+                {loading || branchesLoading || (!targetBranchId && branches.length === 0) ? (
                     <div className="o-table-wrap">
                         <table className="o-table">
                             <thead>
@@ -379,9 +335,27 @@ export const Orders: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <SkeletonLoader variant="table-row" count={Math.min(10, limit)} />
+                                <SkeletonLoader variant="table-row" count={10} />
                             </tbody>
                         </table>
+                    </div>
+                ) : !targetBranchId ? (
+                    <div className="o-branch-grid">
+                        <p className="o-branch-hint">Select a branch to view its orders</p>
+                        {branches.map((branch) => (
+                            <div
+                                key={branch._id}
+                                className="o-branch-card"
+                                onClick={() => navigate(`/staff/orders/${branch._id}`)}
+                            >
+                                <div className="o-branch-icon"><Building2 size={20} /></div>
+                                <div className="o-branch-details">
+                                    <span className="o-branch-name">{branch.name}</span>
+                                    <span className="o-branch-code">{branch.code}</span>
+                                </div>
+                                <ChevronRight size={16} className="o-branch-arrow" />
+                            </div>
+                        ))}
                     </div>
                 ) : filteredOrders.length === 0 ? (
                     <div className="o-empty">
