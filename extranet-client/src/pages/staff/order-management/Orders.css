@@ -1174,3 +1174,60 @@
     background: #fecaca;
     opacity: 1;
 }
+
+/* ── Live / Offline connection badge ─────────────────────── */
+.o-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border: 1px solid transparent;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.o-live-badge--on {
+    background: #ecfdf5;
+    color: #065f46;
+    border-color: #6ee7b7;
+}
+
+.o-live-badge--off {
+    background: #f3f4f6;
+    color: #6b7280;
+    border-color: #d1d5db;
+}
+
+.o-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.o-live-badge--on .o-live-dot {
+    background: #10b981;
+    animation: live-pulse 1.8s ease-in-out infinite;
+}
+
+.o-live-badge--off .o-live-dot {
+    background: #9ca3af;
+}
+
+@keyframes live-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.45;
+        transform: scale(1.3);
+    }
+}
