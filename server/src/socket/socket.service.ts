@@ -1,7 +1,7 @@
 // src/socket/socket.service.ts
 import { Server as HTTPServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { envConfig } from '@/config';
+import { envConfig, corsOptions } from '@/config';
 import { JWTUtil } from '@/utils';
 
 export interface SocketUser {
@@ -17,11 +17,7 @@ class SocketService {
 
   initialize(httpServer: HTTPServer): void {
     this.io = new SocketIOServer(httpServer, {
-      cors: {
-        origin: envConfig.CLIENT_URL || '*',
-        methods: ['GET', 'POST'],
-        credentials: true,
-      },
+      cors: corsOptions,
       transports: ['websocket', 'polling'],
     });
 
