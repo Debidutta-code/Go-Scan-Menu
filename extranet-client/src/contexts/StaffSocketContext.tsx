@@ -55,11 +55,18 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
             setIsConnected(true);
             setSocket(sock);
             console.log('🔌 Staff socket connected! ID:', sock.id);
-            if (branchId) {
-                console.log(`🔑 Emitting socket:authenticate-staff for branch: ${branchId}`);
-                sock.emit('socket:authenticate-staff', { token, branchId });
+
+            // Collect all authorized branch IDs
+            const branchIds = staff?.allowedBranchIds || [];
+            if (staff?.branchId && !branchIds.includes(staff.branchId)) {
+                branchIds.push(staff.branchId);
+            }
+
+            if (branchIds.length > 0) {
+                console.log(`🔑 Emitting socket:authenticate-staff for branches:`, branchIds);
+                sock.emit('socket:authenticate-staff', { token, branchIds });
             } else {
-                console.warn('⚠️ No branchId available for socket authentication');
+                console.warn('⚠️ No branchIds available for socket authentication');
             }
         };
 
@@ -112,11 +119,20 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
         };
     }, [isAuthenticated, token, branchId]);
 
-    // Re-authenticate if branchId changes (e.g. branch selector)
+    // Re-authenticate if staff data or socket changes
     useEffect(() => {
-        if (!socket || !socket.connected || !token || !branchId) return;
-        socket.emit('socket:authenticate-staff', { token, branchId });
-    }, [branchId, socket, token]);
+        if (!socket || !socket.connected || !token) return;
+
+        const branchIds = staff?.allowedBranchIds || [];
+        if (staff?.branchId && !branchIds.includes(staff.branchId)) {
+            branchIds.push(staff.branchId);
+        }
+
+        if (branchIds.length > 0) {
+            console.log('🔄 Re-syncing socket authentication for branches:', branchIds);
+            socket.emit('socket:authenticate-staff', { token, branchIds });
+        }
+    }, [socket, token, staff?.branchId, staff?.allowedBranchIds]);
 
     // Disconnect when the provider unmounts (staff logs out)
     useEffect(() => {

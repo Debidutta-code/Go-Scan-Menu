@@ -46,26 +46,45 @@ class SocketService {
       });
 
       // Handle staff authentication over socket
-      socket.on('socket:authenticate-staff', (data: { token: string; branchId: string }) => {
+      socket.on('socket:authenticate-staff', (data: { token: string; branchId?: string; branchIds?: string[] }) => {
         try {
           const decoded = JWTUtil.verifyToken(data.token);
           if (!decoded?.id) {
             socket.emit('socket:error', { message: 'Invalid token' });
             return;
           }
-          // Join a dedicated staff room for this branch
-          socket.join(`staff:${data.branchId}`);
-          // Also join the branch room for backward compat
-          socket.join(`branch:${data.branchId}`);
+
+          const roomsToJoin: string[] = [];
+
+          // Add rooms from branchIds array
+          if (data.branchIds && Array.isArray(data.branchIds)) {
+            data.branchIds.forEach(id => {
+              roomsToJoin.push(`staff:${id}`);
+              roomsToJoin.push(`branch:${id}`);
+            });
+          }
+
+          // Add rooms from single branchId (backward compat)
+          if (data.branchId) {
+            roomsToJoin.push(`staff:${data.branchId}`);
+            roomsToJoin.push(`branch:${data.branchId}`);
+          }
+
+          // Deduplicate and join
+          const uniqueRooms = [...new Set(roomsToJoin)];
+          uniqueRooms.forEach(room => socket.join(room));
+
           if (decoded.restaurantId) {
             socket.join(`restaurant:${decoded.restaurantId}`);
           }
+
           socket.emit('socket:authenticated', {
             staffId: decoded.id,
-            branchId: data.branchId,
+            joinedRooms: uniqueRooms,
           });
-          console.log(`🔐 Staff ${decoded.id} authenticated → joined staff:${data.branchId}`);
-        } catch {
+
+          console.log(`🔐 Staff ${decoded.id} authenticated → Joined ${uniqueRooms.length} rooms`);
+        } catch (err) {
           socket.emit('socket:error', { message: 'Authentication failed' });
         }
       });
@@ -82,38 +101,48 @@ class SocketService {
   emitOrderCreated(order: any): void {
     if (!this.io) return;
 
+    const branchId = order.branchId?._id?.toString() || order.branchId?.toString();
+    const restaurantId = order.restaurantId?._id?.toString() || order.restaurantId?.toString();
+    const tableId = order.tableId?._id?.toString() || order.tableId?.toString();
+
+    console.log(`📤 Emitting order:created for Order ${order.orderNumber}`);
+    console.log(`   Targeting rooms: staff:${branchId}, branch:${branchId}, restaurant:${restaurantId}`);
+
     // Notify kitchen
-    this.io.to(`kitchen:${order.branchId}`).emit('order:created', order);
+    this.io.to(`kitchen:${branchId}`).emit('order:created', order);
 
-    // Notify branch admins
-    this.io.to(`branch:${order.branchId}`).emit('order:created', order);
+    // Notify branch
+    this.io.to(`branch:${branchId}`).emit('order:created', order);
 
-    // Notify restaurant admins
-    this.io.to(`restaurant:${order.restaurantId}`).emit('order:created', order);
+    // Notify restaurant
+    this.io.to(`restaurant:${restaurantId}`).emit('order:created', order);
 
     // Notify table
-    this.io.to(`table:${order.tableId}`).emit('order:created', order);
+    this.io.to(`table:${tableId}`).emit('order:created', order);
 
     // Notify all authenticated staff on this branch (real-time staff portal)
-    this.io.to(`staff:${order.branchId}`).emit('order:created', order);
-
-    console.log(`📤 Order created event emitted for order: ${order.orderNumber}`);
+    this.io.to(`staff:${branchId}`).emit('order:created', order);
   }
 
   // Emit order status update
   emitOrderStatusUpdate(order: any): void {
     if (!this.io) return;
 
+    const branchId = order.branchId?._id?.toString() || order.branchId?.toString();
+    const restaurantId = order.restaurantId?._id?.toString() || order.restaurantId?.toString();
+    const tableId = order.tableId?._id?.toString() || order.tableId?.toString();
+
+    console.log(`📤 Emitting order:status-update for Order ${order.orderNumber} (Status: ${order.status})`);
+    console.log(`   Targeting rooms: staff:${branchId}, branch:${branchId}`);
+
     // Notify all relevant parties
-    this.io.to(`kitchen:${order.branchId}`).emit('order:status-update', order);
-    this.io.to(`branch:${order.branchId}`).emit('order:status-update', order);
-    this.io.to(`restaurant:${order.restaurantId}`).emit('order:status-update', order);
-    this.io.to(`table:${order.tableId}`).emit('order:status-update', order);
+    this.io.to(`kitchen:${branchId}`).emit('order:status-update', order);
+    this.io.to(`branch:${branchId}`).emit('order:status-update', order);
+    this.io.to(`restaurant:${restaurantId}`).emit('order:status-update', order);
+    this.io.to(`table:${tableId}`).emit('order:status-update', order);
 
     // Notify all authenticated staff on this branch (real-time staff portal)
-    this.io.to(`staff:${order.branchId}`).emit('order:status-update', order);
-
-    console.log(`📤 Order status updated: ${order.orderNumber} -> ${order.status}`);
+    this.io.to(`staff:${branchId}`).emit('order:status-update', order);
   }
 
   // Emit order item status update

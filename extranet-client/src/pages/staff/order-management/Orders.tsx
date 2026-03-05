@@ -171,17 +171,40 @@ export const Orders: React.FC = () => {
         if (!socket || !targetBranchId) return;
 
         const handleOrderCreated = (newOrder: IOrder) => {
+            console.log('📦 Socket Event: order:created', newOrder);
+
+            const incomingBranchId = typeof newOrder.branchId === 'object'
+                ? (newOrder.branchId as any)._id?.toString() || newOrder.branchId?.toString()
+                : newOrder.branchId?.toString();
+
+            console.log(`🔍 Branch check: incoming=${incomingBranchId}, target=${targetBranchId}`);
+
             // Only process orders for the currently viewed branch
-            if (newOrder.branchId !== targetBranchId) return;
+            if (incomingBranchId !== targetBranchId) {
+                console.log('⏭️ Order for different branch, skipping.');
+                return;
+            }
+
             setOrders(prev => {
                 // Avoid duplicates (e.g. if staff also placed the order)
-                if (prev.some(o => o._id === newOrder._id)) return prev;
+                if (prev.some(o => o._id === newOrder._id)) {
+                    console.log('⏭️ Duplicate order, skipping update.');
+                    return prev;
+                }
+                console.log('✨ Adding new order to table!');
                 return [newOrder, ...prev];
             });
         };
 
         const handleOrderStatusUpdate = (updatedOrder: IOrder) => {
-            if (updatedOrder.branchId !== targetBranchId) return;
+            console.log('🔄 Socket Event: order:status-update', updatedOrder);
+
+            const incomingBranchId = typeof updatedOrder.branchId === 'object'
+                ? (updatedOrder.branchId as any)._id?.toString() || updatedOrder.branchId?.toString()
+                : updatedOrder.branchId?.toString();
+
+            if (incomingBranchId !== targetBranchId) return;
+
             setOrders(prev =>
                 prev.map(o => o._id === updatedOrder._id ? updatedOrder : o)
             );
