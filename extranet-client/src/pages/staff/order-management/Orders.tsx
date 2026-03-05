@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '../../../contexts/StaffAuthContext';
 import { useStaffSocket } from '../../../contexts/StaffSocketContext';
-import { OrderService, IOrder } from '../../../services/order.service';
+import { IOrder } from '../../../services/order.service';
+import { OrderService } from '../../../services/order.service';
 import { BranchService } from '../../../services/branch.service';
 import { Branch } from '../../../types/table.types';
 import { OrderDetailPanel } from './OrderDetailPanel';
@@ -12,7 +13,7 @@ import {
     Filter, Search, X, TrendingUp, ShoppingBag,
     DollarSign, AlertTriangle, Eye
 } from 'lucide-react';
-import { SkeletonLoader } from './skeleton-loader/SkeletonLoader';  // ← Adjust path if your folder structure is different
+import { SkeletonLoader } from './skeleton-loader/SkeletonLoader';
 import './Orders.css';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
@@ -94,6 +95,7 @@ export const Orders: React.FC = () => {
         );
     }, [orders, search]);
 
+    // ── Fetch branches (for branch picker, no change) ─────────────────────────
     const fetchBranches = useCallback(async () => {
         if (!token || !staff) return;
         setBranchesLoading(true);
@@ -120,6 +122,7 @@ export const Orders: React.FC = () => {
         if (!targetBranchId && token && staff) fetchBranches();
     }, [targetBranchId, token, staff, fetchBranches]);
 
+    // ── Fetch branch info (for header display, no change) ─────────────────────
     const fetchBranchInfo = useCallback(async () => {
         if (!token || !staff || !targetBranchId) return;
         try {
@@ -137,39 +140,70 @@ export const Orders: React.FC = () => {
         if (token && staff && targetBranchId) fetchBranchInfo();
     }, [fetchBranchInfo, token, staff, targetBranchId]);
 
-    const fetchOrders = useCallback(async () => {
-        if (!token || !staff || !targetBranchId) return;
+    // ── Socket-based order fetch (replaces HTTP GET) ──────────────────────────
+    const fetchOrders = useCallback(() => {
+        if (!socket || !socket.connected || !targetBranchId) return;
+
         setLoading(true);
         setError('');
-        try {
-            const rid = typeof staff.restaurantId === 'string'
-                ? staff.restaurantId : staff.restaurantId?._id;
-            if (!rid) throw new Error('Restaurant ID not found');
-            const response = await OrderService.getBranchOrdersFull(
-                token, rid, targetBranchId, { status }, page, limit
-            );
-            if (response.success && response.data) {
-                setOrders(response.data.orders);
-                setTotalPages(response.data.pagination.totalPages);
-            }
-        } catch (err: any) {
-            setError(err.message || 'Failed to load orders');
-        } finally {
-            setLoading(false);
-        }
-    }, [token, staff, targetBranchId, status, page, limit]);
 
+        socket.emit('orders:get-by-branch', {
+            branchId: targetBranchId,
+            filters: { status: status || undefined },
+            page,
+            limit,
+        });
+
+        console.log(`📡 Emitting orders:get-by-branch for branch: ${targetBranchId}`);
+    }, [socket, targetBranchId, status, page, limit]);
+
+    // Trigger fetch when socket is ready or filters/page change
     useEffect(() => {
-        if (token && staff && targetBranchId) {
+        if (socket?.connected && targetBranchId) {
             fetchOrders();
-            // No polling — real-time updates come via socket events
         }
-    }, [fetchOrders, token, staff, targetBranchId]);
+    }, [fetchOrders, socket, targetBranchId]);
 
-    // ── Real-time socket listeners ────────────────────────────────────
+    // Re-fetch when socket reconnects after a drop
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleReconnect = () => {
+            console.log('🔄 Socket reconnected — re-fetching orders');
+            if (targetBranchId) fetchOrders();
+        };
+
+        socket.on('connect', handleReconnect);
+        return () => {
+            socket.off('connect', handleReconnect);
+        };
+    }, [socket, fetchOrders, targetBranchId]);
+
+    // ── All socket event listeners ────────────────────────────────────────────
     useEffect(() => {
         if (!socket || !targetBranchId) return;
 
+        // Response to our own orders:get-by-branch emit
+        const handleOrdersData = (payload: {
+            success: boolean;
+            data: { orders: IOrder[]; pagination: { totalPages: number } };
+        }) => {
+            console.log(`📋 orders:data received → ${payload.data?.orders?.length ?? 0} orders`);
+            if (payload.success && payload.data) {
+                setOrders(payload.data.orders);
+                setTotalPages(payload.data.pagination.totalPages);
+            }
+            setLoading(false);
+        };
+
+        // Error response to our own emit
+        const handleOrdersError = (err: { message: string }) => {
+            console.error('❌ orders:error', err);
+            setError(err.message || 'Failed to load orders');
+            setLoading(false);
+        };
+
+        // New order pushed from server (customer placed order)
         const handleOrderCreated = (newOrder: IOrder) => {
             console.log('📦 Socket Event: order:created', newOrder);
 
@@ -177,25 +211,22 @@ export const Orders: React.FC = () => {
                 ? (newOrder.branchId as any)._id?.toString() || newOrder.branchId?.toString()
                 : newOrder.branchId?.toString();
 
-            console.log(`🔍 Branch check: incoming=${incomingBranchId}, target=${targetBranchId}`);
-
-            // Only process orders for the currently viewed branch
             if (incomingBranchId !== targetBranchId) {
                 console.log('⏭️ Order for different branch, skipping.');
                 return;
             }
 
             setOrders(prev => {
-                // Avoid duplicates (e.g. if staff also placed the order)
                 if (prev.some(o => o._id === newOrder._id)) {
                     console.log('⏭️ Duplicate order, skipping update.');
                     return prev;
                 }
-                console.log('✨ Adding new order to table!');
+                console.log('✨ Adding new order to list!');
                 return [newOrder, ...prev];
             });
         };
 
+        // Order status changed pushed from server
         const handleOrderStatusUpdate = (updatedOrder: IOrder) => {
             console.log('🔄 Socket Event: order:status-update', updatedOrder);
 
@@ -208,21 +239,25 @@ export const Orders: React.FC = () => {
             setOrders(prev =>
                 prev.map(o => o._id === updatedOrder._id ? updatedOrder : o)
             );
-            // Keep the detail panel in sync if it's showing this order
             setSelectedOrder(prev =>
                 prev?._id === updatedOrder._id ? updatedOrder : prev
             );
         };
 
+        socket.on('orders:data', handleOrdersData);
+        socket.on('orders:error', handleOrdersError);
         socket.on('order:created', handleOrderCreated);
         socket.on('order:status-update', handleOrderStatusUpdate);
 
         return () => {
+            socket.off('orders:data', handleOrdersData);
+            socket.off('orders:error', handleOrdersError);
             socket.off('order:created', handleOrderCreated);
             socket.off('order:status-update', handleOrderStatusUpdate);
         };
     }, [socket, targetBranchId]);
 
+    // ── Action handlers (these still use REST since they mutate data) ─────────
     const handleStatusUpdate = useCallback(async (orderId: string, newStatus: string) => {
         if (!token || !staff) throw new Error('Not authenticated');
         const rid = typeof staff.restaurantId === 'string'
@@ -268,7 +303,7 @@ export const Orders: React.FC = () => {
         setSelectedOrder(updated);
     }, [token, staff]);
 
-    // ── Main Orders view ────────────────────────────────────────────
+    // ── Render ────────────────────────────────────────────────────────────────
     return (
         <div className="o-layout">
             {/* Header */}
@@ -344,7 +379,7 @@ export const Orders: React.FC = () => {
                 </div>
             )}
 
-            {/* Stats cards with skeleton */}
+            {/* Stats cards */}
             <div className="o-stats">
                 {loading || !targetBranchId ? (
                     <SkeletonLoader variant="stats-card" count={4} />
@@ -518,7 +553,7 @@ export const Orders: React.FC = () => {
                 )}
             </div>
 
-            {/* Pagination - only shown when we have real data */}
+            {/* Pagination */}
             {!loading && totalPages > 1 && (
                 <div className="o-pagination">
                     <button
