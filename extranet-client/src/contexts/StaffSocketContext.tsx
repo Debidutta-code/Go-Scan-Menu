@@ -1,7 +1,8 @@
 // src/contexts/StaffSocketContext.tsx
 // Manages the WebSocket lifecycle for authenticated staff users.
-// - Connects when staff token + branchId are available.
+// - Connects as soon as the staff token is available (no branchId required).
 // - Authenticates with the server via 'socket:authenticate-staff'.
+//   The server joins the socket to staff:<branchId> rooms.
 // - Exposes the socket instance and connection state via useStaffSocket().
 // - Disconnects cleanly on logout / unmount.
 
@@ -10,12 +11,12 @@ import React, {
     useContext,
     useEffect,
     useState,
-    useRef,
     ReactNode,
 } from 'react';
-import type { Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 import { getSocket, disconnectSocket } from '../socket/staffSocket';
 import { useStaffAuth } from './StaffAuthContext';
+import { Staff } from '../types/staff.types';
 
 interface StaffSocketContextType {
     socket: Socket | null;
@@ -29,29 +30,33 @@ const StaffSocketContext = createContext<StaffSocketContextType>({
 
 export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { staff, token, isAuthenticated } = useStaffAuth();
-    const [isConnected, setIsConnected] = useState(false);
-    const socketRef = useRef<Socket | null>(null);
 
-    // Determine the branch this staff member belongs to.
-    // Use branchId if set directly, otherwise pick the first allowedBranchId.
+    // Use state (not ref) so context consumers re-render when these change
+    const [socket, setSocket] = useState<Socket | null>(null);
+    const [isConnected, setIsConnected] = useState(false);
+
+    // Resolve the best branchId we can for authentication.
+    // Owners may have multiple branches — we still connect; the server will
+    // join them to all relevant rooms after receiving the token.
     const branchId: string | undefined =
         staff?.branchId ||
-        (staff?.allowedBranchIds?.length === 1 ? staff.allowedBranchIds[0] : undefined);
+        (staff?.allowedBranchIds && staff.allowedBranchIds.length > 0
+            ? staff.allowedBranchIds[0]
+            : undefined);
 
     useEffect(() => {
-        if (!isAuthenticated || !token || !branchId) {
-            // Not ready yet — do nothing (don't disconnect if already connected)
-            return;
-        }
+        if (!isAuthenticated || !token) return;
 
-        const socket = getSocket();
-        socketRef.current = socket;
+        const sock = getSocket();
 
         const handleConnect = () => {
             setIsConnected(true);
-            console.log('🔌 Staff socket connected:', socket.id);
-            // Authenticate with the server so we join the staff:<branchId> room
-            socket.emit('socket:authenticate-staff', { token, branchId });
+            setSocket(sock); // expose to consumers after connect
+            console.log('🔌 Staff socket connected:', sock.id);
+            // Authenticate so the server adds this socket to staff rooms
+            if (branchId) {
+                sock.emit('socket:authenticate-staff', { token, branchId });
+            }
         };
 
         const handleAuthenticated = (data: { staffId: string; branchId: string }) => {
@@ -63,44 +68,52 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
             console.log('🔴 Staff socket disconnected:', reason);
         };
 
-        const handleError = (err: { message: string }) => {
-            console.error('❌ Staff socket error:', err.message);
+        const handleConnectError = (err: Error) => {
+            console.error('❌ Staff socket connection error:', err.message);
         };
 
-        socket.on('connect', handleConnect);
-        socket.on('socket:authenticated', handleAuthenticated);
-        socket.on('disconnect', handleDisconnect);
-        socket.on('socket:error', handleError);
+        sock.on('connect', handleConnect);
+        sock.on('socket:authenticated', handleAuthenticated);
+        sock.on('disconnect', handleDisconnect);
+        sock.on('connect_error', handleConnectError);
 
-        // Connect if not already connected
-        if (!socket.connected) {
-            socket.connect();
+        if (!sock.connected) {
+            sock.connect();
         } else {
-            // Already connected from a previous render (e.g. route change) — re-authenticate
-            socket.emit('socket:authenticate-staff', { token, branchId });
+            // Already connected (e.g. route change) — expose and re-authenticate
+            setSocket(sock);
             setIsConnected(true);
+            if (branchId) {
+                sock.emit('socket:authenticate-staff', { token, branchId });
+            }
         }
 
         return () => {
-            socket.off('connect', handleConnect);
-            socket.off('socket:authenticated', handleAuthenticated);
-            socket.off('disconnect', handleDisconnect);
-            socket.off('socket:error', handleError);
-            // Do NOT disconnect here — the socket should persist across route changes.
-            // It is only disconnected when the provider unmounts (logout).
+            sock.off('connect', handleConnect);
+            sock.off('socket:authenticated', handleAuthenticated);
+            sock.off('disconnect', handleDisconnect);
+            sock.off('connect_error', handleConnectError);
+            // Do NOT disconnect here — persist across route changes.
         };
     }, [isAuthenticated, token, branchId]);
 
-    // Disconnect when the provider unmounts (user logged out)
+    // Re-authenticate if branchId changes (e.g. branch selector)
+    useEffect(() => {
+        if (!socket || !socket.connected || !token || !branchId) return;
+        socket.emit('socket:authenticate-staff', { token, branchId });
+    }, [branchId, socket, token]);
+
+    // Disconnect when the provider unmounts (staff logs out)
     useEffect(() => {
         return () => {
             disconnectSocket();
+            setSocket(null);
             setIsConnected(false);
         };
     }, []);
 
     return (
-        <StaffSocketContext.Provider value={{ socket: socketRef.current, isConnected }}>
+        <StaffSocketContext.Provider value={{ socket, isConnected }}>
             {children}
         </StaffSocketContext.Provider>
     );
