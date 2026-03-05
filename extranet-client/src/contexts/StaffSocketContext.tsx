@@ -48,39 +48,54 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
         if (!isAuthenticated || !token) return;
 
         const sock = getSocket();
+        console.log('🔌 Attempting socket connection...');
+        console.log('🌐 Current window location:', window.location.href);
 
         const handleConnect = () => {
             setIsConnected(true);
-            setSocket(sock); // expose to consumers after connect
-            console.log('🔌 Staff socket connected:', sock.id);
-            // Authenticate so the server adds this socket to staff rooms
+            setSocket(sock);
+            console.log('🔌 Staff socket connected! ID:', sock.id);
             if (branchId) {
+                console.log(`🔑 Emitting socket:authenticate-staff for branch: ${branchId}`);
                 sock.emit('socket:authenticate-staff', { token, branchId });
+            } else {
+                console.warn('⚠️ No branchId available for socket authentication');
             }
         };
 
         const handleAuthenticated = (data: { staffId: string; branchId: string }) => {
-            console.log(`✅ Staff socket authenticated → staff:${data.branchId}`);
+            console.log(`✅ Staff socket authenticated successfully →Joined staff:${data.branchId} room`);
         };
 
         const handleDisconnect = (reason: string) => {
             setIsConnected(false);
-            console.log('🔴 Staff socket disconnected:', reason);
+            console.warn('🔴 Staff socket disconnected. Reason:', reason);
         };
 
-        const handleConnectError = (err: Error) => {
-            console.error('❌ Staff socket connection error:', err.message);
+        const handleConnectError = (err: any) => {
+            setIsConnected(false);
+            console.error('❌ Staff socket connection error:', {
+                message: err.message,
+                description: err.description,
+                context: err.context,
+                type: err.type
+            });
+        };
+
+        const handleSocketError = (err: any) => {
+            console.error('❌ Server-side socket error:', err);
         };
 
         sock.on('connect', handleConnect);
         sock.on('socket:authenticated', handleAuthenticated);
         sock.on('disconnect', handleDisconnect);
         sock.on('connect_error', handleConnectError);
+        sock.on('socket:error', handleSocketError);
 
         if (!sock.connected) {
             sock.connect();
         } else {
-            // Already connected (e.g. route change) — expose and re-authenticate
+            console.log('🔄 Socket already connected, re-verifying...');
             setSocket(sock);
             setIsConnected(true);
             if (branchId) {
@@ -93,7 +108,7 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
             sock.off('socket:authenticated', handleAuthenticated);
             sock.off('disconnect', handleDisconnect);
             sock.off('connect_error', handleConnectError);
-            // Do NOT disconnect here — persist across route changes.
+            sock.off('socket:error', handleSocketError);
         };
     }, [isAuthenticated, token, branchId]);
 
