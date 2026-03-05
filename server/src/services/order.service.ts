@@ -568,9 +568,31 @@ export class OrderService {
       throw new AppError('Branch is closed today', 400);
     }
 
+    // Helper to convert "HH:MM" or "HH.MM" to minutes from midnight
+    const timeToMinutes = (timeStr: string) => {
+      const parts = timeStr.replace('.', ':').split(':');
+      const hours = parseInt(parts[0], 10);
+      const minutes = parseInt(parts[1] || '0', 10);
+      return hours * 60 + minutes;
+    };
+
+    const currentTimeStr = now.toTimeString().slice(0, 5);
+    const currentMinutes = timeToMinutes(currentTimeStr);
+    const openMinutes = timeToMinutes(todayHours.openTime);
+    const closeMinutes = timeToMinutes(todayHours.closeTime);
+
+    console.log(`🕒 Branch Time Check [${currentDay}]:`, {
+      currentTimeStr,
+      currentMinutes,
+      openTime: todayHours.openTime,
+      openMinutes,
+      closeTime: todayHours.closeTime,
+      closeMinutes,
+      isClosed: currentMinutes < openMinutes || currentMinutes > closeMinutes
+    });
+
     // Check current time is within operating hours
-    const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
-    if (currentTime < todayHours.openTime || currentTime > todayHours.closeTime) {
+    if (currentMinutes < openMinutes || currentMinutes > closeMinutes) {
       throw new AppError(
         `Branch is closed. Operating hours: ${todayHours.openTime} - ${todayHours.closeTime}`,
         400
