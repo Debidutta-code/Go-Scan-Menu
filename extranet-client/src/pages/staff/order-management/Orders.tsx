@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '../../../contexts/StaffAuthContext';
+import { useStaffSocket } from '../../../contexts/StaffSocketContext';
 import { OrderService, IOrder } from '../../../services/order.service';
 import { BranchService } from '../../../services/branch.service';
 import { Branch } from '../../../types/table.types';
@@ -59,6 +60,7 @@ export const Orders: React.FC = () => {
     const navigate = useNavigate();
     const { branchId: paramBranchId } = useParams<{ branchId: string }>();
     const { staff, token } = useStaffAuth();
+    const { socket, isConnected } = useStaffSocket();
 
     const [branches, setBranches] = useState<Branch[]>([]);
     const [branchesLoading, setBranchesLoading] = useState(false);
@@ -160,10 +162,43 @@ export const Orders: React.FC = () => {
     useEffect(() => {
         if (token && staff && targetBranchId) {
             fetchOrders();
-            const interval = setInterval(fetchOrders, 60000);
-            return () => clearInterval(interval);
+            // No polling — real-time updates come via socket events
         }
     }, [fetchOrders, token, staff, targetBranchId]);
+
+    // ── Real-time socket listeners ────────────────────────────────────
+    useEffect(() => {
+        if (!socket || !targetBranchId) return;
+
+        const handleOrderCreated = (newOrder: IOrder) => {
+            // Only process orders for the currently viewed branch
+            if (newOrder.branchId !== targetBranchId) return;
+            setOrders(prev => {
+                // Avoid duplicates (e.g. if staff also placed the order)
+                if (prev.some(o => o._id === newOrder._id)) return prev;
+                return [newOrder, ...prev];
+            });
+        };
+
+        const handleOrderStatusUpdate = (updatedOrder: IOrder) => {
+            if (updatedOrder.branchId !== targetBranchId) return;
+            setOrders(prev =>
+                prev.map(o => o._id === updatedOrder._id ? updatedOrder : o)
+            );
+            // Keep the detail panel in sync if it's showing this order
+            setSelectedOrder(prev =>
+                prev?._id === updatedOrder._id ? updatedOrder : prev
+            );
+        };
+
+        socket.on('order:created', handleOrderCreated);
+        socket.on('order:status-update', handleOrderStatusUpdate);
+
+        return () => {
+            socket.off('order:created', handleOrderCreated);
+            socket.off('order:status-update', handleOrderStatusUpdate);
+        };
+    }, [socket, targetBranchId]);
 
     const handleStatusUpdate = useCallback(async (orderId: string, newStatus: string) => {
         if (!token || !staff) throw new Error('Not authenticated');
@@ -258,6 +293,14 @@ export const Orders: React.FC = () => {
                             ))}
                         </select>
                     </div>
+
+                    {/* Live indicator */}
+                    {targetBranchId && (
+                        <span className={`o-live-badge ${isConnected ? 'o-live-badge--on' : 'o-live-badge--off'}`}>
+                            <span className="o-live-dot" />
+                            {isConnected ? 'Live' : 'Offline'}
+                        </span>
+                    )}
 
                     <button
                         className={`o-refresh-btn ${loading ? 'o-refresh-btn--loading' : ''}`}

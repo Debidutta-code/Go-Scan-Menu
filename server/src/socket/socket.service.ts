@@ -2,6 +2,7 @@
 import { Server as HTTPServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { envConfig } from '@/config';
+import { JWTUtil } from '@/utils';
 
 export interface SocketUser {
   userId: string;
@@ -48,6 +49,31 @@ class SocketService {
         console.log(`User joined kitchen room: ${data.branchId}`);
       });
 
+      // Handle staff authentication over socket
+      socket.on('socket:authenticate-staff', (data: { token: string; branchId: string }) => {
+        try {
+          const decoded = JWTUtil.verifyToken(data.token);
+          if (!decoded?.id) {
+            socket.emit('socket:error', { message: 'Invalid token' });
+            return;
+          }
+          // Join a dedicated staff room for this branch
+          socket.join(`staff:${data.branchId}`);
+          // Also join the branch room for backward compat
+          socket.join(`branch:${data.branchId}`);
+          if (decoded.restaurantId) {
+            socket.join(`restaurant:${decoded.restaurantId}`);
+          }
+          socket.emit('socket:authenticated', {
+            staffId: decoded.id,
+            branchId: data.branchId,
+          });
+          console.log(`🔐 Staff ${decoded.id} authenticated → joined staff:${data.branchId}`);
+        } catch {
+          socket.emit('socket:error', { message: 'Authentication failed' });
+        }
+      });
+
       socket.on('disconnect', () => {
         console.log(`❌ Client disconnected: ${socket.id}`);
       });
@@ -72,6 +98,9 @@ class SocketService {
     // Notify table
     this.io.to(`table:${order.tableId}`).emit('order:created', order);
 
+    // Notify all authenticated staff on this branch (real-time staff portal)
+    this.io.to(`staff:${order.branchId}`).emit('order:created', order);
+
     console.log(`📤 Order created event emitted for order: ${order.orderNumber}`);
   }
 
@@ -84,6 +113,9 @@ class SocketService {
     this.io.to(`branch:${order.branchId}`).emit('order:status-update', order);
     this.io.to(`restaurant:${order.restaurantId}`).emit('order:status-update', order);
     this.io.to(`table:${order.tableId}`).emit('order:status-update', order);
+
+    // Notify all authenticated staff on this branch (real-time staff portal)
+    this.io.to(`staff:${order.branchId}`).emit('order:status-update', order);
 
     console.log(`📤 Order status updated: ${order.orderNumber} -> ${order.status}`);
   }

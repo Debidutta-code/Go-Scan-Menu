@@ -6,6 +6,7 @@ import { StaffSidebar } from './StaffSidebar';
 import { StaffNavbar } from './StaffNavbar';
 import './StaffLayout.css';
 import { PageHeaderProvider, usePageHeaderContext } from '../../contexts/PageHeaderContext';
+import { StaffSocketProvider } from '../../contexts/StaffSocketContext';
 
 
 const StaffLayoutContent: React.FC<{
@@ -70,23 +71,25 @@ export const StaffLayout: React.FC = () => {
     };
 
     return (
-        <div className={`staff-layout ${!isSidebarOpen && !isMobile ? 'collapsed' : ''}`}>
-            <StaffSidebar
-                isOpen={isSidebarOpen}
-                toggleSidebar={toggleSidebar}
-                isMobile={isMobile}
-                closeMobileSidebar={closeMobileSidebar}
-            />
+        <StaffSocketProvider>
+            <div className={`staff-layout ${!isSidebarOpen && !isMobile ? 'collapsed' : ''}`}>
+                <StaffSidebar
+                    isOpen={isSidebarOpen}
+                    toggleSidebar={toggleSidebar}
+                    isMobile={isMobile}
+                    closeMobileSidebar={closeMobileSidebar}
+                />
 
-            <div className="staff-layout-content-wrapper">
-                <PageHeaderProvider>
-                    <StaffLayoutContent
-                        isSidebarOpen={isSidebarOpen}
-                        toggleSidebar={toggleSidebar}
-                        isMobile={isMobile}
-                    />
-                </PageHeaderProvider>
+                <div className="staff-layout-content-wrapper">
+                    <PageHeaderProvider>
+                        <StaffLayoutContent
+                            isSidebarOpen={isSidebarOpen}
+                            toggleSidebar={toggleSidebar}
+                            isMobile={isMobile}
+                        />
+                    </PageHeaderProvider>
+                </div>
             </div>
-        </div>
+        </StaffSocketProvider>
     );
 };
