@@ -551,9 +551,14 @@ export class OrderService {
       throw new AppError('This branch is not currently accepting orders', 400);
     }
 
-    // Check operating hours
+    const timezone = 'Asia/Kolkata'; // Hardcoded for India for now
     const now = new Date();
-    const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as
+
+    // Get current day and time in the branch's local timezone (Asia/Kolkata)
+    const currentDay = new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      timeZone: timezone
+    }).format(now).toLowerCase() as
       | 'monday'
       | 'tuesday'
       | 'wednesday'
@@ -562,10 +567,17 @@ export class OrderService {
       | 'saturday'
       | 'sunday';
 
+    const currentTimeStr = new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: timezone
+    }).format(now);
+
     const todayHours = branch.settings.operatingHours.find((oh: any) => oh.day === currentDay);
 
     if (!todayHours || !todayHours.isOpen) {
-      throw new AppError('Branch is closed today', 400);
+      throw new AppError(`Branch is closed on ${currentDay}`, 400);
     }
 
     // Helper to convert "HH:MM" or "HH.MM" to minutes from midnight
@@ -576,12 +588,11 @@ export class OrderService {
       return hours * 60 + minutes;
     };
 
-    const currentTimeStr = now.toTimeString().slice(0, 5);
     const currentMinutes = timeToMinutes(currentTimeStr);
     const openMinutes = timeToMinutes(todayHours.openTime);
     const closeMinutes = timeToMinutes(todayHours.closeTime);
 
-    console.log(`🕒 Branch Time Check [${currentDay}]:`, {
+    console.log(`🕒 Branch Time Check [${currentDay}] [Fixed TZ: ${timezone}]:`, {
       currentTimeStr,
       currentMinutes,
       openTime: todayHours.openTime,
@@ -594,7 +605,7 @@ export class OrderService {
     // Check current time is within operating hours
     if (currentMinutes < openMinutes || currentMinutes > closeMinutes) {
       throw new AppError(
-        `Branch is closed. Operating hours: ${todayHours.openTime} - ${todayHours.closeTime} ${currentTimeStr}`,
+        `Branch is closed. Local time: ${currentTimeStr}. Operating hours: ${todayHours.openTime} - ${todayHours.closeTime}`,
         400
       );
     }
