@@ -594,7 +594,7 @@ export class OrderService {
     // Check current time is within operating hours
     if (currentMinutes < openMinutes || currentMinutes > closeMinutes) {
       throw new AppError(
-        `Branch is closed. Operating hours: ${todayHours.openTime} - ${todayHours.closeTime}`,
+        `Branch is closed. Operating hours: ${todayHours.openTime} - ${todayHours.closeTime} ${currentTimeStr}`,
         400
       );
     }
