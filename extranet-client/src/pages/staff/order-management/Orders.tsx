@@ -140,29 +140,51 @@ export const Orders: React.FC = () => {
         if (token && staff && targetBranchId) fetchBranchInfo();
     }, [fetchBranchInfo, token, staff, targetBranchId]);
 
-    // ── Socket-based order fetch (replaces HTTP GET) ──────────────────────────
-    const fetchOrders = useCallback(() => {
-        if (!socket || !socket.connected || !targetBranchId) return;
+    // ── Fetch orders via REST (replaces Socket emit) ──────────────────────────
+    const fetchOrders = useCallback(async () => {
+        if (!token || !staff || !targetBranchId) return;
 
         setLoading(true);
         setError('');
 
-        socket.emit('orders:get-by-branch', {
-            branchId: targetBranchId,
-            filters: { status: status || undefined },
-            page,
-            limit,
-        });
+        try {
+            const rid = typeof staff.restaurantId === 'string'
+                ? staff.restaurantId : staff.restaurantId?._id;
 
-        console.log(`📡 Emitting orders:get-by-branch for branch: ${targetBranchId}`);
-    }, [socket, targetBranchId, status, page, limit]);
+            if (!rid) {
+                setError('Restaurant ID not found');
+                return;
+            }
 
-    // Trigger fetch when socket is ready or filters/page change
+            const response = await OrderService.getBranchOrdersFull(
+                token,
+                rid,
+                targetBranchId,
+                { status: status || undefined },
+                page,
+                limit
+            );
+
+            if (response.success && response.data) {
+                setOrders(response.data.orders);
+                setTotalPages(response.data.pagination.totalPages);
+            } else {
+                setError(response.message || 'Failed to load orders');
+            }
+        } catch (err: any) {
+            console.error('Failed to fetch orders:', err);
+            setError(err.message || 'An error occurred while fetching orders');
+        } finally {
+            setLoading(false);
+        }
+    }, [token, staff, targetBranchId, status, page, limit]);
+
+    // Trigger fetch when parameters change
     useEffect(() => {
-        if (socket?.connected && targetBranchId) {
+        if (targetBranchId) {
             fetchOrders();
         }
-    }, [fetchOrders, socket, targetBranchId]);
+    }, [fetchOrders, targetBranchId]);
 
     // Re-fetch when socket reconnects after a drop
     useEffect(() => {
@@ -179,45 +201,13 @@ export const Orders: React.FC = () => {
         };
     }, [socket, fetchOrders, targetBranchId]);
 
-    // ── Ensure socket is joined to this branch's staff room ──────────────────
-    // When navigating to a specific branch orders page, guarantee the socket
-    // is in the staff:<branchId> room so push events are received.
-    useEffect(() => {
-        if (!socket || !socket.connected || !targetBranchId || !token) return;
-
-        console.log(`🔑 Orders page: ensuring socket is in staff:${targetBranchId} room`);
-        socket.emit('socket:authenticate-staff', {
-            token,
-            branchIds: [targetBranchId],
-        });
-    }, [socket, socket?.connected, targetBranchId, token]);
+    // ── WebSocket handles push updates only ──────────────────────────────────
 
     // ── All socket event listeners ────────────────────────────────────────────
     useEffect(() => {
         if (!socket || !targetBranchId) return;
 
-        // Response to our own orders:get-by-branch emit
-        const handleOrdersData = (payload: {
-            success: boolean;
-            data: { orders: IOrder[]; pagination: { totalPages: number } };
-        }) => {
-            console.log(`📋 orders:data received → ${payload.data?.orders?.length ?? 0} orders`);
-            if (payload.success && payload.data) {
-                setOrders(payload.data.orders);
-                setTotalPages(payload.data.pagination.totalPages);
-            }
-            setLoading(false);
-        };
-
-        // Error response to our own emit
-        const handleOrdersError = (err: { message: string }) => {
-            console.error('❌ orders:error', err);
-            setError(err.message || 'Failed to load orders');
-            setLoading(false);
-        };
-
-        // New order pushed FROM server TO staff when customer places an order (public-app → server → staff)
-        // Event direction: Server ➜ Staff  (NOT staff → server)
+        // New order pushed FROM server TO staff when customer places an order
         const handleNewOrderFromCustomer = (newOrder: IOrder) => {
             console.log('🔔 Socket Event: orders:send-order-to-staff', newOrder);
 
@@ -225,17 +215,10 @@ export const Orders: React.FC = () => {
                 ? (newOrder.branchId as any)._id?.toString() || newOrder.branchId?.toString()
                 : newOrder.branchId?.toString();
 
-            if (incomingBranchId !== targetBranchId) {
-                console.log('⏭️ Order for different branch, skipping.');
-                return;
-            }
+            if (incomingBranchId !== targetBranchId) return;
 
             setOrders(prev => {
-                if (prev.some(o => o._id === newOrder._id)) {
-                    console.log('⏭️ Duplicate order, skipping update.');
-                    return prev;
-                }
-                console.log('✨ New order received from customer — adding to list!');
+                if (prev.some(o => o._id === newOrder._id)) return prev;
                 return [newOrder, ...prev];
             });
         };
@@ -258,15 +241,10 @@ export const Orders: React.FC = () => {
             );
         };
 
-        socket.on('orders:data', handleOrdersData);
-        socket.on('orders:error', handleOrdersError);
-        // Server pushes new orders to staff when a customer places one
         socket.on('orders:send-order-to-staff', handleNewOrderFromCustomer);
         socket.on('order:status-update', handleOrderStatusUpdate);
 
         return () => {
-            socket.off('orders:data', handleOrdersData);
-            socket.off('orders:error', handleOrdersError);
             socket.off('orders:send-order-to-staff', handleNewOrderFromCustomer);
             socket.off('order:status-update', handleOrderStatusUpdate);
         };

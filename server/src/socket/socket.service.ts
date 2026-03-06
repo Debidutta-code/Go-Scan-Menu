@@ -3,7 +3,6 @@ import { Server as HTTPServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { envConfig, corsOptions } from '@/config';
 import { JWTUtil } from '@/utils';
-import { OrderRepository } from '@/repositories/order.repository';
 
 export interface SocketUser {
   userId: string;
@@ -89,42 +88,6 @@ class SocketService {
           socket.emit('socket:error', { message: 'Authentication failed' });
         }
       });
-
-      // Handle socket-based order fetch (replaces GET /orders REST call)
-      socket.on(
-        'orders:get-by-branch',
-        async (data: {
-          branchId: string;
-          filters?: { status?: string; orderType?: string; paymentStatus?: string };
-          page?: number;
-          limit?: number;
-        }) => {
-          try {
-            if (!data?.branchId) {
-              socket.emit('orders:error', { message: 'branchId is required' });
-              return;
-            }
-
-            const orderRepo = new OrderRepository();
-            const result = await orderRepo.findByBranchFull(
-              data.branchId,
-              data.filters ?? {},
-              data.page ?? 1,
-              data.limit ?? 50
-            );
-
-            // Emit only back to the requesting socket, not the whole room
-            socket.emit('orders:data', { success: true, data: result });
-
-            console.log(
-              `📋 orders:get-by-branch → branch:${data.branchId} → ${result.orders?.length ?? 0} orders`
-            );
-          } catch (err) {
-            console.error('Socket orders:get-by-branch error:', err);
-            socket.emit('orders:error', { message: 'Failed to fetch orders' });
-          }
-        }
-      );
 
       socket.on('disconnect', () => {
         console.log(`❌ Client disconnected: ${socket.id}`);
