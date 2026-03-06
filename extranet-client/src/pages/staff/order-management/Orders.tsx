@@ -203,9 +203,10 @@ export const Orders: React.FC = () => {
             setLoading(false);
         };
 
-        // New order pushed from server (customer placed order)
-        const handleOrderCreated = (newOrder: IOrder) => {
-            console.log('📦 Socket Event: order:created', newOrder);
+        // New order pushed FROM server TO staff when customer places an order (public-app → server → staff)
+        // Event direction: Server ➜ Staff  (NOT staff → server)
+        const handleNewOrderFromCustomer = (newOrder: IOrder) => {
+            console.log('🔔 Socket Event: orders:send-order-to-staff', newOrder);
 
             const incomingBranchId = typeof newOrder.branchId === 'object'
                 ? (newOrder.branchId as any)._id?.toString() || newOrder.branchId?.toString()
@@ -221,7 +222,7 @@ export const Orders: React.FC = () => {
                     console.log('⏭️ Duplicate order, skipping update.');
                     return prev;
                 }
-                console.log('✨ Adding new order to list!');
+                console.log('✨ New order received from customer — adding to list!');
                 return [newOrder, ...prev];
             });
         };
@@ -246,13 +247,14 @@ export const Orders: React.FC = () => {
 
         socket.on('orders:data', handleOrdersData);
         socket.on('orders:error', handleOrdersError);
-        socket.on('order:created', handleOrderCreated);
+        // Server pushes new orders to staff when a customer places one
+        socket.on('orders:send-order-to-staff', handleNewOrderFromCustomer);
         socket.on('order:status-update', handleOrderStatusUpdate);
 
         return () => {
             socket.off('orders:data', handleOrdersData);
             socket.off('orders:error', handleOrdersError);
-            socket.off('order:created', handleOrderCreated);
+            socket.off('orders:send-order-to-staff', handleNewOrderFromCustomer);
             socket.off('order:status-update', handleOrderStatusUpdate);
         };
     }, [socket, targetBranchId]);

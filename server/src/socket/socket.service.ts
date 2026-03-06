@@ -142,10 +142,10 @@ class SocketService {
     const restaurantId = order.restaurantId?._id?.toString() || order.restaurantId?.toString();
     const tableId = order.tableId?._id?.toString() || order.tableId?.toString();
 
-    console.log(`📤 Emitting order:created for Order ${order.orderNumber}`);
+    console.log(`📤 Emitting order events for Order ${order.orderNumber}`);
     console.log(`   Targeting rooms: staff:${branchId}, branch:${branchId}, restaurant:${restaurantId}`);
 
-    // Notify kitchen
+    // Notify kitchen & general branch room
     this.io.to(`kitchen:${branchId}`).emit('order:created', order);
     this.io.to(`branch:${branchId}`).emit('order:created', order);
 
@@ -153,8 +153,11 @@ class SocketService {
     this.io.to(`restaurant:${restaurantId}`).emit('order:created', order);
     this.io.to(`table:${tableId}`).emit('order:created', order);
 
-    // Notify all authenticated staff on this branch (real-time staff portal)
-    this.io.to(`staff:${branchId}`).emit('order:created', order);
+    // 🔔 Push new order directly to staff order page
+    // Direction: Server → Staff (triggered when public-app customer places an order)
+    this.io.to(`staff:${branchId}`).emit('orders:send-order-to-staff', order);
+
+    console.log(`🔔 orders:send-order-to-staff pushed to staff:${branchId}`);
   }
 
   // Emit order status update
