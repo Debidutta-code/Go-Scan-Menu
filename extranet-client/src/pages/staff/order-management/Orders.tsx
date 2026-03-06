@@ -179,6 +179,19 @@ export const Orders: React.FC = () => {
         };
     }, [socket, fetchOrders, targetBranchId]);
 
+    // ── Ensure socket is joined to this branch's staff room ──────────────────
+    // When navigating to a specific branch orders page, guarantee the socket
+    // is in the staff:<branchId> room so push events are received.
+    useEffect(() => {
+        if (!socket || !socket.connected || !targetBranchId || !token) return;
+
+        console.log(`🔑 Orders page: ensuring socket is in staff:${targetBranchId} room`);
+        socket.emit('socket:authenticate-staff', {
+            token,
+            branchIds: [targetBranchId],
+        });
+    }, [socket, socket?.connected, targetBranchId, token]);
+
     // ── All socket event listeners ────────────────────────────────────────────
     useEffect(() => {
         if (!socket || !targetBranchId) return;

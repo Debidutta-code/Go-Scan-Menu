@@ -70,8 +70,8 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
             }
         };
 
-        const handleAuthenticated = (data: { staffId: string; branchId: string }) => {
-            console.log(`✅ Staff socket authenticated successfully →Joined staff:${data.branchId} room`);
+        const handleAuthenticated = (data: { staffId: string; joinedRooms: string[] }) => {
+            console.log(`✅ Staff socket authenticated → Joined rooms:`, data.joinedRooms);
         };
 
         const handleDisconnect = (reason: string) => {
@@ -102,11 +102,22 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
         if (!sock.connected) {
             sock.connect();
         } else {
-            console.log('🔄 Socket already connected, re-verifying...');
+            // Socket is already connected — re-authenticate with the full branchIds array
+            // so the server joins all staff:<id> rooms for real-time order pushes
+            console.log('🔄 Socket already connected, re-authenticating...');
             setSocket(sock);
             setIsConnected(true);
-            if (branchId) {
-                sock.emit('socket:authenticate-staff', { token, branchId });
+
+            const existingBranchIds = staff?.allowedBranchIds || [];
+            if (staff?.branchId && !existingBranchIds.includes(staff.branchId)) {
+                existingBranchIds.push(staff.branchId);
+            }
+
+            if (existingBranchIds.length > 0) {
+                console.log('🔑 Re-emitting socket:authenticate-staff for branches:', existingBranchIds);
+                sock.emit('socket:authenticate-staff', { token, branchIds: existingBranchIds });
+            } else {
+                console.warn('⚠️ No branchIds available for socket re-authentication');
             }
         }
 
