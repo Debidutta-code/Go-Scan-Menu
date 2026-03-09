@@ -141,6 +141,34 @@ export const Orders: React.FC = () => {
         if (token && staff && targetBranchId) fetchBranchInfo();
     }, [fetchBranchInfo, token, staff, targetBranchId]);
 
+    // ── Request browser notification permission once on mount ─────────────────
+    useEffect(() => {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    }, []);
+
+    // Send a native browser notification for new orders
+    const sendBrowserNotification = useCallback((order: IOrder) => {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+        const itemCount = order.items?.length ?? 0;
+        const tableLabel = order.tableNumber ? `Table #${order.tableNumber}` : 'Takeaway';
+
+        const notification = new Notification(`🛎 New Order — ${order.orderNumber}`, {
+            body: `${tableLabel} · ${itemCount} item${itemCount !== 1 ? 's' : ''} · $${order.totalAmount?.toFixed(2)}`,
+            icon: '/favicon.ico',
+            tag: order._id,          // deduplicates if the same order fires twice
+            requireInteraction: true, // stays visible until staff dismisses it
+        });
+
+        // Clicking the notification focuses the tab
+        notification.onclick = () => {
+            window.focus();
+            notification.close();
+        };
+    }, []);
+
     // ── Fetch orders via REST (replaces Socket emit) ──────────────────────────
     const fetchOrders = useCallback(async () => {
         if (!token || !staff || !targetBranchId) return;
@@ -227,9 +255,11 @@ export const Orders: React.FC = () => {
                 } else {
                     // Add new order at the beginning
                     console.log('✨ Adding new order:', newOrder.orderNumber);
-                    // Show notification for new orders
+                    // In-app banner
                     setNewOrderNotification(`New order ${newOrder.orderNumber} received!`);
                     setTimeout(() => setNewOrderNotification(''), 5000);
+                    // Browser push notification
+                    sendBrowserNotification(newOrder);
                     return [newOrder, ...prev];
                 }
             });
