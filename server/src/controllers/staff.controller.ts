@@ -95,4 +95,12 @@ export class StaffController {
       data: staff,
     });
   });
+
+  changePassword = catchAsync(async (req: Request, res: Response) => {
+    const { currentPassword, newPassword } = req.body;
+    await this.staffService.changePassword(req.user!.id, currentPassword, newPassword);
+    sendResponse(res, 200, {
+      message: 'Password changed successfully',
+    });
+  });
 }

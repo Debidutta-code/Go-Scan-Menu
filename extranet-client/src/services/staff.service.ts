@@ -126,4 +126,15 @@ export class StaffService {
       token
     );
   }
+
+  static async changePassword(token: string, currentPassword: string, newPassword: string) {
+    return this.request<any>(
+      '/staff/change-password',
+      {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword }),
+      },
+      token
+    );
+  }
 }

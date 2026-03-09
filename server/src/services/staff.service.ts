@@ -176,5 +176,21 @@ export class StaffService {
     }
     return staff;
   }
+
+  async changePassword(id: string, currentPass: string, newPass: string) {
+    const staff = await this.staffRepo.findById(id);
+    if (!staff) {
+      throw new AppError('Staff not found', 404);
+    }
+
+    const isMatch = await BcryptUtil.compare(currentPass, staff.password);
+    if (!isMatch) {
+      throw new AppError('Current password is incorrect', 400);
+    }
+
+    const hashed = await BcryptUtil.hash(newPass);
+    const updated = await this.staffRepo.update(id, { password: hashed } as any);
+    return updated;
+  }
 }
 
