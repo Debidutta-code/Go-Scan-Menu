@@ -45,7 +45,7 @@ class SocketService {
         console.log(`User joined kitchen room: ${data.branchId}`);
       });
 
-            // Handle staff authentication over socket
+      // Handle staff authentication over socket
       socket.on('socket:authenticate-staff', (data: { token: string; branchId?: string; branchIds?: string[] }) => {
         try {
           const decoded = JWTUtil.verifyToken(data.token);
@@ -77,11 +77,14 @@ class SocketService {
             console.log(`   → Joined room: ${room}`);
           });
 
+          // Always join the restaurant room (handles owners with no single branchId)
           if (decoded.restaurantId) {
             socket.join(`restaurant:${decoded.restaurantId}`);
+            uniqueRooms.push(`restaurant:${decoded.restaurantId}`);
             console.log(`   → Joined restaurant room: ${decoded.restaurantId}`);
           }
 
+          // Always confirm — even if no branch rooms (owners will still get restaurant events)
           socket.emit('socket:authenticated', {
             staffId: decoded.id,
             joinedRooms: uniqueRooms,
@@ -89,7 +92,7 @@ class SocketService {
 
           console.log(`🔐 Staff ${decoded.id} authenticated → Joined ${uniqueRooms.length} rooms`);
           console.log(`   Rooms:`, uniqueRooms);
-          
+
           // Log all current rooms for debugging
           const allRooms = Array.from(this.io?.sockets.adapter.rooms.keys() || []);
           console.log(`   All active rooms:`, allRooms.filter(r => !r.match(/^[A-Za-z0-9_-]{20}$/)));
@@ -108,7 +111,7 @@ class SocketService {
   }
 
   // Emit order created event
-    // Emit order created event
+  // Emit order created event
   emitOrderCreated(order: any): void {
     if (!this.io) {
       console.error('❌ Socket.IO not initialized');
@@ -130,9 +133,10 @@ class SocketService {
 
     // Get all rooms to verify
     const rooms = Array.from(this.io.sockets.adapter.rooms.keys());
-    console.log(`   Available rooms:`, rooms.filter(r => r.startsWith('staff:') || r.startsWith('branch:')));
+    const staffRooms = rooms.filter(r => r.startsWith('staff:') || r.startsWith('branch:'));
+    console.log(`   Available rooms:`, staffRooms);
 
-    // Emit to multiple rooms for redundancy
+    // Emit to multiple rooms for redundancy (always emit — Socket.IO handles empty rooms safely)
     const emitToRooms = [
       `staff:${branchId}`,
       `branch:${branchId}`,
@@ -141,20 +145,18 @@ class SocketService {
     ];
 
     emitToRooms.forEach(room => {
-      // Count clients in room
+      // Log client count for diagnostics (but always emit regardless)
       const clientsInRoom = this.io?.sockets.adapter.rooms.get(room);
       const clientCount = clientsInRoom ? clientsInRoom.size : 0;
       console.log(`   Room ${room}: ${clientCount} clients`);
 
-      if (clientCount > 0) {
-        // Emit order:created (generic event)
-        this.io?.to(room).emit('order:created', order);
-        
-        // Emit orders:send-order-to-staff (specific event for staff)
-        if (room.startsWith('staff:')) {
-          this.io?.to(room).emit('orders:send-order-to-staff', order);
-          console.log(`   ✅ Emitted orders:send-order-to-staff to ${room}`);
-        }
+      // Always emit — even if 0 clients (Socket.IO drops it gracefully)
+      this.io?.to(room).emit('order:created', order);
+
+      // Emit dedicated staff event
+      if (room.startsWith('staff:')) {
+        this.io?.to(room).emit('orders:send-order-to-staff', order);
+        console.log(`   ✅ Emitted orders:send-order-to-staff to ${room} (${clientCount} clients)`);
       }
     });
 
@@ -167,7 +169,7 @@ class SocketService {
   }
 
   // Emit order status update
-    // Emit order status update
+  // Emit order status update
   emitOrderStatusUpdate(order: any): void {
     if (!this.io) {
       console.error('❌ Socket.IO not initialized');
@@ -199,11 +201,9 @@ class SocketService {
       if (room && room !== 'undefined') {
         const clientsInRoom = this.io?.sockets.adapter.rooms.get(room);
         const clientCount = clientsInRoom ? clientsInRoom.size : 0;
-        
-        if (clientCount > 0) {
-          this.io?.to(room).emit('order:status-update', order);
-          console.log(`   ✅ Emitted to ${room} (${clientCount} clients)`);
-        }
+        // Always emit regardless of client count
+        this.io?.to(room).emit('order:status-update', order);
+        console.log(`   ✅ Emitted to ${room} (${clientCount} clients)`);
       }
     });
   }
@@ -261,7 +261,7 @@ class SocketService {
     console.log(`📤 Notification sent`);
   }
 
-    getIO(): SocketIOServer | null {
+  getIO(): SocketIOServer | null {
     return this.io;
   }
 

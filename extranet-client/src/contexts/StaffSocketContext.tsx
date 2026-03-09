@@ -10,6 +10,7 @@ import React, {
     createContext,
     useContext,
     useEffect,
+    useRef,
     useState,
     ReactNode,
 } from 'react';
@@ -44,6 +45,10 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
             ? staff.allowedBranchIds[0]
             : undefined);
 
+    // Keep a ref to the latest authenticate function so event handlers always
+    // call the most up-to-date version without needing to be re-registered.
+    const authenticateRef = useRef<(() => void) | null>(null);
+
     useEffect(() => {
         if (!isAuthenticated || !token) return;
 
@@ -51,22 +56,26 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
         console.log('🔌 StaffSocketContext: Managing connection for', staff?._id);
 
         const authenticate = () => {
-            const branchIds = staff?.allowedBranchIds || [];
+            const branchIds: string[] = [...(staff?.allowedBranchIds || [])];
             if (staff?.branchId && !branchIds.includes(staff.branchId)) {
                 branchIds.push(staff.branchId);
             }
 
-            if (branchIds.length > 0) {
-                console.log('🔑 Emitting socket:authenticate-staff:', branchIds);
-                sock.emit('socket:authenticate-staff', { token, branchIds });
-            }
+            // Always authenticate — even without branchIds so the server can
+            // join the restaurant room (important for owners / managers).
+            console.log('🔑 Emitting socket:authenticate-staff, branchIds:', branchIds);
+            sock.emit('socket:authenticate-staff', { token, branchIds });
         };
+
+        // Keep ref fresh so the connect handler below always calls latest
+        authenticateRef.current = authenticate;
 
         const handleConnect = () => {
             setIsConnected(true);
             setSocket(sock);
             console.log('🔌 Staff socket connected! ID:', sock.id);
-            authenticate();
+            // Re-authenticate on every (re)connect so rooms are always joined
+            authenticateRef.current?.();
         };
 
         const handleAuthenticated = (data: { staffId: string; joinedRooms: string[] }) => {
@@ -79,9 +88,7 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
             setIsConnected(false);
             console.warn('🔴 Staff socket disconnected. Reason:', reason);
 
-            // Auto-reconnect logic
             if (reason === 'io server disconnect') {
-                // Server forcefully disconnected, try to reconnect
                 console.log('🔄 Attempting to reconnect...');
                 setTimeout(() => {
                     if (sock && !sock.connected) {
@@ -110,7 +117,7 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
         if (!sock.connected) {
             sock.connect();
         } else {
-            // Already connected, just ensure we are authenticated with current token/branches
+            // Already connected — re-authenticate immediately with fresh data
             setSocket(sock);
             setIsConnected(true);
             authenticate();
