@@ -129,10 +129,8 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
         {
             label: 'Reports',
             icon: <FileBarChart size={20} />,
-            path: '#',
-            permission: staff?.permissions?.reports?.view,
-            disabled: true,
-            badge: 'Soon'
+            path: '/staff/reports',
+            permission: staff?.permissions?.reports?.view
         },
         {
             label: 'Settings',

@@ -1,9 +1,10 @@
 .s-layout {
     display: flex;
-    height: 100vh;
+    height: 100%;
     background-color: #fcfcfc;
     color: #1a1a1a;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
 }
 
 /* Sidebar Styling */
@@ -14,6 +15,8 @@
     padding: 40px 24px;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
 }
 
 .s-title {
