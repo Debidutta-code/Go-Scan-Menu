@@ -71,20 +71,39 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
 
         const handleAuthenticated = (data: { staffId: string; joinedRooms: string[] }) => {
             console.log(`✅ Staff socket authenticated → Joined rooms:`, data.joinedRooms);
+            console.log(`   Staff ID: ${data.staffId}`);
+            console.log(`   Total rooms joined: ${data.joinedRooms.length}`);
         };
 
         const handleDisconnect = (reason: string) => {
             setIsConnected(false);
             console.warn('🔴 Staff socket disconnected. Reason:', reason);
+
+            // Auto-reconnect logic
+            if (reason === 'io server disconnect') {
+                // Server forcefully disconnected, try to reconnect
+                console.log('🔄 Attempting to reconnect...');
+                setTimeout(() => {
+                    if (sock && !sock.connected) {
+                        sock.connect();
+                    }
+                }, 1000);
+            }
         };
 
         const handleConnectError = (err: any) => {
             setIsConnected(false);
             console.error('❌ Staff socket connection error:', err.message);
+            console.error('   Error details:', err);
+        };
+
+        const handleSocketError = (data: { message: string }) => {
+            console.error('❌ Socket error from server:', data.message);
         };
 
         sock.on('connect', handleConnect);
         sock.on('socket:authenticated', handleAuthenticated);
+        sock.on('socket:error', handleSocketError);
         sock.on('disconnect', handleDisconnect);
         sock.on('connect_error', handleConnectError);
 
@@ -100,6 +119,7 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
         return () => {
             sock.off('connect', handleConnect);
             sock.off('socket:authenticated', handleAuthenticated);
+            sock.off('socket:error', handleSocketError);
             sock.off('disconnect', handleDisconnect);
             sock.off('connect_error', handleConnectError);
         };

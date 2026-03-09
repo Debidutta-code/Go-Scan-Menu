@@ -45,7 +45,7 @@ class SocketService {
         console.log(`User joined kitchen room: ${data.branchId}`);
       });
 
-      // Handle staff authentication over socket
+            // Handle staff authentication over socket
       socket.on('socket:authenticate-staff', (data: { token: string; branchId?: string; branchIds?: string[] }) => {
         try {
           const decoded = JWTUtil.verifyToken(data.token);
@@ -72,10 +72,14 @@ class SocketService {
 
           // Deduplicate and join
           const uniqueRooms = [...new Set(roomsToJoin)];
-          uniqueRooms.forEach(room => socket.join(room));
+          uniqueRooms.forEach(room => {
+            socket.join(room);
+            console.log(`   → Joined room: ${room}`);
+          });
 
           if (decoded.restaurantId) {
             socket.join(`restaurant:${decoded.restaurantId}`);
+            console.log(`   → Joined restaurant room: ${decoded.restaurantId}`);
           }
 
           socket.emit('socket:authenticated', {
@@ -84,7 +88,13 @@ class SocketService {
           });
 
           console.log(`🔐 Staff ${decoded.id} authenticated → Joined ${uniqueRooms.length} rooms`);
+          console.log(`   Rooms:`, uniqueRooms);
+          
+          // Log all current rooms for debugging
+          const allRooms = Array.from(this.io?.sockets.adapter.rooms.keys() || []);
+          console.log(`   All active rooms:`, allRooms.filter(r => !r.match(/^[A-Za-z0-9_-]{20}$/)));
         } catch (err) {
+          console.error('❌ Staff authentication failed:', err);
           socket.emit('socket:error', { message: 'Authentication failed' });
         }
       });
@@ -98,49 +108,104 @@ class SocketService {
   }
 
   // Emit order created event
+    // Emit order created event
   emitOrderCreated(order: any): void {
-    if (!this.io) return;
+    if (!this.io) {
+      console.error('❌ Socket.IO not initialized');
+      return;
+    }
 
     const branchId = order.branchId?._id?.toString() || order.branchId?.toString();
     const restaurantId = order.restaurantId?._id?.toString() || order.restaurantId?.toString();
     const tableId = order.tableId?._id?.toString() || order.tableId?.toString();
 
+    if (!branchId) {
+      console.error('❌ Cannot emit order - branchId missing:', order);
+      return;
+    }
+
     console.log(`📤 Emitting order events for Order ${order.orderNumber}`);
-    console.log(`   Targeting rooms: staff:${branchId}, branch:${branchId}, restaurant:${restaurantId}`);
+    console.log(`   Branch ID: ${branchId}`);
+    console.log(`   Targeting rooms: staff:${branchId}, branch:${branchId}, kitchen:${branchId}`);
 
-    // Notify kitchen & general branch room
-    this.io.to(`kitchen:${branchId}`).emit('order:created', order);
-    this.io.to(`branch:${branchId}`).emit('order:created', order);
+    // Get all rooms to verify
+    const rooms = Array.from(this.io.sockets.adapter.rooms.keys());
+    console.log(`   Available rooms:`, rooms.filter(r => r.startsWith('staff:') || r.startsWith('branch:')));
 
-    // Notify restaurant
-    this.io.to(`restaurant:${restaurantId}`).emit('order:created', order);
-    this.io.to(`table:${tableId}`).emit('order:created', order);
+    // Emit to multiple rooms for redundancy
+    const emitToRooms = [
+      `staff:${branchId}`,
+      `branch:${branchId}`,
+      `kitchen:${branchId}`,
+      `restaurant:${restaurantId}`
+    ];
 
-    // 🔔 Push new order directly to staff order page
-    // Direction: Server → Staff (triggered when public-app customer places an order)
-    this.io.to(`staff:${branchId}`).emit('orders:send-order-to-staff', order);
+    emitToRooms.forEach(room => {
+      // Count clients in room
+      const clientsInRoom = this.io?.sockets.adapter.rooms.get(room);
+      const clientCount = clientsInRoom ? clientsInRoom.size : 0;
+      console.log(`   Room ${room}: ${clientCount} clients`);
 
-    console.log(`🔔 orders:send-order-to-staff pushed to staff:${branchId}`);
+      if (clientCount > 0) {
+        // Emit order:created (generic event)
+        this.io?.to(room).emit('order:created', order);
+        
+        // Emit orders:send-order-to-staff (specific event for staff)
+        if (room.startsWith('staff:')) {
+          this.io?.to(room).emit('orders:send-order-to-staff', order);
+          console.log(`   ✅ Emitted orders:send-order-to-staff to ${room}`);
+        }
+      }
+    });
+
+    // Also emit to table room for customer updates
+    if (tableId) {
+      this.io.to(`table:${tableId}`).emit('order:created', order);
+    }
+
+    console.log(`🔔 All order notifications sent for ${order.orderNumber}`);
   }
 
   // Emit order status update
+    // Emit order status update
   emitOrderStatusUpdate(order: any): void {
-    if (!this.io) return;
+    if (!this.io) {
+      console.error('❌ Socket.IO not initialized');
+      return;
+    }
 
     const branchId = order.branchId?._id?.toString() || order.branchId?.toString();
     const restaurantId = order.restaurantId?._id?.toString() || order.restaurantId?.toString();
     const tableId = order.tableId?._id?.toString() || order.tableId?.toString();
 
+    if (!branchId) {
+      console.error('❌ Cannot emit status update - branchId missing:', order);
+      return;
+    }
+
     console.log(`📤 Emitting order:status-update for Order ${order.orderNumber} (Status: ${order.status})`);
+    console.log(`   Branch ID: ${branchId}, Status: ${order.status}`);
 
-    // Notify all relevant parties
-    this.io.to(`kitchen:${branchId}`).emit('order:status-update', order);
-    this.io.to(`branch:${branchId}`).emit('order:status-update', order);
-    this.io.to(`restaurant:${restaurantId}`).emit('order:status-update', order);
-    this.io.to(`table:${tableId}`).emit('order:status-update', order);
+    // Emit to all relevant rooms
+    const emitToRooms = [
+      `staff:${branchId}`,
+      `branch:${branchId}`,
+      `kitchen:${branchId}`,
+      `restaurant:${restaurantId}`,
+      `table:${tableId}`
+    ];
 
-    // Notify all authenticated staff on this branch (real-time staff portal)
-    this.io.to(`staff:${branchId}`).emit('order:status-update', order);
+    emitToRooms.forEach(room => {
+      if (room && room !== 'undefined') {
+        const clientsInRoom = this.io?.sockets.adapter.rooms.get(room);
+        const clientCount = clientsInRoom ? clientsInRoom.size : 0;
+        
+        if (clientCount > 0) {
+          this.io?.to(room).emit('order:status-update', order);
+          console.log(`   ✅ Emitted to ${room} (${clientCount} clients)`);
+        }
+      }
+    });
   }
 
   // Emit order item status update
@@ -196,8 +261,30 @@ class SocketService {
     console.log(`📤 Notification sent`);
   }
 
-  getIO(): SocketIOServer | null {
+    getIO(): SocketIOServer | null {
     return this.io;
+  }
+
+  // Get diagnostic information about connected sockets
+  getDiagnostics(): any {
+    if (!this.io) return { error: 'Socket.IO not initialized' };
+
+    const rooms = Array.from(this.io.sockets.adapter.rooms.entries());
+    const sockets = Array.from(this.io.sockets.sockets.values());
+
+    return {
+      totalSockets: sockets.length,
+      connectedClients: sockets.map(s => ({
+        id: s.id,
+        rooms: Array.from(s.rooms).filter(r => r !== s.id)
+      })),
+      rooms: rooms
+        .filter(([name]) => !name.match(/^[A-Za-z0-9_-]{20}$/)) // Filter out socket IDs
+        .map(([name, clients]) => ({
+          name,
+          clientCount: clients.size
+        }))
+    };
   }
 }
 

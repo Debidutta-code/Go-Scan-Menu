@@ -75,6 +75,7 @@ export const Orders: React.FC = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [limit] = useState(20);
+    const [newOrderNotification, setNewOrderNotification] = useState<string>('');
 
     const targetBranchId = paramBranchId || staff?.branchId;
 
@@ -207,46 +208,102 @@ export const Orders: React.FC = () => {
     useEffect(() => {
         if (!socket || !targetBranchId) return;
 
+        // Helper function to extract branchId from order
+        const extractBranchId = (order: IOrder): string => {
+            if (typeof order.branchId === 'object') {
+                return (order.branchId as any)._id?.toString() || (order.branchId as any).toString();
+            }
+            return order.branchId?.toString() || '';
+        };
+
         // New order pushed FROM server TO staff when customer places an order
         const handleNewOrderFromCustomer = (newOrder: IOrder) => {
             console.log('🔔 Socket Event: orders:send-order-to-staff', newOrder);
 
-            const incomingBranchId = typeof newOrder.branchId === 'object'
-                ? (newOrder.branchId as any)._id?.toString() || newOrder.branchId?.toString()
-                : newOrder.branchId?.toString();
+            const incomingBranchId = extractBranchId(newOrder);
 
-            if (incomingBranchId !== targetBranchId) return;
+            if (incomingBranchId !== targetBranchId) {
+                console.log('⚠️ Branch mismatch - ignoring order', { incomingBranchId, targetBranchId });
+                return;
+            }
+
+            console.log('✅ Adding/updating order in real-time:', newOrder.orderNumber);
 
             setOrders(prev => {
-                if (prev.some(o => o._id === newOrder._id)) return prev;
-                return [newOrder, ...prev];
+                // Check if order already exists
+                const existingIndex = prev.findIndex(o => o._id === newOrder._id);
+                
+                if (existingIndex >= 0) {
+                    // Update existing order
+                    console.log('📝 Updating existing order:', newOrder.orderNumber);
+                    const updated = [...prev];
+                    updated[existingIndex] = newOrder;
+                    return updated;
+                } else {
+                    // Add new order at the beginning
+                    console.log('✨ Adding new order:', newOrder.orderNumber);
+                    // Show notification for new orders
+                    setNewOrderNotification(`New order ${newOrder.orderNumber} received!`);
+                    setTimeout(() => setNewOrderNotification(''), 5000);
+                    return [newOrder, ...prev];
+                }
             });
+
+            // Update selected order if it's the same one
+            setSelectedOrder(prev => 
+                prev?._id === newOrder._id ? newOrder : prev
+            );
         };
 
         // Order status changed pushed from server
         const handleOrderStatusUpdate = (updatedOrder: IOrder) => {
             console.log('🔄 Socket Event: order:status-update', updatedOrder);
 
-            const incomingBranchId = typeof updatedOrder.branchId === 'object'
-                ? (updatedOrder.branchId as any)._id?.toString() || updatedOrder.branchId?.toString()
-                : updatedOrder.branchId?.toString();
+            const incomingBranchId = extractBranchId(updatedOrder);
 
-            if (incomingBranchId !== targetBranchId) return;
+            if (incomingBranchId !== targetBranchId) {
+                console.log('⚠️ Branch mismatch - ignoring update', { incomingBranchId, targetBranchId });
+                return;
+            }
 
-            setOrders(prev =>
-                prev.map(o => o._id === updatedOrder._id ? updatedOrder : o)
-            );
+            console.log('✅ Updating order status in real-time:', updatedOrder.orderNumber, updatedOrder.status);
+
+            setOrders(prev => {
+                const existingIndex = prev.findIndex(o => o._id === updatedOrder._id);
+                
+                if (existingIndex >= 0) {
+                    // Update existing order
+                    const updated = [...prev];
+                    updated[existingIndex] = updatedOrder;
+                    return updated;
+                } else {
+                    // Order not in list, add it (edge case)
+                    console.log('⚠️ Order not found in list, adding:', updatedOrder.orderNumber);
+                    return [updatedOrder, ...prev];
+                }
+            });
+
+            // Update selected order if it's the same one
             setSelectedOrder(prev =>
                 prev?._id === updatedOrder._id ? updatedOrder : prev
             );
         };
 
+        // Also listen to generic order:created event as backup
+        const handleOrderCreated = (newOrder: IOrder) => {
+            console.log('🆕 Socket Event: order:created', newOrder);
+            // Use the same handler logic
+            handleNewOrderFromCustomer(newOrder);
+        };
+
         socket.on('orders:send-order-to-staff', handleNewOrderFromCustomer);
         socket.on('order:status-update', handleOrderStatusUpdate);
+        socket.on('order:created', handleOrderCreated);
 
         return () => {
             socket.off('orders:send-order-to-staff', handleNewOrderFromCustomer);
             socket.off('order:status-update', handleOrderStatusUpdate);
+            socket.off('order:created', handleOrderCreated);
         };
     }, [socket, targetBranchId]);
 
@@ -369,6 +426,28 @@ export const Orders: React.FC = () => {
                 <div className="o-error">
                     <AlertCircle size={14} />
                     {error}
+                </div>
+            )}
+
+            {/* New Order Notification */}
+            {newOrderNotification && (
+                <div className="o-notification" style={{
+                    position: 'fixed',
+                    top: '20px',
+                    right: '20px',
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    padding: '16px 24px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    animation: 'slideIn 0.3s ease-out'
+                }}>
+                    <CheckCircle2 size={20} />
+                    <span style={{ fontWeight: 500 }}>{newOrderNotification}</span>
                 </div>
             )}
 
