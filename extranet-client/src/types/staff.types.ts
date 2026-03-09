@@ -19,6 +19,13 @@ export interface Staff {
   staffType: StaffType; // Changed from role to staffType
   allowedBranchIds: string[];
   isActive: boolean;
+  preferences?: {
+    timePreference?: string;
+    workingHours?: {
+      start?: string;
+      end?: string;
+    };
+  };
   permissions?: IPermissions; // Added permissions from backend response
   restaurant?: RestaurantInfo; // Restaurant details
   createdAt: string;

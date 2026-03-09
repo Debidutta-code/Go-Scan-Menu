@@ -11,6 +11,7 @@ router.post('/login', staffController.login);
 
 // Protected routes
 router.get('/me', AuthMiddleware.authenticate, staffController.getCurrentUser);
+router.put('/profile', AuthMiddleware.authenticate, staffController.updateProfile);
 router.post('/change-password', AuthMiddleware.authenticate, staffController.changePassword);
 
 router.post(

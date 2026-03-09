@@ -16,7 +16,6 @@ import './Settings.css';
 export const Settings: React.FC = () => {
     const { token, staff } = useStaffAuth();
     const [activeCategory, setActiveCategory] = useState('Account'); // Set Account as default for user request
-    const [timePreference, setTimePreference] = useState('Mid-Day');
 
     const categories = [
         { id: 'Account', icon: <User size={18} />, label: 'Account' },
@@ -31,12 +30,7 @@ export const Settings: React.FC = () => {
             case 'Account':
                 return <AccountSection staff={staff} token={token!} />;
             case 'Preferences':
-                return (
-                    <PreferencesSection
-                        timePreference={timePreference}
-                        setTimePreference={setTimePreference}
-                    />
-                );
+                return <PreferencesSection />;
             default:
                 const activeCatData = categories.find(c => c.id === activeCategory);
                 return (

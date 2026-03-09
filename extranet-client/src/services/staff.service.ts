@@ -98,6 +98,17 @@ export class StaffService {
     );
   }
 
+  static async updateProfile(token: string, data: Partial<Staff>) {
+    return this.request<Staff>(
+      `/staff/profile`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      },
+      token
+    );
+  }
+
   static async updateStaffType(token: string, staffId: string, staffType: string) {
     return this.request<Staff>(
       `/staff/${staffId}/staff-type`,

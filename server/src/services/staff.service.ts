@@ -156,6 +156,20 @@ export class StaffService {
     return staff;
   }
 
+  async updateProfile(id: string, data: Partial<IStaff>) {
+    // Only allow specific fields to be updated by the user themselves
+    const allowedUpdates: Partial<IStaff> = {};
+    if (data.name) allowedUpdates.name = data.name;
+    if (data.phone) allowedUpdates.phone = data.phone;
+    if (data.preferences) allowedUpdates.preferences = data.preferences;
+
+    const staff = await this.staffRepo.update(id, allowedUpdates as any);
+    if (!staff) {
+      throw new AppError('Staff not found', 404);
+    }
+    return staff;
+  }
+
   async updateStaffType(id: string, staffType: StaffType) {
     // Validate staff type
     if (!Object.values(StaffType).includes(staffType)) {

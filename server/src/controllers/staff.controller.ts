@@ -96,6 +96,14 @@ export class StaffController {
     });
   });
 
+  updateProfile = catchAsync(async (req: Request, res: Response) => {
+    const staff = await this.staffService.updateProfile(req.user!.id, req.body);
+    sendResponse(res, 200, {
+      message: 'Profile updated successfully',
+      data: staff,
+    });
+  });
+
   changePassword = catchAsync(async (req: Request, res: Response) => {
     const { currentPassword, newPassword } = req.body;
     await this.staffService.changePassword(req.user!.id, currentPassword, newPassword);

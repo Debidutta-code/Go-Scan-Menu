@@ -8,6 +8,7 @@ interface StaffAuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateCurrentStaff: (updatedStaff: Partial<Staff>) => void;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -72,11 +73,19 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
     setStaff(null);
   };
 
+  const updateCurrentStaff = (updatedFields: Partial<Staff>) => {
+    if (!staff) return;
+    const updatedStaff = { ...staff, ...updatedFields };
+    setStaff(updatedStaff);
+    localStorage.setItem('staff_data', JSON.stringify(updatedStaff));
+  };
+
   const value: StaffAuthContextType = {
     staff,
     token,
     login,
     logout,
+    updateCurrentStaff,
     isAuthenticated: !!token && !!staff,
     isLoading,
   };
