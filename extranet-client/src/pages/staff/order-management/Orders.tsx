@@ -518,26 +518,29 @@ export const Orders: React.FC = () => {
             {/* Table / content area */}
             <div className="o-body">
                 {loading || branchesLoading || (!targetBranchId && branches.length === 0) ? (
-                    <div className="o-table-wrap">
-                        <table className="o-table">
-                            <thead>
-                                <tr>
-                                    <th>Order #</th>
-                                    <th>Table</th>
-                                    <th>Type</th>
-                                    <th>Items</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Payment</th>
-                                    <th>Date / Time</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <SkeletonLoader variant="table-row" count={10} />
-                            </tbody>
-                        </table>
-                    </div>
+                    <>
+                        <div className="o-table-wrap">
+                            <table className="o-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Table</th>
+                                        <th>Type</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Payment</th>
+                                        <th>Date / Time</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <SkeletonLoader variant="table-row" count={10} />
+                                </tbody>
+                            </table>
+                        </div>
+                        <SkeletonLoader variant="pagination" />
+                    </>
                 ) : !targetBranchId ? (
                     <div className="o-branch-grid">
                         <p className="o-branch-hint">Select a branch to view its orders</p>
