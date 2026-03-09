@@ -14,6 +14,7 @@ import {
     DollarSign, AlertTriangle, Eye
 } from 'lucide-react';
 import { SkeletonLoader } from './skeleton-loader/SkeletonLoader';
+import { FilterDrawer } from './FilterDrawer';
 import './Orders.css';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
@@ -70,7 +71,13 @@ export const Orders: React.FC = () => {
     const [loading, setLoading] = useState(!!(paramBranchId || staff?.branchId));
     const [error, setError] = useState('');
     const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
-    const [status, setStatus] = useState<string>('');
+    const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+    const [filters, setFilters] = useState({
+        statuses: [] as string[],
+        paymentStatuses: [] as string[],
+        sortBy: 'orderTime',
+        sortOrder: 'desc' as 'asc' | 'desc',
+    });
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -189,7 +196,12 @@ export const Orders: React.FC = () => {
                 token,
                 rid,
                 targetBranchId,
-                { status: status || undefined },
+                {
+                    status: filters.statuses.join(',') || undefined,
+                    paymentStatus: filters.paymentStatuses.join(',') || undefined,
+                    sortBy: filters.sortBy as any,
+                    sortOrder: filters.sortOrder,
+                },
                 page,
                 limit
             );
@@ -206,7 +218,7 @@ export const Orders: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [token, staff, targetBranchId, status, page, limit]);
+    }, [token, staff, targetBranchId, filters, page, limit]);
 
     // Trigger fetch when parameters change
     useEffect(() => {
@@ -402,20 +414,19 @@ export const Orders: React.FC = () => {
                         )}
                     </div>
 
-                    <div className="o-filter">
-                        <Filter size={13} />
-                        <select
-                            className="o-filter-select"
-                            value={status}
-                            onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-                            disabled={!targetBranchId}
-                        >
-                            <option value="">All Statuses</option>
-                            {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
-                                <option key={val} value={val}>{cfg.label}</option>
-                            ))}
-                        </select>
-                    </div>
+                    <button
+                        className={`o-filter-btn ${(filters.statuses.length > 0 || filters.paymentStatuses.length > 0) ? 'o-filter-btn--active' : ''}`}
+                        onClick={() => setFilterDrawerOpen(true)}
+                        disabled={!targetBranchId}
+                    >
+                        <Filter size={14} />
+                        <span>Filters</span>
+                        {(filters.statuses.length + filters.paymentStatuses.length) > 0 && (
+                            <span className="o-filter-badge">
+                                {filters.statuses.length + filters.paymentStatuses.length}
+                            </span>
+                        )}
+                    </button>
 
                     {/* Live indicator */}
                     {targetBranchId && (
@@ -594,7 +605,7 @@ export const Orders: React.FC = () => {
                                             </td>
                                             <td>
                                                 <span className="o-items-count">
-                                                    {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                                                    {order.items.reduce((sum, item) => sum + item.quantity, 0)} item{order.items.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 's' : ''}
                                                 </span>
                                             </td>
                                             <td>
@@ -675,6 +686,26 @@ export const Orders: React.FC = () => {
                 onStatusUpdate={handleStatusUpdate}
                 onPaymentUpdate={handlePaymentUpdate}
                 onCancel={handleCancelOrder}
+            />
+
+            <FilterDrawer
+                open={filterDrawerOpen}
+                onClose={() => setFilterDrawerOpen(false)}
+                filters={filters}
+                onApply={(newFilters) => {
+                    setFilters(newFilters);
+                    setFilterDrawerOpen(false);
+                    setPage(1);
+                }}
+                onClear={() => {
+                    setFilters({
+                        statuses: [],
+                        paymentStatuses: [],
+                        sortBy: 'orderTime',
+                        sortOrder: 'desc',
+                    });
+                    setPage(1);
+                }}
             />
         </div>
     );

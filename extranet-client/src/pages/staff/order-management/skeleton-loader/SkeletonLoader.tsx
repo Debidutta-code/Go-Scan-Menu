@@ -3,7 +3,7 @@ import React from 'react';
 import './SkeletonLoader.css';
 
 interface SkeletonLoaderProps {
-  variant?: 'table-row' | 'stats-card' | 'detail-panel' | 'text' | 'circle';
+  variant?: 'table-row' | 'stats-card' | 'detail-panel' | 'text' | 'circle' | 'pagination';
   count?: number;           // how many rows/cards to show
   width?: string | number;
   height?: string | number;
@@ -86,6 +86,17 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
               <div className="skeleton skeleton-item-row" style={{ height: '68px' }} />
               <div className="skeleton skeleton-item-row" style={{ height: '68px' }} />
               <div className="skeleton skeleton-item-row" style={{ height: '48px' }} />
+            </div>
+          );
+        }
+        if (variant === 'pagination') {
+          return (
+            <div key={i} className="o-pagination skeleton-pagination">
+              <div className="skeleton skeleton-icon-btn" style={{ width: '32px', height: '32px' }} />
+              <div className="skeleton skeleton-icon-btn" style={{ width: '32px', height: '32px' }} />
+              <div className="skeleton skeleton-icon-btn" style={{ width: '32px', height: '32px' }} />
+              <div className="skeleton skeleton-icon-btn" style={{ width: '32px', height: '32px' }} />
+              <div className="skeleton skeleton-icon-btn" style={{ width: '32px', height: '32px' }} />
             </div>
           );
         }
