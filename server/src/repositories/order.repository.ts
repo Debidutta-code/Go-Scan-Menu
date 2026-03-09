@@ -30,16 +30,31 @@ export class OrderRepository {
 
   async findByBranch(
     branchId: string,
-    filter: { status?: string; orderType?: string; paymentStatus?: string } = {},
+    filter: {
+      status?: string;
+      orderType?: string;
+      paymentStatus?: string;
+      sortBy?: 'totalAmount' | 'itemCount' | 'orderTime';
+      sortOrder?: 'asc' | 'desc';
+    } = {},
     page: number = 1,
     limit: number = 20
   ) {
     const skip = (page - 1) * limit;
-    const query: any = { branchId };
+    const query: any = { branchId: new Types.ObjectId(branchId) };
 
-    if (filter.status) query.status = filter.status;
+    if (filter.status) {
+      const statuses = filter.status.split(',').map((s) => s.trim()).filter(Boolean);
+      query.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
+    }
     if (filter.orderType) query.orderType = filter.orderType;
-    if (filter.paymentStatus) query.paymentStatus = filter.paymentStatus;
+    if (filter.paymentStatus) {
+      const payStatuses = filter.paymentStatus.split(',').map((s) => s.trim()).filter(Boolean);
+      query.paymentStatus = payStatuses.length === 1 ? payStatuses[0] : { $in: payStatuses };
+    }
+
+    const sortDir = filter.sortOrder === 'asc' ? 1 : -1;
+    const sortBy = filter.sortBy || 'orderTime';
 
     const [orders, total] = await Promise.all([
       Order.find(query)
@@ -47,7 +62,7 @@ export class OrderRepository {
         .populate('assignedStaffId')
         .skip(skip)
         .limit(limit)
-        .sort({ orderTime: -1 }),
+        .sort(sortBy === 'totalAmount' ? { totalAmount: sortDir } : { orderTime: -1 }),
       Order.countDocuments(query),
     ]);
 
@@ -64,19 +79,84 @@ export class OrderRepository {
 
   async findByBranchFull(
     branchId: string,
-    filter: { status?: string; orderType?: string; paymentStatus?: string } = {},
+    filter: {
+      status?: string;
+      orderType?: string;
+      paymentStatus?: string;
+      sortBy?: 'totalAmount' | 'itemCount' | 'orderTime';
+      sortOrder?: 'asc' | 'desc';
+    } = {},
     page: number = 1,
     limit: number = 20
   ) {
     const skip = (page - 1) * limit;
-    const query: any = { branchId };
+    const matchQuery: any = { branchId: new Types.ObjectId(branchId) };
 
-    if (filter.status) query.status = filter.status;
-    if (filter.orderType) query.orderType = filter.orderType;
-    if (filter.paymentStatus) query.paymentStatus = filter.paymentStatus;
+    if (filter.status) {
+      const statuses = filter.status.split(',').map((s) => s.trim()).filter(Boolean);
+      matchQuery.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
+    }
+    if (filter.orderType) matchQuery.orderType = filter.orderType;
+    if (filter.paymentStatus) {
+      const payStatuses = filter.paymentStatus.split(',').map((s) => s.trim()).filter(Boolean);
+      matchQuery.paymentStatus = payStatuses.length === 1 ? payStatuses[0] : { $in: payStatuses };
+    }
 
+    const sortDir = filter.sortOrder === 'asc' ? 1 : -1;
+    const sortBy = filter.sortBy || 'orderTime';
+
+    // Build sort stage
+    let sortStage: any;
+    if (sortBy === 'totalAmount') {
+      sortStage = { totalAmount: sortDir };
+    } else if (sortBy === 'itemCount') {
+      sortStage = { _itemCount: sortDir };
+    } else {
+      sortStage = { orderTime: -1 }; // default: newest first
+    }
+
+    // Use aggregation when sorting by itemCount to compute it
+    if (sortBy === 'itemCount') {
+      const pipeline: any[] = [
+        { $match: matchQuery },
+        { $addFields: { _itemCount: { $sum: '$items.quantity' } } },
+        { $sort: sortStage },
+        {
+          $facet: {
+            orders: [{ $skip: skip }, { $limit: limit }],
+            count: [{ $count: 'total' }],
+          },
+        },
+      ];
+
+      const [result] = await Order.aggregate(pipeline);
+      const orders = result?.orders ?? [];
+      const total = result?.count?.[0]?.total ?? 0;
+
+      // Populate manually after aggregation
+      await Order.populate(orders, [
+        { path: 'restaurantId' },
+        { path: 'branchId' },
+        { path: 'tableId' },
+        { path: 'assignedStaffId' },
+        { path: 'items.menuItemId' },
+        { path: 'taxes.taxId' },
+      ]);
+
+      return {
+        orders,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    }
+
+    // Regular query path (orderTime or totalAmount)
     const [orders, total] = await Promise.all([
-      Order.find(query)
+      Order.find(matchQuery)
         .populate('restaurantId')
         .populate('branchId')
         .populate('tableId')
@@ -85,8 +165,8 @@ export class OrderRepository {
         .populate('taxes.taxId')
         .skip(skip)
         .limit(limit)
-        .sort({ orderTime: -1 }),
-      Order.countDocuments(query),
+        .sort(sortStage),
+      Order.countDocuments(matchQuery),
     ]);
 
     return {

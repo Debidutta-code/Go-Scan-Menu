@@ -66,7 +66,13 @@ export class OrderService {
         token: string,
         restaurantId: string,
         branchId: string,
-        filters: { status?: string; orderType?: string; paymentStatus?: string } = {},
+        filters: {
+            status?: string;
+            orderType?: string;
+            paymentStatus?: string;
+            sortBy?: 'totalAmount' | 'itemCount' | 'orderTime';
+            sortOrder?: 'asc' | 'desc';
+        } = {},
         page: number = 1,
         limit: number = 20
     ): Promise<ApiResponse<IOrderListResponse>> {
@@ -74,6 +80,8 @@ export class OrderService {
         if (filters.status) queryParams.append('status', filters.status);
         if (filters.orderType) queryParams.append('orderType', filters.orderType);
         if (filters.paymentStatus) queryParams.append('paymentStatus', filters.paymentStatus);
+        if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
+        if (filters.sortOrder) queryParams.append('sortOrder', filters.sortOrder);
         queryParams.append('page', page.toString());
         queryParams.append('limit', limit.toString());
 

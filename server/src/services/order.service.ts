@@ -361,7 +361,13 @@ export class OrderService {
 
   async getOrdersByBranch(
     branchId: string,
-    filter: { status?: string; orderType?: string; paymentStatus?: string },
+    filter: {
+      status?: string;
+      orderType?: string;
+      paymentStatus?: string;
+      sortBy?: 'totalAmount' | 'itemCount' | 'orderTime';
+      sortOrder?: 'asc' | 'desc';
+    },
     page: number = 1,
     limit: number = 20
   ) {
@@ -369,7 +375,13 @@ export class OrderService {
   }
   async getOrdersFullByBranch(
     branchId: string,
-    filter: { status?: string; orderType?: string; paymentStatus?: string },
+    filter: {
+      status?: string;
+      orderType?: string;
+      paymentStatus?: string;
+      sortBy?: 'totalAmount' | 'itemCount' | 'orderTime';
+      sortOrder?: 'asc' | 'desc';
+    },
     page: number = 1,
     limit: number = 20
   ) {

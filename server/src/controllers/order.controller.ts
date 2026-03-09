@@ -56,12 +56,14 @@ export class OrderController {
     const status = req.query.status as string | undefined;
     const orderType = req.query.orderType as 'dine-in' | 'takeaway' | undefined;
     const paymentStatus = req.query.paymentStatus as string | undefined;
+    const sortBy = req.query.sortBy as 'totalAmount' | 'itemCount' | 'orderTime' | undefined;
+    const sortOrder = req.query.sortOrder as 'asc' | 'desc' | undefined;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
 
     const result = await this.orderService.getOrdersByBranch(
       branchId,
-      { status, orderType, paymentStatus },
+      { status, orderType, paymentStatus, sortBy, sortOrder },
       page,
       limit
     );
@@ -77,12 +79,14 @@ export class OrderController {
     const status = req.query.status as string | undefined;
     const orderType = req.query.orderType as 'dine-in' | 'takeaway' | undefined;
     const paymentStatus = req.query.paymentStatus as string | undefined;
+    const sortBy = req.query.sortBy as 'totalAmount' | 'itemCount' | 'orderTime' | undefined;
+    const sortOrder = req.query.sortOrder as 'asc' | 'desc' | undefined;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
 
     const result = await this.orderService.getOrdersFullByBranch(
       branchId,
-      { status, orderType, paymentStatus },
+      { status, orderType, paymentStatus, sortBy, sortOrder },
       page,
       limit
     );
