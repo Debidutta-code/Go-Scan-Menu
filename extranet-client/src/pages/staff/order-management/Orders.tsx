@@ -187,21 +187,6 @@ export const Orders: React.FC = () => {
         }
     }, [fetchOrders, targetBranchId]);
 
-    // Re-fetch when socket reconnects after a drop
-    useEffect(() => {
-        if (!socket) return;
-
-        const handleReconnect = () => {
-            console.log('🔄 Socket reconnected — re-fetching orders');
-            if (targetBranchId) fetchOrders();
-        };
-
-        socket.on('connect', handleReconnect);
-        return () => {
-            socket.off('connect', handleReconnect);
-        };
-    }, [socket, fetchOrders, targetBranchId]);
-
     // ── WebSocket handles push updates only ──────────────────────────────────
 
     // ── All socket event listeners ────────────────────────────────────────────
@@ -232,7 +217,7 @@ export const Orders: React.FC = () => {
             setOrders(prev => {
                 // Check if order already exists
                 const existingIndex = prev.findIndex(o => o._id === newOrder._id);
-                
+
                 if (existingIndex >= 0) {
                     // Update existing order
                     console.log('📝 Updating existing order:', newOrder.orderNumber);
@@ -250,7 +235,7 @@ export const Orders: React.FC = () => {
             });
 
             // Update selected order if it's the same one
-            setSelectedOrder(prev => 
+            setSelectedOrder(prev =>
                 prev?._id === newOrder._id ? newOrder : prev
             );
         };
@@ -270,7 +255,7 @@ export const Orders: React.FC = () => {
 
             setOrders(prev => {
                 const existingIndex = prev.findIndex(o => o._id === updatedOrder._id);
-                
+
                 if (existingIndex >= 0) {
                     // Update existing order
                     const updated = [...prev];
