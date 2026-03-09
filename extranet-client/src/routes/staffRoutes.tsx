@@ -15,6 +15,7 @@ import { BranchSelection } from '../pages/staff/BranchSelection';
 import { TableManagement } from '../pages/staff/TableManagement';
 import { QRManagement } from '../pages/staff/QRManagement';
 import { Orders } from '../pages/staff/order-management/Orders';
+import { Settings } from '../pages/staff/settings/Settings';
 import { StaffLayout } from '../components/layout/StaffLayout';
 
 export const renderStaffRoutes = () => [
@@ -66,5 +67,8 @@ export const renderStaffRoutes = () => [
         <Route path="/staff/tables" element={<BranchSelection />} />
         <Route path="/staff/tables/:branchId" element={<TableManagement />} />
         <Route path="/staff/tables/:branchId/qr-settings" element={<QRManagement />} />
+
+        {/* Settings */}
+        <Route path="/staff/settings" element={<Settings />} />
     </Route>
 ];
