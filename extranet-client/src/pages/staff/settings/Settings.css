@@ -521,3 +521,133 @@
     font-size: 0.875rem;
     margin: 0;
 }
+
+/* Help Center Styling */
+.help-center-header {
+    margin-bottom: 32px;
+}
+
+.section-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.sub-section-title {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 16px;
+}
+
+.mr-2 {
+    margin-right: 8px;
+}
+
+.faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.faq-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.faq-item:hover {
+    border-color: #d1d5db;
+}
+
+.faq-question {
+    padding: 14px 16px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: #111827;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    list-style: none;
+}
+
+.faq-question::-webkit-details-marker {
+    display: none;
+}
+
+.faq-question .chevron {
+    color: #9ca3af;
+    transition: transform 0.2s;
+}
+
+details[open] .faq-question .chevron {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    padding: 0 16px 16px 16px;
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.contact-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.contact-card {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+
+.contact-card:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.contact-card .card-icon {
+    width: 24px;
+    height: 24px;
+    color: #2563eb;
+    flex-shrink: 0;
+}
+
+.card-content h4 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 4px 0;
+}
+
+.card-content p {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0 0 12px 0;
+}
+
+.contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.contact-link:hover {
+    text-decoration: underline;
+}

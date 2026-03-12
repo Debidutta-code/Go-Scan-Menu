@@ -4,13 +4,15 @@ import {
     Calendar,
     Settings as SettingsIcon,
     Clock,
-    Layers
+    Layers,
+    HelpCircle
 } from 'lucide-react';
 import { useStaffAuth } from '../../../contexts/StaffAuthContext';
 import SettingsLayout from './components/SettingsLayout';
 import SettingsEmptyState from './components/SettingsEmptyState';
 import AccountSection from './sections/account/AccountSection';
 import PreferencesSection from './sections/preferences/PreferencesSection';
+import HelpCenterSection from './sections/help-center/HelpCenterSection';
 import './Settings.css';
 
 export const Settings: React.FC = () => {
@@ -23,6 +25,7 @@ export const Settings: React.FC = () => {
         { id: 'Preferences', icon: <SettingsIcon size={18} />, label: 'Preferences' },
         { id: 'Schedules', icon: <Clock size={18} />, label: 'Schedules', badge: 'NEW' },
         { id: 'Integrations', icon: <Layers size={18} />, label: 'Integrations' },
+        { id: 'HelpCenter', icon: <HelpCircle size={18} />, label: 'Help Center' },
     ];
 
     const renderContent = () => {
@@ -31,6 +34,8 @@ export const Settings: React.FC = () => {
                 return <AccountSection staff={staff} token={token!} />;
             case 'Preferences':
                 return <PreferencesSection />;
+            case 'HelpCenter':
+                return <HelpCenterSection />;
             default:
                 const activeCatData = categories.find(c => c.id === activeCategory);
                 return (
