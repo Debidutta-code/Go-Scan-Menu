@@ -226,4 +226,4 @@ export class TableService {
     // In production we'd get this from config, for now let's hope it's consistent
     return `${axiosInstance.defaults.baseURL}/restaurants/${rId}/tables/${tableId}/qr-image?token=${token}`;
   }
-}
+}
