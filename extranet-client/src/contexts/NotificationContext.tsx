@@ -32,22 +32,44 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }, []);
 
     const sendBrowserNotification = useCallback((order: IOrder) => {
-        if (!('Notification' in window) || Notification.permission !== 'granted') return;
-
-        const itemCount = order.items?.length ?? 0;
-        const tableLabel = order.tableNumber ? `Table #${order.tableNumber}` : 'Takeaway';
-
-        const n = new Notification(`🛎 New Order — ${order.orderNumber}`, {
-            body: `${tableLabel} · ${itemCount} item${itemCount !== 1 ? 's' : ''} · $${order.totalAmount?.toFixed(2)}`,
-            icon: '/favicon.ico',
-            tag: order._id,
-            requireInteraction: true,
+        console.log('🌐 sendBrowserNotification: Attempting browser notification', {
+            hasNotificationAPI: 'Notification' in window,
+            permission: 'Notification' in window ? Notification.permission : 'N/A'
         });
 
-        n.onclick = () => {
-            window.focus();
-            n.close();
-        };
+        if (!('Notification' in window)) {
+            console.error('❌ Browser does not support notifications');
+            return;
+        }
+
+        if (Notification.permission !== 'granted') {
+            console.warn('⚠️ Browser notification permission not granted. Current status:', Notification.permission);
+            return;
+        }
+
+        try {
+            const itemCount = order.items?.length ?? 0;
+            const tableLabel = order.tableNumber ? `Table #${order.tableNumber}` : 'Takeaway';
+
+            console.log('🚀 Triggering new Notification instance');
+            const n = new Notification(`🛎 New Order — ${order.orderNumber}`, {
+                body: `${tableLabel} · ${itemCount} item${itemCount !== 1 ? 's' : ''} · $${order.totalAmount?.toFixed(2)}`,
+                icon: '/favicon.ico',
+                tag: order._id,
+                requireInteraction: true,
+            });
+
+            n.onclick = () => {
+                console.log('🖱 Notification clicked');
+                window.focus();
+                n.close();
+            };
+
+            n.onshow = () => console.log('✅ Notification displayed successfully');
+            n.onerror = (err) => console.error('❌ Notification error event:', err);
+        } catch (err) {
+            console.error('❌ Error creating Notification object:', err);
+        }
     }, []);
 
     const showNotification = useCallback((message: string, type: 'info' | 'success' | 'order' = 'info') => {
@@ -65,21 +87,40 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }, [playNotificationSound]);
 
     useEffect(() => {
-        if (!socket || !staff) return;
+        if (!socket || !staff) {
+            console.log('⏳ NotificationContext: Waiting for socket/staff...', { hasSocket: !!socket, hasStaff: !!staff });
+            return;
+        }
+
+        console.log('📡 NotificationContext: Registering socket listeners for staff:', staff._id);
 
         const handleNewOrder = (newOrder: IOrder) => {
+            console.log('📦 NotificationContext: Received order event', newOrder.orderNumber);
+            
             // Check if order belongs to one of the staff's allowed branches
             const incomingBranchId = typeof newOrder.branchId === 'object' 
-                ? (newOrder.branchId as any)._id?.toString() 
+                ? (newOrder.branchId as any)._id?.toString() || (newOrder.branchId as any).toString()
                 : newOrder.branchId?.toString();
             
-            const allowedBranchIds = staff.allowedBranchIds || [];
-            if (staff.branchId) allowedBranchIds.push(staff.branchId);
+            const allowedBranchIds = (staff.allowedBranchIds || []).map(id => 
+                typeof id === 'object' ? (id as any)._id?.toString() || (id as any).toString() : id.toString()
+            );
+            
+            if (staff.branchId) {
+                const sbid = typeof staff.branchId === 'object' 
+                    ? (staff.branchId as any)._id?.toString() || (staff.branchId as any).toString() 
+                    : staff.branchId.toString();
+                if (!allowedBranchIds.includes(sbid)) allowedBranchIds.push(sbid);
+            }
+
+            console.log('🔍 Checking branch permissions:', { incomingBranchId, allowedBranchIds });
 
             if (incomingBranchId && allowedBranchIds.includes(incomingBranchId)) {
-                console.log('🔔 Global Notification: New order received', newOrder.orderNumber);
+                console.log('✅ Branch authorized. Showing notification.');
                 showNotification(`New order ${newOrder.orderNumber} received!`, 'order');
                 sendBrowserNotification(newOrder);
+            } else {
+                console.log('❌ Branch not in allowed list for this staff.');
             }
         };
 
@@ -87,6 +128,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         socket.on('order:created', handleNewOrder);
 
         return () => {
+            console.log('🧹 NotificationContext: Cleaning up listeners');
             socket.off('orders:send-order-to-staff', handleNewOrder);
             socket.off('order:created', handleNewOrder);
         };
