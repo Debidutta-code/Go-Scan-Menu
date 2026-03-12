@@ -82,7 +82,6 @@ export const Orders: React.FC = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [limit] = useState(20);
-    const [newOrderNotification, setNewOrderNotification] = useState<string>('');
 
     const targetBranchId = paramBranchId || staff?.branchId;
 
@@ -153,27 +152,6 @@ export const Orders: React.FC = () => {
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
-    }, []);
-
-    // Send a native browser notification for new orders
-    const sendBrowserNotification = useCallback((order: IOrder) => {
-        if (!('Notification' in window) || Notification.permission !== 'granted') return;
-
-        const itemCount = order.items?.length ?? 0;
-        const tableLabel = order.tableNumber ? `Table #${order.tableNumber}` : 'Takeaway';
-
-        const notification = new Notification(`🛎 New Order — ${order.orderNumber}`, {
-            body: `${tableLabel} · ${itemCount} item${itemCount !== 1 ? 's' : ''} · $${order.totalAmount?.toFixed(2)}`,
-            icon: '/favicon.ico',
-            tag: order._id,          // deduplicates if the same order fires twice
-            requireInteraction: true, // stays visible until staff dismisses it
-        });
-
-        // Clicking the notification focuses the tab
-        notification.onclick = () => {
-            window.focus();
-            notification.close();
-        };
     }, []);
 
     // ── Fetch orders via REST (replaces Socket emit) ──────────────────────────
@@ -271,11 +249,6 @@ export const Orders: React.FC = () => {
                 } else {
                     // Add new order at the beginning
                     console.log('✨ Adding new order:', newOrder.orderNumber);
-                    // In-app banner
-                    setNewOrderNotification(`New order ${newOrder.orderNumber} received!`);
-                    setTimeout(() => setNewOrderNotification(''), 5000);
-                    // Browser push notification
-                    sendBrowserNotification(newOrder);
                     return [newOrder, ...prev];
                 }
             });
@@ -459,27 +432,6 @@ export const Orders: React.FC = () => {
                 </div>
             )}
 
-            {/* New Order Notification */}
-            {newOrderNotification && (
-                <div className="o-notification" style={{
-                    position: 'fixed',
-                    top: '20px',
-                    right: '20px',
-                    backgroundColor: '#10b981',
-                    color: 'white',
-                    padding: '16px 24px',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                    zIndex: 1000,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    animation: 'slideIn 0.3s ease-out'
-                }}>
-                    <CheckCircle2 size={20} />
-                    <span style={{ fontWeight: 500 }}>{newOrderNotification}</span>
-                </div>
-            )}
 
             {/* Stats cards */}
             <div className="o-stats">

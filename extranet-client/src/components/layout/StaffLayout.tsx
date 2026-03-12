@@ -7,6 +7,7 @@ import { StaffNavbar } from './StaffNavbar';
 import './StaffLayout.css';
 import { PageHeaderProvider, usePageHeaderContext } from '../../contexts/PageHeaderContext';
 import { StaffSocketProvider } from '../../contexts/StaffSocketContext';
+import { NotificationProvider } from '../../contexts/NotificationContext';
 
 
 const StaffLayoutContent: React.FC<{
@@ -72,24 +73,26 @@ export const StaffLayout: React.FC = () => {
 
     return (
         <StaffSocketProvider>
-            <div className={`staff-layout ${!isSidebarOpen && !isMobile ? 'collapsed' : ''}`}>
-                <StaffSidebar
-                    isOpen={isSidebarOpen}
-                    toggleSidebar={toggleSidebar}
-                    isMobile={isMobile}
-                    closeMobileSidebar={closeMobileSidebar}
-                />
+            <NotificationProvider>
+                <div className={`staff-layout ${!isSidebarOpen && !isMobile ? 'collapsed' : ''}`}>
+                    <StaffSidebar
+                        isOpen={isSidebarOpen}
+                        toggleSidebar={toggleSidebar}
+                        isMobile={isMobile}
+                        closeMobileSidebar={closeMobileSidebar}
+                    />
 
-                <div className="staff-layout-content-wrapper">
-                    <PageHeaderProvider>
-                        <StaffLayoutContent
-                            isSidebarOpen={isSidebarOpen}
-                            toggleSidebar={toggleSidebar}
-                            isMobile={isMobile}
-                        />
-                    </PageHeaderProvider>
+                    <div className="staff-layout-content-wrapper">
+                        <PageHeaderProvider>
+                            <StaffLayoutContent
+                                isSidebarOpen={isSidebarOpen}
+                                toggleSidebar={toggleSidebar}
+                                isMobile={isMobile}
+                            />
+                        </PageHeaderProvider>
+                    </div>
                 </div>
-            </div>
+            </NotificationProvider>
         </StaffSocketProvider>
     );
 };
