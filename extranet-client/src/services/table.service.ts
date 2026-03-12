@@ -1,6 +1,6 @@
 // src/services/table.service.ts
 
-import env from '@/config/env';
+import axiosInstance from './axios.service';
 import { ApiResponse } from '../types';
 import {
   Table,
@@ -11,9 +11,8 @@ import {
 } from '../types/table.types';
 
 export class TableService {
-  private static getHeaders(token: string): HeadersInit {
+  private static getHeaders(token: string) {
     return {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     };
   }
@@ -37,20 +36,14 @@ export class TableService {
         ? `/restaurants/${rId}/tables/branch/${branchId}?page=${page}&limit=${limit}`
         : `/restaurants/${rId}/tables?page=${page}&limit=${limit}`;
 
-      const response = await fetch(`${env.API_BASE_URL}${endpoint}`, {
-        method: 'GET',
+      const response = await axiosInstance.get(endpoint, {
         headers: this.getHeaders(token),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch tables');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to fetch tables';
+      throw new Error(message);
     }
   }
 
@@ -62,24 +55,16 @@ export class TableService {
   ): Promise<ApiResponse<Table>> {
     try {
       const rId = this.getRestaurantId(restaurantId);
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rId}/tables`,
-        {
-          method: 'POST',
-          headers: this.getHeaders(token),
-          body: JSON.stringify({ ...payload, branchId }),
-        }
+      const response = await axiosInstance.post(
+        `/restaurants/${rId}/tables`,
+        { ...payload, branchId },
+        { headers: this.getHeaders(token) }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create table');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to create table';
+      throw new Error(message);
     }
   }
 
@@ -125,7 +110,7 @@ export class TableService {
           created: createdTables.length,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       throw error instanceof Error ? error : new Error('Network error');
     }
   }
@@ -138,24 +123,16 @@ export class TableService {
   ): Promise<ApiResponse<Table>> {
     try {
       const rId = this.getRestaurantId(restaurantId);
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}`,
-        {
-          method: 'PUT',
-          headers: this.getHeaders(token),
-          body: JSON.stringify(payload),
-        }
+      const response = await axiosInstance.put(
+        `/restaurants/${rId}/tables/${tableId}`,
+        payload,
+        { headers: this.getHeaders(token) }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update table');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to update table';
+      throw new Error(message);
     }
   }
 
@@ -167,24 +144,16 @@ export class TableService {
   ): Promise<ApiResponse<Table>> {
     try {
       const rId = this.getRestaurantId(restaurantId);
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}/status`,
-        {
-          method: 'PATCH',
-          headers: this.getHeaders(token),
-          body: JSON.stringify({ status }),
-        }
+      const response = await axiosInstance.patch(
+        `/restaurants/${rId}/tables/${tableId}/status`,
+        { status },
+        { headers: this.getHeaders(token) }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update table status');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to update table status';
+      throw new Error(message);
     }
   }
 
@@ -195,23 +164,15 @@ export class TableService {
   ): Promise<ApiResponse<Table>> {
     try {
       const rId = this.getRestaurantId(restaurantId);
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}`,
-        {
-          method: 'DELETE',
-          headers: this.getHeaders(token),
-        }
+      const response = await axiosInstance.delete(
+        `/restaurants/${rId}/tables/${tableId}`,
+        { headers: this.getHeaders(token) }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete table');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to delete table';
+      throw new Error(message);
     }
   }
 
@@ -222,23 +183,16 @@ export class TableService {
   ): Promise<ApiResponse<Table>> {
     try {
       const rId = this.getRestaurantId(restaurantId);
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}/regenerate-qr`,
-        {
-          method: 'POST',
-          headers: this.getHeaders(token),
-        }
+      const response = await axiosInstance.post(
+        `/restaurants/${rId}/tables/${tableId}/regenerate-qr`,
+        {},
+        { headers: this.getHeaders(token) }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to regenerate QR code');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to regenerate QR code';
+      throw new Error(message);
     }
   }
 
@@ -249,23 +203,15 @@ export class TableService {
   ): Promise<ApiResponse<{ qrUrl: string }>> {
     try {
       const rId = this.getRestaurantId(restaurantId);
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}/qr-data`,
-        {
-          method: 'GET',
-          headers: this.getHeaders(token),
-        }
+      const response = await axiosInstance.get(
+        `/restaurants/${rId}/tables/${tableId}/qr-data`,
+        { headers: this.getHeaders(token) }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to get QR code data');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to get QR code data';
+      throw new Error(message);
     }
   }
 
@@ -275,6 +221,9 @@ export class TableService {
     tableId: string
   ): string {
     const rId = this.getRestaurantId(restaurantId);
-    return `${env.API_BASE_URL}/restaurants/${rId}/tables/${tableId}/qr-image?token=${token}`;
+    // This remains as a direct URL as it's typically used in an <img> src
+    const env = (window as any).env || { API_BASE_URL: '' }; 
+    // In production we'd get this from config, for now let's hope it's consistent
+    return `${axiosInstance.defaults.baseURL}/restaurants/${rId}/tables/${tableId}/qr-image?token=${token}`;
   }
-}
+}

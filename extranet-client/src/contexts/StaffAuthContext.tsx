@@ -1,7 +1,17 @@
 // src/contexts/StaffAuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { StaffService } from '../services/staff.service'; // Your staff service
 import { Staff } from '../types/staff.types';
+
+// ── Global auth-expiry event ──────────────────────────────────────────────────
+// Any page/service can call triggerStaffAuthExpiry() to force a logout when
+// it receives a 401 / "Authentication failed" response from the server.
+export const STAFF_AUTH_EXPIRED_EVENT = 'staff:auth-expired';
+
+export const triggerStaffAuthExpiry = () => {
+  window.dispatchEvent(new CustomEvent(STAFF_AUTH_EXPIRED_EVENT));
+};
 
 interface StaffAuthContextType {
   staff: Staff | null;
@@ -16,9 +26,26 @@ interface StaffAuthContextType {
 const StaffAuthContext = createContext<StaffAuthContextType | undefined>(undefined);
 
 export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
   const [staff, setStaff] = useState<Staff | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // ── Global auth-expiry listener ─────────────────────────────────────────────
+  // Fires when any page or service detects a 401 / expired-token response.
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      console.warn('[StaffAuth] Token expired — logging out and redirecting to login.');
+      localStorage.removeItem('staff_token');
+      localStorage.removeItem('staff_data');
+      setToken(null);
+      setStaff(null);
+      navigate('/staff/login', { replace: true });
+    };
+
+    window.addEventListener(STAFF_AUTH_EXPIRED_EVENT, handleAuthExpired);
+    return () => window.removeEventListener(STAFF_AUTH_EXPIRED_EVENT, handleAuthExpired);
+  }, [navigate]);
 
   // Load stored token and staff on mount
   useEffect(() => {

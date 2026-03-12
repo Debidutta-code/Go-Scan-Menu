@@ -39,7 +39,10 @@ export const StaffList: React.FC = () => {
     }, []);
 
     const fetchStaff = async () => {
-        if (!token || !currentStaff?.restaurantId) return;
+        if (!token || !currentStaff?.restaurantId) {
+            setLoading(false);
+            return;
+        }
 
         try {
             setLoading(true);
@@ -56,7 +59,7 @@ export const StaffList: React.FC = () => {
                 setStaffList([]);
             }
         } catch (err: any) {
-            setError(err.message || 'Failed to fetch staff');
+            setError(err?.message || 'Failed to fetch staff');
         } finally {
             setLoading(false);
         }

@@ -1,6 +1,6 @@
 // src/services/order.service.ts
 
-import { ApiService } from './api.service';
+import axiosInstance from './axios.service';
 import { ApiResponse } from '../types';
 
 export interface IOrderItem {
@@ -62,6 +62,12 @@ export interface IOrderListResponse {
 }
 
 export class OrderService {
+    private static getHeaders(token: string) {
+        return {
+            Authorization: `Bearer ${token}`,
+        };
+    }
+
     static async getBranchOrdersFull(
         token: string,
         restaurantId: string,
@@ -76,20 +82,25 @@ export class OrderService {
         page: number = 1,
         limit: number = 20
     ): Promise<ApiResponse<IOrderListResponse>> {
-        const queryParams = new URLSearchParams();
-        if (filters.status) queryParams.append('status', filters.status);
-        if (filters.orderType) queryParams.append('orderType', filters.orderType);
-        if (filters.paymentStatus) queryParams.append('paymentStatus', filters.paymentStatus);
-        if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
-        if (filters.sortOrder) queryParams.append('sortOrder', filters.sortOrder);
-        queryParams.append('page', page.toString());
-        queryParams.append('limit', limit.toString());
+        try {
+            const queryParams = new URLSearchParams();
+            if (filters.status) queryParams.append('status', filters.status);
+            if (filters.orderType) queryParams.append('orderType', filters.orderType);
+            if (filters.paymentStatus) queryParams.append('paymentStatus', filters.paymentStatus);
+            if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
+            if (filters.sortOrder) queryParams.append('sortOrder', filters.sortOrder);
+            queryParams.append('page', page.toString());
+            queryParams.append('limit', limit.toString());
 
-        return ApiService.request<IOrderListResponse>(
-            `/restaurants/${restaurantId}/orders/branch/${branchId}/full?${queryParams.toString()}`,
-            { method: 'GET' },
-            token
-        );
+            const response = await axiosInstance.get(
+                `/restaurants/${restaurantId}/orders/branch/${branchId}/full?${queryParams.toString()}`,
+                { headers: this.getHeaders(token) }
+            );
+            return response.data;
+        } catch (error: any) {
+            const message = error.response?.data?.message || error.message || 'Failed to fetch orders';
+            throw new Error(message);
+        }
     }
 
     static async updateOrderStatus(
@@ -98,14 +109,17 @@ export class OrderService {
         orderId: string,
         status: string
     ): Promise<ApiResponse<IOrder>> {
-        return ApiService.request<IOrder>(
-            `/restaurants/${restaurantId}/orders/${orderId}/status`,
-            {
-                method: 'PATCH',
-                body: JSON.stringify({ status }),
-            },
-            token
-        );
+        try {
+            const response = await axiosInstance.patch(
+                `/restaurants/${restaurantId}/orders/${orderId}/status`,
+                { status },
+                { headers: this.getHeaders(token) }
+            );
+            return response.data;
+        } catch (error: any) {
+            const message = error.response?.data?.message || error.message || 'Failed to update status';
+            throw new Error(message);
+        }
     }
 
     static async cancelOrder(
@@ -114,14 +128,17 @@ export class OrderService {
         orderId: string,
         cancellationReason?: string
     ): Promise<ApiResponse<IOrder>> {
-        return ApiService.request<IOrder>(
-            `/restaurants/${restaurantId}/orders/${orderId}/cancel`,
-            {
-                method: 'PATCH',
-                body: JSON.stringify({ cancellationReason }),
-            },
-            token
-        );
+        try {
+            const response = await axiosInstance.patch(
+                `/restaurants/${restaurantId}/orders/${orderId}/cancel`,
+                { cancellationReason },
+                { headers: this.getHeaders(token) }
+            );
+            return response.data;
+        } catch (error: any) {
+            const message = error.response?.data?.message || error.message || 'Failed to cancel order';
+            throw new Error(message);
+        }
     }
 
     static async updatePaymentStatus(
@@ -131,13 +148,16 @@ export class OrderService {
         paymentStatus: string,
         paymentMethod?: string
     ): Promise<ApiResponse<IOrder>> {
-        return ApiService.request<IOrder>(
-            `/restaurants/${restaurantId}/orders/${orderId}/payment`,
-            {
-                method: 'PATCH',
-                body: JSON.stringify({ paymentStatus, paymentMethod }),
-            },
-            token
-        );
+        try {
+            const response = await axiosInstance.patch(
+                `/restaurants/${restaurantId}/orders/${orderId}/payment`,
+                { paymentStatus, paymentMethod },
+                { headers: this.getHeaders(token) }
+            );
+            return response.data;
+        } catch (error: any) {
+            const message = error.response?.data?.message || error.message || 'Failed to update payment status';
+            throw new Error(message);
+        }
     }
 }

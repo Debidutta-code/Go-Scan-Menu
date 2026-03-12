@@ -1,39 +1,30 @@
 // src/services/api.service.ts
 
-import env from '@/config/env';
+import axiosInstance from './axios.service';
 import { SuperAdmin, ApiResponse } from '../types';
 
 export class ApiService {
-  private static getHeaders(token?: string | null): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }
-
   static async request<T>(
     endpoint: string,
-    options: RequestInit = {},
+    options: any = {},
     token?: string | null
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${env.API_BASE_URL}${endpoint}`, {
+      const config = {
+        url: endpoint,
         ...options,
-        headers: this.getHeaders(token),
-      });
+        headers: {
+          ...options.headers,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      };
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Request failed');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      const response = await axiosInstance(config);
+      return response.data;
+    } catch (error: any) {
+      // Axios errors have a response object
+      const errorMessage = error.response?.data?.message || error.message || 'Request failed';
+      throw new Error(errorMessage);
     }
   }
 
@@ -42,7 +33,7 @@ export class ApiService {
       '/superadmin/auth/login',
       {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        data: { email, password },
       }
     );
   }
@@ -52,12 +43,12 @@ export class ApiService {
       '/superadmin/auth/register',
       {
         method: 'POST',
-        body: JSON.stringify({ name, email, password }),
+        data: { name, email, password },
       }
     );
   }
 
   static async getProfile(token: string) {
-    return this.request<SuperAdmin>('/superadmin/auth/profile', {}, token);
+    return this.request<SuperAdmin>('/superadmin/auth/profile', { method: 'GET' }, token);
   }
 }

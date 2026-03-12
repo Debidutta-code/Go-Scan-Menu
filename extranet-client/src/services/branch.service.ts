@@ -1,13 +1,12 @@
 // src/services/branch.service.ts
 
-import env from '@/config/env';
+import axiosInstance from './axios.service';
 import { ApiResponse } from '../types';
 import { Branch, BranchListResponse } from '../types/table.types';
 
 export class BranchService {
-  private static getHeaders(token: string): HeadersInit {
+  private static getHeaders(token: string) {
     return {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     };
   }
@@ -19,23 +18,16 @@ export class BranchService {
     limit: number = 100
   ): Promise<ApiResponse<BranchListResponse>> {
     try {
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/branches?page=${page}&limit=${limit}`,
-        {
-          method: 'GET',
-          headers: this.getHeaders(token),
-        }
+      const rId = typeof restaurantId === 'object' ? restaurantId._id : restaurantId;
+      const response = await axiosInstance.get(
+        `/restaurants/${rId}/branches?page=${page}&limit=${limit}`,
+        { headers: this.getHeaders(token) }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch branches');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to fetch branches';
+      throw new Error(message);
     }
   }
 
@@ -45,23 +37,16 @@ export class BranchService {
     branchId: string
   ): Promise<ApiResponse<Branch>> {
     try {
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/branches/${branchId}`,
-        {
-          method: 'GET',
-          headers: this.getHeaders(token),
-        }
+      const rId = typeof restaurantId === 'object' ? restaurantId._id : restaurantId;
+      const response = await axiosInstance.get(
+        `/restaurants/${rId}/branches/${branchId}`,
+        { headers: this.getHeaders(token) }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch branch');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to fetch branch';
+      throw new Error(message);
     }
   }
 }

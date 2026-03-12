@@ -44,7 +44,10 @@ export const TableManagement: React.FC = () => {
   }, [staff, token, branchId]);
 
   const loadData = async () => {
-    if (!staff || !token || !branchId) return;
+    if (!staff || !token || !branchId) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError('');
@@ -66,7 +69,7 @@ export const TableManagement: React.FC = () => {
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to load table data');
+      setError(err?.message || 'Failed to load table data');
     } finally {
       setLoading(false);
     }

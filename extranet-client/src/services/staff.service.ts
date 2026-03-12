@@ -1,14 +1,12 @@
 // src/services/staff.service.ts
 
-import env from '@/config/env';
+import axiosInstance from './axios.service';
 import { ApiResponse } from '../types';
 import { Staff, StaffLoginResponse, CreateStaffPayload, StaffListResponse, UpdateStaffPayload } from '../types/staff.types';
 
 export class StaffService {
-  private static getHeaders(token?: string | null): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
+  private static getHeaders(token?: string | null) {
+    const headers: any = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
@@ -17,24 +15,24 @@ export class StaffService {
 
   static async request<T>(
     endpoint: string,
-    options: RequestInit = {},
+    options: any = {},
     token?: string | null
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${env.API_BASE_URL}${endpoint}`, {
+      const config = {
+        url: endpoint,
         ...options,
-        headers: this.getHeaders(token),
-      });
+        headers: {
+          ...options.headers,
+          ...this.getHeaders(token),
+        },
+      };
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Request failed');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
+      const response = await axiosInstance(config);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Request failed';
+      throw new Error(message);
     }
   }
 
@@ -43,7 +41,7 @@ export class StaffService {
       '/staff/login',
       {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        data: { email, password },
       }
     );
   }
@@ -53,7 +51,7 @@ export class StaffService {
       '/staff',
       {
         method: 'POST',
-        body: JSON.stringify(payload),
+        data: payload,
       },
       token
     );
@@ -74,7 +72,7 @@ export class StaffService {
 
     return this.request<StaffListResponse>(
       `/staff/restaurant/${restaurantId}?${queryParams.toString()}`,
-      {},
+      { method: 'GET' },
       token
     );
   }
@@ -82,7 +80,7 @@ export class StaffService {
   static async getStaff(token: string, staffId: string) {
     return this.request<Staff>(
       `/staff/${staffId}`,
-      {},
+      { method: 'GET' },
       token
     );
   }
@@ -92,7 +90,7 @@ export class StaffService {
       `/staff/${staffId}`,
       {
         method: 'PUT',
-        body: JSON.stringify(data),
+        data: data,
       },
       token
     );
@@ -103,7 +101,7 @@ export class StaffService {
       `/staff/profile`,
       {
         method: 'PUT',
-        body: JSON.stringify(data),
+        data: data,
       },
       token
     );
@@ -114,7 +112,7 @@ export class StaffService {
       `/staff/${staffId}/staff-type`,
       {
         method: 'PUT',
-        body: JSON.stringify({ staffType }),
+        data: { staffType },
       },
       token
     );
@@ -133,7 +131,7 @@ export class StaffService {
   static async getCurrentUser(token: string) {
     return this.request<Staff>(
       '/staff/me',
-      {},
+      { method: 'GET' },
       token
     );
   }
@@ -143,7 +141,7 @@ export class StaffService {
       '/staff/change-password',
       {
         method: 'POST',
-        body: JSON.stringify({ currentPassword, newPassword }),
+        data: { currentPassword, newPassword },
       },
       token
     );

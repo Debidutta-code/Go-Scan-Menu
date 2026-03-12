@@ -2,16 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '../../../contexts/StaffAuthContext';
 import { useStaffSocket } from '../../../contexts/StaffSocketContext';
-import { IOrder } from '../../../services/order.service';
-import { OrderService } from '../../../services/order.service';
+import { IOrder, OrderService } from '../../../services/order.service';
 import { BranchService } from '../../../services/branch.service';
 import { Branch } from '../../../types/table.types';
 import { OrderDetailPanel } from './OrderDetailPanel';
 import {
-    RefreshCcw, Clock, CheckCircle2, AlertCircle,
-    ChevronRight, ChevronLeft, Utensils, Building2,
-    Filter, Search, X, TrendingUp, ShoppingBag,
-    DollarSign, AlertTriangle, Eye
+    Clock, CheckCircle2, AlertCircle,
+    ChevronRight, ChevronLeft,
+    Filter, Search, X,
+    MoreVertical, XCircle, Package, ArrowUpDown, ArrowRight,
+    RefreshCcw, Utensils, Building2, TrendingUp, ShoppingBag, AlertTriangle, DollarSign, Eye
 } from 'lucide-react';
 import { SkeletonLoader } from './skeleton-loader/SkeletonLoader';
 import { FilterDrawer } from './FilterDrawer';
@@ -119,7 +119,7 @@ export const Orders: React.FC = () => {
                 }
                 setBranches(list);
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to load branches:', err);
         } finally {
             setBranchesLoading(false);
@@ -178,7 +178,11 @@ export const Orders: React.FC = () => {
 
     // ── Fetch orders via REST (replaces Socket emit) ──────────────────────────
     const fetchOrders = useCallback(async () => {
-        if (!token || !staff || !targetBranchId) return;
+        // Always ensure loading is cleared on early exit
+        if (!token || !staff || !targetBranchId) {
+            setLoading(false);
+            return;
+        }
 
         setLoading(true);
         setError('');
@@ -214,7 +218,7 @@ export const Orders: React.FC = () => {
             }
         } catch (err: any) {
             console.error('Failed to fetch orders:', err);
-            setError(err.message || 'An error occurred while fetching orders');
+            setError(err?.message || 'An error occurred while fetching orders');
         } finally {
             setLoading(false);
         }
