@@ -86,53 +86,84 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }, 5000);
     }, [playNotificationSound]);
 
+    const staffRef = useRef(staff);
+    const handlersRef = useRef({ showNotification, sendBrowserNotification });
+
     useEffect(() => {
-        if (!socket || !staff) {
-            console.log('⏳ NotificationContext: Waiting for socket/staff...', { hasSocket: !!socket, hasStaff: !!staff });
+        staffRef.current = staff;
+    }, [staff]);
+
+    useEffect(() => {
+        handlersRef.current = { showNotification, sendBrowserNotification };
+    }, [showNotification, sendBrowserNotification]);
+
+    useEffect(() => {
+        if (!socket) {
+            console.log('⏳ NotificationContext: Waiting for socket...');
             return;
         }
 
-        console.log('📡 NotificationContext: Registering socket listeners for staff:', staff._id);
+        console.log('📡 NotificationContext: Registering socket listeners');
 
-        const handleNewOrder = (newOrder: IOrder) => {
-            console.log('📦 NotificationContext: Received order event', newOrder.orderNumber);
+        const handleIncomingOrder = (order: IOrder, eventName: string) => {
+            console.log(`📦 NotificationContext: Received [${eventName}] event`, order.orderNumber);
             
-            // Check if order belongs to one of the staff's allowed branches
-            const incomingBranchId = typeof newOrder.branchId === 'object' 
-                ? (newOrder.branchId as any)._id?.toString() || (newOrder.branchId as any).toString()
-                : newOrder.branchId?.toString();
+            const currentStaff = staffRef.current;
+            if (!currentStaff) {
+                console.warn('⚠️ No staff info available to filter order');
+                return;
+            }
+
+            // Extract branch ID from incoming order
+            const incomingBranchId = typeof order.branchId === 'object' 
+                ? (order.branchId as any)._id?.toString() || (order.branchId as any).toString()
+                : order.branchId?.toString();
             
-            const allowedBranchIds = (staff.allowedBranchIds || []).map(id => 
+            // Collect all branches this staff can view
+            const allowedBranchIds = (currentStaff.allowedBranchIds || []).map(id => 
                 typeof id === 'object' ? (id as any)._id?.toString() || (id as any).toString() : id.toString()
             );
             
-            if (staff.branchId) {
-                const sbid = typeof staff.branchId === 'object' 
-                    ? (staff.branchId as any)._id?.toString() || (staff.branchId as any).toString() 
-                    : staff.branchId.toString();
+            if (currentStaff.branchId) {
+                const sbid = typeof currentStaff.branchId === 'object' 
+                    ? (currentStaff.branchId as any)._id?.toString() || (currentStaff.branchId as any).toString() 
+                    : currentStaff.branchId.toString();
                 if (!allowedBranchIds.includes(sbid)) allowedBranchIds.push(sbid);
             }
 
-            console.log('🔍 Checking branch permissions:', { incomingBranchId, allowedBranchIds });
+            console.log(`🔍 Checking branch permissions for [${eventName}]:`, { incomingBranchId, allowedBranchIds });
 
             if (incomingBranchId && allowedBranchIds.includes(incomingBranchId)) {
-                console.log('✅ Branch authorized. Showing notification.');
-                showNotification(`New order ${newOrder.orderNumber} received!`, 'order');
-                sendBrowserNotification(newOrder);
+                // If it's a status update, only notify if it's "pending" (meaning it's a NEW order)
+                // or if we want to notify on all status changes. For now, let's treat order:created 
+                // and orders:send-order-to-staff as the primary notification triggers.
+                const shouldNotify = eventName !== 'order:status-update' || order.status === 'pending';
+
+                if (shouldNotify) {
+                    console.log('✅ Authorized. Triggering notifications.');
+                    handlersRef.current.showNotification(`New order ${order.orderNumber} received!`, 'order');
+                    handlersRef.current.sendBrowserNotification(order);
+                }
             } else {
-                console.log('❌ Branch not in allowed list for this staff.');
+                console.log('❌ Branch not authorized for this staff.');
             }
         };
 
-        socket.on('orders:send-order-to-staff', handleNewOrder);
-        socket.on('order:created', handleNewOrder);
+        const onOrderStaff = (order: IOrder) => handleIncomingOrder(order, 'orders:send-order-to-staff');
+        const onOrderCreated = (order: IOrder) => handleIncomingOrder(order, 'order:created');
+        const onOrderStatus = (order: IOrder) => handleIncomingOrder(order, 'order:status-update');
+
+        socket.on('orders:send-order-to-staff', onOrderStaff);
+        socket.on('order:created', onOrderCreated);
+        socket.on('order:status-update', onOrderStatus);
 
         return () => {
             console.log('🧹 NotificationContext: Cleaning up listeners');
-            socket.off('orders:send-order-to-staff', handleNewOrder);
-            socket.off('order:created', handleNewOrder);
+            socket.off('orders:send-order-to-staff', onOrderStaff);
+            socket.off('order:created', onOrderCreated);
+            socket.off('order:status-update', onOrderStatus);
         };
-    }, [socket, staff, showNotification, sendBrowserNotification]);
+    }, [socket]);
 
     // Request permission once
     useEffect(() => {
