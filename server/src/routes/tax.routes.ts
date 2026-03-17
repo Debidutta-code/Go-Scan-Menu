@@ -3,6 +3,8 @@ import { Router } from 'express';
 import { TaxController } from '@/controllers/tax.controller';
 import { AuthMiddleware } from '@/middlewares/auth.middleware';
 import { StaffRole } from '@/types/role.types';
+import { validateRequest } from '@/middlewares/validate.middleware';
+import { createTaxSchema, updateTaxSchema, updateTaxStatusSchema } from '@/validations/tax.validation';
 
 const router = Router({ mergeParams: true });
 const taxController = new TaxController();
@@ -20,7 +22,7 @@ const canManageTaxes = [
 ];
 
 // Create tax
-router.post('/', ...canManageTaxes, taxController.createTax);
+router.post('/', ...canManageTaxes, validateRequest(createTaxSchema), taxController.createTax);
 
 // Get all taxes by restaurant
 router.get('/', taxController.getTaxesByRestaurant);
@@ -35,10 +37,10 @@ router.get('/branch/:branchId', taxController.getTaxesByBranch);
 router.get('/:id', taxController.getTax);
 
 // Update tax
-router.put('/:id', ...canManageTaxes, taxController.updateTax);
+router.put('/:id', ...canManageTaxes, validateRequest(updateTaxSchema), taxController.updateTax);
 
 // Update tax status (activate/deactivate)
-router.patch('/:id/status', ...canManageTaxes, taxController.updateTaxStatus);
+router.patch('/:id/status', ...canManageTaxes, validateRequest(updateTaxStatusSchema), taxController.updateTaxStatus);
 
 // Delete tax
 router.delete('/:id', ...canManageTaxes, taxController.deleteTax);

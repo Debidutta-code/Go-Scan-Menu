@@ -1,35 +1,9 @@
 // src/models/Tax.model.ts
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export interface ITax extends Document {
-  restaurantId: Types.ObjectId;
-  branchId?: Types.ObjectId; // null = applies to all branches, specific ID = branch-specific tax
-  name: string; // e.g., "CGST", "SGST", "GST", "VAT", "Service Tax", "Room Tax"
-  description?: string;
-  taxType: 'percentage' | 'fixed'; // percentage-based or fixed amount
-  value: number; // percentage (e.g., 9, 18) or fixed amount (e.g., 50)
-  applicableOn: 'subtotal' | 'item_total' | 'after_other_taxes'; // when to apply this tax
-  scope: 'restaurant' | 'branch'; // restaurant-wide or branch-specific
-  category: 'food_tax' | 'service_tax' | 'room_tax' | 'luxury_tax' | 'other'; // tax category
+import { ITax } from '@/types/tax.types';
 
-  // Conditional application rules
-  conditions?: {
-    orderType?: ('dine-in' | 'takeaway')[]; // apply only for specific order types
-    minOrderAmount?: number; // apply only if order amount is above this
-    maxOrderAmount?: number; // apply only if order amount is below this
-    specificItems?: Types.ObjectId[]; // apply only for specific menu items (references MenuItem)
-    specificCategories?: Types.ObjectId[]; // apply only for specific categories (references Category)
-  };
-
-  // Tax grouping (for combined display like CGST+SGST = GST)
-  isPartOfGroup?: boolean;
-  groupName?: string; // e.g., "GST" (for CGST+SGST combined display)
-
-  isActive: boolean;
-  displayOrder: number; // order in which taxes are displayed on receipt
-  createdAt: Date;
-  updatedAt: Date;
-}
+export { ITax };
 
 const taxSchema = new Schema<ITax>(
   {

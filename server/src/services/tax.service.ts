@@ -2,7 +2,7 @@
 import { TaxRepository } from '@/repositories/tax.repository';
 import { RestaurantRepository } from '@/repositories/restaurant.repository';
 import { BranchRepository } from '@/repositories/branch.repository';
-import { ITax } from '@/models/Tax.model';
+import { ITax, CreateTaxDTO, UpdateTaxDTO } from '@/types/tax.types';
 import { AppError } from '@/utils/AppError';
 import { Types } from 'mongoose';
 
@@ -19,20 +19,7 @@ export class TaxService {
 
   async createTax(
     restaurantId: string,
-    data: {
-      name: string;
-      description?: string;
-      taxType: 'percentage' | 'fixed';
-      value: number;
-      applicableOn: 'subtotal' | 'item_total' | 'after_other_taxes';
-      scope: 'restaurant' | 'branch';
-      branchId?: string;
-      category: 'food_tax' | 'service_tax' | 'room_tax' | 'luxury_tax' | 'other';
-      conditions?: ITax['conditions'];
-      isPartOfGroup?: boolean;
-      groupName?: string;
-      displayOrder?: number;
-    }
+    data: CreateTaxDTO
   ) {
     // Verify restaurant exists
     const restaurant = await this.restaurantRepo.findById(restaurantId);
@@ -69,7 +56,11 @@ export class TaxService {
       applicableOn: data.applicableOn,
       scope: data.scope,
       category: data.category,
-      conditions: data.conditions,
+      conditions: data.conditions ? {
+        ...data.conditions,
+        specificItems: data.conditions.specificItems?.map((id: string) => new Types.ObjectId(id)),
+        specificCategories: data.conditions.specificCategories?.map((id: string) => new Types.ObjectId(id)),
+      } : undefined,
       isPartOfGroup: data.isPartOfGroup || false,
       groupName: data.groupName,
       isActive: true,
@@ -154,7 +145,7 @@ export class TaxService {
     return applicableTaxes;
   }
 
-  async updateTax(id: string, restaurantId: string, data: Partial<ITax>): Promise<ITax> {
+  async updateTax(id: string, restaurantId: string, data: UpdateTaxDTO): Promise<ITax> {
     const tax = await this.taxRepo.findById(id);
     if (!tax || !tax.isActive) {
       throw new AppError('Tax not found', 404);
@@ -164,7 +155,21 @@ export class TaxService {
       throw new AppError('Tax does not belong to this restaurant', 403);
     }
 
-    const updatedTax = await this.taxRepo.update(id, data);
+    const updateData: Record<string, any> = { ...data };
+    if (data.branchId) {
+      updateData.branchId = new Types.ObjectId(data.branchId);
+    }
+    if (data.conditions) {
+      updateData.conditions = { ...data.conditions };
+      if (data.conditions.specificItems) {
+        updateData.conditions.specificItems = data.conditions.specificItems.map((id: string) => new Types.ObjectId(id));
+      }
+      if (data.conditions.specificCategories) {
+        updateData.conditions.specificCategories = data.conditions.specificCategories.map((id: string) => new Types.ObjectId(id));
+      }
+    }
+
+    const updatedTax = await this.taxRepo.update(id, updateData);
     if (!updatedTax) {
       throw new AppError('Failed to update tax', 500);
     }
