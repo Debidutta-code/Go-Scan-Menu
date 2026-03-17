@@ -11,17 +11,17 @@ export enum StaffRole {
 }
 
 export enum RoleLevel {
-  PLATFORM = 1,      // SuperAdmin - platform level
-  RESTAURANT = 2,    // Owner - restaurant level
-  BRANCH_MULTI = 3,  // Branch Manager - multi-branch level
+  PLATFORM = 1, // SuperAdmin - platform level
+  RESTAURANT = 2, // Owner - restaurant level
+  BRANCH_MULTI = 3, // Branch Manager - multi-branch level
   BRANCH_SINGLE = 4, // Manager - single branch level
-  OPERATIONAL = 5,   // Waiter, Kitchen, Cashier - operational level
+  OPERATIONAL = 5, // Waiter, Kitchen, Cashier - operational level
 }
 
 export enum AccessScope {
-  PLATFORM = 'platform',           // Access to entire platform
-  RESTAURANT = 'restaurant',       // Access to all branches in restaurant
-  BRANCH_MULTI = 'branch_multi',   // Access to specific multiple branches
+  PLATFORM = 'platform', // Access to entire platform
+  RESTAURANT = 'restaurant', // Access to all branches in restaurant
+  BRANCH_MULTI = 'branch_multi', // Access to specific multiple branches
   BRANCH_SINGLE = 'branch_single', // Access to single branch only
 }
 
@@ -36,7 +36,7 @@ export interface RolePermissions {
     managePayment: boolean;
     viewAllBranches: boolean;
   };
-  
+
   // Menu Management
   menu: {
     view: boolean;
@@ -46,7 +46,7 @@ export interface RolePermissions {
     manageCategories: boolean;
     managePricing: boolean;
   };
-  
+
   // Staff Management
   staff: {
     view: boolean;
@@ -55,14 +55,14 @@ export interface RolePermissions {
     delete: boolean;
     manageRoles: boolean;
   };
-  
+
   // Reports & Analytics
   reports: {
     view: boolean;
     export: boolean;
     viewFinancials: boolean;
   };
-  
+
   // Settings Management
   settings: {
     view: boolean;
@@ -70,7 +70,7 @@ export interface RolePermissions {
     updateBranch: boolean;
     manageTaxes: boolean;
   };
-  
+
   // Table Management
   tables: {
     view: boolean;
@@ -79,7 +79,7 @@ export interface RolePermissions {
     delete: boolean;
     manageQR: boolean;
   };
-  
+
   // Customer Management
   customers: {
     view: boolean;

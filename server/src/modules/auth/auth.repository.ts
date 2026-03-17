@@ -1,0 +1,34 @@
+// server/src/modules/auth/auth.repository.ts
+import { SuperAdmin, ISuperAdmin } from './auth.model';
+
+export const createSuperAdmin = async (data: {
+  name: string;
+  email: string;
+  password: string;
+}): Promise<ISuperAdmin> => {
+  return SuperAdmin.create(data);
+};
+
+export const findSuperAdminByEmail = async (email: string): Promise<ISuperAdmin | null> => {
+  return SuperAdmin.findOne({ email });
+};
+
+export const findSuperAdminById = async (id: string): Promise<ISuperAdmin | null> => {
+  return SuperAdmin.findById(id).select('-password');
+};
+
+export const updateSuperAdminById = async (
+  id: string,
+  data: Partial<ISuperAdmin>
+): Promise<ISuperAdmin | null> => {
+  return SuperAdmin.findByIdAndUpdate(id, data, { new: true }).select('-password');
+};
+
+export const checkSuperAdminEmailExists = async (
+  email: string,
+  excludeId?: string
+): Promise<boolean> => {
+  const query = excludeId ? { email, _id: { $ne: excludeId } } : { email };
+  const superAdmin = await SuperAdmin.findOne(query);
+  return !!superAdmin;
+};

@@ -1,7 +1,7 @@
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import type { StringValue } from 'ms';
 import { envConfig as config } from '@/config';
-import { StaffType, IPermissions } from '@/models/StaffTypePermissions.model';
+import { StaffType, IPermissions } from '@/modules/staff/models/staff-type-permissions.model';
 import { StaffRole, RolePermissions } from '@/types/role.types';
 
 export interface JWTPayload {
