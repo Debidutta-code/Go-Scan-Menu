@@ -1,4 +1,4 @@
-import { IRestaurant } from '@/models';
+import { IRestaurant } from '@/modules/restaurant/models/restaurant.model';
 
 export const defaultTheme: IRestaurant['theme'] = {
   primaryColor: '#3B82F6', // blue-500

@@ -3,7 +3,7 @@ import { envConfig } from './env.config';
 
 const allowedOrigins = (envConfig.cors_origins || '')
   .split(',')
-  .map(origin => origin.trim())
+  .map((origin) => origin.trim())
   .filter(Boolean);
 
 export const corsOptions: CorsOptions = {
@@ -15,9 +15,7 @@ export const corsOptions: CorsOptions = {
       return callback(null, true);
     }
 
-    return callback(
-      new Error(`CORS blocked: ${origin} is not allowed`)
-    );
+    return callback(new Error(`CORS blocked: ${origin} is not allowed`));
   },
   credentials: true,
 };

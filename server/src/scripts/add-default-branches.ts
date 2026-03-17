@@ -3,8 +3,8 @@
 
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { Restaurant } from '../models/Restaurant.model';
-import { Branch } from '../models/Branch.model';
+import { Restaurant } from '../modules/restaurant/models/restaurant.model';
+import { Branch } from '../modules/restaurant/models/branch.model';
 
 // Load environment variables
 dotenv.config();
@@ -77,7 +77,9 @@ async function addDefaultBranches() {
         console.log(`   ✅ Created branch: ${defaultBranch.name} (ID: ${defaultBranch._id})`);
         console.log(`   ✅ Updated currentBranches count to 1`);
       } else {
-        console.log(`⏭️  Restaurant \"${restaurant.name}\" already has ${existingBranches.length} branch(es), skipping...`);
+        console.log(
+          `⏭️  Restaurant \"${restaurant.name}\" already has ${existingBranches.length} branch(es), skipping...`
+        );
       }
     }
 

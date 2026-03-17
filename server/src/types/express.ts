@@ -1,7 +1,7 @@
 // Updated Express Types for Enhanced RBAC
 import type {} from 'express-serve-static-core';
 import { StaffRole, RolePermissions, AccessScope } from './role.types';
-import { StaffType, IPermissions } from '../models/StaffTypePermissions.model';
+import { StaffType, IPermissions } from '../modules/staff/models/staff-type-permissions.model';
 
 /**
  * Authenticated user payload
@@ -11,12 +11,12 @@ export interface AuthUser {
   email?: string;
   role?: StaffRole;
   roleId?: string;
-  staffType: StaffType;  // ← Added
+  staffType: StaffType; // ← Added
   restaurantId?: string;
   branchId?: string;
   accessScope?: AccessScope;
   allowedBranchIds?: string[];
-  permissions?: RolePermissions | IPermissions;  // ← Updated
+  permissions?: RolePermissions | IPermissions; // ← Updated
 }
 
 declare module 'express-serve-static-core' {

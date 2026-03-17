@@ -1,27 +1,22 @@
 // src/routes/index.ts
 import { Router } from 'express';
-import superAdminAuthRoutes from './superadmin.auth.route';
-import restaurantRoutes from './restaurant.routes';
-import staffRoutes from './staff.routes';
-import staffTypePermissionsRoutes from './staffTypePermissions.routes';
+import { authRoutes } from '@/modules/auth';
+import { restaurantRoutes, branchRoutes, taxRoutes, qrConfigRoutes } from '@/modules/restaurant';
+import { staffRoutes, staffTypePermissionsRoutes } from '@/modules/staff';
+import { categoryRoutes, menuItemRoutes, publicMenuRoutes } from '@/modules/menu';
+import { orderRoutes } from '@/modules/order';
+import { tableRoutes } from '@/modules/table';
 import healthRoutes from './health.route';
-import branchRoutes from './branch.routes';
-import tableRoutes from './table.routes';
-import categoryRoutes from './category.routes';
-import menuItemRoutes from './menuitem.routes';
-import publicMenuRoutes from './public.menu.routes';
-import taxRoutes from './tax.routes';
-import orderRoutes from './order.routes';
-import qrConfigRoutes from './qrconfig.routes';
 
 const router = Router();
 
 router.use('/health', healthRoutes);
-router.use('/superadmin/auth', superAdminAuthRoutes);
+router.use('/superadmin/auth', authRoutes);
 router.use('/restaurants', restaurantRoutes);
 router.use('/staff', staffRoutes);
 router.use('/staff-type-permissions', staffTypePermissionsRoutes);
-// router.use('/:restaurantId/branches', branchRoutes);
+
+// Branch Management
 router.use('/restaurants/:restaurantId/branches', branchRoutes);
 
 // Table Management (can be accessed via restaurant or branch)
@@ -34,7 +29,7 @@ router.use('/restaurants/:restaurantId/categories', categoryRoutes);
 // Menu Item Management (nested under restaurants)
 router.use('/restaurants/:restaurantId/menu-items', menuItemRoutes);
 
-// Create Tex
+// Tax Management
 router.use('/restaurants/:restaurantId/taxes', taxRoutes);
 
 // Order Management (nested under restaurants)

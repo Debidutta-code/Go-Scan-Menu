@@ -3,11 +3,14 @@
 
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { SuperAdmin } from '../models/SuperAdmin.model';
-import { Restaurant } from '../models/Restaurant.model';
-import { Branch } from '../models/Branch.model';
-import { Staff } from '../models/Staff.model';
-import { StaffTypePermissions, StaffType } from '../models/StaffTypePermissions.model';
+import { SuperAdmin } from '../modules/auth/auth.model';
+import { Restaurant } from '../modules/restaurant/models/restaurant.model';
+import { Branch } from '../modules/restaurant/models/branch.model';
+import { Staff } from '../modules/staff/models/staff.model';
+import {
+  StaffTypePermissions,
+  StaffType,
+} from '../modules/staff/models/staff-type-permissions.model';
 import bcrypt from 'bcryptjs';
 
 // Load environment variables
@@ -41,10 +44,10 @@ async function seedTestData() {
     console.log('🏪 Creating Single Restaurant...');
     const existingRestaurant = await Restaurant.findOne({ slug: 'burger-heaven' });
     let restaurant;
-    
+
     if (!existingRestaurant) {
       const hashedPassword = await bcrypt.hash('password123', 10);
-      
+
       restaurant = await Restaurant.create({
         name: 'Burger Heaven',
         slug: 'burger-heaven',
@@ -93,7 +96,7 @@ async function seedTestData() {
     console.log('👔 Creating Owner Staff...');
     const existingStaff = await Staff.findOne({ email: 'owner@burgerheaven.com' });
     let ownerStaff;
-    
+
     if (!existingStaff) {
       const hashedPassword = await bcrypt.hash('password123', 10);
       ownerStaff = await Staff.create({
@@ -106,13 +109,15 @@ async function seedTestData() {
         allowedBranchIds: [],
         isActive: true,
       });
-      
+
       // Update restaurant with ownerId
       await Restaurant.findByIdAndUpdate(restaurant._id, {
         ownerId: ownerStaff._id,
       });
-      
-      console.log(`   ✅ Owner Staff created: owner@burgerheaven.com / password123 (ID: ${ownerStaff._id})`);
+
+      console.log(
+        `   ✅ Owner Staff created: owner@burgerheaven.com / password123 (ID: ${ownerStaff._id})`
+      );
     } else {
       ownerStaff = existingStaff;
       console.log(`   ⏭️  Owner Staff already exists`);
@@ -124,7 +129,7 @@ async function seedTestData() {
       restaurantId: restaurant._id,
       staffType: StaffType.OWNER,
     });
-    
+
     if (!existingPermissions) {
       await StaffTypePermissions.create({
         restaurantId: restaurant._id,
@@ -185,7 +190,7 @@ async function seedTestData() {
     // 5. Create Default Branch
     console.log('🏢 Creating Default Branch...');
     const existingBranch = await Branch.findOne({ restaurantId: restaurant._id });
-    
+
     if (!existingBranch) {
       const defaultBranch = await Branch.create({
         restaurantId: restaurant._id,
@@ -201,7 +206,7 @@ async function seedTestData() {
           country: 'USA',
           coordinates: {
             latitude: 40.7128,
-            longitude: -74.0060,
+            longitude: -74.006,
           },
         },
         settings: {
@@ -239,7 +244,7 @@ async function seedTestData() {
     console.log('📝 Login Credentials:');
     console.log('   SuperAdmin: admin@test.com / password123');
     console.log('   Owner (Staff): owner@burgerheaven.com / password123');
-    
+
     process.exit(0);
   } catch (error) {
     console.error('❌ Seed failed:', error);
