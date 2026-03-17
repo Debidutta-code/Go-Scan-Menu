@@ -5,6 +5,7 @@ import { BranchRepository } from '../repositories/branch.repository';
 import { ITax } from '../models/tax.model';
 import { AppError } from '@/utils/AppError';
 import { Types } from 'mongoose';
+import { CreateTaxDTO, UpdateTaxDTO } from '@/types/tax.types';
 
 export class TaxService {
   private taxRepo: TaxRepository;

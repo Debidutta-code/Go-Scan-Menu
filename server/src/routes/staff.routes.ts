@@ -1,7 +1,6 @@
 // src/routes/staff.routes.ts
+import { AuthMiddleware, StaffController } from '@/modules/staff';
 import { Router } from 'express';
-import { StaffController } from '@/controllers/staff.controller';
-import { AuthMiddleware } from '@/middlewares/auth.middleware';
 
 const router = Router();
 const staffController = new StaffController();

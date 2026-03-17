@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { PublicMenuController } from './controllers/public-menu.controller';
+import { OrderController } from '../order';
 
 const router = Router();
 const publicMenuController = new PublicMenuController();
