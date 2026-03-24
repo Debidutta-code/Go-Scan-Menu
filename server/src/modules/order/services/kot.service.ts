@@ -33,18 +33,21 @@ export class KOTService {
   }
 
   async createKOTFromOrder(order: IOrder): Promise<IKOT> {
-    const kotNumber = await this.generateKOTNumber(order.branchId.toString());
+    const branchId = order.branchId?._id || order.branchId;
+    const restaurantId = order.restaurantId?._id || order.restaurantId;
+
+    const kotNumber = await this.generateKOTNumber(branchId.toString());
 
     const kotData: Partial<IKOT> = {
-      restaurantId: order.restaurantId as any,
-      branchId: order.branchId as any,
+      restaurantId: restaurantId as any,
+      branchId: branchId as any,
       orderId: order._id as any,
       kotNumber,
       orderNumber: order.orderNumber,
       tableNumber: order.tableNumber,
       customerName: order.customerName,
       items: order.items.map((item) => ({
-        menuItemId: item.menuItemId as any,
+        menuItemId: (item.menuItemId?._id || item.menuItemId) as any,
         name: item.name,
         quantity: item.quantity,
         variant: item.variant ? { name: item.variant.name } : undefined,
