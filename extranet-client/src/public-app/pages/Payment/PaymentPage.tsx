@@ -1,5 +1,5 @@
 import React from 'react';
-import { usePublicApp } from '../../contexts/PublicAppContext';
+import { usePublicApp } from '@/public-app/contexts/PublicAppContext';
 import './PaymentPage.css';
 
 export const PaymentPage: React.FC = () => {

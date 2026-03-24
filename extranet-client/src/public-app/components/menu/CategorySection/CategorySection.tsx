@@ -1,5 +1,5 @@
 import React from 'react';
-import { Category, MenuItem } from '../../../types/menu.types';
+import { Category, MenuItem } from '@/public-app/types/menu.types';
 import { MenuItemCard } from '../MenuItemCard/MenuItemCard';
 import './CategorySection.css';
 
@@ -17,7 +17,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   onAddClick,
 }) => {
   return (
-    <section id={`category-${category.id}`} className="category-section-container">
+    <section id={`category-${category._id}`} className="category-section-container">
       <div className="category-section-header">
         <h2 className="category-section-title">{category.name}</h2>
         {category.description && (
@@ -28,7 +28,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
       <div className="category-section-items-list">
         {category.items.map((item) => (
           <MenuItemCard
-            key={item.id}
+            key={item._id}
             item={item}
             currency={currency}
             onItemClick={onItemClick}

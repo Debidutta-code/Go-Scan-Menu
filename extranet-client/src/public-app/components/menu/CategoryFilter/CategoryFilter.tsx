@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { Category } from '../../../types/menu.types';
-import { ALL_CATEGORIES_ID, ALL_CATEGORIES_NAME, SCROLL_OFFSET } from '../../../utils/constants';
+import { Category } from '@/public-app/types/menu.types';
+import { ALL_CATEGORIES_ID, ALL_CATEGORIES_NAME, SCROLL_OFFSET } from '@/public-app/utils/constants';
 import './CategoryFilter.css';
 
 interface CategoryFilterProps {
@@ -54,9 +54,9 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
 
         {categories.map((category) => (
           <button
-            key={category.id}
-            className={`public-category-filter-btn ${activeCategory === category.id ? 'active' : ''}`}
-            onClick={() => handleCategoryClick(category.id)}
+            key={category._id}
+            className={`public-category-filter-btn ${activeCategory === category._id ? 'active' : ''}`}
+            onClick={() => handleCategoryClick(category._id)}
           >
             <div className="public-category-filter-icon">
               {category.image ? (

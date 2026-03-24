@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { CategoryFilter } from '../../components/menu/CategoryFilter/CategoryFilter';
-import { CategoryGrid } from '../../components/menu/CategoryGrid/CategoryGrid';
-import { CategorySection } from '../../components/menu/CategorySection/CategorySection';
-import { MenuItemDetail } from '../../components/menu/MenuItemDetail/MenuItemDetail';
-import { usePublicApp } from '../../contexts/PublicAppContext';
-import { useCart } from '../../contexts/CartContext';
-import { useScrollSpy } from '../../hooks/useScrollSpy';
-import { MenuItem, Variant, Addon } from '../../types/menu.types';
-import { ALL_CATEGORIES_ID } from '../../utils/constants';
+import { CategoryFilter } from '@/public-app/components/menu/CategoryFilter/CategoryFilter';
+import { CategoryGrid } from '@/public-app/components/menu/CategoryGrid/CategoryGrid';
+import { CategorySection } from '@/public-app/components/menu/CategorySection/CategorySection';
+import { MenuItemDetail } from '@/public-app/components/menu/MenuItemDetail/MenuItemDetail';
+import { usePublicApp } from '@/public-app/contexts/PublicAppContext';
+import { useCart } from '@/public-app/contexts/CartContext';
+import { useScrollSpy } from '@/public-app/hooks/useScrollSpy';
+import { MenuItem, Variant, Addon } from '@/public-app/types/menu.types';
+import { ALL_CATEGORIES_ID } from '@/public-app/utils/constants';
 import './MenuPage.css';
 
 export const MenuPage: React.FC = () => {
@@ -17,7 +17,7 @@ export const MenuPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES_ID);
 
   const categoryIds = useMemo(
-    () => menuData.menu.map((cat) => cat.id),
+    () => menuData.menu.map((cat) => cat._id),
     [menuData.menu]
   );
 
@@ -64,7 +64,7 @@ export const MenuPage: React.FC = () => {
         ) : (
           menuData.menu.map((category) => (
             <CategorySection
-              key={category.id}
+              key={category._id}
               category={category}
               currency={menuData.branch.settings.currency}
               onItemClick={handleItemClick}

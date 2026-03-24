@@ -1,5 +1,5 @@
 import React from 'react';
-import { Restaurant, Table } from '../../../types/menu.types';
+import { Restaurant, Table } from '@/public-app/types/menu.types';
 import './Navbar.css';
 
 interface NavbarProps {

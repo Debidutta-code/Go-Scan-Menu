@@ -1,7 +1,7 @@
 import React from 'react';
-import { MenuItem } from '../../../types/menu.types';
-import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '../../../utils/formatters';
-import { useCart } from '../../../contexts/CartContext';
+import { MenuItem } from '@/public-app/types/menu.types';
+import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '@/public-app/utils/formatters';
+import { useCart } from '@/public-app/contexts/CartContext';
 import './MenuItemCard.css';
 
 interface MenuItemCardProps {
@@ -20,7 +20,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
   const { cart, addItem, updateQuantity, removeItem } = useCart();
 
   // Find the total quantity of this item in the cart
-  const cartItems = cart.filter(i => i.menuItem.id === item.id);
+  const cartItems = cart.filter(i => i.menuItem._id === item._id);
   const totalQuantity = cartItems.reduce((acc, i) => acc + i.quantity, 0);
   const hasVariants = item.variants && item.variants.length > 0;
 
@@ -34,9 +34,9 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
     // If it's a simple item and it's in the cart, reduce its quantity
     if (cartItems.length === 1 && !hasVariants) {
       if (cartItems[0].quantity > 1) {
-        updateQuantity(cartItems[0].id, -1);
+        updateQuantity(cartItems[0]._id, -1);
       } else {
-        removeItem(cartItems[0].id);
+        removeItem(cartItems[0]._id);
       }
     } else if (hasVariants || cartItems.length > 1) {
       // For items with variants or multiple cart entries, open the detail view

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MenuData } from '../types/menu.types';
+import { MenuData } from '@/public-app/types/menu.types';
 import { menuApi } from '../api/menuApi';
 
 export const useMenu = (restaurantSlug: string, branchCode: string, qrCode?: string) => {

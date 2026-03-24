@@ -1,5 +1,5 @@
 // src/public-app/services/order.service.ts
-import env from '@/config/env';
+import env from '@/shared/config/env';
 import axios, { AxiosError } from 'axios';
 
 const API_BASE_URL = env.API_BASE_URL || 'http://localhost:5000/api/v1';

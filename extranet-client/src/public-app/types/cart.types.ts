@@ -1,7 +1,8 @@
 import { MenuItem, Variant, Addon } from './menu.types';
 
 export interface CartItem {
-    id: string; // Unique ID for the cart item (item.id + variant?.id + chosen addons ids)
+    id: string; // Unique ID for the cart item (item._id + variant?._id + chosen addons ids)
+    _id: string;
     menuItem: MenuItem;
     variant?: Variant;
     addons: Addon[];

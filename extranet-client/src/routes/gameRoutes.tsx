@@ -1,14 +1,14 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { GamesManagement as MemoryGame } from '../public-app/games/memory-game/GamesManagement';
+import { GamesManagement as MemoryGame } from '@/public-app/games/memory-game/GamesManagement';
 import { StackGame } from '@/public-app/games/stack-game/StackGame';
 import { BrickGame } from '@/public-app/games/brick-game/BrickGame';
-import { FingerPickGame } from '../public-app/games/random-finger-pick/FingerPickGame';
-import { FastestFingerGame } from '../public-app/games/fastest-finger/FastestFingerGame';
-import { RiseUpGame } from '../public-app/games/rise-up/RiseUpGame';
-import { ChidiyaUddGame } from '../public-app/games/chidiya-udd/ChidiyaUddGame';
-import { TicTacToeGame } from '../public-app/games/tic-tac-toe/TicTacToeGame';
-import { GalaxyShooter } from '../public-app/games/galaxy-shooter/GalaxyShooter';
+import { FingerPickGame } from '@/public-app/games/random-finger-pick/FingerPickGame';
+import { FastestFingerGame } from '@/public-app/games/fastest-finger/FastestFingerGame';
+import { RiseUpGame } from '@/public-app/games/rise-up/RiseUpGame';
+import { ChidiyaUddGame } from '@/public-app/games/chidiya-udd/ChidiyaUddGame';
+import { TicTacToeGame } from '@/public-app/games/tic-tac-toe/TicTacToeGame';
+import { GalaxyShooter } from '@/public-app/games/galaxy-shooter/GalaxyShooter';
 
 export const renderGameRoutes = () => [
     <Route key="memory" path="games/memory-game" element={<MemoryGame />} />,

@@ -1,5 +1,6 @@
 export interface MenuItem {
   id: string;
+  _id: string;
   name: string;
   description: string;
   image?: string;
@@ -23,23 +24,27 @@ export interface Variant {
   name: string;
   price: number;
   isDefault: boolean;
+  id: string;
   _id: string;
 }
 
 export interface Addon {
   name: string;
   price: number;
+  id: string;
   _id: string;
 }
 
 export interface Customization {
   name: string;
   options: string[];
+  id: string;
   _id: string;
 }
 
 export interface Category {
   id: string;
+  _id: string;
   name: string;
   description: string;
   image?: string;
@@ -56,6 +61,7 @@ export interface RestaurantTheme {
 
 export interface Restaurant {
   id: string;
+  _id: string;
   name: string;
   slug: string;
   theme?: RestaurantTheme;
@@ -83,6 +89,7 @@ export interface BranchSettings {
 
 export interface Branch {
   id: string;
+  _id: string;
   name: string;
   code: string;
   address?: Address;
@@ -92,6 +99,7 @@ export interface Branch {
 
 export interface Table {
   id: string;
+  _id: string;
   tableNumber: string;
   capacity: number;
   location: string;

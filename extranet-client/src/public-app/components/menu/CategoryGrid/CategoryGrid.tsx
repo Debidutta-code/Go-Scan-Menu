@@ -1,6 +1,6 @@
 import React from 'react';
-import { Category } from '../../../types/menu.types';
-import { generateCategoryMasonryPattern } from '../../../utils/categoryMasonryPattern';
+import { Category } from '@/public-app/types/menu.types';
+import { generateCategoryMasonryPattern } from '@/public-app/utils/categoryMasonryPattern';
 import './CategoryGrid.css';
 
 interface CategoryGridProps {
@@ -29,11 +29,11 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
       <div className="public-category-grid">
         {categories.map((category, index) => (
           <div
-            key={category.id}
+            key={category._id}
             className={`public-category-grid-card ${
               pattern[index] ? 'large' : 'small'
             }`}
-            onClick={() => handleClick(category.id)}
+            onClick={() => handleClick(category._id)}
           >
             {category.image ? (
               <img

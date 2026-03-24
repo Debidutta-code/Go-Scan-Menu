@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { MenuItem, Variant } from '../../../types/menu.types';
-import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '../../../utils/formatters';
+import { MenuItem, Variant } from '@/public-app/types/menu.types';
+import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '@/public-app/utils/formatters';
 import './MenuItemDetail.css';
 
 interface MenuItemDetailProps {

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { MenuItem, Variant, Addon } from '../types/menu.types';
-import { CartItem, CartContextType } from '../types/cart.types';
+import { MenuItem, Variant, Addon } from '@/public-app/types/menu.types';
+import { CartItem, CartContextType } from '@/public-app/types/cart.types';
 
 const CartContext = createContext<CartContextType | null>(null);
 
@@ -33,9 +33,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCart((prevCart) => {
             // Create a unique ID based on item, variant, and addons
             const addonIds = addons.map(a => a._id).sort().join(',');
-            const cartItemId = `${item.id}-${variant?._id || 'default'}-${addonIds}`;
+            const cartItemId = `${item._id}-${variant?._id || 'default'}-${addonIds}`;
 
-            const existingItemIndex = prevCart.findIndex((i) => i.id === cartItemId);
+            const existingItemIndex = prevCart.findIndex((i) => i._id === cartItemId);
 
             const itemPrice = variant ? variant.price : item.price;
             const addonsPrice = addons.reduce((acc, a) => acc + a.price, 0);
@@ -52,6 +52,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             const newItem: CartItem = {
                 id: cartItemId,
+                _id: cartItemId,
                 menuItem: item,
                 variant,
                 addons,
@@ -64,13 +65,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const removeItem = (cartItemId: string) => {
-        setCart((prevCart) => prevCart.filter((item) => item.id !== cartItemId));
+        setCart((prevCart) => prevCart.filter((item) => item._id !== cartItemId));
     };
 
     const updateQuantity = (cartItemId: string, delta: number) => {
         setCart((prevCart) => {
             return prevCart.map((item) => {
-                if (item.id === cartItemId) {
+                if (item._id === cartItemId) {
                     const newQuantity = Math.max(1, item.quantity + delta);
                     return { ...item, quantity: newQuantity };
                 }

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { usePublicApp } from '../../contexts/PublicAppContext';
-import { CheckCircle, Clock, ShoppingBag, Loader2, IndianRupee } from 'lucide-react';
-import { PublicOrderService } from '../../services/order.service';
+import { usePublicApp } from '@/public-app/contexts/PublicAppContext';
+import { Clock, ShoppingBag, Loader2 } from 'lucide-react';
+import { PublicOrderService } from '@/public-app/services/public-order.service';
 import './OrdersPage.css';
 
 export const OrdersPage: React.FC = () => {
@@ -13,28 +13,32 @@ export const OrdersPage: React.FC = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!menuData.table?.id) {
+      if (!menuData.table?._id) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const response = await PublicOrderService.getOrdersByTable(menuData.table.id);
-        if (response.success) {
+        const response = await PublicOrderService.getOrdersByTable(
+          menuData.restaurant.slug,
+          menuData.branch.code,
+          menuData.table._id
+        );
+        if (response.success && response.data) {
           // Response.data contains { orders, pagination }
-          setOrders(response.data.orders || []);
+          setOrders((response.data as any).orders || []);
         } else {
-          setError(response.error || 'Failed to fetch orders');
+          setError((response as any).message || 'Failed to fetch orders');
         }
-      } catch (err) {
-        setError('An unexpected error occurred');
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchOrders();
-  }, [menuData.table?.id]);
+  }, [menuData.table?._id, menuData.restaurant.slug, menuData.branch.code]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -107,6 +111,7 @@ export const OrdersPage: React.FC = () => {
                   {menuData.branch.settings.currency} {order.totalAmount.toFixed(2)}
                 </div>
                 <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                  <Clock size={12} style={{ display: 'inline', marginRight: '4px' }} />
                   {new Date(order.orderTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { PublicLayout } from '../public-app/layouts/PublicLayout';
-import { MenuPage } from '../public-app/pages/Menu/MenuPage';
-import { OrdersPage } from '../public-app/pages/Orders/OrdersPage';
-import { CartPage } from '../public-app/pages/Cart/CartPage';
-import { PaymentPage } from '../public-app/pages/Payment/PaymentPage';
-import { GamesPage } from '../public-app/pages/Games/GamesPage';
+import { PublicLayout } from '@/public-app/layouts/PublicLayout';
+import { MenuPage } from '@/public-app/pages/Menu/MenuPage';
+import { OrdersPage } from '@/public-app/pages/Orders/OrdersPage';
+import { CartPage } from '@/public-app/pages/Cart/CartPage';
+import { PaymentPage } from '@/public-app/pages/Payment/PaymentPage';
+import { GamesPage } from '@/public-app/pages/Games/GamesPage';
 import { renderGameRoutes } from './gameRoutes';
 
 export const renderPublicMenuRoutes = () => [

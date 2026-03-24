@@ -181,7 +181,7 @@ export const StackGame: React.FC = () => {
                 { restitution: 0.35, friction: 0.4, frictionAir: 0.008, label: 'debris' }
             );
             const id = ++debrisId.current;
-            (body as any)._id = id;
+            (body as any).id = id;
             debrisColors.current.set(id, [c1, c2]);
             Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.22);
             Matter.Body.setVelocity(body, {
@@ -328,7 +328,7 @@ export const StackGame: React.FC = () => {
                 const bodies = Matter.Composite.allBodies(engineRef.current.world);
                 bodies.forEach(body => {
                     if (body.label !== 'debris') return;
-                    const id     = (body as any)._id as number;
+                    const id     = (body as any).id as number;
                     const colors = debrisColors.current.get(id);
                     if (!colors) return;
                     const [c1] = colors;

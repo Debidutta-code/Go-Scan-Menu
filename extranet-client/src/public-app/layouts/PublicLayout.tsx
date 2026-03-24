@@ -1,9 +1,9 @@
 import React from 'react';
 import { Outlet, useParams, useLocation, useNavigate } from 'react-router-dom';
-import { Navbar } from '../components/common/Navbar/Navbar';
-import { BottomNav } from '../components/common/BottomNav/BottomNav';
-import { Loading } from '../components/common/Loading/Loading';
-import { Error } from '../components/common/Error/Error';
+import { Navbar } from '@/public-app/components/common/Navbar/Navbar';
+import { BottomNav } from '@/public-app/components/common/BottomNav/BottomNav';
+import { Loading } from '@/public-app/components/common/Loading/Loading';
+import { Error } from '@/public-app/components/common/Error/Error';
 import { useMenu } from '../hooks/useMenu';
 import { PublicAppProvider } from '../contexts/PublicAppContext';
 import { CartProvider, useCart } from '../contexts/CartContext';

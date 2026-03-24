@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePublicApp } from '../../contexts/PublicAppContext';
-import { useCart } from '../../contexts/CartContext';
+import { usePublicApp } from '@/public-app/contexts/PublicAppContext';
+import { useCart } from '@/public-app/contexts/CartContext';
 import { Trash2, Plus, Minus, ShoppingBag, AlertCircle } from 'lucide-react';
-import { getDietaryIcon } from '../../utils/formatters';
-import { PublicOrderService } from '../../services/order.service';
+import { getDietaryIcon } from '@/public-app/utils/formatters';
+import { PublicOrderService } from '@/public-app/services/public-order.service';
 import './CartPage.css';
 
 export const CartPage: React.FC = () => {
@@ -33,7 +33,7 @@ export const CartPage: React.FC = () => {
 
   const handleCheckout = async () => {
     console.log('Checkout initiated', { menuData, cart });
-    if (!menuData.table?.id) {
+    if (!menuData.table?._id) {
       console.warn('Table ID missing');
       setOrderError('Table information missing. Please scan the QR code again.');
       return;
@@ -43,11 +43,11 @@ export const CartPage: React.FC = () => {
     setOrderError(null);
 
     const orderData = {
-      branchId: menuData.branch.id,
-      tableId: menuData.table.id,
+      branchId: menuData.branch._id,
+      tableId: menuData.table._id,
       orderType: 'dine-in' as const,
       items: cart.map(item => ({
-        menuItemId: item.menuItem.id,
+        menuItemId: item.menuItem._id,
         quantity: item.quantity,
         variantName: item.variant?.name,
         addons: item.addons.map(a => ({ name: a.name, price: a.price })),
@@ -57,17 +57,21 @@ export const CartPage: React.FC = () => {
     console.log('Placing order with data:', orderData);
 
     try {
-      const response = await PublicOrderService.createOrder(menuData.restaurant.id, orderData);
+      const response = await PublicOrderService.createOrder(
+        menuData.restaurant.slug,
+        menuData.branch.code,
+        orderData
+      );
       console.log('Order response:', response);
       if (response.success) {
         clearCart();
         navigate('../orders', { state: { orderSuccess: true, orderDetails: response.data } });
       } else {
-        setOrderError(response.error || 'Failed to place order. Please try again.');
+        setOrderError((response as any).message || 'Failed to place order. Please try again.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Order placement error:', err);
-      setOrderError('An unexpected error occurred. Please try again.');
+      setOrderError(err.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setIsPlacingOrder(false);
     }
@@ -102,7 +106,7 @@ export const CartPage: React.FC = () => {
 
       <div className="cart-items-list">
         {cart.map((item) => (
-          <div key={item.id} className="cart-item-card">
+          <div key={item._id} className="cart-item-card">
             {item.menuItem.image ? (
               <img
                 src={item.menuItem.image}
@@ -126,7 +130,7 @@ export const CartPage: React.FC = () => {
                   {(item.variant || item.addons.length > 0) && (
                     <div className="cart-item-details">
                       {item.variant && <span>{item.variant.name}</span>}
-                      {item.addons.map((addon) => (
+                      {item.addons.map((addon: any) => (
                         <span key={addon._id}>, {addon.name}</span>
                       ))}
                     </div>
@@ -134,7 +138,7 @@ export const CartPage: React.FC = () => {
                 </div>
                 <button
                   className="remove-btn"
-                  onClick={() => setItemToRemove(item.id)}
+                  onClick={() => setItemToRemove(item._id)}
                   title="Remove item"
                 >
                   <Trash2 size={16} />
@@ -148,14 +152,14 @@ export const CartPage: React.FC = () => {
                 <div className="quantity-controls">
                   <button
                     className="qty-btn"
-                    onClick={() => handleMinus(item.id, item.quantity)}
+                    onClick={() => handleMinus(item._id, item.quantity)}
                   >
                     <Minus size={14} />
                   </button>
                   <span className="qty-value">{item.quantity}</span>
                   <button
                     className="qty-btn"
-                    onClick={() => updateQuantity(item.id, 1)}
+                    onClick={() => updateQuantity(item._id, 1)}
                   >
                     <Plus size={14} />
                   </button>

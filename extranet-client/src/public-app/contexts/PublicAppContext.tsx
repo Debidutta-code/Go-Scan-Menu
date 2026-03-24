@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { MenuData } from '../types/menu.types';
+import { MenuData } from '@/public-app/types/menu.types';
 
 interface PublicAppContextType {
   menuData: MenuData;

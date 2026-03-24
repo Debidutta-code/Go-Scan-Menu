@@ -1,5 +1,5 @@
-import env from '@/config/env';
-import { MenuResponse } from '../types/menu.types';
+import env from '@/shared/config/env';
+import { MenuResponse } from '@/public-app/types/menu.types';
 
 export const menuApi = {
   getMenu: async (
