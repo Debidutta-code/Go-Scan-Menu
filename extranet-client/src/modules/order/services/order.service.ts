@@ -51,6 +51,25 @@ export interface IOrder {
     completedAt?: string;
 }
 
+export interface IKOT {
+    _id: string;
+    kotNumber: string;
+    orderNumber: string;
+    tableNumber: string;
+    customerName?: string;
+    items: Array<{
+        name: string;
+        quantity: number;
+        variant?: { name: string };
+        addons: Array<{ name: string }>;
+        customizations: Array<{ name: string; value: string }>;
+        specialInstructions?: string;
+    }>;
+    orderType: string;
+    orderTime: string;
+    createdAt: string;
+}
+
 export interface IOrderListResponse {
     orders: IOrder[];
     pagination: {
@@ -157,6 +176,23 @@ export class OrderService {
             return response.data;
         } catch (error: any) {
             const message = error.response?.data?.message || error.message || 'Failed to update payment status';
+            throw new Error(message);
+        }
+    }
+
+    static async getKOT(
+        token: string,
+        restaurantId: string,
+        orderId: string
+    ): Promise<ApiResponse<IKOT>> {
+        try {
+            const response = await axiosInstance.get(
+                `/restaurants/${restaurantId}/orders/${orderId}/kot`,
+                { headers: this.getHeaders(token) }
+            );
+            return response.data;
+        } catch (error: any) {
+            const message = error.response?.data?.message || error.message || 'Failed to fetch KOT';
             throw new Error(message);
         }
     }

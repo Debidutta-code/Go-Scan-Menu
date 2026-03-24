@@ -1175,6 +1175,20 @@
     opacity: 1;
 }
 
+.odp-btn--secondary {
+    background: var(--o-surface);
+    color: var(--o-text-secondary);
+    border: 1px solid var(--o-border);
+    flex: 1;
+}
+
+.odp-btn--secondary:hover:not(:disabled) {
+    background: var(--o-bg);
+    border-color: #c0c6d0;
+    color: var(--o-text-primary);
+    opacity: 1;
+}
+
 /* ── Live / Offline connection badge ─────────────────────── */
 .o-live-badge {
     display: inline-flex;

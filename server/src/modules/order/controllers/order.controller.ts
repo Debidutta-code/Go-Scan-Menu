@@ -1,14 +1,17 @@
 // src/controllers/order.controller.ts
 import { Request, Response } from 'express';
 import { OrderService } from '../services/order.service';
+import { KOTService } from '../services/kot.service';
 import { catchAsync, sendResponse } from '@/utils';
 import { socketService } from '@/socket/socket.service';
 
 export class OrderController {
   private orderService: OrderService;
+  private kotService: KOTService;
 
   constructor() {
     this.orderService = new OrderService();
+    this.kotService = new KOTService();
   }
 
   createOrder = catchAsync(async (req: Request, res: Response) => {
@@ -236,6 +239,16 @@ export class OrderController {
     sendResponse(res, 200, {
       message: 'Order cancelled successfully',
       data: order,
+    });
+  });
+
+  getKOT = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const kot = await this.kotService.getKOTByOrderId(id);
+
+    sendResponse(res, 200, {
+      message: 'KOT retrieved successfully',
+      data: kot,
     });
   });
 }

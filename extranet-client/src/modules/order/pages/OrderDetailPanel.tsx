@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Clock, CheckCircle2, Package, User, Utensils, ChevronRight, Ban, Loader2 } from 'lucide-react';
-import { IOrder } from '@/modules/order/services/order.service';
+import { X, Clock, CheckCircle2, Package, User, Utensils, ChevronRight, Ban, Loader2, Printer } from 'lucide-react';
+import { IOrder, OrderService } from '@/modules/order/services/order.service';
+import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 
 interface OrderDetailPanelProps {
     order: IOrder | null;
@@ -61,8 +62,10 @@ export const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
     onPaymentUpdate,
     onCancel,
 }) => {
+    const { token, staff } = useStaffAuth();
     const [actionLoading, setActionLoading] = useState(false);
     const [cancelLoading, setCancelLoading] = useState(false);
+    const [printLoading, setPrintLoading] = useState(false);
     const [actionError, setActionError] = useState('');
 
     if (!order) return null;
@@ -99,6 +102,85 @@ export const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
             setActionError(err.message || 'Failed to cancel order');
         } finally {
             setCancelLoading(false);
+        }
+    };
+
+    const handlePrintKOT = async () => {
+        if (!token || !staff || !order) return;
+        setPrintLoading(true);
+        setActionError('');
+        try {
+            const rid = typeof staff.restaurantId === 'string' ? staff.restaurantId : staff.restaurantId?._id;
+            const response = await OrderService.getKOT(token, rid, order._id);
+            if (response.success && response.data) {
+                const kot = response.data;
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    const html = `
+                        <html>
+                        <head>
+                            <title>KOT - ${kot.kotNumber}</title>
+                            <style>
+                                @page { size: 80mm auto; margin: 0; }
+                                body {
+                                    font-family: 'Courier New', Courier, monospace;
+                                    width: 80mm;
+                                    padding: 5mm;
+                                    margin: 0;
+                                    font-size: 12px;
+                                    line-height: 1.2;
+                                }
+                                .center { text-align: center; }
+                                .bold { font-weight: bold; }
+                                .divider { border-top: 1px dashed #000; margin: 5px 0; }
+                                .item-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+                                .item-details { margin-left: 5mm; font-size: 11px; font-style: italic; }
+                                .header { font-size: 16px; margin-bottom: 5px; }
+                                .meta { margin-bottom: 10px; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="center bold header">KITCHEN ORDER TOKEN</div>
+                            <div class="divider"></div>
+                            <div class="meta">
+                                <div><strong>KOT:</strong> ${kot.kotNumber}</div>
+                                <div><strong>Order:</strong> ${kot.orderNumber}</div>
+                                <div><strong>Table:</strong> #${kot.tableNumber}</div>
+                                <div><strong>Type:</strong> ${kot.orderType.toUpperCase()}</div>
+                                <div><strong>Date:</strong> ${new Date(kot.orderTime).toLocaleString()}</div>
+                                ${kot.customerName ? `<div><strong>Customer:</strong> ${kot.customerName}</div>` : ''}
+                            </div>
+                            <div class="divider"></div>
+                            <div class="bold">ITEMS</div>
+                            <div class="divider"></div>
+                            ${kot.items.map(item => `
+                                <div class="item-row">
+                                    <span class="bold">${item.quantity} x ${item.name}</span>
+                                </div>
+                                ${item.variant ? `<div class="item-details">Variant: ${item.variant.name}</div>` : ''}
+                                ${item.addons.length > 0 ? `<div class="item-details">Add-ons: ${item.addons.map(a => a.name).join(', ')}</div>` : ''}
+                                ${item.customizations.length > 0 ? `<div class="item-details">${item.customizations.map(c => `${c.name}: ${c.value}`).join(', ')}</div>` : ''}
+                                ${item.specialInstructions ? `<div class="item-details">Note: "${item.specialInstructions}"</div>` : ''}
+                                <div style="margin-bottom: 5px;"></div>
+                            `).join('')}
+                            <div class="divider"></div>
+                            <div class="center" style="margin-top: 10px;">*** ${new Date().toLocaleTimeString()} ***</div>
+                        </body>
+                        </html>
+                    `;
+                    printWindow.document.write(html);
+                    printWindow.document.close();
+                    printWindow.focus();
+                    setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                    }, 250);
+                }
+            }
+        } catch (err: any) {
+            setActionError(err.message || 'Failed to print KOT');
+        } finally {
+            setPrintLoading(false);
         }
     };
 
@@ -292,41 +374,55 @@ export const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                 </div>
 
                 {/* ── Action Footer ─────────────────────────────────── */}
-                {(nextAction || canCancel) && (
-                    <div className="odp-footer">
-                        {actionError && (
-                            <div className="odp-action-error">{actionError}</div>
+                <div className="odp-footer">
+                    {actionError && (
+                        <div className="odp-action-error">{actionError}</div>
+                    )}
+                    <div className="odp-footer-actions">
+                        {/* Always show Print KOT button for active/confirmed orders */}
+                        {['pending', 'confirmed', 'preparing', 'ready', 'served'].includes(order.status) && (
+                            <button
+                                className="odp-btn odp-btn--secondary"
+                                onClick={handlePrintKOT}
+                                disabled={printLoading || actionLoading || cancelLoading}
+                                style={{ marginRight: 'auto' }}
+                            >
+                                {printLoading
+                                    ? <Loader2 size={14} className="spin" />
+                                    : <Printer size={14} />
+                                }
+                                Print KOT
+                            </button>
                         )}
-                        <div className="odp-footer-actions">
-                            {canCancel && (
-                                <button
-                                    className="odp-btn odp-btn--cancel"
-                                    onClick={handleCancel}
-                                    disabled={cancelLoading || actionLoading}
-                                >
-                                    {cancelLoading
-                                        ? <Loader2 size={14} className="spin" />
-                                        : <Ban size={14} />
-                                    }
-                                    Cancel Order
-                                </button>
-                            )}
-                            {nextAction && (
-                                <button
-                                    className="odp-btn odp-btn--primary"
-                                    onClick={handleNextAction}
-                                    disabled={actionLoading || cancelLoading}
-                                >
-                                    {actionLoading
-                                        ? <Loader2 size={14} className="spin" />
-                                        : <ChevronRight size={14} />
-                                    }
-                                    {nextAction.label}
-                                </button>
-                            )}
-                        </div>
+
+                        {canCancel && (
+                            <button
+                                className="odp-btn odp-btn--cancel"
+                                onClick={handleCancel}
+                                disabled={cancelLoading || actionLoading || printLoading}
+                            >
+                                {cancelLoading
+                                    ? <Loader2 size={14} className="spin" />
+                                    : <Ban size={14} />
+                                }
+                                Cancel Order
+                            </button>
+                        )}
+                        {nextAction && (
+                            <button
+                                className="odp-btn odp-btn--primary"
+                                onClick={handleNextAction}
+                                disabled={actionLoading || cancelLoading || printLoading}
+                            >
+                                {actionLoading
+                                    ? <Loader2 size={14} className="spin" />
+                                    : <ChevronRight size={14} />
+                                }
+                                {nextAction.label}
+                            </button>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         </>
     );

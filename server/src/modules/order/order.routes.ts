@@ -75,4 +75,7 @@ router.patch('/:id/assign-staff', ...canManageOrders, orderController.assignStaf
 // Cancel order
 router.patch('/:id/cancel', ...canManageOrders, orderController.cancelOrder);
 
+// Get KOT
+router.get('/:id/kot', AuthMiddleware.authenticate, ...canViewOrders, orderController.getKOT);
+
 export default router;
