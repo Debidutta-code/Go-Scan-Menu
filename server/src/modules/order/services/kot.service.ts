@@ -33,18 +33,28 @@ export class KOTService {
   }
 
   async createKOTFromOrder(order: IOrder): Promise<IKOT> {
-    const kotNumber = await this.generateKOTNumber(order.branchId.toString());
+    // orderRepo.findById() populates branchId, restaurantId, and items.menuItemId
+    // into full documents. We must extract the raw _id to pass valid ObjectIds to KOT.create().
+    const extractId = (field: any): Types.ObjectId => {
+      if (field && typeof field === 'object' && field._id) {
+        return new Types.ObjectId(field._id.toString());
+      }
+      return new Types.ObjectId(field.toString());
+    };
+
+    const branchId = extractId(order.branchId);
+    const kotNumber = await this.generateKOTNumber(branchId.toString());
 
     const kotData: Partial<IKOT> = {
-      restaurantId: order.restaurantId as any,
-      branchId: order.branchId as any,
+      restaurantId: extractId(order.restaurantId),
+      branchId,
       orderId: order._id as any,
       kotNumber,
       orderNumber: order.orderNumber,
       tableNumber: order.tableNumber,
       customerName: order.customerName,
       items: order.items.map((item) => ({
-        menuItemId: item.menuItemId as any,
+        menuItemId: extractId(item.menuItemId),
         name: item.name,
         quantity: item.quantity,
         variant: item.variant ? { name: item.variant.name } : undefined,
