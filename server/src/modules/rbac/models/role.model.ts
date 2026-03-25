@@ -37,7 +37,7 @@ const roleSchema = new Schema<IRole>(
     level: {
       type: Number,
       required: true,
-      enum: Object.values(RoleLevel),
+      enum: Object.values(RoleLevel).filter((v) => typeof v === 'number'),
     },
     accessScope: {
       type: String,
