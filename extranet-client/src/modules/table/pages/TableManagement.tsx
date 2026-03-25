@@ -137,12 +137,12 @@ export const TableManagement: React.FC = () => {
 
   const canManageTables = () => {
     if (!staff || !staff.permissions) return false;
-    return staff.permissions.tables?.create || staff.staffType === 'owner';
+    return staff.permissions.tables?.create || staff.role === 'owner';
   };
 
   const canDeleteTables = () => {
     if (!staff || !staff.permissions) return false;
-    return staff.permissions.tables?.delete || staff.staffType === 'owner';
+    return staff.permissions.tables?.delete || staff.role === 'owner';
   };
 
   const filteredTables =

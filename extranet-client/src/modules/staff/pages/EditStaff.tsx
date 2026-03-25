@@ -1,4 +1,4 @@
-// src/pages/staff/EditStaff.tsx
+// extranet-client/src/modules/staff/pages/EditStaff.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
@@ -6,18 +6,9 @@ import { StaffService } from '@/modules/staff/services/staff.service';
 import { InputField } from '@/shared/components/InputField';
 import { Button } from '@/shared/components/Button';
 import { Staff } from '@/shared/types/staff.types';
-import { StaffType } from '@/shared/types/staffPermissions.types';
+import { IRole } from '@/shared/types/staffPermissions.types';
 import { ArrowLeft } from 'lucide-react';
 import './EditStaff.css';
-
-const STAFF_TYPE_OPTIONS = [
-  { value: StaffType.OWNER, label: 'Owner' },
-  { value: StaffType.BRANCH_MANAGER, label: 'Branch Manager' },
-  { value: StaffType.MANAGER, label: 'Manager' },
-  { value: StaffType.WAITER, label: 'Waiter' },
-  { value: StaffType.KITCHEN_STAFF, label: 'Kitchen Staff' },
-  { value: StaffType.CASHIER, label: 'Cashier' },
-];
 
 export const EditStaff: React.FC = () => {
   const navigate = useNavigate();
@@ -25,11 +16,12 @@ export const EditStaff: React.FC = () => {
   const { token } = useStaffAuth();
 
   const [staff, setStaff] = useState<Staff | null>(null);
+  const [roles, setRoles] = useState<IRole[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    staffType: StaffType.WAITER,
+    roleId: '',
     isActive: true,
   });
 
@@ -40,33 +32,40 @@ export const EditStaff: React.FC = () => {
 
   useEffect(() => {
     if (id && token) {
-      fetchStaff();
+      fetchData();
     }
   }, [id, token]);
 
-  const fetchStaff = async () => {
+  const fetchData = async () => {
     if (!token || !id) return;
 
     try {
       setFetchLoading(true);
-      const response = await StaffService.getStaff(token, id);
-      const staffData = response.data;
+      const [staffResponse, rolesResponse] = await Promise.all([
+        StaffService.getStaff(token, id),
+        fetch(`/api/v1/roles`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json())
+      ]);
 
+      const staffData = staffResponse.data;
       if (!staffData) {
         setServerError('Staff member not found');
         return;
       }
       
+      if (rolesResponse.success) {
+        setRoles(rolesResponse.data);
+      }
+
       setStaff(staffData);
       setFormData({
         name: staffData.name,
         email: staffData.email,
         phone: staffData.phone,
-        staffType: staffData.staffType,
+        roleId: staffData.roleId,
         isActive: staffData.isActive,
       });
     } catch (err: any) {
-      setServerError(err.message || 'Failed to fetch staff details');
+      setServerError(err.message || 'Failed to fetch details');
     } finally {
       setFetchLoading(false);
     }
@@ -89,6 +88,10 @@ export const EditStaff: React.FC = () => {
       newErrors.phone = 'Phone is required';
     }
 
+    if (!formData.roleId) {
+      newErrors.roleId = 'Role is required';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -105,7 +108,7 @@ export const EditStaff: React.FC = () => {
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
-        staffType: formData.staffType,
+        roleId: formData.roleId,
         isActive: formData.isActive,
       });
 
@@ -207,18 +210,18 @@ export const EditStaff: React.FC = () => {
             
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="staffType" className="form-label">Staff Role</label>
+                <label htmlFor="roleId" className="form-label">Staff Role</label>
                 <select
-                  id="staffType"
-                  value={formData.staffType}
-                  onChange={(e) => handleChange('staffType', e.target.value)}
+                  id="roleId"
+                  value={formData.roleId}
+                  onChange={(e) => handleChange('roleId', e.target.value)}
                   className="form-select"
                   disabled={loading}
                   data-testid="staff-type-select"
                 >
-                  {STAFF_TYPE_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+                  {roles.map(option => (
+                    <option key={option._id} value={option._id}>
+                      {option.displayName}
                     </option>
                   ))}
                 </select>

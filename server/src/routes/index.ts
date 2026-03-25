@@ -2,7 +2,8 @@
 import { Router } from 'express';
 import { authRoutes } from '@/modules/auth';
 import { restaurantRoutes, branchRoutes, taxRoutes, qrConfigRoutes } from '@/modules/restaurant';
-import { staffRoutes, staffTypePermissionsRoutes } from '@/modules/staff';
+import { staffRoutes } from '@/modules/staff';
+import { roleRoutes } from '@/modules/rbac';
 import { categoryRoutes, menuItemRoutes, publicMenuRoutes } from '@/modules/menu';
 import { orderRoutes } from '@/modules/order';
 import { tableRoutes } from '@/modules/table';
@@ -14,7 +15,7 @@ router.use('/health', healthRoutes);
 router.use('/superadmin/auth', authRoutes);
 router.use('/restaurants', restaurantRoutes);
 router.use('/staff', staffRoutes);
-router.use('/staff-type-permissions', staffTypePermissionsRoutes);
+router.use('/roles', roleRoutes);
 
 // Branch Management
 router.use('/restaurants/:restaurantId/branches', branchRoutes);

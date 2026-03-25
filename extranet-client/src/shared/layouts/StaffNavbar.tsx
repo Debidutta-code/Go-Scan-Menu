@@ -73,7 +73,7 @@ export const StaffNavbar: React.FC<StaffNavbarProps> = ({
                     <div className="navbar-user-info">
                         <span className="navbar-user-name">{staff?.name}</span>
                         <span className="navbar-user-role">
-                            {staff?.staffType?.replace(/_/g, ' ')}
+                            {(staff?.role as string || '').replace(/_/g, ' ')}
                         </span>
                     </div>
                 </button>

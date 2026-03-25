@@ -110,7 +110,7 @@ export const Orders: React.FC = () => {
             const response = await BranchService.getBranches(token, staff.restaurantId);
             if (response.success && response.data) {
                 let list = response.data.branches || [];
-                if (staff.staffType !== 'owner' && staff.allowedBranchIds?.length > 0)
+                if (staff.role !== 'owner' && staff.allowedBranchIds?.length > 0)
                     list = list.filter((b) => staff.allowedBranchIds.includes(b._id));
                 if (list.length === 1) {
                     navigate(`/staff/orders/${list[0]._id}`, { replace: true });
