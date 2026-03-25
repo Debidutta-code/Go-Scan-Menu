@@ -1,7 +1,8 @@
-// FILE: src/middlewares/superadmin.auth.middleware.ts
+// server/src/modules/auth/auth.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { JWTUtil, sendResponse } from '@/utils';
-import { RoleRepository } from '../staff/repositories/role.repository';
+import { RoleRepository } from '@/modules/rbac/repositories/role.repository';
+import { StaffRole } from '@/modules/rbac/role.types';
 
 const roleRepo = new RoleRepository();
 
@@ -19,7 +20,7 @@ export class SuperAdminAuthMiddleware {
       const token = authHeader.substring(7);
       const decoded = JWTUtil.verifyToken(token);
 
-      if (decoded.role !== 'super_admin') {
+      if (decoded.role !== StaffRole.SUPER_ADMIN) {
         return sendResponse(res, 403, {
           message: 'Access denied. Super admin privileges required.',
         });

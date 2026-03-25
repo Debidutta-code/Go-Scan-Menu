@@ -1,6 +1,6 @@
-// src/types/staff.types.ts
+// extranet-client/src/shared/types/staff.types.ts
 
-import { StaffType, IPermissions } from './staffPermissions.types';
+import { StaffRole, IPermissions, AccessScope } from './staffPermissions.types';
 
 export interface RestaurantInfo {
   _id: string;
@@ -16,7 +16,9 @@ export interface Staff {
   name: string;
   email: string;
   phone: string;
-  staffType: StaffType; // Changed from role to staffType
+  role: StaffRole;
+  roleId: string;
+  accessScope: AccessScope;
   allowedBranchIds: string[];
   isActive: boolean;
   preferences?: {
@@ -26,8 +28,8 @@ export interface Staff {
       end?: string;
     };
   };
-  permissions?: IPermissions; // Added permissions from backend response
-  restaurant?: RestaurantInfo; // Restaurant details
+  permissions?: IPermissions;
+  restaurant?: RestaurantInfo;
   createdAt: string;
   updatedAt: string;
 }
@@ -44,7 +46,7 @@ export interface CreateStaffPayload {
   email: string;
   phone: string;
   password: string;
-  staffType: StaffType;
+  roleId: string;
   allowedBranchIds?: string[];
 }
 
@@ -52,7 +54,7 @@ export interface UpdateStaffPayload {
   name?: string;
   email?: string;
   phone?: string;
-  staffType?: StaffType;
+  roleId?: string;
   branchId?: string;
   allowedBranchIds?: string[];
   isActive?: boolean;

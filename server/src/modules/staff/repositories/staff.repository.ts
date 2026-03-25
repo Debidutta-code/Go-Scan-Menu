@@ -12,14 +12,16 @@ export class StaffRepository {
     return Staff.findById(id)
       .populate('restaurantId')
       .populate('branchId')
-      .populate('allowedBranchIds');
+      .populate('allowedBranchIds')
+      .populate('roleId');
   }
 
   async findByEmail(email: string): Promise<IStaff | null> {
     return Staff.findOne({ email })
       .populate('restaurantId')
       .populate('branchId')
-      .populate('allowedBranchIds');
+      .populate('allowedBranchIds')
+      .populate('roleId');
   }
 
   async findByRestaurant(
@@ -35,6 +37,7 @@ export class StaffRepository {
       Staff.find(query)
         .populate('branchId')
         .populate('allowedBranchIds')
+        .populate('roleId')
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
@@ -59,6 +62,7 @@ export class StaffRepository {
       Staff.find({ branchId })
         .populate('restaurantId')
         .populate('branchId')
+        .populate('roleId')
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
@@ -80,7 +84,8 @@ export class StaffRepository {
     return Staff.findByIdAndUpdate(id, data, { new: true })
       .populate('restaurantId')
       .populate('branchId')
-      .populate('allowedBranchIds');
+      .populate('allowedBranchIds')
+      .populate('roleId');
   }
 
   async delete(id: string): Promise<IStaff | null> {

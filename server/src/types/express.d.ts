@@ -1,5 +1,5 @@
-// Extended Express Request types
-import { StaffType, IPermissions } from '../models/StaffTypePermissions.model';
+// server/src/types/express.d.ts
+import { StaffRole, RolePermissions } from '../modules/rbac/role.types';
 
 declare global {
   namespace Express {
@@ -7,11 +7,12 @@ declare global {
       user?: {
         id: string;
         email: string;
-        staffType: StaffType;
-        restaurantId: string;
+        role: StaffRole;
+        roleId?: string;
+        restaurantId?: string;
         branchId?: string;
-        allowedBranchIds: string[];
-        permissions: IPermissions;
+        allowedBranchIds?: string[];
+        permissions: RolePermissions;
       };
     }
   }

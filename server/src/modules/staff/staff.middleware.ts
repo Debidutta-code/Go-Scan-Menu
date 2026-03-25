@@ -1,11 +1,10 @@
-// Enhanced Authentication Middleware - Staff Type Based
+// Enhanced Authentication Middleware - Role Based
 import { Request, Response, NextFunction } from 'express';
 import { JWTUtil, sendResponse } from '@/utils';
-import { StaffTypePermissionsRepository } from './repositories/staff-type-permissions.repository';
-import { StaffType } from './models/staff-type-permissions.model';
-import { StaffRole } from '@/types/role.types';
+import { RoleRepository } from '../rbac/repositories/role.repository';
+import { StaffRole } from '../rbac/role.types';
 
-const permissionsRepo = new StaffTypePermissionsRepository();
+const roleRepo = new RoleRepository();
 
 export class AuthMiddleware {
   static authenticate = async (req: Request, res: Response, next: NextFunction) => {
@@ -21,10 +20,7 @@ export class AuthMiddleware {
       const token = authHeader.split(' ')[1];
       const decoded = JWTUtil.verifyToken(token);
 
-      // Support both staffType and role for backward compatibility
-      const userStaffType = decoded.staffType || (decoded.role as unknown as StaffType);
-
-      if (!decoded?.id || (!decoded?.staffType && !decoded?.role)) {
+      if (!decoded?.id || !decoded?.role) {
         return sendResponse(res, 401, {
           message: 'Invalid token',
         });
@@ -32,20 +28,18 @@ export class AuthMiddleware {
 
       // Fetch latest permissions for real-time permission checking
       let permissions = decoded.permissions;
-      if (userStaffType !== StaffType.SUPER_ADMIN && decoded.restaurantId) {
-        const staffTypePermissions = await permissionsRepo.findByRestaurantAndStaffType(
-          decoded.restaurantId,
-          userStaffType
-        );
-        if (staffTypePermissions && staffTypePermissions.isActive) {
-          permissions = staffTypePermissions.permissions;
+      if (decoded.role !== StaffRole.SUPER_ADMIN && decoded.roleId) {
+        const role = await roleRepo.findById(decoded.roleId);
+        if (role && role.isActive) {
+          permissions = role.permissions;
         }
       }
 
       req.user = {
         id: decoded.id,
         email: decoded.email,
-        staffType: userStaffType,
+        role: decoded.role as StaffRole,
+        roleId: decoded.roleId,
         restaurantId: decoded.restaurantId,
         branchId: decoded.branchId,
         allowedBranchIds: decoded.allowedBranchIds,
@@ -60,18 +54,7 @@ export class AuthMiddleware {
     }
   };
 
-  static authorizeStaffTypes = (...staffTypes: StaffType[]) => {
-    return (req: Request, res: Response, next: NextFunction) => {
-      if (!req.user || !staffTypes.includes(req.user.staffType as StaffType)) {
-        return sendResponse(res, 403, {
-          message: 'Access denied - Insufficient staff type',
-        });
-      }
-      next();
-    };
-  };
-
-  // Alias method for role-based authorization (accepts StaffRole enum or string values)
+  // Method for role-based authorization
   static authorizeRoles = (...roles: (StaffRole | string)[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
       if (!req.user) {
@@ -80,8 +63,7 @@ export class AuthMiddleware {
         });
       }
 
-      // Convert user's staffType to string for comparison
-      const userRole = req.user.staffType as string;
+      const userRole = req.user.role as string;
 
       // Check if user's role matches any of the allowed roles
       const hasAccess = roles.some((role) => {
@@ -107,11 +89,10 @@ export class AuthMiddleware {
       }
 
       // SUPERADMIN BYPASS
-      if (req.user.staffType === StaffType.SUPER_ADMIN) {
+      if (req.user.role === StaffRole.SUPER_ADMIN) {
         return next();
       }
 
-      // Check nested permissions (e.g., orders.view, menu.create)
       const permissions = (req.user as any).permissions;
 
       if (!permissions || !permissions[module] || permissions[module][action] !== true) {
@@ -131,7 +112,7 @@ export class AuthMiddleware {
         return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
-      if (req.user.staffType === StaffType.SUPER_ADMIN) {
+      if (req.user.role === StaffRole.SUPER_ADMIN) {
         return next();
       }
 
@@ -143,7 +124,7 @@ export class AuthMiddleware {
         });
       }
 
-      // Parse and check all required permissions (format: \"module.action\")
+      // Parse and check all required permissions (format: "module.action")
       const hasAllPermissions = requiredPermissions.every((perm) => {
         const [module, action] = perm.split('.');
         return permissions[module] && permissions[module][action] === true;
@@ -166,7 +147,7 @@ export class AuthMiddleware {
         return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
-      if (req.user.staffType === StaffType.SUPER_ADMIN) {
+      if (req.user.role === StaffRole.SUPER_ADMIN) {
         return next();
       }
 
@@ -197,10 +178,8 @@ export class AuthMiddleware {
   // Authenticate with token from query parameter (for image/file endpoints)
   static authenticateWithQueryToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Try to get token from query parameter first
       let token = req.query.token as string;
 
-      // Fall back to Authorization header if no query token
       if (!token) {
         const authHeader = req.headers.authorization;
         if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -216,31 +195,26 @@ export class AuthMiddleware {
 
       const decoded = JWTUtil.verifyToken(token);
 
-      // Support both staffType and role for backward compatibility
-      const userStaffType = decoded.staffType || (decoded.role as unknown as StaffType);
-
-      if (!decoded?.id || (!decoded?.staffType && !decoded?.role)) {
+      if (!decoded?.id || !decoded?.role) {
         return sendResponse(res, 401, {
           message: 'Invalid token',
         });
       }
 
-      // Fetch latest permissions for real-time permission checking
+      // Fetch latest permissions
       let permissions = decoded.permissions;
-      if (userStaffType !== StaffType.SUPER_ADMIN && decoded.restaurantId) {
-        const staffTypePermissions = await permissionsRepo.findByRestaurantAndStaffType(
-          decoded.restaurantId,
-          userStaffType
-        );
-        if (staffTypePermissions && staffTypePermissions.isActive) {
-          permissions = staffTypePermissions.permissions;
+      if (decoded.role !== StaffRole.SUPER_ADMIN && decoded.roleId) {
+        const role = await roleRepo.findById(decoded.roleId);
+        if (role && role.isActive) {
+          permissions = role.permissions;
         }
       }
 
       req.user = {
         id: decoded.id,
         email: decoded.email,
-        staffType: userStaffType,
+        role: decoded.role as StaffRole,
+        roleId: decoded.roleId,
         restaurantId: decoded.restaurantId,
         branchId: decoded.branchId,
         allowedBranchIds: decoded.allowedBranchIds,

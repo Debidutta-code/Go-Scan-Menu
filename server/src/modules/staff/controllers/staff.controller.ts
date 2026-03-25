@@ -79,13 +79,13 @@ export class StaffController {
   });
 
   updateStaffRole = catchAsync(async (req: Request, res: Response) => {
-    const { staffType } = req.body;
-    const staff = await this.staffService.updateStaffType(
+    const { roleId } = req.body;
+    const staff = await this.staffService.updateStaffRole(
       ParamsUtil.getString(req.params.id),
-      staffType
+      roleId
     );
     sendResponse(res, 200, {
-      message: 'Staff type updated successfully',
+      message: 'Staff role updated successfully',
       data: staff,
     });
   });

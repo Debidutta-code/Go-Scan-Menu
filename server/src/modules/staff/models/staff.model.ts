@@ -1,11 +1,10 @@
 // src/models/Staff.model.ts
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { StaffType } from './staff-type-permissions.model';
 
 export interface IStaff extends Document {
   restaurantId: Types.ObjectId;
   branchId?: Types.ObjectId; // Primary branch
-  staffType: StaffType; // Changed from roleId to staffType
+  roleId: Types.ObjectId;
   name: string;
   email: string;
   phone: string;
@@ -34,10 +33,10 @@ const staffSchema = new Schema<IStaff>(
       type: Schema.Types.ObjectId,
       ref: 'Branch',
     },
-    staffType: {
-      type: String,
+    roleId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Role',
       required: true,
-      enum: Object.values(StaffType),
     },
     name: {
       type: String,
@@ -84,7 +83,7 @@ const staffSchema = new Schema<IStaff>(
 
 // Indexes
 staffSchema.index({ restaurantId: 1, email: 1 }, { unique: true });
-staffSchema.index({ restaurantId: 1, branchId: 1, staffType: 1 });
-staffSchema.index({ staffType: 1 });
+staffSchema.index({ restaurantId: 1, branchId: 1, roleId: 1 });
+staffSchema.index({ roleId: 1 });
 
 export const Staff = mongoose.model<IStaff>('Staff', staffSchema);
