@@ -3,7 +3,7 @@ import { StaffRepository } from '../repositories/staff.repository';
 import { RestaurantRepository } from '../../restaurant/repositories/restaurant.repository';
 import { RoleRepository } from '../../rbac/repositories/role.repository';
 import { IStaff } from '../models/staff.model';
-import { BcryptUtil, JWTUtil } from '@/utils';
+import { BcryptUtil, JWTUtil, ParamsUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
 import { StaffRole } from '../../rbac/role.types';
 
@@ -30,28 +30,25 @@ export class StaffService {
       throw new AppError('Invalid credentials', 401);
     }
 
-    // Get role and permissions
-    const role = await this.roleRepo.findById(staff.roleId.toString());
+    // Get role and permissions - The role might be populated already
+    let role = staff.roleId as any;
+    if (!role || (typeof role === 'object' && !role.isActive)) {
+      // Fallback: if not populated or inactive, try fetching it
+      const roleId = ParamsUtil.extractId(staff.roleId);
+      if (roleId) {
+        role = await this.roleRepo.findById(roleId);
+      }
+    }
+
     if (!role || !role.isActive) {
       throw new AppError('Staff role not found or inactive', 403);
     }
 
-    const restaurantIdValue = staff.restaurantId as any;
-    const restaurantId =
-      typeof restaurantIdValue === 'object' && restaurantIdValue?._id
-        ? restaurantIdValue._id.toString()
-        : staff.restaurantId.toString();
-
-    const branchIdValue = staff.branchId as any;
-    const branchId = branchIdValue
-      ? typeof branchIdValue === 'object' && branchIdValue?._id
-        ? branchIdValue._id.toString()
-        : branchIdValue.toString()
-      : undefined;
-
-    const allowedBranchIds = staff.allowedBranchIds.map((id: any) => {
-      return typeof id === 'object' && id?._id ? id._id.toString() : id.toString();
-    });
+    const restaurantId = ParamsUtil.extractId(staff.restaurantId);
+    const branchId = ParamsUtil.extractId(staff.branchId);
+    const allowedBranchIds = (staff.allowedBranchIds || [])
+      .map((id: any) => ParamsUtil.extractId(id))
+      .filter((id): id is string => !!id);
 
     const token = JWTUtil.generateToken({
       id: staff._id.toString(),
@@ -65,10 +62,23 @@ export class StaffService {
       permissions: role.permissions,
     });
 
-    // Get restaurant data
-    const restaurant = await this.restaurantRepo.findById(restaurantId);
-    if (!restaurant) {
-      throw new AppError('Restaurant not found', 404);
+    // Get restaurant data if available
+    let restaurantData = null;
+    if (restaurantId) {
+      const restaurant = await this.restaurantRepo.findById(restaurantId);
+      if (restaurant) {
+        restaurantData = {
+          _id: restaurant._id.toString(),
+          name: restaurant.name,
+          type: restaurant.type,
+          slug: restaurant.slug,
+        };
+      }
+    }
+
+    // If not super admin and restaurant is missing, throw error
+    if (role.accessScope !== StaffRole.SUPER_ADMIN && role.name !== StaffRole.SUPER_ADMIN && !restaurantData && restaurantId) {
+       throw new AppError('Restaurant not found', 404);
     }
 
     const staffData = staff.toObject();
@@ -78,12 +88,7 @@ export class StaffService {
         role: role.name,
         accessScope: role.accessScope,
         permissions: role.permissions,
-        restaurant: {
-          _id: restaurant._id.toString(),
-          name: restaurant.name,
-          type: restaurant.type,
-          slug: restaurant.slug,
-        },
+        restaurant: restaurantData,
       },
       token,
     };
