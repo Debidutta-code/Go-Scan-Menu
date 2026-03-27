@@ -48,6 +48,7 @@ const staffSchema = new Schema<IStaff>(
       required: true,
       lowercase: true,
       trim: true,
+      unique: true,
     },
     phone: {
       type: String,
