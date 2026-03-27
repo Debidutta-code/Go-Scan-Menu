@@ -2,6 +2,8 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
+import bcrypt from 'bcryptjs';
 
 // Load environment variables
 dotenv.config();
@@ -172,10 +174,11 @@ async function seed() {
     console.log('Main Branch created');
 
     // 3. Create Test Staff for each role
-    const password = '$2b$10$YourHashedPasswordHere'; // 'password123' hashed
-    // Note: In a real script we would use bcrypt.hash('password123', 10)
-    // For now I'll use a pre-hashed one for simplicity in standalone script if bcrypt is not available in environment
-    // Actually, I should use the correct bcrypt from node_modules if possible.
+    const rawPassword = 'password123';
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+    const credentials: string[] = [];
+    credentials.push(`Credentials for seeded users (generated on ${new Date().toISOString()})\n`);
+    credentials.push(`${'-'.repeat(50)}\n`);
 
     const roleDocs = await Role.find({ isSystemRole: true });
 
@@ -186,7 +189,7 @@ async function seed() {
         {
           name: `${role.displayName} User`,
           email,
-          password: '$2b$10$n6Z6.9N.0.P.Q.R.S.T.U.V.W.X.Y.Z.0.1.2.3.4.5.6.7.8.9', // Dummy hash for 'password123'
+          password: hashedPassword,
           phone: '1234567890',
           restaurantId: restaurant._id,
           branchId: branch._id,
@@ -196,8 +199,14 @@ async function seed() {
         },
         { upsert: true }
       );
-      console.log(`Test user created for ${role.name}: ${email} / password123`);
+      console.log(`Test user created/updated for ${role.name}: ${email} / ${rawPassword}`);
+      credentials.push(`Role: ${role.displayName}\nEmail: ${email}\nPassword: ${rawPassword}\n${'-'.repeat(20)}\n`);
     }
+
+    // 4. Write credentials to file
+    const filePath = path.join(__dirname, 'credentials.txt');
+    fs.writeFileSync(filePath, credentials.join(''));
+    console.log(`Credentials saved to ${filePath}`);
 
     console.log('Seeding completed successfully!');
     process.exit(0);
