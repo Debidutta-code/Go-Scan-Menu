@@ -7,10 +7,8 @@ import { SuperAdmin } from '../modules/auth/auth.model';
 import { Restaurant } from '../modules/restaurant/models/restaurant.model';
 import { Branch } from '../modules/restaurant/models/branch.model';
 import { Staff } from '../modules/staff/models/staff.model';
-import {
-  StaffTypePermissions,
-  StaffType,
-} from '../modules/staff/models/staff-type-permissions.model';
+import { Role } from '../modules/rbac/models/role.model';
+import { StaffRole, RoleLevel, AccessScope } from '../modules/rbac/role.types';
 import bcrypt from 'bcryptjs';
 
 // Load environment variables
@@ -24,7 +22,55 @@ async function seedTestData() {
     await mongoose.connect(MONGO_URI);
     console.log('✅ Connected to MongoDB');
 
-    // 1. Create SuperAdmin
+    // 1. Seed Roles
+    console.log('🔑 Seeding System Roles...');
+    const systemRoles = [
+      {
+        name: StaffRole.SUPER_ADMIN,
+        displayName: 'Super Admin',
+        description: 'Platform administrator',
+        level: RoleLevel.PLATFORM,
+        accessScope: AccessScope.PLATFORM,
+        isSystemRole: true,
+        permissions: {
+          orders: { view: true, create: true, update: true, delete: true, managePayment: true, viewAllBranches: true },
+          menu: { view: true, create: true, update: true, delete: true, manageCategories: true, managePricing: true },
+          staff: { view: true, create: true, update: true, delete: true, manageRoles: true },
+          reports: { view: true, export: true, viewFinancials: true },
+          settings: { view: true, updateRestaurant: true, updateBranch: true, manageTaxes: true },
+          tables: { view: true, create: true, update: true, delete: true, manageQR: true },
+          customers: { view: true, manage: true }
+        }
+      },
+      {
+        name: StaffRole.OWNER,
+        displayName: 'Restaurant Owner',
+        description: 'Full restaurant access',
+        level: RoleLevel.RESTAURANT,
+        accessScope: AccessScope.RESTAURANT,
+        isSystemRole: true,
+        permissions: {
+          orders: { view: true, create: true, update: true, delete: true, managePayment: true, viewAllBranches: true },
+          menu: { view: true, create: true, update: true, delete: true, manageCategories: true, managePricing: true },
+          staff: { view: true, create: true, update: true, delete: true, manageRoles: true },
+          reports: { view: true, export: true, viewFinancials: true },
+          settings: { view: true, updateRestaurant: true, updateBranch: true, manageTaxes: true },
+          tables: { view: true, create: true, update: true, delete: true, manageQR: true },
+          customers: { view: true, manage: true }
+        }
+      }
+    ];
+
+    for (const roleData of systemRoles) {
+      await Role.findOneAndUpdate(
+        { name: roleData.name, isSystemRole: true },
+        roleData,
+        { upsert: true }
+      );
+    }
+    const ownerRole = await Role.findOne({ name: StaffRole.OWNER });
+
+    // 2. Create SuperAdmin
     console.log('👤 Creating SuperAdmin...');
     const existingSuperAdmin = await SuperAdmin.findOne({ email: 'admin@test.com' });
     if (!existingSuperAdmin) {
@@ -40,10 +86,10 @@ async function seedTestData() {
       console.log('   ⏭️  SuperAdmin already exists');
     }
 
-    // 2. Create Single Restaurant
+    // 3. Create Single Restaurant
     console.log('🏪 Creating Single Restaurant...');
     const existingRestaurant = await Restaurant.findOne({ slug: 'burger-heaven' });
-    let restaurant;
+    let restaurant: any;
 
     if (!existingRestaurant) {
       const hashedPassword = await bcrypt.hash('password123', 10);
@@ -84,24 +130,22 @@ async function seedTestData() {
         },
         isActive: true,
       });
-      console.log(`   ✅ Restaurant created: ${restaurant.name} (ID: ${restaurant._id})
-`);
+      console.log(`   ✅ Restaurant created: ${restaurant.name}`);
     } else {
       restaurant = existingRestaurant;
-      console.log(`   ⏭️  Restaurant already exists: ${restaurant.name}
-`);
+      console.log(`   ⏭️  Restaurant already exists: ${restaurant.name}`);
     }
 
-    // 3. Create Owner Staff
+    // 4. Create Owner Staff
     console.log('👔 Creating Owner Staff...');
     const existingStaff = await Staff.findOne({ email: 'owner@burgerheaven.com' });
-    let ownerStaff;
+    let ownerStaff: any;
 
     if (!existingStaff) {
       const hashedPassword = await bcrypt.hash('password123', 10);
       ownerStaff = await Staff.create({
         restaurantId: restaurant._id,
-        staffType: StaffType.OWNER,
+        roleId: ownerRole?._id,
         name: 'John Doe',
         email: 'owner@burgerheaven.com',
         phone: '+1234567890',
@@ -115,76 +159,10 @@ async function seedTestData() {
         ownerId: ownerStaff._id,
       });
 
-      console.log(
-        `   ✅ Owner Staff created: owner@burgerheaven.com / password123 (ID: ${ownerStaff._id})`
-      );
+      console.log(`   ✅ Owner Staff created: owner@burgerheaven.com`);
     } else {
       ownerStaff = existingStaff;
       console.log(`   ⏭️  Owner Staff already exists`);
-    }
-
-    // 4. Create Owner Permissions
-    console.log('🔐 Creating Owner Permissions...');
-    const existingPermissions = await StaffTypePermissions.findOne({
-      restaurantId: restaurant._id,
-      staffType: StaffType.OWNER,
-    });
-
-    if (!existingPermissions) {
-      await StaffTypePermissions.create({
-        restaurantId: restaurant._id,
-        staffType: StaffType.OWNER,
-        permissions: {
-          orders: {
-            view: true,
-            create: true,
-            update: true,
-            delete: true,
-            managePayment: true,
-            viewAllBranches: true,
-          },
-          menu: {
-            view: true,
-            create: true,
-            update: true,
-            delete: true,
-            manageCategories: true,
-            managePricing: true,
-          },
-          staff: {
-            view: true,
-            create: true,
-            update: true,
-            delete: true,
-            manageRoles: true,
-          },
-          reports: {
-            view: true,
-            export: true,
-            viewFinancials: true,
-          },
-          settings: {
-            view: true,
-            updateRestaurant: true,
-            updateBranch: true,
-            manageTaxes: true,
-          },
-          tables: {
-            view: true,
-            create: true,
-            update: true,
-            delete: true,
-            manageQR: true,
-          },
-          customers: {
-            view: true,
-            manage: true,
-          },
-        },
-      });
-      console.log('   ✅ Owner Permissions created');
-    } else {
-      console.log('   ⏭️  Owner Permissions already exist');
     }
 
     // 5. Create Default Branch
@@ -235,16 +213,12 @@ async function seedTestData() {
         'subscription.currentBranches': 1,
       });
 
-      console.log(`   ✅ Default Branch created: ${defaultBranch.name} (ID: ${defaultBranch._id})`);
+      console.log(`   ✅ Default Branch created: ${defaultBranch.name}`);
     } else {
       console.log(`   ⏭️  Branch already exists: ${existingBranch.name}`);
     }
 
     console.log('✨ Test data seeded successfully!');
-    console.log('📝 Login Credentials:');
-    console.log('   SuperAdmin: admin@test.com / password123');
-    console.log('   Owner (Staff): owner@burgerheaven.com / password123');
-
     process.exit(0);
   } catch (error) {
     console.error('❌ Seed failed:', error);

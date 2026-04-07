@@ -1,6 +1,6 @@
-// Enhanced Role Model - Industry Standard
-import { StaffRole, RoleLevel, AccessScope, RolePermissions } from '@/types/role.types';
+// server/src/modules/rbac/models/role.model.ts
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import { StaffRole, RoleLevel, AccessScope, RolePermissions } from '../role.types';
 
 export interface IRole extends Document {
   name: StaffRole;
@@ -37,13 +37,7 @@ const roleSchema = new Schema<IRole>(
     level: {
       type: Number,
       required: true,
-      enum: [
-        RoleLevel.PLATFORM,
-        RoleLevel.RESTAURANT,
-        RoleLevel.BRANCH_MULTI,
-        RoleLevel.BRANCH_SINGLE,
-        RoleLevel.OPERATIONAL,
-      ],
+      enum: Object.values(RoleLevel).filter((v) => typeof v === 'number'),
     },
     accessScope: {
       type: String,

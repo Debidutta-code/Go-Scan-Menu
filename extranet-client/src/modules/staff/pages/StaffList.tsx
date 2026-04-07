@@ -1,23 +1,23 @@
-// src/pages/staff/StaffList.tsx
+// extranet-client/src/modules/staff/pages/StaffList.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { StaffService } from '@/modules/staff/services/staff.service';
 import { Staff } from '@/shared/types/staff.types';
-import { StaffType } from '@/shared/types/staffPermissions.types';
+import { StaffRole } from '@/shared/types/staffPermissions.types';
 import { Button } from '@/shared/components/Button';
 import { PermissionsModal } from '@/modules/staff/components/PermissionsModal';
 import { Plus, Edit, Trash2, Search, Shield } from 'lucide-react';
 import './StaffList.css';
 
-const STAFF_TYPE_LABELS: Record<StaffType, string> = {
-    [StaffType.SUPER_ADMIN]: 'Super Admin',
-    [StaffType.OWNER]: 'Owner',
-    [StaffType.BRANCH_MANAGER]: 'Branch Manager',
-    [StaffType.MANAGER]: 'Manager',
-    [StaffType.WAITER]: 'Waiter',
-    [StaffType.KITCHEN_STAFF]: 'Kitchen Staff',
-    [StaffType.CASHIER]: 'Cashier',
+const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
+    [StaffRole.SUPER_ADMIN]: 'Super Admin',
+    [StaffRole.OWNER]: 'Owner',
+    [StaffRole.BRANCH_MANAGER]: 'Branch Manager',
+    [StaffRole.MANAGER]: 'Manager',
+    [StaffRole.WAITER]: 'Waiter',
+    [StaffRole.KITCHEN_STAFF]: 'Kitchen Staff',
+    [StaffRole.CASHIER]: 'Cashier',
 };
 
 export const StaffList: React.FC = () => {
@@ -32,7 +32,7 @@ export const StaffList: React.FC = () => {
 
     // Permissions modal state
     const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
-    const [selectedStaffType, setSelectedStaffType] = useState<StaffType | null>(null);
+    const [selectedStaffRole, setSelectedStaffRole] = useState<StaffRole | null>(null);
 
     useEffect(() => {
         fetchStaff();
@@ -77,13 +77,12 @@ export const StaffList: React.FC = () => {
         }
     };
 
-    const handleManagePermissions = (staffType: StaffType) => {
-        setSelectedStaffType(staffType);
+    const handleManagePermissions = (role: StaffRole) => {
+        setSelectedStaffRole(role);
         setIsPermissionsModalOpen(true);
     };
 
     const handlePermissionsSaved = () => {
-        // Optionally refetch staff or show success message
         alert('Permissions updated successfully!');
     };
 
@@ -93,7 +92,7 @@ export const StaffList: React.FC = () => {
             staff.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
             staff.phone.includes(searchQuery);
 
-        const matchesRole = filterRole === 'all' || staff.staffType === filterRole;
+        const matchesRole = filterRole === 'all' || staff.role === filterRole;
 
         return matchesSearch && matchesRole;
     });
@@ -149,7 +148,7 @@ export const StaffList: React.FC = () => {
                     data-testid="role-filter"
                 >
                     <option value="all">All Roles</option>
-                    {Object.entries(STAFF_TYPE_LABELS).map(([value, label]) => (
+                    {Object.entries(STAFF_ROLE_LABELS).map(([value, label]) => (
                         <option key={value} value={value}>{label}</option>
                     ))}
                 </select>
@@ -182,8 +181,8 @@ export const StaffList: React.FC = () => {
                                     <td className="staff-email">{staff.email}</td>
                                     <td className="staff-phone">{staff.phone}</td>
                                     <td>
-                                        <span className="role-badge" data-testid={`role-badge-${staff.staffType}`}>
-                                            {STAFF_TYPE_LABELS[staff.staffType]}
+                                        <span className="role-badge" data-testid={`role-badge-${staff.role}`}>
+                                            {STAFF_ROLE_LABELS[staff.role]}
                                         </span>
                                     </td>
                                     <td>
@@ -194,7 +193,7 @@ export const StaffList: React.FC = () => {
                                     <td className="action-buttons">
                                         <button
                                             className="icon-button permissions"
-                                            onClick={() => handleManagePermissions(staff.staffType)}
+                                            onClick={() => handleManagePermissions(staff.role)}
                                             title="Manage Permissions"
                                             data-testid={`permissions-button-${staff._id}`}
                                         >
@@ -229,12 +228,12 @@ export const StaffList: React.FC = () => {
             </div>
 
             {/* Permissions Management Modal */}
-            {selectedStaffType && currentStaff && (
+            {selectedStaffRole && currentStaff && (
                 <PermissionsModal
                     isOpen={isPermissionsModalOpen}
                     onClose={() => setIsPermissionsModalOpen(false)}
                     restaurantId={currentStaff.restaurantId}
-                    staffType={selectedStaffType}
+                    staffRole={selectedStaffRole}
                     token={token || ''}
                     onSave={handlePermissionsSaved}
                 />

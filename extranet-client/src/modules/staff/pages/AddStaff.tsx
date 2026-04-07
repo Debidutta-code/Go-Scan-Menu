@@ -1,22 +1,13 @@
-// src/pages/staff/AddStaff.tsx
-import React, { useState } from 'react';
+// extranet-client/src/modules/staff/pages/AddStaff.tsx
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { StaffService } from '@/modules/staff/services/staff.service';
 import { InputField } from '@/shared/components/InputField';
 import { Button } from '@/shared/components/Button';
-import { StaffType } from '@/shared/types/staffPermissions.types';
+import { StaffRole, IRole } from '@/shared/types/staffPermissions.types';
 import { ArrowLeft } from 'lucide-react';
 import './AddStaff.css';
-
-const STAFF_TYPE_OPTIONS = [
-  { value: StaffType.OWNER, label: 'Owner' },
-  { value: StaffType.BRANCH_MANAGER, label: 'Branch Manager' },
-  { value: StaffType.MANAGER, label: 'Manager' },
-  { value: StaffType.WAITER, label: 'Waiter' },
-  { value: StaffType.KITCHEN_STAFF, label: 'Kitchen Staff' },
-  { value: StaffType.CASHIER, label: 'Cashier' },
-];
 
 export const AddStaff: React.FC = () => {
   const navigate = useNavigate();
@@ -28,13 +19,35 @@ export const AddStaff: React.FC = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    staffType: StaffType.WAITER,
+    roleId: '',
     branchId: '',
   });
 
+  const [roles, setRoles] = useState<IRole[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      if (!token) return;
+      try {
+        const response = await fetch(`/api/v1/roles?restaurantId=${currentStaff?.restaurantId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success) {
+          setRoles(data.data);
+          if (data.data.length > 0) {
+            setFormData(prev => ({ ...prev, roleId: data.data[0]._id }));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch roles');
+      }
+    };
+    fetchRoles();
+  }, [token, currentStaff?.restaurantId]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -63,6 +76,10 @@ export const AddStaff: React.FC = () => {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
+    if (!formData.roleId) {
+      newErrors.roleId = 'Role is required';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -81,7 +98,7 @@ export const AddStaff: React.FC = () => {
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         password: formData.password,
-        staffType: formData.staffType,
+        roleId: formData.roleId,
         branchId: formData.branchId || undefined,
       });
 
@@ -192,26 +209,27 @@ export const AddStaff: React.FC = () => {
             <h3 className="section-title">Role & Access</h3>
 
             <div className="form-group">
-              <label htmlFor="staffType" className="form-label">
+              <label htmlFor="roleId" className="form-label">
                 Staff Role
               </label>
               <select
-                id="staffType"
-                value={formData.staffType}
-                onChange={(e) => handleChange('staffType', e.target.value)}
+                id="roleId"
+                value={formData.roleId}
+                onChange={(e) => handleChange('roleId', e.target.value)}
                 className="form-select"
                 disabled={loading}
                 data-testid="staff-type-select"
               >
-                {STAFF_TYPE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                {roles.map((role) => (
+                  <option key={role._id} value={role._id}>
+                    {role.displayName}
                   </option>
                 ))}
               </select>
               <p className="form-helper-text">
                 Role permissions can be configured in the Permissions tab
               </p>
+              {errors.roleId && <p className="error-message">{errors.roleId}</p>}
             </div>
           </div>
 

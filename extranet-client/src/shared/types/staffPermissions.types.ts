@@ -1,6 +1,6 @@
-// src/types/staffPermissions.types.ts
+// extranet-client/src/shared/types/staffPermissions.types.ts
 
-export enum StaffType {
+export enum StaffRole {
   SUPER_ADMIN = 'super_admin',
   OWNER = 'owner',
   BRANCH_MANAGER = 'branch_manager',
@@ -10,8 +10,22 @@ export enum StaffType {
   CASHIER = 'cashier',
 }
 
+export enum RoleLevel {
+  PLATFORM = 1,
+  RESTAURANT = 2,
+  BRANCH_MULTI = 3,
+  BRANCH_SINGLE = 4,
+  OPERATIONAL = 5,
+}
+
+export enum AccessScope {
+  PLATFORM = 'platform',
+  RESTAURANT = 'restaurant',
+  BRANCH_MULTI = 'branch_multi',
+  BRANCH_SINGLE = 'branch_single',
+}
+
 export interface IPermissions {
-  // Order Management
   orders: {
     view: boolean;
     create: boolean;
@@ -20,8 +34,6 @@ export interface IPermissions {
     managePayment: boolean;
     viewAllBranches: boolean;
   };
-  
-  // Menu Management
   menu: {
     view: boolean;
     create: boolean;
@@ -30,8 +42,6 @@ export interface IPermissions {
     manageCategories: boolean;
     managePricing: boolean;
   };
-  
-  // Staff Management
   staff: {
     view: boolean;
     create: boolean;
@@ -39,23 +49,17 @@ export interface IPermissions {
     delete: boolean;
     manageRoles: boolean;
   };
-  
-  // Reports & Analytics
   reports: {
     view: boolean;
     export: boolean;
     viewFinancials: boolean;
   };
-  
-  // Settings Management
   settings: {
     view: boolean;
     updateRestaurant: boolean;
     updateBranch: boolean;
     manageTaxes: boolean;
   };
-  
-  // Table Management
   tables: {
     view: boolean;
     create: boolean;
@@ -63,22 +67,23 @@ export interface IPermissions {
     delete: boolean;
     manageQR: boolean;
   };
-  
-  // Customer Management
   customers: {
     view: boolean;
     manage: boolean;
   };
 }
 
-export interface IStaffTypePermissions {
+export interface IRole {
   _id: string;
-  restaurantId: string;
-  staffType: StaffType;
+  name: StaffRole;
+  displayName: string;
+  description: string;
+  level: RoleLevel;
+  accessScope: AccessScope;
+  restaurantId?: string;
   permissions: IPermissions;
+  isSystemRole: boolean;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface UpdatePermissionsPayload {

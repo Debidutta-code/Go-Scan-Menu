@@ -1,6 +1,6 @@
-// src/repositories/role.repository.ts
+// server/src/modules/rbac/repositories/role.repository.ts
 import { Role, IRole } from '../models/role.model';
-// import FilterQuery from 'mongoose';
+import { StaffRole } from '../role.types';
 
 export class RoleRepository {
   async create(data: Partial<IRole>): Promise<IRole> {
@@ -12,7 +12,7 @@ export class RoleRepository {
     return await Role.findById(id);
   }
 
-  async findByName(name: string, restaurantId?: string): Promise<IRole | null> {
+  async findByName(name: string | StaffRole, restaurantId?: string): Promise<IRole | null> {
     return await Role.findOne({
       name,
       restaurantId: restaurantId || null,
@@ -21,11 +21,11 @@ export class RoleRepository {
   }
 
   async findAll(filter: any = {}): Promise<IRole[]> {
-    return await Role.find({ ...filter, isActive: true }).sort({ name: 1 });
+    return await Role.find({ ...filter, isActive: true }).sort({ level: 1 });
   }
 
   async findSystemRoles(): Promise<IRole[]> {
-    return await Role.find({ isSystemRole: true, isActive: true }).sort({ name: 1 });
+    return await Role.find({ isSystemRole: true, isActive: true }).sort({ level: 1 });
   }
 
   async update(id: string, data: Partial<IRole>): Promise<IRole | null> {
@@ -48,8 +48,8 @@ export class RoleRepository {
     return await Role.countDocuments({ ...filter, isActive: true });
   }
 
-  async exists(name: string): Promise<boolean> {
-    const role = await Role.findOne({ name });
+  async exists(name: string | StaffRole): Promise<boolean> {
+    const role = await Role.findOne({ name, isSystemRole: true });
     return !!role;
   }
 }

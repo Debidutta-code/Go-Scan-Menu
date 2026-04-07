@@ -1,8 +1,8 @@
-// Enhanced Role Service with Industry Standard Templates
+// server/src/modules/rbac/services/role.service.ts
 import { RoleRepository } from '../repositories/role.repository';
 import { IRole } from '../models/role.model';
 import { AppError } from '@/utils/AppError';
-import { StaffRole, RoleLevel, AccessScope, RolePermissions } from '@/types/role.types';
+import { StaffRole, RoleLevel, AccessScope, RolePermissions } from '../role.types';
 
 export class RoleService {
   private roleRepo: RoleRepository;
@@ -19,7 +19,7 @@ export class RoleService {
     return role;
   }
 
-  async getRoleByName(name: string, restaurantId?: string): Promise<IRole> {
+  async getRoleByName(name: string | StaffRole, restaurantId?: string): Promise<IRole> {
     const role = await this.roleRepo.findByName(name, restaurantId);
     if (!role) {
       throw new AppError('Role not found', 404);
@@ -41,7 +41,6 @@ export class RoleService {
       throw new AppError('Role not found', 404);
     }
 
-    // Prevent updating system roles' core properties
     if (role.isSystemRole) {
       if (data.name || data.level || data.accessScope || data.isSystemRole !== undefined) {
         throw new AppError('Cannot modify system role core properties', 400);
@@ -85,7 +84,6 @@ export class RoleService {
     return deletedRole;
   }
 
-  // Seed Industry-Standard System Roles
   async seedSystemRoles(): Promise<void> {
     const systemRoles = [
       {
@@ -158,31 +156,14 @@ export class RoleService {
       if (!exists) {
         await this.roleRepo.create(roleData as Partial<IRole>);
         console.log(`✅ Seeded system role: ${roleData.name}`);
-      } else {
-        console.log(`ℹ️  Role already exists: ${roleData.name}`);
       }
     }
   }
 
-  // Permission Templates
   private getSuperAdminPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        managePayment: true,
-        viewAllBranches: true,
-      },
-      menu: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        manageCategories: true,
-        managePricing: true,
-      },
+      orders: { view: true, create: true, update: true, delete: true, managePayment: true, viewAllBranches: true },
+      menu: { view: true, create: true, update: true, delete: true, manageCategories: true, managePricing: true },
       staff: { view: true, create: true, update: true, delete: true, manageRoles: true },
       reports: { view: true, export: true, viewFinancials: true },
       settings: { view: true, updateRestaurant: true, updateBranch: true, manageTaxes: true },
@@ -193,22 +174,8 @@ export class RoleService {
 
   private getOwnerPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        managePayment: true,
-        viewAllBranches: true,
-      },
-      menu: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        manageCategories: true,
-        managePricing: true,
-      },
+      orders: { view: true, create: true, update: true, delete: true, managePayment: true, viewAllBranches: true },
+      menu: { view: true, create: true, update: true, delete: true, manageCategories: true, managePricing: true },
       staff: { view: true, create: true, update: true, delete: true, manageRoles: true },
       reports: { view: true, export: true, viewFinancials: true },
       settings: { view: true, updateRestaurant: true, updateBranch: true, manageTaxes: true },
@@ -219,22 +186,8 @@ export class RoleService {
 
   private getBranchManagerPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        managePayment: true,
-        viewAllBranches: false,
-      },
-      menu: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        manageCategories: true,
-        managePricing: true,
-      },
+      orders: { view: true, create: true, update: true, delete: true, managePayment: true, viewAllBranches: false },
+      menu: { view: true, create: true, update: true, delete: true, manageCategories: true, managePricing: true },
       staff: { view: true, create: true, update: true, delete: true, manageRoles: false },
       reports: { view: true, export: true, viewFinancials: true },
       settings: { view: true, updateRestaurant: false, updateBranch: true, manageTaxes: true },
@@ -245,22 +198,8 @@ export class RoleService {
 
   private getManagerPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: false,
-        managePayment: true,
-        viewAllBranches: false,
-      },
-      menu: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        manageCategories: false,
-        managePricing: true,
-      },
+      orders: { view: true, create: true, update: true, delete: false, managePayment: true, viewAllBranches: false },
+      menu: { view: true, create: true, update: true, delete: true, manageCategories: false, managePricing: true },
       staff: { view: true, create: false, update: false, delete: false, manageRoles: false },
       reports: { view: true, export: false, viewFinancials: false },
       settings: { view: true, updateRestaurant: false, updateBranch: true, manageTaxes: false },
@@ -271,22 +210,8 @@ export class RoleService {
 
   private getWaiterPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: false,
-        managePayment: false,
-        viewAllBranches: false,
-      },
-      menu: {
-        view: true,
-        create: false,
-        update: false,
-        delete: false,
-        manageCategories: false,
-        managePricing: false,
-      },
+      orders: { view: true, create: true, update: true, delete: false, managePayment: false, viewAllBranches: false },
+      menu: { view: true, create: false, update: false, delete: false, manageCategories: false, managePricing: false },
       staff: { view: false, create: false, update: false, delete: false, manageRoles: false },
       reports: { view: false, export: false, viewFinancials: false },
       settings: { view: false, updateRestaurant: false, updateBranch: false, manageTaxes: false },
@@ -297,22 +222,8 @@ export class RoleService {
 
   private getKitchenStaffPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: false,
-        update: true,
-        delete: false,
-        managePayment: false,
-        viewAllBranches: false,
-      },
-      menu: {
-        view: true,
-        create: false,
-        update: false,
-        delete: false,
-        manageCategories: false,
-        managePricing: false,
-      },
+      orders: { view: true, create: false, update: true, delete: false, managePayment: false, viewAllBranches: false },
+      menu: { view: true, create: false, update: false, delete: false, manageCategories: false, managePricing: false },
       staff: { view: false, create: false, update: false, delete: false, manageRoles: false },
       reports: { view: false, export: false, viewFinancials: false },
       settings: { view: false, updateRestaurant: false, updateBranch: false, manageTaxes: false },
@@ -323,22 +234,8 @@ export class RoleService {
 
   private getCashierPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: false,
-        update: false,
-        delete: false,
-        managePayment: true,
-        viewAllBranches: false,
-      },
-      menu: {
-        view: true,
-        create: false,
-        update: false,
-        delete: false,
-        manageCategories: false,
-        managePricing: false,
-      },
+      orders: { view: true, create: false, update: false, delete: false, managePayment: true, viewAllBranches: false },
+      menu: { view: true, create: false, update: false, delete: false, manageCategories: false, managePricing: false },
       staff: { view: false, create: false, update: false, delete: false, manageRoles: false },
       reports: { view: false, export: false, viewFinancials: false },
       settings: { view: false, updateRestaurant: false, updateBranch: false, manageTaxes: false },

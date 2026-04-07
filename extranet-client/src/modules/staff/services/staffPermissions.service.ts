@@ -1,8 +1,8 @@
-// src/services/staffPermissions.service.ts
+// extranet-client/src/modules/staff/services/staffPermissions.service.ts
 
 import env from '@/shared/config/env';
 import { ApiResponse } from '@/shared/types';
-import { IStaffTypePermissions, StaffType, UpdatePermissionsPayload } from '@/shared/types/staffPermissions.types';
+import { IRole, StaffRole, UpdatePermissionsPayload } from '@/shared/types/staffPermissions.types';
 
 export class StaffPermissionsService {
   private static getHeaders(token?: string | null): HeadersInit {
@@ -38,47 +38,35 @@ export class StaffPermissionsService {
     }
   }
 
-  // GET all staff type permissions for a restaurant
-  static async getAllStaffTypePermissions(token: string, restaurantId: any) {
-    return this.request<IStaffTypePermissions[]>(
-      `/staff-type-permissions/${restaurantId._id}`,
+  // GET all roles for a restaurant
+  static async getAllRoles(token: string, restaurantId: string) {
+    return this.request<IRole[]>(
+      `/roles?restaurantId=${restaurantId}`,
       {},
       token
     );
   }
 
-  // GET permissions for a specific staff type
-  static async getPermissionsForStaffType(token: string, restaurantId: any, staffType: StaffType) {
-    return this.request<IStaffTypePermissions>(
-      `/staff-type-permissions/${restaurantId._id}/${staffType}`,
+  // GET role by ID
+  static async getRole(token: string, roleId: string) {
+    return this.request<IRole>(
+      `/roles/${roleId}`,
       {},
       token
     );
   }
 
-  // UPDATE permissions for a specific staff type
-  static async updatePermissionsForStaffType(
+  // UPDATE permissions for a specific role
+  static async updateRolePermissions(
     token: string,
-    restaurantId: any,
-    staffType: StaffType,
+    roleId: string,
     payload: UpdatePermissionsPayload
   ) {
-    return this.request<IStaffTypePermissions>(
-      `/staff-type-permissions/${restaurantId._id}/${staffType}`,
+    return this.request<IRole>(
+      `/roles/${roleId}/permissions`,
       {
         method: 'PUT',
-        body: JSON.stringify(payload),
-      },
-      token
-    );
-  }
-
-  // Initialize all default permissions for a restaurant
-  static async initializeAllPermissions(token: string, restaurantId: any) {
-    return this.request<null>(
-      `/staff-type-permissions/${restaurantId._id}/initialize`,
-      {
-        method: 'POST',
+        body: JSON.stringify(payload.permissions),
       },
       token
     );

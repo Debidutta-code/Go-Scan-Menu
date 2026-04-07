@@ -26,7 +26,7 @@ router.get('/branch/:branchId', AuthMiddleware.authenticate, staffController.get
 
 router.put('/:id', AuthMiddleware.authenticate, staffController.updateStaff);
 
-router.put('/:id/staff-type', AuthMiddleware.authenticate, staffController.updateStaffRole);
+router.put('/:id/role', AuthMiddleware.authenticate, staffController.updateStaffRole);
 
 router.delete('/:id', AuthMiddleware.authenticate, staffController.deleteStaff);
 

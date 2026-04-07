@@ -1,8 +1,8 @@
-// src/routes/role.routes.ts
+// server/src/modules/rbac/role.routes.ts
 import { Router } from 'express';
 import { RoleController } from './controllers/role.controller';
-import { AuthMiddleware } from '@/modules/staff';
-import { StaffRole } from '@/types/role.types';
+import { AuthMiddleware } from '@/modules/staff/staff.middleware';
+import { StaffRole } from './role.types';
 
 const router = Router();
 const roleController = new RoleController();

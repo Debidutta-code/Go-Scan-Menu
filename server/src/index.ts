@@ -3,7 +3,7 @@ import { createServer } from 'http';
 import app from '@/app';
 import { connectDB, envConfig } from '@/config';
 import { socketService } from '@/socket/socket.service';
-import { RoleService } from '@/modules/staff/services/role.service';
+import { RoleService } from '@/modules/rbac/services/role.service';
 import '@/types';
 
 const PORT = envConfig.PORT;

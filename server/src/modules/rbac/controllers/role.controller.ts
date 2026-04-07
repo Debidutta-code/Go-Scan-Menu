@@ -1,4 +1,4 @@
-// src/controllers/role.controller.ts
+// server/src/modules/rbac/controllers/role.controller.ts
 import { Request, Response } from 'express';
 import { RoleService } from '../services/role.service';
 import { catchAsync, sendResponse } from '@/utils';
@@ -19,7 +19,8 @@ export class RoleController {
   });
 
   getAllRoles = catchAsync(async (req: Request, res: Response) => {
-    const roles = await this.roleService.getAllRoles();
+    const restaurantId = req.query.restaurantId as string;
+    const roles = await this.roleService.getAllRoles(restaurantId);
     sendResponse(res, 200, {
       message: 'Roles retrieved successfully',
       data: roles,

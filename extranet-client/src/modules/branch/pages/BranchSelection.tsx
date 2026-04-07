@@ -40,7 +40,7 @@ export const BranchSelection: React.FC = () => {
         // Filter branches based on staff's allowed branches
         let filteredBranches = branchList;
         if (
-          staff.staffType !== 'owner' &&
+          staff.role !== 'owner' &&
           staff.allowedBranchIds &&
           staff.allowedBranchIds.length > 0
         ) {

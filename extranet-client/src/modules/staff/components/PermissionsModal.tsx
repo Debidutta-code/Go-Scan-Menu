@@ -1,8 +1,8 @@
-// src/components/PermissionsModal.tsx
+// extranet-client/src/modules/staff/components/PermissionsModal.tsx
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { StaffPermissionsService } from '@/modules/staff/services/staffPermissions.service';
-import { IPermissions, StaffType } from '@/shared/types/staffPermissions.types';
+import { IPermissions, StaffRole, IRole } from '@/shared/types/staffPermissions.types';
 import { Button } from '@/shared/components/Button';
 import './PermissionsModal.css';
 
@@ -10,51 +10,58 @@ interface PermissionsModalProps {
   isOpen: boolean;
   onClose: () => void;
   restaurantId: string;
-  staffType: StaffType;
+  staffRole: StaffRole;
   token: string;
   onSave?: () => void;
 }
 
-const STAFF_TYPE_LABELS: Record<StaffType, string> = {
-  [StaffType.SUPER_ADMIN]: 'Super Admin',
-  [StaffType.OWNER]: 'Owner',
-  [StaffType.BRANCH_MANAGER]: 'Branch Manager',
-  [StaffType.MANAGER]: 'Manager',
-  [StaffType.WAITER]: 'Waiter',
-  [StaffType.KITCHEN_STAFF]: 'Kitchen Staff',
-  [StaffType.CASHIER]: 'Cashier',
+const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
+  [StaffRole.SUPER_ADMIN]: 'Super Admin',
+  [StaffRole.OWNER]: 'Owner',
+  [StaffRole.BRANCH_MANAGER]: 'Branch Manager',
+  [StaffRole.MANAGER]: 'Manager',
+  [StaffRole.WAITER]: 'Waiter',
+  [StaffRole.KITCHEN_STAFF]: 'Kitchen Staff',
+  [StaffRole.CASHIER]: 'Cashier',
 };
 
 export const PermissionsModal: React.FC<PermissionsModalProps> = ({
   isOpen,
   onClose,
   restaurantId,
-  staffType,
+  staffRole,
   token,
   onSave,
 }) => {
+  const [role, setRole] = useState<IRole | null>(null);
   const [permissions, setPermissions] = useState<IPermissions | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen && restaurantId && staffType) {
-      fetchPermissions();
+    if (isOpen && restaurantId && staffRole) {
+      fetchRole();
     }
-  }, [isOpen, restaurantId, staffType]);
+  }, [isOpen, restaurantId, staffRole]);
 
-  const fetchPermissions = async () => {
+  const fetchRole = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await StaffPermissionsService.getPermissionsForStaffType(
-        token,
-        restaurantId,
-        staffType
-      );
-      if (response.data) {
-        setPermissions(response.data.permissions);
+      // Fetch the role for this restaurant and role name
+      const response = await fetch(`/api/v1/roles?restaurantId=${restaurantId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        const foundRole = data.data.find((r: IRole) => r.name === staffRole);
+        if (foundRole) {
+            setRole(foundRole);
+            setPermissions(foundRole.permissions);
+        } else {
+            setError('Role not found');
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load permissions');
@@ -64,12 +71,12 @@ export const PermissionsModal: React.FC<PermissionsModalProps> = ({
   };
 
   const handleSave = async () => {
-    if (!permissions) return;
+    if (!permissions || !role) return;
 
     try {
       setSaving(true);
       setError(null);
-      await StaffPermissionsService.updatePermissionsForStaffType(token, restaurantId, staffType, {
+      await StaffPermissionsService.updateRolePermissions(token, role._id, {
         permissions,
       });
       onSave?.();
@@ -89,7 +96,7 @@ export const PermissionsModal: React.FC<PermissionsModalProps> = ({
         ...permissions[category],
         [field]: value,
       },
-    });
+    } as any);
   };
 
   const toggleAllInCategory = (category: keyof IPermissions, value: boolean) => {
@@ -106,7 +113,7 @@ export const PermissionsModal: React.FC<PermissionsModalProps> = ({
     setPermissions({
       ...permissions,
       [category]: updatedCategory,
-    });
+    } as any);
   };
 
   if (!isOpen) return null;
@@ -117,7 +124,7 @@ export const PermissionsModal: React.FC<PermissionsModalProps> = ({
         <div className="modal-header">
           <div>
             <h2 className="modal-title">Manage Permissions</h2>
-            <p className="modal-subtitle">{STAFF_TYPE_LABELS[staffType]} Role Permissions</p>
+            <p className="modal-subtitle">{STAFF_ROLE_LABELS[staffRole]} Role Permissions</p>
           </div>
           <button className="modal-close" onClick={onClose}>
             <X size={24} />
