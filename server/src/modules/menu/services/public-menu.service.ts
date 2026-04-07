@@ -63,12 +63,14 @@ export class PublicMenuService {
     return {
       restaurant: {
         id: restaurant._id,
+        _id: restaurant._id,
         name: restaurant.name,
         slug: restaurant.slug,
         theme: restaurant.theme,
       },
       branch: {
         id: branch._id,
+        _id: branch._id,
         name: branch.name,
         code: branch.code,
         address: branch.address,
@@ -82,6 +84,7 @@ export class PublicMenuService {
       },
       table: {
         id: table._id,
+        _id: table._id,
         tableNumber: table.tableNumber,
         capacity: table.capacity,
         location: table.location,
@@ -117,12 +120,14 @@ export class PublicMenuService {
     return {
       restaurant: {
         id: restaurant._id,
+        _id: restaurant._id,
         name: restaurant.name,
         slug: restaurant.slug,
         theme: restaurant.theme,
       },
       branch: {
         id: branch._id,
+        _id: branch._id,
         name: branch.name,
         code: branch.code,
         address: branch.address,
@@ -149,6 +154,7 @@ export class PublicMenuService {
 
     return {
       id: restaurant._id,
+      _id: restaurant._id,
       name: restaurant.name,
       slug: restaurant.slug,
       type: restaurant.type,
@@ -175,12 +181,14 @@ export class PublicMenuService {
 
       return {
         id: category._id,
+        _id: category._id,
         name: category.name,
         description: category.description,
         image: category.image,
         displayOrder: category.displayOrder,
         items: categoryItems.map((item: any) => ({
           id: item._id,
+          _id: item._id,
           name: item.name,
           description: item.description,
           image: item.image,

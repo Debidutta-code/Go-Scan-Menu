@@ -4,14 +4,21 @@ import { OrderService } from '../services/order.service';
 import { KOTService } from '../services/kot.service';
 import { catchAsync, sendResponse } from '@/utils';
 import { socketService } from '@/socket/socket.service';
+import { RestaurantRepository } from '../../restaurant/repositories/restaurant.repository';
+import { BranchRepository } from '../../restaurant/repositories/branch.repository';
 
 export class OrderController {
   private orderService: OrderService;
   private kotService: KOTService;
 
+  private restaurantRepo: RestaurantRepository;
+  private branchRepo: BranchRepository;
+
   constructor() {
     this.orderService = new OrderService();
     this.kotService = new KOTService();
+    this.restaurantRepo = new RestaurantRepository();
+    this.branchRepo = new BranchRepository();
   }
 
   createOrder = catchAsync(async (req: Request, res: Response) => {
@@ -249,6 +256,44 @@ export class OrderController {
     sendResponse(res, 200, {
       message: 'KOT retrieved successfully',
       data: kot,
+    });
+  });
+
+  /**
+   * Public order creation (from QR scan)
+   */
+  createPublicOrder = catchAsync(async (req: Request, res: Response) => {
+    const { restaurantSlug, branchCode } = req.params;
+
+    // Resolve restaurant ID from slug
+    const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
+    if (!restaurant) {
+      sendResponse(res, 404, { message: 'Restaurant not found' });
+      return;
+    }
+
+    // Resolve branch ID from code
+    const branch = await this.branchRepo.findByCodeAndRestaurant(
+      branchCode,
+      restaurant._id.toString()
+    );
+    if (!branch) {
+      sendResponse(res, 404, { message: 'Branch not found' });
+      return;
+    }
+
+    // Inject branchId into body if it's not already there or if it's different
+    // The frontend usually sends it, but this ensures it's the correct one
+    req.body.branchId = branch._id.toString();
+
+    const order = await this.orderService.createOrder(restaurant._id.toString(), req.body);
+
+    // Emit WebSocket event for real-time updates
+    socketService.emitOrderCreated(order);
+
+    sendResponse(res, 201, {
+      message: 'Order placed successfully',
+      data: order,
     });
   });
 }
