@@ -22,6 +22,7 @@ router.post('/orders/:restaurantId', orderController.createOrder); // Keep for b
 router.post('/orders/:restaurantSlug/:branchCode', orderController.createPublicOrder);
 
 // Get orders by table (public)
-router.get('/orders/table/:tableId', orderController.getOrdersByTable);
+router.get('/orders/table/:tableId', orderController.getOrdersByTable); // Keep for backward compatibility
+router.get('/orders/:restaurantSlug/:branchCode/table/:tableId', orderController.getOrdersByTable);
 
 export default router;
