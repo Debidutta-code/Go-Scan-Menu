@@ -1,27 +1,27 @@
 // src/services/restaurant.service.ts
 import { RestaurantRepository } from '../repositories/restaurant.repository';
 import { StaffRepository } from '@/modules/staff/repositories/staff.repository';
-import { StaffTypePermissionsRepository } from '@/modules/staff/repositories/staff-type-permissions.repository';
+import { RoleRepository } from '@/modules/staff/repositories/role.repository';
 import { BranchRepository } from '../repositories/branch.repository';
 import { IRestaurant } from '../models/restaurant.model';
 import { BcryptUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
 import { defaultSettings, defaultTheme } from '@/constants';
-import { StaffType, IPermissions } from '@/modules/staff/models/staff-type-permissions.model';
+import { StaffRole } from '@/types/role.types';
 import { TaxRepository } from '../repositories/tax.repository';
 
 export class RestaurantService {
   private restaurantRepo: RestaurantRepository;
   private staffRepo: StaffRepository;
   private taxRepo: TaxRepository;
-  private permissionsRepo: StaffTypePermissionsRepository;
+  private roleRepo: RoleRepository;
   private branchRepo: BranchRepository;
 
   constructor() {
     this.restaurantRepo = new RestaurantRepository();
     this.staffRepo = new StaffRepository();
     this.taxRepo = new TaxRepository();
-    this.permissionsRepo = new StaffTypePermissionsRepository();
+    this.roleRepo = new RoleRepository();
     this.branchRepo = new BranchRepository();
   }
 
@@ -82,10 +82,16 @@ export class RestaurantService {
 
     const restaurant = await this.restaurantRepo.create(restaurantData);
 
-    // Create owner staff record with OWNER staff type
+    // Find OWNER role
+    const ownerRole = await this.roleRepo.findByName(StaffRole.OWNER);
+    if (!ownerRole) {
+      throw new AppError('Owner role template not found', 500);
+    }
+
+    // Create owner staff record with OWNER role
     const ownerStaff = await this.staffRepo.create({
       restaurantId: restaurant._id,
-      staffType: StaffType.OWNER,
+      roleId: ownerRole._id,
       name: data.owner.name,
       email: data.owner.email,
       phone: data.owner.phone,
@@ -97,62 +103,6 @@ export class RestaurantService {
     // Link owner staff to restaurant
     await this.restaurantRepo.update(restaurant._id.toString(), {
       ownerId: ownerStaff._id,
-    });
-
-    // Initialize full permissions for OWNER staff type
-    const fullPermissions: IPermissions = {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        managePayment: true,
-        viewAllBranches: true,
-      },
-      menu: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        manageCategories: true,
-        managePricing: true,
-      },
-      staff: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        manageRoles: true,
-      },
-      reports: {
-        view: true,
-        export: true,
-        viewFinancials: true,
-      },
-      settings: {
-        view: true,
-        updateRestaurant: true,
-        updateBranch: true,
-        manageTaxes: true,
-      },
-      tables: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        manageQR: true,
-      },
-      customers: {
-        view: true,
-        manage: true,
-      },
-    };
-
-    // Create permissions for OWNER with all permissions enabled
-    await this.permissionsRepo.create({
-      restaurantId: restaurant._id,
-      staffType: StaffType.OWNER,
-      permissions: fullPermissions,
     });
 
     // AUTO-CREATE DEFAULT BRANCH for single restaurants

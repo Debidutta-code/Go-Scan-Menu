@@ -7,10 +7,8 @@ import { SuperAdmin } from '../modules/auth/auth.model';
 import { Restaurant } from '../modules/restaurant/models/restaurant.model';
 import { Branch } from '../modules/restaurant/models/branch.model';
 import { Staff } from '../modules/staff/models/staff.model';
-import {
-  StaffTypePermissions,
-  StaffType,
-} from '../modules/staff/models/staff-type-permissions.model';
+import { Role } from '../modules/staff/models/role.model';
+import { StaffRole } from '../types/role.types';
 import bcrypt from 'bcryptjs';
 
 // Load environment variables
@@ -98,10 +96,15 @@ async function seedTestData() {
     let ownerStaff;
 
     if (!existingStaff) {
+      const ownerRole = await Role.findOne({ name: StaffRole.OWNER });
+      if (!ownerRole) {
+        throw new Error('OWNER role template not found. Please seed roles first.');
+      }
+
       const hashedPassword = await bcrypt.hash('password123', 10);
       ownerStaff = await Staff.create({
         restaurantId: restaurant._id,
-        staffType: StaffType.OWNER,
+        roleId: ownerRole._id,
         name: 'John Doe',
         email: 'owner@burgerheaven.com',
         phone: '+1234567890',
@@ -123,69 +126,7 @@ async function seedTestData() {
       console.log(`   ⏭️  Owner Staff already exists`);
     }
 
-    // 4. Create Owner Permissions
-    console.log('🔐 Creating Owner Permissions...');
-    const existingPermissions = await StaffTypePermissions.findOne({
-      restaurantId: restaurant._id,
-      staffType: StaffType.OWNER,
-    });
-
-    if (!existingPermissions) {
-      await StaffTypePermissions.create({
-        restaurantId: restaurant._id,
-        staffType: StaffType.OWNER,
-        permissions: {
-          orders: {
-            view: true,
-            create: true,
-            update: true,
-            delete: true,
-            managePayment: true,
-            viewAllBranches: true,
-          },
-          menu: {
-            view: true,
-            create: true,
-            update: true,
-            delete: true,
-            manageCategories: true,
-            managePricing: true,
-          },
-          staff: {
-            view: true,
-            create: true,
-            update: true,
-            delete: true,
-            manageRoles: true,
-          },
-          reports: {
-            view: true,
-            export: true,
-            viewFinancials: true,
-          },
-          settings: {
-            view: true,
-            updateRestaurant: true,
-            updateBranch: true,
-            manageTaxes: true,
-          },
-          tables: {
-            view: true,
-            create: true,
-            update: true,
-            delete: true,
-            manageQR: true,
-          },
-          customers: {
-            view: true,
-            manage: true,
-          },
-        },
-      });
-      console.log('   ✅ Owner Permissions created');
-    } else {
-      console.log('   ⏭️  Owner Permissions already exist');
-    }
+    // 4. Role-based permissions are managed via Role model, no separate StaffTypePermissions needed
 
     // 5. Create Default Branch
     console.log('🏢 Creating Default Branch...');
