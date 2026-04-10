@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import { AuthController } from './auth.controller';
 import { AuthMiddleware } from '@/modules/staff';
-import { StaffType } from '@/modules/staff/models/staff-type-permissions.model';
+import { StaffRole } from '@/types/role.types';
 
 const router = Router();
 const authController = new AuthController();
@@ -15,21 +15,21 @@ router.post('/login', authController.login);
 router.get(
   '/profile',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeStaffTypes(StaffType.SUPER_ADMIN),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN),
   authController.getProfile
 );
 
 router.put(
   '/profile',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeStaffTypes(StaffType.SUPER_ADMIN),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN),
   authController.updateProfile
 );
 
 router.put(
   '/change-password',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeStaffTypes(StaffType.SUPER_ADMIN),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN),
   authController.changePassword
 );
 

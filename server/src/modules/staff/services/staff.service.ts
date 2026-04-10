@@ -31,9 +31,34 @@ export class StaffService {
       throw new AppError('Invalid credentials', 401);
     }
 
-    const role = (staff.roleId as unknown) as IRole;
-    if (!role) {
-      throw new AppError('Staff role not found', 404);
+    let role = (staff.roleId as unknown) as IRole;
+    let permissions = role?.permissions;
+
+    // Fallback for legacy data (handle staffType if roleId/permissions missing)
+    if (!role || !permissions) {
+      console.log('⚠️ Staff role/permissions not found, attempting fallback for legacy data');
+      const RoleModel = staff.model('Role');
+      const legacyRoleName = (staff as any).staffType || StaffRole.WAITER;
+      const foundRole = await RoleModel.findOne({
+        name: legacyRoleName,
+        isSystemRole: true,
+      });
+
+      if (foundRole) {
+        role = foundRole as any;
+        permissions = role.permissions;
+      } else {
+        // Ultimate fallback: empty permissions object instead of throwing
+        permissions = {
+          orders: { view: false, create: false, update: false, delete: false, managePayment: false, viewAllBranches: false },
+          menu: { view: false, create: false, update: false, delete: false, manageCategories: false, managePricing: false },
+          staff: { view: false, create: false, update: false, delete: false, manageRoles: false },
+          reports: { view: false, export: false, viewFinancials: false },
+          settings: { view: false, updateRestaurant: false, updateBranch: false, manageTaxes: false },
+          tables: { view: false, create: false, update: false, delete: false, manageQR: false },
+          customers: { view: false, manage: false },
+        } as any;
+      }
     }
 
     const restaurantIdValue = staff.restaurantId as any;
@@ -41,8 +66,6 @@ export class StaffService {
       typeof restaurantIdValue === 'object' && restaurantIdValue?._id
         ? restaurantIdValue._id.toString()
         : staff.restaurantId.toString();
-
-    const permissions = role.permissions;
 
     const branchIdValue = staff.branchId as any;
     const branchId = branchIdValue
@@ -58,8 +81,8 @@ export class StaffService {
     const token = JWTUtil.generateToken({
       id: staff._id.toString(),
       email: staff.email,
-      role: role.name as StaffRole,
-      roleId: role._id.toString(),
+      role: (role?.name || (staff as any).staffType) as StaffRole,
+      roleId: role?._id?.toString(),
       restaurantId,
       branchId,
       allowedBranchIds,

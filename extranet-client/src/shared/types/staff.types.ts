@@ -17,6 +17,8 @@ export interface Staff {
   email: string;
   phone: string;
   staffType: StaffType; // Changed from role to staffType
+  roleName?: string;
+  roleId?: any;
   allowedBranchIds: string[];
   isActive: boolean;
   preferences?: {

@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { CustomerSessionController } from './controllers/customer-session.controller';
 import { AuthMiddleware } from '@/modules/staff';
+import { StaffRole } from '@/types/role.types';
 
 const router = Router({ mergeParams: true });
 const sessionController = new CustomerSessionController();
@@ -19,7 +20,12 @@ router.patch('/session/:sessionId/end', sessionController.endSession);
 router.use(AuthMiddleware.authenticate);
 
 const canViewSessions = [
-  AuthMiddleware.authorizeRoles('owner', 'branch_manager', 'manager', 'waiter'),
+  AuthMiddleware.authorizeRoles(
+    StaffRole.OWNER,
+    StaffRole.BRANCH_MANAGER,
+    StaffRole.MANAGER,
+    StaffRole.WAITER
+  ),
   AuthMiddleware.authorizePermission('orders', 'view'),
 ];
 

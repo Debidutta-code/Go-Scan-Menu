@@ -34,32 +34,32 @@ router.get(
 router.put(
   '/:id',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin', 'owner'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER),
   restaurantController.updateRestaurant
 ); // Separate endpoints for theme, subscription, and settings
 router.put(
   '/:id/theme',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin', 'owner'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER),
   restaurantController.updateTheme
 );
 router.put(
   '/:id/subscription',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN),
   restaurantController.updateSubscription
 );
 router.put(
   '/:id/settings',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin', 'owner'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN, StaffRole.OWNER),
   // AuthMiddleware.authorizePermission('canManageSettings'),
   restaurantController.updateDefaultSettings
 );
 router.delete(
   '/:id',
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorizeRoles('super_admin'),
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN),
   restaurantController.deleteRestaurant
 );
 export default router;

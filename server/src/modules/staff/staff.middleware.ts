@@ -1,11 +1,10 @@
 // Enhanced Authentication Middleware - Staff Type Based
 import { Request, Response, NextFunction } from 'express';
 import { JWTUtil, sendResponse } from '@/utils';
-import { StaffTypePermissionsRepository } from './repositories/staff-type-permissions.repository';
-import { StaffType } from './models/staff-type-permissions.model';
 import { StaffRole } from '@/types/role.types';
+import { RoleRepository } from './repositories/role.repository';
 
-const permissionsRepo = new StaffTypePermissionsRepository();
+const roleRepo = new RoleRepository();
 
 export class AuthMiddleware {
   static authenticate = async (req: Request, res: Response, next: NextFunction) => {
@@ -21,31 +20,26 @@ export class AuthMiddleware {
       const token = authHeader.split(' ')[1];
       const decoded = JWTUtil.verifyToken(token);
 
-      // Support both staffType and role for backward compatibility
-      const userStaffType = decoded.staffType || (decoded.role as unknown as StaffType);
-
-      if (!decoded?.id || (!decoded?.staffType && !decoded?.role)) {
+      if (!decoded?.id || !decoded?.role) {
         return sendResponse(res, 401, {
           message: 'Invalid token',
         });
       }
 
-      // Fetch latest permissions for real-time permission checking
+      // Fetch latest permissions for real-time permission checking if it's a staff member
       let permissions = decoded.permissions;
-      if (userStaffType !== StaffType.SUPER_ADMIN && decoded.restaurantId) {
-        const staffTypePermissions = await permissionsRepo.findByRestaurantAndStaffType(
-          decoded.restaurantId,
-          userStaffType
-        );
-        if (staffTypePermissions && staffTypePermissions.isActive) {
-          permissions = staffTypePermissions.permissions;
+      if (decoded.role !== StaffRole.SUPER_ADMIN && decoded.roleId) {
+        const role = await roleRepo.findById(decoded.roleId);
+        if (role && role.isActive) {
+          permissions = role.permissions;
         }
       }
 
       req.user = {
         id: decoded.id,
         email: decoded.email,
-        staffType: userStaffType,
+        role: decoded.role as StaffRole,
+        roleId: decoded.roleId,
         restaurantId: decoded.restaurantId,
         branchId: decoded.branchId,
         allowedBranchIds: decoded.allowedBranchIds,
@@ -60,19 +54,8 @@ export class AuthMiddleware {
     }
   };
 
-  static authorizeStaffTypes = (...staffTypes: StaffType[]) => {
-    return (req: Request, res: Response, next: NextFunction) => {
-      if (!req.user || !staffTypes.includes(req.user.staffType as StaffType)) {
-        return sendResponse(res, 403, {
-          message: 'Access denied - Insufficient staff type',
-        });
-      }
-      next();
-    };
-  };
-
-  // Alias method for role-based authorization (accepts StaffRole enum or string values)
-  static authorizeRoles = (...roles: (StaffRole | string)[]) => {
+  // Authorize by specific roles
+  static authorizeRoles = (...roles: StaffRole[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
       if (!req.user) {
         return sendResponse(res, 403, {
@@ -80,16 +63,7 @@ export class AuthMiddleware {
         });
       }
 
-      // Convert user's staffType to string for comparison
-      const userRole = req.user.staffType as string;
-
-      // Check if user's role matches any of the allowed roles
-      const hasAccess = roles.some((role) => {
-        const roleStr = typeof role === 'string' ? role : String(role);
-        return userRole === roleStr;
-      });
-
-      if (!hasAccess) {
+      if (!roles.includes(req.user.role as StaffRole)) {
         return sendResponse(res, 403, {
           message: 'Access denied - Insufficient role',
         });
@@ -107,7 +81,7 @@ export class AuthMiddleware {
       }
 
       // SUPERADMIN BYPASS
-      if (req.user.staffType === StaffType.SUPER_ADMIN) {
+      if (req.user.role === StaffRole.SUPER_ADMIN) {
         return next();
       }
 
@@ -131,7 +105,7 @@ export class AuthMiddleware {
         return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
-      if (req.user.staffType === StaffType.SUPER_ADMIN) {
+      if (req.user.role === StaffRole.SUPER_ADMIN) {
         return next();
       }
 
@@ -166,7 +140,7 @@ export class AuthMiddleware {
         return sendResponse(res, 401, { message: 'Unauthorized' });
       }
 
-      if (req.user.staffType === StaffType.SUPER_ADMIN) {
+      if (req.user.role === StaffRole.SUPER_ADMIN) {
         return next();
       }
 
@@ -216,31 +190,26 @@ export class AuthMiddleware {
 
       const decoded = JWTUtil.verifyToken(token);
 
-      // Support both staffType and role for backward compatibility
-      const userStaffType = decoded.staffType || (decoded.role as unknown as StaffType);
-
-      if (!decoded?.id || (!decoded?.staffType && !decoded?.role)) {
+      if (!decoded?.id || !decoded?.role) {
         return sendResponse(res, 401, {
           message: 'Invalid token',
         });
       }
 
-      // Fetch latest permissions for real-time permission checking
+      // Fetch latest permissions for real-time permission checking if it's a staff member
       let permissions = decoded.permissions;
-      if (userStaffType !== StaffType.SUPER_ADMIN && decoded.restaurantId) {
-        const staffTypePermissions = await permissionsRepo.findByRestaurantAndStaffType(
-          decoded.restaurantId,
-          userStaffType
-        );
-        if (staffTypePermissions && staffTypePermissions.isActive) {
-          permissions = staffTypePermissions.permissions;
+      if (decoded.role !== StaffRole.SUPER_ADMIN && decoded.roleId) {
+        const role = await roleRepo.findById(decoded.roleId);
+        if (role && role.isActive) {
+          permissions = role.permissions;
         }
       }
 
       req.user = {
         id: decoded.id,
         email: decoded.email,
-        staffType: userStaffType,
+        role: decoded.role as StaffRole,
+        roleId: decoded.roleId,
         restaurantId: decoded.restaurantId,
         branchId: decoded.branchId,
         allowedBranchIds: decoded.allowedBranchIds,
