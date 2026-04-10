@@ -25,9 +25,25 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
     return <>{children}</>;
   }
 
-  // Check Role requirement
-  if (requiredRole && !requiredRole.includes(staff.roleName as StaffRole)) {
-    return <>{fallback}</>;
+  // Check Role requirement with hierarchy
+  if (requiredRole) {
+    const roleLevelMap: Record<string, number> = {
+        [StaffRole.SUPER_ADMIN]: 1,
+        [StaffRole.OWNER]: 2,
+        [StaffRole.BRANCH_MANAGER]: 3,
+        [StaffRole.MANAGER]: 4,
+        [StaffRole.WAITER]: 5,
+        [StaffRole.KITCHEN_STAFF]: 5,
+        [StaffRole.CASHIER]: 5,
+    };
+
+    const userRole = staff.roleName || (staff as any).staffType;
+    const userLevel = roleLevelMap[userRole as string] || 99;
+    const minRequiredLevel = Math.min(...requiredRole.map(r => roleLevelMap[r] || 99));
+
+    if (userLevel > minRequiredLevel) {
+        return <>{fallback}</>;
+    }
   }
 
   // Check Permission requirement

@@ -44,6 +44,7 @@ export class AuthMiddleware {
         branchId: decoded.branchId,
         allowedBranchIds: decoded.allowedBranchIds,
         permissions: permissions,
+        accessScope: (decoded as any).accessScope,
       };
 
       next();
@@ -54,22 +55,61 @@ export class AuthMiddleware {
     }
   };
 
-  // Authorize by specific roles
+  // Authorize by specific roles with hierarchical check
   static authorizeRoles = (...roles: StaffRole[]) => {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       if (!req.user) {
         return sendResponse(res, 403, {
           message: 'Access denied - Authentication required',
         });
       }
 
-      if (!roles.includes(req.user.role as StaffRole)) {
-        return sendResponse(res, 403, {
-          message: 'Access denied - Insufficient role',
-        });
+      // SuperAdmin bypass
+      if (req.user.role === StaffRole.SUPER_ADMIN) {
+        return next();
       }
 
-      next();
+      // Check if user's role is explicitly allowed
+      if (roles.includes(req.user.role)) {
+        return next();
+      }
+
+      // Hierarchical check
+      try {
+        const userRoleId = req.user.roleId;
+        if (!userRoleId) {
+            return sendResponse(res, 403, { message: 'Access denied - Role information missing' });
+        }
+
+        const userRoleDoc = await roleRepo.findById(userRoleId);
+        if (!userRoleDoc) {
+            return sendResponse(res, 403, { message: 'Access denied - Role not found' });
+        }
+
+        // Get the levels of the allowed roles
+        // Since we don't want to fetch every role doc, we use a mapping or known system role levels
+        const roleLevelMap: Record<StaffRole, number> = {
+            [StaffRole.SUPER_ADMIN]: 1,
+            [StaffRole.OWNER]: 2,
+            [StaffRole.BRANCH_MANAGER]: 3,
+            [StaffRole.MANAGER]: 4,
+            [StaffRole.WAITER]: 5,
+            [StaffRole.KITCHEN_STAFF]: 5,
+            [StaffRole.CASHIER]: 5,
+        };
+
+        const minAllowedLevel = Math.min(...roles.map(r => roleLevelMap[r] || 99));
+
+        if (userRoleDoc.level <= minAllowedLevel) {
+            return next();
+        }
+
+        return sendResponse(res, 403, {
+          message: 'Access denied - Insufficient role hierarchy level',
+        });
+      } catch (error) {
+        return sendResponse(res, 500, { message: 'Internal server error during authorization' });
+      }
     };
   };
 
