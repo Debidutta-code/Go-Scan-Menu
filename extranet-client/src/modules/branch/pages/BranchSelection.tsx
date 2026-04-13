@@ -6,6 +6,7 @@ import { BranchService } from '@/modules/branch/services/branch.service';
 import { TableService } from '@/modules/table/services/table.service';
 import { Branch } from '@/shared/types/table.types';
 import { Button } from '@/shared/components/Button';
+import { extractId } from '@/shared/utils/id.util';
 import { BranchSelectionSkeleton as TableManagementSkeleton } from './BranchSelectionSkeleton';
 import '@/modules/table/pages/TableManagement.css';
 import './BranchSelection.css';
@@ -52,14 +53,16 @@ export const BranchSelection: React.FC = () => {
         // AUTO-REDIRECT LOGIC: Redirect immediately for single restaurants or single branch access
         if (filteredBranches.length === 1) {
           // Auto-redirect to the single branch without showing selection UI
-          navigate(`/staff/tables/${filteredBranches[0]._id}`, { replace: true });
+          const bId = extractId(filteredBranches[0]);
+          navigate(`/staff/tables/${bId}`, { replace: true });
           return;
         }
 
         // If single restaurant type but somehow has multiple branches, still redirect to first active branch
         if (staff.restaurant?.type === 'single' && filteredBranches.length > 0) {
           const activeBranch = filteredBranches.find((b) => b.isActive) || filteredBranches[0];
-          navigate(`/staff/tables/${activeBranch._id}`, { replace: true });
+          const bId = extractId(activeBranch);
+          navigate(`/staff/tables/${bId}`, { replace: true });
           return;
         }
 
@@ -100,8 +103,9 @@ export const BranchSelection: React.FC = () => {
     }
   };
 
-  const handleBranchClick = (branchId: string) => {
-    navigate(`/staff/tables/${branchId}`);
+  const handleBranchClick = (branchIdOrObject: any) => {
+    const bId = extractId(branchIdOrObject);
+    navigate(`/staff/tables/${bId}`);
   };
 
   if (loading) {

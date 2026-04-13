@@ -2,6 +2,7 @@
 
 import env from '@/shared/config/env';
 import { ApiResponse } from '@/shared/types';
+import { extractId } from '@/shared/utils/id.util';
 
 export interface QRConfig {
   _id?: string;
@@ -35,8 +36,9 @@ export class QRConfigService {
     restaurantId: any
   ): Promise<ApiResponse<QRConfig>> {
     try {
+      const rId = extractId(restaurantId);
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/qr-config`,
+        `${env.API_BASE_URL}/restaurants/${rId}/qr-config`,
         {
           method: 'GET',
           headers: this.getHeaders(token),
@@ -61,8 +63,9 @@ export class QRConfigService {
     config: Partial<QRConfig>
   ): Promise<ApiResponse<QRConfig>> {
     try {
+      const rId = extractId(restaurantId);
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/qr-config`,
+        `${env.API_BASE_URL}/restaurants/${rId}/qr-config`,
         {
           method: 'POST',
           headers: this.getHeaders(token),
@@ -87,8 +90,9 @@ export class QRConfigService {
     restaurantId: any
   ): Promise<ApiResponse<QRConfig>> {
     try {
+      const rId = extractId(restaurantId);
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/qr-config/reset`,
+        `${env.API_BASE_URL}/restaurants/${rId}/qr-config/reset`,
         {
           method: 'POST',
           headers: this.getHeaders(token),
@@ -112,8 +116,9 @@ export class QRConfigService {
     restaurantId: any
   ): Promise<ApiResponse<QRConfig>> {
     try {
+      const rId = extractId(restaurantId);
       const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${restaurantId._id}/qr-config`,
+        `${env.API_BASE_URL}/restaurants/${rId}/qr-config`,
         {
           method: 'DELETE',
           headers: this.getHeaders(token),

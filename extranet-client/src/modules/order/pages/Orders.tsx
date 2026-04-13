@@ -5,6 +5,7 @@ import { useStaffSocket } from '@/shared/contexts/StaffSocketContext';
 import { IOrder, OrderService } from '@/modules/order/services/order.service';
 import { BranchService } from '@/modules/branch/services/branch.service';
 import { Branch } from '@/shared/types/table.types';
+import { extractId } from '@/shared/utils/id.util';
 import { OrderDetailPanel } from './OrderDetailPanel';
 import {
     Clock, CheckCircle2, AlertCircle,
@@ -113,7 +114,8 @@ export const Orders: React.FC = () => {
                 if (staff.staffType !== 'owner' && staff.allowedBranchIds?.length > 0)
                     list = list.filter((b) => staff.allowedBranchIds.includes(b._id));
                 if (list.length === 1) {
-                    navigate(`/staff/orders/${list[0]._id}`, { replace: true });
+                    const bId = extractId(list[0]);
+                    navigate(`/staff/orders/${bId}`, { replace: true });
                     return;
                 }
                 setBranches(list);
@@ -504,7 +506,7 @@ export const Orders: React.FC = () => {
                             <div
                                 key={branch._id}
                                 className="o-branch-card"
-                                onClick={() => navigate(`/staff/orders/${branch._id}`)}
+                                onClick={() => navigate(`/staff/orders/${extractId(branch)}`)}
                             >
                                 <div className="o-branch-icon"><Building2 size={20} /></div>
                                 <div className="o-branch-details">
