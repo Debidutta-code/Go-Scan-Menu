@@ -2,6 +2,7 @@
 
 import { Restaurant, CreateRestaurantDto, PaginatedResponse } from '@/shared/types/restaurant.types';
 import { ApiResponse } from '@/shared/types';
+import { extractId } from '@/shared/utils/id.util';
 import env from '@/shared/config/env';
 
 export class RestaurantService {
@@ -36,9 +37,10 @@ export class RestaurantService {
 
   static async getRestaurant(
     token: string,
-    id: string
+    id: any
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}`, {
+    const rId = extractId(id);
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}`, {
       headers: this.getHeaders(token),
     });
 
@@ -60,10 +62,11 @@ export class RestaurantService {
 
   static async updateRestaurant(
     token: string,
-    id: string,
+    id: any,
     data: Partial<Restaurant>
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}`, {
+    const rId = extractId(id);
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}`, {
       method: 'PUT',
       headers: this.getHeaders(token),
       body: JSON.stringify(data),
@@ -74,9 +77,10 @@ export class RestaurantService {
 
   static async deleteRestaurant(
     token: string,
-    id: string
+    id: any
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}`, {
+    const rId = extractId(id);
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}`, {
       method: 'DELETE',
       headers: this.getHeaders(token),
     });
@@ -86,10 +90,11 @@ export class RestaurantService {
   
   static async updateTheme(
     token: string,
-    id: string,
+    id: any,
     theme: Partial<Restaurant['theme']>
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}/theme`, {
+    const rId = extractId(id);
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}/theme`, {
       method: 'PUT',
       headers: this.getHeaders(token),
       body: JSON.stringify(theme),
@@ -100,10 +105,11 @@ export class RestaurantService {
 
   static async updateSubscription(
     token: string,
-    id: string,
+    id: any,
     subscription: Partial<Restaurant['subscription']>
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}/subscription`, {
+    const rId = extractId(id);
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}/subscription`, {
       method: 'PUT',
       headers: this.getHeaders(token),
       body: JSON.stringify(subscription),
@@ -114,10 +120,11 @@ export class RestaurantService {
 
   static async updateSettings(
     token: string,
-    id: string,
+    id: any,
     settings: Partial<Restaurant['defaultSettings']>
   ): Promise<ApiResponse<Restaurant>> {
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${id}/settings`, {
+    const rId = extractId(id);
+    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}/settings`, {
       method: 'PUT',
       headers: this.getHeaders(token),
       body: JSON.stringify(settings),

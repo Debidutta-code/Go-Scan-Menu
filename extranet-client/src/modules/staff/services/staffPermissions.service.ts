@@ -2,6 +2,7 @@
 
 import env from '@/shared/config/env';
 import { ApiResponse } from '@/shared/types';
+import { extractId } from '@/shared/utils/id.util';
 import { IStaffTypePermissions, StaffType, UpdatePermissionsPayload } from '@/shared/types/staffPermissions.types';
 
 export class StaffPermissionsService {
@@ -40,8 +41,9 @@ export class StaffPermissionsService {
 
   // GET all staff type permissions for a restaurant
   static async getAllStaffTypePermissions(token: string, restaurantId: any) {
+    const rId = extractId(restaurantId);
     return this.request<IStaffTypePermissions[]>(
-      `/staff-type-permissions/${restaurantId._id}`,
+      `/staff-type-permissions/${rId}`,
       {},
       token
     );
@@ -49,8 +51,9 @@ export class StaffPermissionsService {
 
   // GET permissions for a specific staff type
   static async getPermissionsForStaffType(token: string, restaurantId: any, staffType: StaffType) {
+    const rId = extractId(restaurantId);
     return this.request<IStaffTypePermissions>(
-      `/staff-type-permissions/${restaurantId._id}/${staffType}`,
+      `/staff-type-permissions/${rId}/${staffType}`,
       {},
       token
     );
@@ -63,8 +66,9 @@ export class StaffPermissionsService {
     staffType: StaffType,
     payload: UpdatePermissionsPayload
   ) {
+    const rId = extractId(restaurantId);
     return this.request<IStaffTypePermissions>(
-      `/staff-type-permissions/${restaurantId._id}/${staffType}`,
+      `/staff-type-permissions/${rId}/${staffType}`,
       {
         method: 'PUT',
         body: JSON.stringify(payload),
@@ -75,8 +79,9 @@ export class StaffPermissionsService {
 
   // Initialize all default permissions for a restaurant
   static async initializeAllPermissions(token: string, restaurantId: any) {
+    const rId = extractId(restaurantId);
     return this.request<null>(
-      `/staff-type-permissions/${restaurantId._id}/initialize`,
+      `/staff-type-permissions/${rId}/initialize`,
       {
         method: 'POST',
       },
