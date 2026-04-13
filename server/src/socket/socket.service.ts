@@ -2,7 +2,7 @@
 import { Server as HTTPServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { envConfig, corsOptions } from '@/config';
-import { JWTUtil } from '@/utils';
+import { JWTUtil, ParamsUtil } from '@/utils';
 
 export interface SocketUser {
   userId: string;
@@ -25,24 +25,28 @@ class SocketService {
       console.log(`✅ Client connected: ${socket.id}`);
 
       // Handle user joining specific rooms
-      socket.on('join:restaurant', (restaurantId: string) => {
-        socket.join(`restaurant:${restaurantId}`);
-        console.log(`User joined restaurant room: ${restaurantId}`);
+      socket.on('join:restaurant', (restaurantId: any) => {
+        const rId = ParamsUtil.extractId(restaurantId);
+        socket.join(`restaurant:${rId}`);
+        console.log(`User joined restaurant room: ${rId}`);
       });
 
-      socket.on('join:branch', (branchId: string) => {
-        socket.join(`branch:${branchId}`);
-        console.log(`User joined branch room: ${branchId}`);
+      socket.on('join:branch', (branchId: any) => {
+        const bId = ParamsUtil.extractId(branchId);
+        socket.join(`branch:${bId}`);
+        console.log(`User joined branch room: ${bId}`);
       });
 
-      socket.on('join:table', (tableId: string) => {
-        socket.join(`table:${tableId}`);
-        console.log(`User joined table room: ${tableId}`);
+      socket.on('join:table', (tableId: any) => {
+        const tId = ParamsUtil.extractId(tableId);
+        socket.join(`table:${tId}`);
+        console.log(`User joined table room: ${tId}`);
       });
 
-      socket.on('join:kitchen', (data: { restaurantId: string; branchId: string }) => {
-        socket.join(`kitchen:${data.branchId}`);
-        console.log(`User joined kitchen room: ${data.branchId}`);
+      socket.on('join:kitchen', (data: { restaurantId: any; branchId: any }) => {
+        const bId = ParamsUtil.extractId(data.branchId);
+        socket.join(`kitchen:${bId}`);
+        console.log(`User joined kitchen room: ${bId}`);
       });
 
       // Handle staff authentication over socket
@@ -59,15 +63,17 @@ class SocketService {
           // Add rooms from branchIds array
           if (data.branchIds && Array.isArray(data.branchIds)) {
             data.branchIds.forEach(id => {
-              roomsToJoin.push(`staff:${id}`);
-              roomsToJoin.push(`branch:${id}`);
+              const bId = ParamsUtil.extractId(id);
+              roomsToJoin.push(`staff:${bId}`);
+              roomsToJoin.push(`branch:${bId}`);
             });
           }
 
           // Add rooms from single branchId (backward compat)
           if (data.branchId) {
-            roomsToJoin.push(`staff:${data.branchId}`);
-            roomsToJoin.push(`branch:${data.branchId}`);
+            const bId = ParamsUtil.extractId(data.branchId);
+            roomsToJoin.push(`staff:${bId}`);
+            roomsToJoin.push(`branch:${bId}`);
           }
 
           // Deduplicate and join
@@ -79,9 +85,10 @@ class SocketService {
 
           // Always join the restaurant room (handles owners with no single branchId)
           if (decoded.restaurantId) {
-            socket.join(`restaurant:${decoded.restaurantId}`);
-            uniqueRooms.push(`restaurant:${decoded.restaurantId}`);
-            console.log(`   → Joined restaurant room: ${decoded.restaurantId}`);
+            const rId = ParamsUtil.extractId(decoded.restaurantId);
+            socket.join(`restaurant:${rId}`);
+            uniqueRooms.push(`restaurant:${rId}`);
+            console.log(`   → Joined restaurant room: ${rId}`);
           }
 
           // Always confirm — even if no branch rooms (owners will still get restaurant events)
@@ -118,9 +125,9 @@ class SocketService {
       return;
     }
 
-    const branchId = order.branchId?._id?.toString() || order.branchId?.toString();
-    const restaurantId = order.restaurantId?._id?.toString() || order.restaurantId?.toString();
-    const tableId = order.tableId?._id?.toString() || order.tableId?.toString();
+    const branchId = ParamsUtil.extractId(order.branchId);
+    const restaurantId = ParamsUtil.extractId(order.restaurantId);
+    const tableId = ParamsUtil.extractId(order.tableId);
 
     if (!branchId) {
       console.error('❌ Cannot emit order - branchId missing:', order);
@@ -176,9 +183,9 @@ class SocketService {
       return;
     }
 
-    const branchId = order.branchId?._id?.toString() || order.branchId?.toString();
-    const restaurantId = order.restaurantId?._id?.toString() || order.restaurantId?.toString();
-    const tableId = order.tableId?._id?.toString() || order.tableId?.toString();
+    const branchId = ParamsUtil.extractId(order.branchId);
+    const restaurantId = ParamsUtil.extractId(order.restaurantId);
+    const tableId = ParamsUtil.extractId(order.tableId);
 
     if (!branchId) {
       console.error('❌ Cannot emit status update - branchId missing:', order);
@@ -214,48 +221,54 @@ class SocketService {
     orderNumber: string;
     itemId: string;
     status: string;
-    restaurantId: string;
-    branchId: string;
-    tableId: string;
+    restaurantId: any;
+    branchId: any;
+    tableId: any;
   }): void {
     if (!this.io) return;
 
-    this.io.to(`kitchen:${data.branchId}`).emit('order:item-status-update', data);
-    this.io.to(`branch:${data.branchId}`).emit('order:item-status-update', data);
-    this.io.to(`table:${data.tableId}`).emit('order:item-status-update', data);
+    const bId = ParamsUtil.extractId(data.branchId);
+    const tId = ParamsUtil.extractId(data.tableId);
+
+    this.io.to(`kitchen:${bId}`).emit('order:item-status-update', data);
+    this.io.to(`branch:${bId}`).emit('order:item-status-update', data);
+    this.io.to(`table:${tId}`).emit('order:item-status-update', data);
 
     console.log(`📤 Order item status updated: ${data.orderNumber}`);
   }
 
   // Emit table status update
   emitTableStatusUpdate(data: {
-    tableId: string;
-    branchId: string;
-    restaurantId: string;
+    tableId: any;
+    branchId: any;
+    restaurantId: any;
     status: string;
   }): void {
     if (!this.io) return;
 
-    this.io.to(`branch:${data.branchId}`).emit('table:status-update', data);
-    this.io.to(`restaurant:${data.restaurantId}`).emit('table:status-update', data);
+    const bId = ParamsUtil.extractId(data.branchId);
+    const rId = ParamsUtil.extractId(data.restaurantId);
 
-    console.log(`📤 Table status updated: ${data.tableId}`);
+    this.io.to(`branch:${bId}`).emit('table:status-update', data);
+    this.io.to(`restaurant:${rId}`).emit('table:status-update', data);
+
+    console.log(`📤 Table status updated: ${ParamsUtil.extractId(data.tableId)}`);
   }
 
   // Emit notification
   emitNotification(data: {
-    restaurantId?: string;
-    branchId?: string;
-    userId?: string;
+    restaurantId?: any;
+    branchId?: any;
+    userId?: any;
     notification: any;
   }): void {
     if (!this.io) return;
 
     if (data.branchId) {
-      this.io.to(`branch:${data.branchId}`).emit('notification', data.notification);
+      this.io.to(`branch:${ParamsUtil.extractId(data.branchId)}`).emit('notification', data.notification);
     }
     if (data.restaurantId) {
-      this.io.to(`restaurant:${data.restaurantId}`).emit('notification', data.notification);
+      this.io.to(`restaurant:${ParamsUtil.extractId(data.restaurantId)}`).emit('notification', data.notification);
     }
 
     console.log(`📤 Notification sent`);
