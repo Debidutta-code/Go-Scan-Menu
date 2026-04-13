@@ -2,6 +2,7 @@
 
 import axiosInstance from '@/shared/services/axios.service';
 import { ApiResponse } from '@/shared/types';
+import { extractId } from '@/shared/utils/id.util';
 
 export interface IOrderItem {
     _id: string;
@@ -89,8 +90,8 @@ export class OrderService {
 
     static async getBranchOrdersFull(
         token: string,
-        restaurantId: string,
-        branchId: string,
+        restaurantId: any,
+        branchId: any,
         filters: {
             status?: string;
             orderType?: string;
@@ -111,8 +112,11 @@ export class OrderService {
             queryParams.append('page', page.toString());
             queryParams.append('limit', limit.toString());
 
+            const rId = extractId(restaurantId);
+            const bId = extractId(branchId);
+
             const response = await axiosInstance.get(
-                `/restaurants/${restaurantId}/orders/branch/${branchId}/full?${queryParams.toString()}`,
+                `/restaurants/${rId}/orders/branch/${bId}/full?${queryParams.toString()}`,
                 { headers: this.getHeaders(token) }
             );
             return response.data;
@@ -124,13 +128,14 @@ export class OrderService {
 
     static async updateOrderStatus(
         token: string,
-        restaurantId: string,
+        restaurantId: any,
         orderId: string,
         status: string
     ): Promise<ApiResponse<IOrder>> {
         try {
+            const rId = extractId(restaurantId);
             const response = await axiosInstance.patch(
-                `/restaurants/${restaurantId}/orders/${orderId}/status`,
+                `/restaurants/${rId}/orders/${orderId}/status`,
                 { status },
                 { headers: this.getHeaders(token) }
             );
@@ -143,13 +148,14 @@ export class OrderService {
 
     static async cancelOrder(
         token: string,
-        restaurantId: string,
+        restaurantId: any,
         orderId: string,
         cancellationReason?: string
     ): Promise<ApiResponse<IOrder>> {
         try {
+            const rId = extractId(restaurantId);
             const response = await axiosInstance.patch(
-                `/restaurants/${restaurantId}/orders/${orderId}/cancel`,
+                `/restaurants/${rId}/orders/${orderId}/cancel`,
                 { cancellationReason },
                 { headers: this.getHeaders(token) }
             );
@@ -162,14 +168,15 @@ export class OrderService {
 
     static async updatePaymentStatus(
         token: string,
-        restaurantId: string,
+        restaurantId: any,
         orderId: string,
         paymentStatus: string,
         paymentMethod?: string
     ): Promise<ApiResponse<IOrder>> {
         try {
+            const rId = extractId(restaurantId);
             const response = await axiosInstance.patch(
-                `/restaurants/${restaurantId}/orders/${orderId}/payment`,
+                `/restaurants/${rId}/orders/${orderId}/payment`,
                 { paymentStatus, paymentMethod },
                 { headers: this.getHeaders(token) }
             );
@@ -182,12 +189,13 @@ export class OrderService {
 
     static async getKOT(
         token: string,
-        restaurantId: string,
+        restaurantId: any,
         orderId: string
     ): Promise<ApiResponse<IKOT>> {
         try {
+            const rId = extractId(restaurantId);
             const response = await axiosInstance.get(
-                `/restaurants/${restaurantId}/orders/${orderId}/kot`,
+                `/restaurants/${rId}/orders/${orderId}/kot`,
                 { headers: this.getHeaders(token) }
             );
             return response.data;

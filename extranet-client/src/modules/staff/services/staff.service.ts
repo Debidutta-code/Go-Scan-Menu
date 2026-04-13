@@ -2,6 +2,7 @@
 
 import axiosInstance from '@/shared/services/axios.service';
 import { ApiResponse } from '@/shared/types';
+import { extractId } from '@/shared/utils/id.util';
 import { Staff, StaffLoginResponse, CreateStaffPayload, StaffListResponse, UpdateStaffPayload } from '@/shared/types/staff.types';
 
 export class StaffService {
@@ -70,8 +71,10 @@ export class StaffService {
       filter: JSON.stringify(filter),
     });
 
+    const rId = extractId(restaurantId);
+
     return this.request<StaffListResponse>(
-      `/staff/restaurant/${restaurantId}?${queryParams.toString()}`,
+      `/staff/restaurant/${rId}?${queryParams.toString()}`,
       { method: 'GET' },
       token
     );

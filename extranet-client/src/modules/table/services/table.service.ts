@@ -2,6 +2,7 @@
 
 import axiosInstance from '@/shared/services/axios.service';
 import { ApiResponse } from '@/shared/types';
+import { extractId } from '@/shared/utils/id.util';
 import {
   Table,
   CreateTablePayload,
@@ -17,23 +18,18 @@ export class TableService {
     };
   }
 
-  private static getRestaurantId(restaurantId: any): string {
-    if (!restaurantId) return '';
-    if (typeof restaurantId === 'string') return restaurantId;
-    return restaurantId._id || restaurantId.id || '';
-  }
-
   static async getTables(
     token: string,
     restaurantId: any,
-    branchId?: string,
+    branchIdOrObject?: any,
     page: number = 1,
     limit: number = 100
   ): Promise<ApiResponse<TableListResponse>> {
     try {
-      const rId = this.getRestaurantId(restaurantId);
-      const endpoint = branchId
-        ? `/restaurants/${rId}/tables/branch/${branchId}?page=${page}&limit=${limit}`
+      const rId = extractId(restaurantId);
+      const bId = extractId(branchIdOrObject);
+      const endpoint = bId
+        ? `/restaurants/${rId}/tables/branch/${bId}?page=${page}&limit=${limit}`
         : `/restaurants/${rId}/tables?page=${page}&limit=${limit}`;
 
       const response = await axiosInstance.get(endpoint, {
@@ -50,14 +46,15 @@ export class TableService {
   static async createTable(
     token: string,
     restaurantId: any,
-    branchId: string,
+    branchIdOrObject: any,
     payload: CreateTablePayload
   ): Promise<ApiResponse<Table>> {
     try {
-      const rId = this.getRestaurantId(restaurantId);
+      const rId = extractId(restaurantId);
+      const bId = extractId(branchIdOrObject);
       const response = await axiosInstance.post(
         `/restaurants/${rId}/tables`,
-        { ...payload, branchId },
+        { ...payload, branchId: bId },
         { headers: this.getHeaders(token) }
       );
 
@@ -118,13 +115,14 @@ export class TableService {
   static async updateTable(
     token: string,
     restaurantId: any,
-    tableId: string,
+    tableIdOrObject: any,
     payload: UpdateTablePayload
   ): Promise<ApiResponse<Table>> {
     try {
-      const rId = this.getRestaurantId(restaurantId);
+      const rId = extractId(restaurantId);
+      const tId = extractId(tableIdOrObject);
       const response = await axiosInstance.put(
-        `/restaurants/${rId}/tables/${tableId}`,
+        `/restaurants/${rId}/tables/${tId}`,
         payload,
         { headers: this.getHeaders(token) }
       );
@@ -139,13 +137,14 @@ export class TableService {
   static async updateTableStatus(
     token: string,
     restaurantId: any,
-    tableId: string,
+    tableIdOrObject: any,
     status: Table['status']
   ): Promise<ApiResponse<Table>> {
     try {
-      const rId = this.getRestaurantId(restaurantId);
+      const rId = extractId(restaurantId);
+      const tId = extractId(tableIdOrObject);
       const response = await axiosInstance.patch(
-        `/restaurants/${rId}/tables/${tableId}/status`,
+        `/restaurants/${rId}/tables/${tId}/status`,
         { status },
         { headers: this.getHeaders(token) }
       );
@@ -160,12 +159,13 @@ export class TableService {
   static async deleteTable(
     token: string,
     restaurantId: any,
-    tableId: string
+    tableIdOrObject: any
   ): Promise<ApiResponse<Table>> {
     try {
-      const rId = this.getRestaurantId(restaurantId);
+      const rId = extractId(restaurantId);
+      const tId = extractId(tableIdOrObject);
       const response = await axiosInstance.delete(
-        `/restaurants/${rId}/tables/${tableId}`,
+        `/restaurants/${rId}/tables/${tId}`,
         { headers: this.getHeaders(token) }
       );
 
@@ -179,12 +179,13 @@ export class TableService {
   static async regenerateQR(
     token: string,
     restaurantId: any,
-    tableId: string
+    tableIdOrObject: any
   ): Promise<ApiResponse<Table>> {
     try {
-      const rId = this.getRestaurantId(restaurantId);
+      const rId = extractId(restaurantId);
+      const tId = extractId(tableIdOrObject);
       const response = await axiosInstance.post(
-        `/restaurants/${rId}/tables/${tableId}/regenerate-qr`,
+        `/restaurants/${rId}/tables/${tId}/regenerate-qr`,
         {},
         { headers: this.getHeaders(token) }
       );
@@ -199,12 +200,13 @@ export class TableService {
   static async getQRCodeData(
     token: string,
     restaurantId: any,
-    tableId: string
+    tableIdOrObject: any
   ): Promise<ApiResponse<{ qrUrl: string }>> {
     try {
-      const rId = this.getRestaurantId(restaurantId);
+      const rId = extractId(restaurantId);
+      const tId = extractId(tableIdOrObject);
       const response = await axiosInstance.get(
-        `/restaurants/${rId}/tables/${tableId}/qr-data`,
+        `/restaurants/${rId}/tables/${tId}/qr-data`,
         { headers: this.getHeaders(token) }
       );
 
@@ -218,12 +220,13 @@ export class TableService {
   static getQRCodeImageUrl(
     token: string,
     restaurantId: any,
-    tableId: string
+    tableIdOrObject: any
   ): string {
-    const rId = this.getRestaurantId(restaurantId);
+    const rId = extractId(restaurantId);
+    const tId = extractId(tableIdOrObject);
     // This remains as a direct URL as it's typically used in an <img> src
     const env = (window as any).env || { API_BASE_URL: '' }; 
     // In production we'd get this from config, for now let's hope it's consistent
-    return `${axiosInstance.defaults.baseURL}/restaurants/${rId}/tables/${tableId}/qr-image?token=${token}`;
+    return `${axiosInstance.defaults.baseURL}/restaurants/${rId}/tables/${tId}/qr-image?token=${token}`;
   }
 }

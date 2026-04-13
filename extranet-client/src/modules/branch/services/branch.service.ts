@@ -2,6 +2,7 @@
 
 import axiosInstance from '@/shared/services/axios.service';
 import { ApiResponse } from '@/shared/types';
+import { extractId } from '@/shared/utils/id.util';
 import { Branch, BranchListResponse } from '@/shared/types/table.types';
 
 export class BranchService {
@@ -18,7 +19,7 @@ export class BranchService {
     limit: number = 100
   ): Promise<ApiResponse<BranchListResponse>> {
     try {
-      const rId = typeof restaurantId === 'object' ? restaurantId._id : restaurantId;
+      const rId = extractId(restaurantId);
       const response = await axiosInstance.get(
         `/restaurants/${rId}/branches?page=${page}&limit=${limit}`,
         { headers: this.getHeaders(token) }
@@ -34,12 +35,13 @@ export class BranchService {
   static async getBranch(
     token: string,
     restaurantId: any,
-    branchId: string
+    branchId: any
   ): Promise<ApiResponse<Branch>> {
     try {
-      const rId = typeof restaurantId === 'object' ? restaurantId._id : restaurantId;
+      const rId = extractId(restaurantId);
+      const bId = extractId(branchId);
       const response = await axiosInstance.get(
-        `/restaurants/${rId}/branches/${branchId}`,
+        `/restaurants/${rId}/branches/${bId}`,
         { headers: this.getHeaders(token) }
       );
 
