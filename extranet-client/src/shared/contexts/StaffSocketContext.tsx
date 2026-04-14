@@ -17,6 +17,7 @@ import React, {
 import { Socket } from 'socket.io-client';
 import { getSocket, disconnectSocket } from '@/shared/socket/staffSocket';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
+import { extractId } from '@/shared/utils/id.util';
 import { Staff } from '@/shared/types/staff.types';
 
 interface StaffSocketContextType {
@@ -56,10 +57,13 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
         console.log('🔌 StaffSocketContext: Managing connection for', staff?._id);
 
         const authenticate = () => {
-            const branchIds: string[] = [...(staff?.allowedBranchIds || [])];
-            if (staff?.branchId && !branchIds.includes(staff.branchId)) {
-                branchIds.push(staff.branchId);
+            const rawBranchIds: any[] = [...(staff?.allowedBranchIds || [])];
+            if (staff?.branchId) {
+                rawBranchIds.push(staff.branchId);
             }
+
+            // Deduplicate and ensure they are all strings
+            const branchIds = [...new Set(rawBranchIds.map(id => extractId(id)).filter(id => !!id))];
 
             // Always authenticate — even without branchIds so the server can
             // join the restaurant room (important for owners / managers).
