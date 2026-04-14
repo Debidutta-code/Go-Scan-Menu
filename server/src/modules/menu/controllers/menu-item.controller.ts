@@ -155,7 +155,8 @@ export class MenuItemController {
   });
 
   updateBranchPricing = catchAsync(async (req: Request, res: Response) => {
-    let restaurantId = ParamsUtil.getString(req.params.restaurantId) || (req.user as any)?.restaurantId;
+    let restaurantId =
+      ParamsUtil.getString(req.params.restaurantId) || (req.user as any)?.restaurantId;
 
     if (restaurantId && typeof restaurantId !== 'string') {
       restaurantId = restaurantId.toString();

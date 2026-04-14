@@ -14,7 +14,11 @@ export const validateRequest = (schema: ZodSchema) => {
     } catch (error) {
       if (error instanceof ZodError) {
         const errors = ((error as any).errors || []).map((e: any) => ({
-          field: e.path.join('.').replace(/^body\./, '').replace(/^query\./, '').replace(/^params\./, ''),
+          field: e.path
+            .join('.')
+            .replace(/^body\./, '')
+            .replace(/^query\./, '')
+            .replace(/^params\./, ''),
           message: e.message,
         }));
         return sendResponse(res, 400, {

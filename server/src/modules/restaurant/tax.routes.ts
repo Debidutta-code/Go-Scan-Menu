@@ -4,7 +4,11 @@ import { TaxController } from './controllers/tax.controller';
 import { AuthMiddleware } from '@/modules/staff';
 import { StaffRole } from '@/types/role.types';
 import { validateRequest } from '@/middlewares/validate.middleware';
-import { createTaxSchema, updateTaxSchema, updateTaxStatusSchema } from '@/validations/tax.validation';
+import {
+  createTaxSchema,
+  updateTaxSchema,
+  updateTaxStatusSchema,
+} from '@/validations/tax.validation';
 
 const router = Router({ mergeParams: true });
 const taxController = new TaxController();
@@ -40,7 +44,12 @@ router.get('/:id', taxController.getTax);
 router.put('/:id', ...canManageTaxes, validateRequest(updateTaxSchema), taxController.updateTax);
 
 // Update tax status (activate/deactivate)
-router.patch('/:id/status', ...canManageTaxes, validateRequest(updateTaxStatusSchema), taxController.updateTaxStatus);
+router.patch(
+  '/:id/status',
+  ...canManageTaxes,
+  validateRequest(updateTaxStatusSchema),
+  taxController.updateTaxStatus
+);
 
 // Delete tax
 router.delete('/:id', ...canManageTaxes, taxController.deleteTax);

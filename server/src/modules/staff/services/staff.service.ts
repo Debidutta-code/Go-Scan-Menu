@@ -31,7 +31,7 @@ export class StaffService {
       throw new AppError('Invalid credentials', 401);
     }
 
-    let role = (staff.roleId as unknown) as IRole;
+    let role = staff.roleId as unknown as IRole;
     let permissions = role?.permissions;
 
     // Fallback for legacy data (handle staffType if roleId/permissions missing)
@@ -50,11 +50,30 @@ export class StaffService {
       } else {
         // Ultimate fallback: empty permissions object instead of throwing
         permissions = {
-          orders: { view: false, create: false, update: false, delete: false, managePayment: false, viewAllBranches: false },
-          menu: { view: false, create: false, update: false, delete: false, manageCategories: false, managePricing: false },
+          orders: {
+            view: false,
+            create: false,
+            update: false,
+            delete: false,
+            managePayment: false,
+            viewAllBranches: false,
+          },
+          menu: {
+            view: false,
+            create: false,
+            update: false,
+            delete: false,
+            manageCategories: false,
+            managePricing: false,
+          },
           staff: { view: false, create: false, update: false, delete: false, manageRoles: false },
           reports: { view: false, export: false, viewFinancials: false },
-          settings: { view: false, updateRestaurant: false, updateBranch: false, manageTaxes: false },
+          settings: {
+            view: false,
+            updateRestaurant: false,
+            updateBranch: false,
+            manageTaxes: false,
+          },
           tables: { view: false, create: false, update: false, delete: false, manageQR: false },
           customers: { view: false, manage: false },
         } as any;

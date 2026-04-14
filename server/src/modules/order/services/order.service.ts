@@ -569,8 +569,10 @@ export class OrderService {
     // Get current day and time in the branch's local timezone (Asia/Kolkata)
     const currentDay = new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
-      timeZone: timezone
-    }).format(now).toLowerCase() as
+      timeZone: timezone,
+    })
+      .format(now)
+      .toLowerCase() as
       | 'monday'
       | 'tuesday'
       | 'wednesday'
@@ -583,7 +585,7 @@ export class OrderService {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-      timeZone: timezone
+      timeZone: timezone,
     }).format(now);
 
     const todayHours = branch.settings.operatingHours.find((oh: any) => oh.day === currentDay);
@@ -611,7 +613,7 @@ export class OrderService {
       openMinutes,
       closeTime: todayHours.closeTime,
       closeMinutes,
-      isClosed: currentMinutes < openMinutes || currentMinutes > closeMinutes
+      isClosed: currentMinutes < openMinutes || currentMinutes > closeMinutes,
     });
 
     // Check current time is within operating hours
@@ -635,7 +637,6 @@ export class OrderService {
     }
   }
 
-
   /**
    * Validate status transition is allowed
    */
@@ -647,11 +648,11 @@ export class OrderService {
     const allowedTransitions: Record<IOrder['status'], IOrder['status'][]> = {
       pending: ['confirmed', 'cancelled'],
       confirmed: ['served'],
-      preparing: ['served'],   // legacy support if any orders are mid-flow
-      ready: ['served'],   // legacy support
+      preparing: ['served'], // legacy support if any orders are mid-flow
+      ready: ['served'], // legacy support
       served: ['completed'],
-      completed: [],           // terminal
-      cancelled: [],           // terminal
+      completed: [], // terminal
+      cancelled: [], // terminal
     };
 
     const allowed = allowedTransitions[currentStatus] || [];
@@ -675,7 +676,10 @@ export class OrderService {
 
     // Only allow cancellation while still in pending (not yet confirmed)
     if (order.status !== 'pending') {
-      throw new AppError('Order can only be cancelled while in pending state (before confirmation)', 400);
+      throw new AppError(
+        'Order can only be cancelled while in pending state (before confirmation)',
+        400
+      );
     }
 
     if (order.paymentStatus === 'paid') {

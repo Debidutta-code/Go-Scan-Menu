@@ -44,12 +44,18 @@ export class OrderRepository {
     const query: any = { branchId: new Types.ObjectId(branchId) };
 
     if (filter.status) {
-      const statuses = filter.status.split(',').map((s) => s.trim()).filter(Boolean);
+      const statuses = filter.status
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
       query.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
     }
     if (filter.orderType) query.orderType = filter.orderType;
     if (filter.paymentStatus) {
-      const payStatuses = filter.paymentStatus.split(',').map((s) => s.trim()).filter(Boolean);
+      const payStatuses = filter.paymentStatus
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
       query.paymentStatus = payStatuses.length === 1 ? payStatuses[0] : { $in: payStatuses };
     }
 
@@ -93,12 +99,18 @@ export class OrderRepository {
     const matchQuery: any = { branchId: new Types.ObjectId(branchId) };
 
     if (filter.status) {
-      const statuses = filter.status.split(',').map((s) => s.trim()).filter(Boolean);
+      const statuses = filter.status
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
       matchQuery.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
     }
     if (filter.orderType) matchQuery.orderType = filter.orderType;
     if (filter.paymentStatus) {
-      const payStatuses = filter.paymentStatus.split(',').map((s) => s.trim()).filter(Boolean);
+      const payStatuses = filter.paymentStatus
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
       matchQuery.paymentStatus = payStatuses.length === 1 ? payStatuses[0] : { $in: payStatuses };
     }
 
