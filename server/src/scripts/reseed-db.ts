@@ -26,11 +26,39 @@ async function reseed() {
     await mongoose.connect(MONGO_URI);
     console.log('✅ Connected to MongoDB');
 
+    // Clean DB
+    console.log('🧹 Cleaning Database...');
+    await Promise.all([
+      SuperAdmin.deleteMany({}),
+      Role.deleteMany({}),
+      Staff.deleteMany({}),
+      Restaurant.deleteMany({}),
+      Branch.deleteMany({}),
+      Category.deleteMany({}),
+      MenuItem.deleteMany({}),
+      Table.deleteMany({}),
+    ]);
+    console.log('✅ Database cleaned');
+
     const password = await bcrypt.hash('Test@1234', 10);
 
     const fullPerms = {
-      orders: { view: true, create: true, update: true, delete: true, managePayment: true, viewAllBranches: true },
-      menu: { view: true, create: true, update: true, delete: true, manageCategories: true, managePricing: true },
+      orders: {
+        view: true,
+        create: true,
+        update: true,
+        delete: true,
+        managePayment: true,
+        viewAllBranches: true,
+      },
+      menu: {
+        view: true,
+        create: true,
+        update: true,
+        delete: true,
+        manageCategories: true,
+        managePricing: true,
+      },
       staff: { view: true, create: true, update: true, delete: true, manageRoles: true },
       reports: { view: true, export: true, viewFinancials: true },
       settings: { view: true, updateRestaurant: true, updateBranch: true, manageTaxes: true },
@@ -84,12 +112,17 @@ async function reseed() {
         level: RoleLevel.OPERATIONAL,
         accessScope: AccessScope.BRANCH_SINGLE,
         isSystemRole: true,
-        permissions: { ...fullPerms, staff: { ...fullPerms.staff, manageRoles: false, delete: false } },
+        permissions: {
+          ...fullPerms,
+          staff: { ...fullPerms.staff, manageRoles: false, delete: false },
+        },
       },
     ];
 
     for (const roleData of rolesToSeed) {
-      await Role.findOneAndUpdate({ name: roleData.name, isSystemRole: true }, roleData, { upsert: true });
+      await Role.findOneAndUpdate({ name: roleData.name, isSystemRole: true }, roleData, {
+        upsert: true,
+      });
     }
     console.log('✅ Roles seeded');
 
@@ -97,7 +130,13 @@ async function reseed() {
     console.log('👤 Creating SuperAdmin: superadmin@gmail.com');
     await SuperAdmin.findOneAndUpdate(
       { email: 'superadmin@gmail.com' },
-      { name: 'Super Admin', email: 'superadmin@gmail.com', password, isActive: true, permissions: fullPerms },
+      {
+        name: 'Super Admin',
+        email: 'superadmin@gmail.com',
+        password,
+        isActive: true,
+        permissions: fullPerms,
+      },
       { upsert: true }
     );
 
@@ -112,8 +151,18 @@ async function reseed() {
         owner: { name: 'Owner User', email: 'owner@gmail.com', phone: '1234567890', password },
         isActive: true,
         subscription: { plan: 'pro', isActive: true, maxBranches: 10, currentBranches: 1 },
-        theme: { primaryColor: '#3498db', secondaryColor: '#95a5a6', accentColor: '#e74c3c', font: 'Roboto' },
-        defaultSettings: { currency: 'USD', defaultTaxIds: [], serviceChargePercentage: 0, allowBranchOverride: false },
+        theme: {
+          primaryColor: '#3498db',
+          secondaryColor: '#95a5a6',
+          accentColor: '#e74c3c',
+          font: 'Roboto',
+        },
+        defaultSettings: {
+          currency: 'USD',
+          defaultTaxIds: [],
+          serviceChargePercentage: 0,
+          allowBranchOverride: false,
+        },
         menuSettings: { centralizedMenu: true, allowBranchSpecificItems: false },
       },
       { upsert: true, new: true }
@@ -129,7 +178,14 @@ async function reseed() {
         code: 'BH01',
         email: 'branch@gmail.com',
         phone: '0987654321',
-        address: { street: '123 Burger St', city: 'NY', state: 'NY', zipCode: '10001', country: 'USA', coordinates: { latitude: 40.7128, longitude: -74.006 } },
+        address: {
+          street: '123 Burger St',
+          city: 'NY',
+          state: 'NY',
+          zipCode: '10001',
+          country: 'USA',
+          coordinates: { latitude: 40.7128, longitude: -74.006 },
+        },
         isActive: true,
         settings: {
           currency: 'USD',
@@ -157,34 +213,41 @@ async function reseed() {
     console.log('👔 Creating Staff members...');
     const roles = await Role.find({ isSystemRole: true });
     for (const role of roles) {
-        if (role.name === StaffRole.SUPER_ADMIN) continue; // SuperAdmin is in separate collection
+      if (role.name === StaffRole.SUPER_ADMIN) continue; // SuperAdmin is in separate collection
 
-        const email = `${role.name}@gmail.com`;
-        console.log(`   - Creating ${role.name}: ${email}`);
-        const staffData = {
-            restaurantId: restaurant._id,
-            branchId: branch._id,
-            roleId: role._id,
-            name: `${role.displayName} User`,
-            email: email,
-            phone: '1234567890',
-            password,
-            isActive: true,
-            allowedBranchIds: [branch._id]
-        };
+      const email = `${role.name}@gmail.com`;
+      console.log(`   - Creating ${role.name}: ${email}`);
+      const staffData = {
+        restaurantId: restaurant._id,
+        branchId: branch._id,
+        roleId: role._id,
+        name: `${role.displayName} User`,
+        email: email,
+        phone: '1234567890',
+        password,
+        isActive: true,
+        allowedBranchIds: [branch._id],
+      };
 
-        const staff = await Staff.findOneAndUpdate({ email }, staffData, { upsert: true, new: true });
+      const staff = await Staff.findOneAndUpdate({ email }, staffData, { upsert: true, new: true });
 
-        if (role.name === StaffRole.OWNER) {
-            await Restaurant.findByIdAndUpdate(restaurant._id, { ownerId: staff._id });
-        }
+      if (role.name === StaffRole.OWNER) {
+        await Restaurant.findByIdAndUpdate(restaurant._id, { ownerId: staff._id });
+      }
     }
 
     // 6. Create Category
     console.log('📂 Creating Category: Burgers');
     const category = await Category.findOneAndUpdate(
       { restaurantId: restaurant._id, name: 'Burgers' },
-      { restaurantId: restaurant._id, name: 'Burgers', description: 'Delicious burgers', displayOrder: 1, isActive: true, scope: 'restaurant' },
+      {
+        restaurantId: restaurant._id,
+        name: 'Burgers',
+        description: 'Delicious burgers',
+        displayOrder: 1,
+        isActive: true,
+        scope: 'restaurant',
+      },
       { upsert: true, new: true }
     );
 
@@ -202,7 +265,7 @@ async function reseed() {
         dietaryType: 'NON_VEG',
         isActive: true,
         isAvailable: true,
-        scope: 'restaurant'
+        scope: 'restaurant',
       },
       { upsert: true }
     );
@@ -210,18 +273,18 @@ async function reseed() {
     // 8. Create Table
     console.log('🪑 Creating Table: A1');
     await Table.findOneAndUpdate(
-        { branchId: branch._id, tableNumber: 'A1' },
-        {
-            restaurantId: restaurant._id,
-            branchId: branch._id,
-            tableNumber: 'A1',
-            qrCode: `QR-${restaurant.slug}-${branch.code}-A1`,
-            capacity: 4,
-            location: 'indoor',
-            status: 'available',
-            isActive: true
-        },
-        { upsert: true }
+      { branchId: branch._id, tableNumber: 'A1' },
+      {
+        restaurantId: restaurant._id,
+        branchId: branch._id,
+        tableNumber: 'A1',
+        qrCode: `QR-${restaurant.slug}-${branch.code}-A1`,
+        capacity: 4,
+        location: 'indoor',
+        status: 'available',
+        isActive: true,
+      },
+      { upsert: true }
     );
 
     console.log('✨ Seeding completed successfully!');

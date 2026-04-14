@@ -56,7 +56,12 @@ router.get('/number/:orderNumber', ...canViewOrders, orderController.getOrderByN
 router.get('/:id', ...canViewOrders, orderController.getOrder);
 
 // Update order status
-router.patch('/:id/status', AuthMiddleware.authenticate, ...canManageOrders, orderController.updateOrderStatus);
+router.patch(
+  '/:id/status',
+  AuthMiddleware.authenticate,
+  ...canManageOrders,
+  orderController.updateOrderStatus
+);
 
 // Update item status
 router.patch('/:id/items/:itemId/status', ...canManageOrders, orderController.updateItemStatus);

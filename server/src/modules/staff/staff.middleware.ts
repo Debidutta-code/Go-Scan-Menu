@@ -78,30 +78,30 @@ export class AuthMiddleware {
       try {
         const userRoleId = req.user.roleId;
         if (!userRoleId) {
-            return sendResponse(res, 403, { message: 'Access denied - Role information missing' });
+          return sendResponse(res, 403, { message: 'Access denied - Role information missing' });
         }
 
         const userRoleDoc = await roleRepo.findById(userRoleId);
         if (!userRoleDoc) {
-            return sendResponse(res, 403, { message: 'Access denied - Role not found' });
+          return sendResponse(res, 403, { message: 'Access denied - Role not found' });
         }
 
         // Get the levels of the allowed roles
         // Since we don't want to fetch every role doc, we use a mapping or known system role levels
         const roleLevelMap: Record<StaffRole, number> = {
-            [StaffRole.SUPER_ADMIN]: 1,
-            [StaffRole.OWNER]: 2,
-            [StaffRole.BRANCH_MANAGER]: 3,
-            [StaffRole.MANAGER]: 4,
-            [StaffRole.WAITER]: 5,
-            [StaffRole.KITCHEN_STAFF]: 5,
-            [StaffRole.CASHIER]: 5,
+          [StaffRole.SUPER_ADMIN]: 1,
+          [StaffRole.OWNER]: 2,
+          [StaffRole.BRANCH_MANAGER]: 3,
+          [StaffRole.MANAGER]: 4,
+          [StaffRole.WAITER]: 5,
+          [StaffRole.KITCHEN_STAFF]: 5,
+          [StaffRole.CASHIER]: 5,
         };
 
-        const minAllowedLevel = Math.min(...roles.map(r => roleLevelMap[r] || 99));
+        const minAllowedLevel = Math.min(...roles.map((r) => roleLevelMap[r] || 99));
 
         if (userRoleDoc.level <= minAllowedLevel) {
-            return next();
+          return next();
         }
 
         return sendResponse(res, 403, {

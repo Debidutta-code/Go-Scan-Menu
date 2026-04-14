@@ -16,7 +16,7 @@ export interface IStaff extends Document {
     workingHours?: {
       start?: string;
       end?: string;
-    }
+    };
   };
   createdAt: Date;
   updatedAt: Date;
@@ -72,9 +72,9 @@ const staffSchema = new Schema<IStaff>(
       timePreference: { type: String, default: 'Mid-Day' },
       workingHours: {
         start: { type: String, default: '9:00 AM' },
-        end: { type: String, default: '6:00 PM' }
-      }
-    }
+        end: { type: String, default: '6:00 PM' },
+      },
+    },
   },
   {
     timestamps: true,

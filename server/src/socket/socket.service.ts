@@ -50,64 +50,72 @@ class SocketService {
       });
 
       // Handle staff authentication over socket
-      socket.on('socket:authenticate-staff', (data: { token: string; branchId?: string; branchIds?: string[] }) => {
-        try {
-          const decoded = JWTUtil.verifyToken(data.token);
-          if (!decoded?.id) {
-            socket.emit('socket:error', { message: 'Invalid token' });
-            return;
-          }
+      socket.on(
+        'socket:authenticate-staff',
+        (data: { token: string; branchId?: string; branchIds?: string[] }) => {
+          try {
+            const decoded = JWTUtil.verifyToken(data.token);
+            if (!decoded?.id) {
+              socket.emit('socket:error', { message: 'Invalid token' });
+              return;
+            }
 
-          const roomsToJoin: string[] = [];
+            const roomsToJoin: string[] = [];
 
-          // Add rooms from branchIds array
-          if (data.branchIds && Array.isArray(data.branchIds)) {
-            data.branchIds.forEach(id => {
-              const bId = ParamsUtil.extractId(id);
+            // Add rooms from branchIds array
+            if (data.branchIds && Array.isArray(data.branchIds)) {
+              data.branchIds.forEach((id) => {
+                const bId = ParamsUtil.extractId(id);
+                roomsToJoin.push(`staff:${bId}`);
+                roomsToJoin.push(`branch:${bId}`);
+              });
+            }
+
+            // Add rooms from single branchId (backward compat)
+            if (data.branchId) {
+              const bId = ParamsUtil.extractId(data.branchId);
               roomsToJoin.push(`staff:${bId}`);
               roomsToJoin.push(`branch:${bId}`);
+            }
+
+            // Deduplicate and join
+            const uniqueRooms = [...new Set(roomsToJoin)];
+            uniqueRooms.forEach((room) => {
+              socket.join(room);
+              console.log(`   → Joined room: ${room}`);
             });
+
+            // Always join the restaurant room (handles owners with no single branchId)
+            if (decoded.restaurantId) {
+              const rId = ParamsUtil.extractId(decoded.restaurantId);
+              socket.join(`restaurant:${rId}`);
+              uniqueRooms.push(`restaurant:${rId}`);
+              console.log(`   → Joined restaurant room: ${rId}`);
+            }
+
+            // Always confirm — even if no branch rooms (owners will still get restaurant events)
+            socket.emit('socket:authenticated', {
+              staffId: decoded.id,
+              joinedRooms: uniqueRooms,
+            });
+
+            console.log(
+              `🔐 Staff ${decoded.id} authenticated → Joined ${uniqueRooms.length} rooms`
+            );
+            console.log(`   Rooms:`, uniqueRooms);
+
+            // Log all current rooms for debugging
+            const allRooms = Array.from(this.io?.sockets.adapter.rooms.keys() || []);
+            console.log(
+              `   All active rooms:`,
+              allRooms.filter((r) => !r.match(/^[A-Za-z0-9_-]{20}$/))
+            );
+          } catch (err) {
+            console.error('❌ Staff authentication failed:', err);
+            socket.emit('socket:error', { message: 'Authentication failed' });
           }
-
-          // Add rooms from single branchId (backward compat)
-          if (data.branchId) {
-            const bId = ParamsUtil.extractId(data.branchId);
-            roomsToJoin.push(`staff:${bId}`);
-            roomsToJoin.push(`branch:${bId}`);
-          }
-
-          // Deduplicate and join
-          const uniqueRooms = [...new Set(roomsToJoin)];
-          uniqueRooms.forEach(room => {
-            socket.join(room);
-            console.log(`   → Joined room: ${room}`);
-          });
-
-          // Always join the restaurant room (handles owners with no single branchId)
-          if (decoded.restaurantId) {
-            const rId = ParamsUtil.extractId(decoded.restaurantId);
-            socket.join(`restaurant:${rId}`);
-            uniqueRooms.push(`restaurant:${rId}`);
-            console.log(`   → Joined restaurant room: ${rId}`);
-          }
-
-          // Always confirm — even if no branch rooms (owners will still get restaurant events)
-          socket.emit('socket:authenticated', {
-            staffId: decoded.id,
-            joinedRooms: uniqueRooms,
-          });
-
-          console.log(`🔐 Staff ${decoded.id} authenticated → Joined ${uniqueRooms.length} rooms`);
-          console.log(`   Rooms:`, uniqueRooms);
-
-          // Log all current rooms for debugging
-          const allRooms = Array.from(this.io?.sockets.adapter.rooms.keys() || []);
-          console.log(`   All active rooms:`, allRooms.filter(r => !r.match(/^[A-Za-z0-9_-]{20}$/)));
-        } catch (err) {
-          console.error('❌ Staff authentication failed:', err);
-          socket.emit('socket:error', { message: 'Authentication failed' });
         }
-      });
+      );
 
       socket.on('disconnect', () => {
         console.log(`❌ Client disconnected: ${socket.id}`);
@@ -140,7 +148,7 @@ class SocketService {
 
     // Get all rooms to verify
     const rooms = Array.from(this.io.sockets.adapter.rooms.keys());
-    const staffRooms = rooms.filter(r => r.startsWith('staff:') || r.startsWith('branch:'));
+    const staffRooms = rooms.filter((r) => r.startsWith('staff:') || r.startsWith('branch:'));
     console.log(`   Available rooms:`, staffRooms);
 
     // Emit to multiple rooms for redundancy (always emit — Socket.IO handles empty rooms safely)
@@ -148,10 +156,10 @@ class SocketService {
       `staff:${branchId}`,
       `branch:${branchId}`,
       `kitchen:${branchId}`,
-      `restaurant:${restaurantId}`
+      `restaurant:${restaurantId}`,
     ];
 
-    emitToRooms.forEach(room => {
+    emitToRooms.forEach((room) => {
       // Log client count for diagnostics (but always emit regardless)
       const clientsInRoom = this.io?.sockets.adapter.rooms.get(room);
       const clientCount = clientsInRoom ? clientsInRoom.size : 0;
@@ -192,7 +200,9 @@ class SocketService {
       return;
     }
 
-    console.log(`📤 Emitting order:status-update for Order ${order.orderNumber} (Status: ${order.status})`);
+    console.log(
+      `📤 Emitting order:status-update for Order ${order.orderNumber} (Status: ${order.status})`
+    );
     console.log(`   Branch ID: ${branchId}, Status: ${order.status}`);
 
     // Emit to all relevant rooms
@@ -201,10 +211,10 @@ class SocketService {
       `branch:${branchId}`,
       `kitchen:${branchId}`,
       `restaurant:${restaurantId}`,
-      `table:${tableId}`
+      `table:${tableId}`,
     ];
 
-    emitToRooms.forEach(room => {
+    emitToRooms.forEach((room) => {
       if (room && room !== 'undefined') {
         const clientsInRoom = this.io?.sockets.adapter.rooms.get(room);
         const clientCount = clientsInRoom ? clientsInRoom.size : 0;
@@ -265,10 +275,14 @@ class SocketService {
     if (!this.io) return;
 
     if (data.branchId) {
-      this.io.to(`branch:${ParamsUtil.extractId(data.branchId)}`).emit('notification', data.notification);
+      this.io
+        .to(`branch:${ParamsUtil.extractId(data.branchId)}`)
+        .emit('notification', data.notification);
     }
     if (data.restaurantId) {
-      this.io.to(`restaurant:${ParamsUtil.extractId(data.restaurantId)}`).emit('notification', data.notification);
+      this.io
+        .to(`restaurant:${ParamsUtil.extractId(data.restaurantId)}`)
+        .emit('notification', data.notification);
     }
 
     console.log(`📤 Notification sent`);
@@ -287,16 +301,16 @@ class SocketService {
 
     return {
       totalSockets: sockets.length,
-      connectedClients: sockets.map(s => ({
+      connectedClients: sockets.map((s) => ({
         id: s.id,
-        rooms: Array.from(s.rooms).filter(r => r !== s.id)
+        rooms: Array.from(s.rooms).filter((r) => r !== s.id),
       })),
       rooms: rooms
         .filter(([name]) => !name.match(/^[A-Za-z0-9_-]{20}$/)) // Filter out socket IDs
         .map(([name, clients]) => ({
           name,
-          clientCount: clients.size
-        }))
+          clientCount: clients.size,
+        })),
     };
   }
 }

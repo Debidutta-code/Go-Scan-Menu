@@ -8,8 +8,8 @@ const allowedOrigins = (envConfig.cors_origins || '')
 
 // Add 127.0.0.1 equivalents for localhost origins
 const localOrigins = allowedOrigins
-  .filter(o => o.includes('localhost'))
-  .map(o => o.replace('localhost', '127.0.0.1'));
+  .filter((o) => o.includes('localhost'))
+  .map((o) => o.replace('localhost', '127.0.0.1'));
 
 const finalAllowedOrigins = [...new Set([...allowedOrigins, ...localOrigins])];
 
