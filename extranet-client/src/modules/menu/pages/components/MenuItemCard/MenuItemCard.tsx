@@ -5,6 +5,7 @@ import { MenuItem } from '@/shared/types/menu.types';
 import { Button } from '@/shared/components/Button';
 import { Switch } from '@/shared/components/Switch';
 import { PermissionGuard } from '@/shared/components/PermissionGuard';
+import { RoleLevel, StaffRole } from '@/shared/types/role.types';
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -34,12 +35,18 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           <h3 className="item-name" data-testid="item-name">
             {item.name}
           </h3>
-          <Switch
-            id="toggle-availability"
-            checked={item.isAvailable}
-            onChange={() => onToggleAvailability(item._id, item.isAvailable)}
-            label={item.isAvailable ? 'Available' : 'Unavailable'}
-          />
+          <PermissionGuard
+            requiredRole={[StaffRole.KITCHEN_STAFF]}
+            minLevel={RoleLevel.OPERATIONAL}
+            permission="menu.update"
+          >
+            <Switch
+              id="toggle-availability"
+              checked={item.isAvailable}
+              onChange={() => onToggleAvailability(item._id, item.isAvailable)}
+              label={item.isAvailable ? 'Available' : 'Unavailable'}
+            />
+          </PermissionGuard>
         </div>
 
         <p className="item-description">{item.description || 'No description'}</p>
@@ -58,12 +65,12 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
         </div>
 
         <div className="item-actions">
-          <PermissionGuard permission="menu.update">
+          <PermissionGuard permission="menu.update" minLevel={RoleLevel.BRANCH_SINGLE}>
             <Button variant="outline" onClick={() => onEdit(item._id)} data-testid="edit-button">
               Edit
             </Button>
           </PermissionGuard>
-          <PermissionGuard permission="menu.delete">
+          <PermissionGuard permission="menu.delete" minLevel={RoleLevel.BRANCH_SINGLE}>
             <Button
               variant="danger"
               onClick={() => onDelete(item._id, item.name)}

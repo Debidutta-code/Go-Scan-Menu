@@ -5,6 +5,7 @@ import { MenuAPI } from '@/modules/menu/pages/api/menu-api';
 import { MenuItem, Category } from '@/shared/types/menu.types';
 import { Button } from '@/shared/components/Button';
 import { PermissionGuard } from '@/shared/components/PermissionGuard';
+import { RoleLevel } from '@/shared/types/role.types';
 import { MenuItemCard } from '@/modules/menu/pages/components/MenuItemCard/MenuItemCard';
 import { getCategoryId } from '@/modules/menu/pages/utils/category-helpers';
 import { MenuModal } from './MenuModal';
@@ -177,7 +178,7 @@ export const MenuManagement: React.FC = () => {
             </select>
           </div>
 
-          <PermissionGuard permission="menu.manageCategories">
+          <PermissionGuard permission="menu.manageCategories" minLevel={RoleLevel.BRANCH_SINGLE}>
             <Button
               variant="outline"
               onClick={() => navigate('/staff/categories')}
@@ -188,7 +189,7 @@ export const MenuManagement: React.FC = () => {
             </Button>
           </PermissionGuard>
 
-          <PermissionGuard permission="menu.create">
+          <PermissionGuard permission="menu.create" minLevel={RoleLevel.BRANCH_SINGLE}>
             <Button
               variant="primary"
               onClick={handleAddMenuItem}
@@ -220,7 +221,7 @@ export const MenuManagement: React.FC = () => {
                 <p className="empty-description">
                   Start by adding items to your menu
                 </p>
-                <PermissionGuard permission="menu.create">
+                <PermissionGuard permission="menu.create" minLevel={RoleLevel.BRANCH_SINGLE}>
                   <Button variant="primary" onClick={handleAddMenuItem}>
                     + Add Menu Item
                   </Button>

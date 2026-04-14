@@ -47,6 +47,7 @@ export interface CreateStaffPayload {
   phone: string;
   password: string;
   staffType: StaffType;
+  roleId?: string;
   allowedBranchIds?: string[];
 }
 
@@ -55,6 +56,7 @@ export interface UpdateStaffPayload {
   email?: string;
   phone?: string;
   staffType?: StaffType;
+  roleId?: string;
   branchId?: string;
   allowedBranchIds?: string[];
   isActive?: boolean;

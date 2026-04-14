@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Category } from '@/shared/types/menu.types';
 import { Button } from '@/shared/components/Button';
 import { PermissionGuard } from '@/shared/components/PermissionGuard';
+import { RoleLevel } from '@/shared/types/role.types';
 import './SortableCategoryItem.css';
 
 interface SortableCategoryItemProps {
@@ -82,7 +83,7 @@ export const SortableCategoryItem: React.FC<SortableCategoryItemProps> = ({ cate
         </div>
 
         <div className="category-item-actions">
-          <PermissionGuard permission="menu.manageCategories">
+          <PermissionGuard permission="menu.manageCategories" minLevel={RoleLevel.BRANCH_SINGLE}>
             <Button variant="outline" onClick={onEdit}>
               Edit
             </Button>
