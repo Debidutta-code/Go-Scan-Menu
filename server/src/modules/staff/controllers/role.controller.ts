@@ -57,4 +57,47 @@ export class RoleController {
       data: role,
     });
   });
+
+  // --- NEW CONTROLLER METHODS FOR STAFF TYPE PERMISSIONS ---
+
+  getPermissionsForStaffType = catchAsync(async (req: Request, res: Response) => {
+    const { restaurantId, staffType } = req.params;
+    const role = await this.roleService.getPermissionsByStaffType(restaurantId, staffType);
+    sendResponse(res, 200, {
+      message: 'Permissions retrieved successfully',
+      data: role,
+    });
+  });
+
+  updatePermissionsForStaffType = catchAsync(async (req: Request, res: Response) => {
+    const { restaurantId, staffType } = req.params;
+    const { permissions } = req.body;
+    const role = await this.roleService.updatePermissionsByStaffType(
+      restaurantId,
+      staffType,
+      permissions
+    );
+    sendResponse(res, 200, {
+      message: 'Permissions updated successfully',
+      data: role,
+    });
+  });
+
+  initializeRestaurantPermissions = catchAsync(async (req: Request, res: Response) => {
+    const { restaurantId } = req.params;
+    await this.roleService.initializeRestaurantRoles(restaurantId);
+    sendResponse(res, 201, {
+      message: 'Restaurant permissions initialized successfully',
+      data: null,
+    });
+  });
+
+  getAllRestaurantStaffTypePermissions = catchAsync(async (req: Request, res: Response) => {
+    const { restaurantId } = req.params;
+    const roles = await this.roleService.getAllRestaurantStaffTypePermissions(restaurantId);
+    sendResponse(res, 200, {
+      message: 'Restaurant staff type permissions retrieved successfully',
+      data: roles,
+    });
+  });
 }

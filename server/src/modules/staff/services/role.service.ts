@@ -346,4 +346,101 @@ export class RoleService {
       customers: { view: true, manage: false },
     };
   }
+
+  // --- NEW METHODS FOR STAFF TYPE PERMISSIONS ---
+
+  /**
+   * Initialize all system roles for a specific restaurant
+   */
+  async initializeRestaurantRoles(restaurantId: string): Promise<void> {
+    const systemRoles = await this.getSystemRoles();
+
+    for (const sysRole of systemRoles) {
+      const exists = await this.roleRepo.findByName(sysRole.name, restaurantId);
+      if (!exists) {
+        const { _id, createdAt, updatedAt, ...roleData } = sysRole.toObject() as any;
+        await this.roleRepo.create({
+          ...roleData,
+          restaurantId: restaurantId as any,
+          isSystemRole: false, // Restaurant-specific roles are not system roles
+        });
+      }
+    }
+  }
+
+  /**
+   * Get permissions for a specific staff type in a restaurant
+   * Falls back to system role if restaurant-specific role doesn't exist
+   */
+  async getPermissionsByStaffType(restaurantId: string, staffType: string): Promise<IRole> {
+    // 1. Try to find restaurant-specific role
+    let role = await this.roleRepo.findByName(staffType, restaurantId);
+
+    // 2. Fallback to system role if not found
+    if (!role) {
+      role = await this.roleRepo.findByName(staffType);
+    }
+
+    if (!role) {
+      throw new AppError(`Role ${staffType} not found`, 404);
+    }
+
+    return role;
+  }
+
+  /**
+   * Update permissions for a specific staff type in a restaurant
+   * Creates restaurant-specific role if it doesn't exist
+   */
+  async updatePermissionsByStaffType(
+    restaurantId: string,
+    staffType: string,
+    permissions: Partial<RolePermissions>
+  ): Promise<IRole> {
+    // 1. Find restaurant-specific role
+    let role = await this.roleRepo.findByName(staffType, restaurantId);
+
+    if (role) {
+      // Update existing restaurant-specific role
+      return (await this.roleRepo.updatePermissions(role._id.toString(), permissions))!;
+    }
+
+    // 2. If not found, create a new one based on the system role template
+    const systemRole = await this.roleRepo.findByName(staffType);
+    if (!systemRole) {
+      throw new AppError(`System role template for ${staffType} not found`, 404);
+    }
+
+    const { _id, createdAt, updatedAt, ...roleData } = systemRole.toObject() as any;
+    const newRole = await this.roleRepo.create({
+      ...roleData,
+      restaurantId: restaurantId as any,
+      permissions: { ...roleData.permissions, ...permissions },
+      isSystemRole: false,
+    });
+
+    return newRole;
+  }
+
+  /**
+   * Get all staff type permissions for a restaurant
+   */
+  async getAllRestaurantStaffTypePermissions(restaurantId: string): Promise<IRole[]> {
+    // Get all roles for this restaurant
+    const restaurantRoles = await this.roleRepo.findAll({ restaurantId });
+
+    // Get all system roles
+    const systemRoles = await this.roleRepo.findSystemRoles();
+
+    // Map system roles and override with restaurant roles if present
+    const roleMap = new Map<string, IRole>();
+
+    // Start with system roles as base
+    systemRoles.forEach(r => roleMap.set(r.name, r));
+
+    // Override with restaurant-specific overrides
+    restaurantRoles.forEach(r => roleMap.set(r.name, r));
+
+    return Array.from(roleMap.values());
+  }
 }

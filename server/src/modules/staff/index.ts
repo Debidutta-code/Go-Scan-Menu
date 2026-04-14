@@ -14,3 +14,4 @@ export * from './staff.middleware';
 
 export { default as staffRoutes } from './staff.routes';
 export { default as roleRoutes } from './role.routes';
+export { default as staffTypePermissionRoutes } from './staff-type-permission.routes';
