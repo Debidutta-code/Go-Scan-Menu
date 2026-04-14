@@ -13,11 +13,7 @@ router.get('/me', AuthMiddleware.authenticate, staffController.getCurrentUser);
 router.put('/profile', AuthMiddleware.authenticate, staffController.updateProfile);
 router.post('/change-password', AuthMiddleware.authenticate, staffController.changePassword);
 
-router.post(
-  '/',
-  AuthMiddleware.authenticate,
-  staffController.createStaff
-);
+router.post('/', AuthMiddleware.authenticate, staffController.createStaff);
 
 router.get('/:id', AuthMiddleware.authenticate, staffController.getStaff);
 
@@ -27,28 +23,12 @@ router.get(
   staffController.getStaffByRestaurant
 );
 
-router.get(
-  '/branch/:branchId',
-  AuthMiddleware.authenticate,
-  staffController.getStaffByBranch
-);
+router.get('/branch/:branchId', AuthMiddleware.authenticate, staffController.getStaffByBranch);
 
-router.put(
-  '/:id',
-  AuthMiddleware.authenticate,
-  staffController.updateStaff
-);
+router.put('/:id', AuthMiddleware.authenticate, staffController.updateStaff);
 
-router.put(
-  '/:id/staff-type',
-  AuthMiddleware.authenticate,
-  staffController.updateStaffRole
-);
+router.put('/:id/staff-type', AuthMiddleware.authenticate, staffController.updateStaffRole);
 
-router.delete(
-  '/:id',
-  AuthMiddleware.authenticate,
-  staffController.deleteStaff
-);
+router.delete('/:id', AuthMiddleware.authenticate, staffController.deleteStaff);
 
 export default router;

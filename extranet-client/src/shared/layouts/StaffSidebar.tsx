@@ -16,6 +16,7 @@ import {
     ShoppingBag
 } from 'lucide-react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
+import { extractId } from '@/shared/utils/id.util';
 import './StaffSidebar.css';
 
 interface StaffSidebarProps {
@@ -114,9 +115,9 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
             label: 'Tables & QR',
             icon: <Armchair size={20} />,
             path: staff?.branchId
-                ? `/staff/tables/${staff.branchId}`
+                ? `/staff/tables/${extractId(staff.branchId)}`
                 : (staff?.allowedBranchIds?.length === 1)
-                    ? `/staff/tables/${staff.allowedBranchIds[0]}`
+                    ? `/staff/tables/${extractId(staff.allowedBranchIds[0])}`
                     : '/staff/tables',
             permission: staff?.permissions?.tables?.view
         },

@@ -18,10 +18,7 @@ export class TaxService {
     this.branchRepo = new BranchRepository();
   }
 
-  async createTax(
-    restaurantId: string,
-    data: CreateTaxDTO
-  ) {
+  async createTax(restaurantId: string, data: CreateTaxDTO) {
     // Verify restaurant exists
     const restaurant = await this.restaurantRepo.findById(restaurantId);
     if (!restaurant || !restaurant.isActive) {
@@ -57,11 +54,17 @@ export class TaxService {
       applicableOn: data.applicableOn,
       scope: data.scope,
       category: data.category,
-      conditions: data.conditions ? {
-        ...data.conditions,
-        specificItems: data.conditions.specificItems?.map((id: string) => new Types.ObjectId(id)),
-        specificCategories: data.conditions.specificCategories?.map((id: string) => new Types.ObjectId(id)),
-      } : undefined,
+      conditions: data.conditions
+        ? {
+            ...data.conditions,
+            specificItems: data.conditions.specificItems?.map(
+              (id: string) => new Types.ObjectId(id)
+            ),
+            specificCategories: data.conditions.specificCategories?.map(
+              (id: string) => new Types.ObjectId(id)
+            ),
+          }
+        : undefined,
       isPartOfGroup: data.isPartOfGroup || false,
       groupName: data.groupName,
       isActive: true,
@@ -163,10 +166,14 @@ export class TaxService {
     if (data.conditions) {
       updateData.conditions = { ...data.conditions };
       if (data.conditions.specificItems) {
-        updateData.conditions.specificItems = data.conditions.specificItems.map((id: string) => new Types.ObjectId(id));
+        updateData.conditions.specificItems = data.conditions.specificItems.map(
+          (id: string) => new Types.ObjectId(id)
+        );
       }
       if (data.conditions.specificCategories) {
-        updateData.conditions.specificCategories = data.conditions.specificCategories.map((id: string) => new Types.ObjectId(id));
+        updateData.conditions.specificCategories = data.conditions.specificCategories.map(
+          (id: string) => new Types.ObjectId(id)
+        );
       }
     }
 

@@ -21,8 +21,11 @@ export class ParamsUtil {
 
     if (typeof idOrObject === 'object') {
       // Handle Mongoose/BSON ObjectId
-      if (idOrObject.toString && typeof idOrObject.toString === 'function' &&
-          (idOrObject._bsontype === 'ObjectID' || idOrObject.constructor.name === 'ObjectId')) {
+      if (
+        idOrObject.toString &&
+        typeof idOrObject.toString === 'function' &&
+        (idOrObject._bsontype === 'ObjectID' || idOrObject.constructor.name === 'ObjectId')
+      ) {
         return idOrObject.toString();
       }
 
