@@ -6,6 +6,8 @@ import { TableService } from '@/modules/table/services/table.service';
 import { BranchService } from '@/modules/branch/services/branch.service';
 import { Table, Branch } from '@/shared/types/table.types';
 import { Button } from '@/shared/components/Button';
+import { PermissionGuard } from '@/shared/components/PermissionGuard';
+import { RoleLevel } from '@/shared/types/role.types';
 import { QRCodeModal } from '@/modules/table/components/QRCodeModal';
 import { CreateTableModal } from '@/modules/table/components/CreateTableModal';
 import { BulkCreateTableModal } from '@/modules/table/components/BulkCreateTableModal';
@@ -254,34 +256,35 @@ export const TableManagement: React.FC = () => {
             </select>
           </div>
 
-          {canManageTables() && (
-            <>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/staff/tables/${branchId}/qr-settings`)}
-                data-testid="manage-qr-button"
-                size="sm"
-              >
-                🎨 QR Codes
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setCreateModalOpen(true)}
-                data-testid="add-table-button"
-                size="sm"
-              >
-                + Add Table
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => setBulkCreateModalOpen(true)}
-                data-testid="bulk-add-button"
-                size="sm"
-              >
-                + Bulk Add
-              </Button>
-            </>
-          )}
+          <PermissionGuard permission="tables.manageQR" minLevel={RoleLevel.RESTAURANT}>
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/staff/tables/${branchId}/qr-settings`)}
+              data-testid="manage-qr-button"
+              size="sm"
+            >
+              🎨 QR Codes
+            </Button>
+          </PermissionGuard>
+
+          <PermissionGuard permission="tables.create" minLevel={RoleLevel.BRANCH_SINGLE}>
+            <Button
+              variant="outline"
+              onClick={() => setCreateModalOpen(true)}
+              data-testid="add-table-button"
+              size="sm"
+            >
+              + Add Table
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => setBulkCreateModalOpen(true)}
+              data-testid="bulk-add-button"
+              size="sm"
+            >
+              + Bulk Add
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -308,11 +311,11 @@ export const TableManagement: React.FC = () => {
                     ? 'Start by adding your first table'
                     : 'No tables available in this branch'}
                 </p>
-                {canManageTables() && (
+                <PermissionGuard permission="tables.create" minLevel={RoleLevel.BRANCH_SINGLE}>
                   <Button variant="primary" onClick={() => setCreateModalOpen(true)}>
                     + Add Your First Table
                   </Button>
-                )}
+                </PermissionGuard>
               </div>
             ) : (
               <div className="tables-by-location">
@@ -383,28 +386,32 @@ export const TableManagement: React.FC = () => {
               </div>
             </div>
 
-            <select
-              className="hover-card-status-select"
-              value={hoveredTable.status}
-              onChange={(e) =>
-                handleUpdateStatus(hoveredTable._id, e.target.value as Table['status'])
-              }
-            >
-              <option value="available">Set Available</option>
-              <option value="occupied">Set Occupied</option>
-              <option value="reserved">Set Reserved</option>
-              <option value="maintenance">Set Maintenance</option>
-            </select>
+            <PermissionGuard permission="tables.update" minLevel={RoleLevel.OPERATIONAL}>
+              <select
+                className="hover-card-status-select"
+                value={hoveredTable.status}
+                onChange={(e) =>
+                  handleUpdateStatus(hoveredTable._id, e.target.value as Table['status'])
+                }
+              >
+                <option value="available">Set Available</option>
+                <option value="occupied">Set Occupied</option>
+                <option value="reserved">Set Reserved</option>
+                <option value="maintenance">Set Maintenance</option>
+              </select>
+            </PermissionGuard>
 
             <div className="hover-card-actions">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleShowQR(hoveredTable)}
-              >
-                QR
-              </Button>
-              {canManageTables() && (
+              <PermissionGuard permission="tables.view">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleShowQR(hoveredTable)}
+                >
+                  QR
+                </Button>
+              </PermissionGuard>
+              <PermissionGuard permission="tables.update" minLevel={RoleLevel.BRANCH_SINGLE}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -412,8 +419,8 @@ export const TableManagement: React.FC = () => {
                 >
                   Edit
                 </Button>
-              )}
-              {canDeleteTables() && (
+              </PermissionGuard>
+              <PermissionGuard permission="tables.delete" minLevel={RoleLevel.BRANCH_SINGLE}>
                 <Button
                   variant="danger"
                   size="sm"
@@ -421,7 +428,7 @@ export const TableManagement: React.FC = () => {
                 >
                   Del
                 </Button>
-              )}
+              </PermissionGuard>
             </div>
           </div>
         </div>

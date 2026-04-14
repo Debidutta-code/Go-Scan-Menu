@@ -7,6 +7,8 @@ import { QRConfigService, QRConfig } from '@/modules/table/services/qrconfig.ser
 import { BranchService } from '@/modules/branch/services/branch.service';
 import { Branch } from '@/shared/types/table.types';
 import { Button } from '@/shared/components/Button';
+import { PermissionGuard } from '@/shared/components/PermissionGuard';
+import { RoleLevel } from '@/shared/types/role.types';
 import { QR_STYLES, getQRStylesArray } from '@/shared/config/qrStyles.config';
 import {
   getTemplate,
@@ -276,18 +278,20 @@ export const QRManagement: React.FC = () => {
         </h1>
 
         <div className="qr-toolbar-actions">
-          <Button variant="outline" onClick={handleResetConfig} size="sm">
-            Reset
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleSaveConfig}
-            disabled={saving}
-            data-testid="save-qr-config-btn"
-            size="sm"
-          >
-            {saving ? 'Saving...' : '💾 Save'}
-          </Button>
+          <PermissionGuard permission="tables.manageQR" minLevel={RoleLevel.RESTAURANT}>
+            <Button variant="outline" onClick={handleResetConfig} size="sm">
+              Reset
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSaveConfig}
+              disabled={saving}
+              data-testid="save-qr-config-btn"
+              size="sm"
+            >
+              {saving ? 'Saving...' : '💾 Save'}
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 
