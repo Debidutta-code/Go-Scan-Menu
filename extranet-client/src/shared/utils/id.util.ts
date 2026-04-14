@@ -9,6 +9,7 @@
 export const extractId = (idOrObject: any): string => {
   if (!idOrObject) return '';
   if (typeof idOrObject === 'string') return idOrObject;
+  console.log("idOrObject", idOrObject);
 
   if (typeof idOrObject === 'object') {
     // If it's already an ID string-like object (e.g. BSON ObjectId in some contexts)
