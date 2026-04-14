@@ -11,7 +11,7 @@ export const extractId = (idOrObject: any): string => {
   if (!idOrObject) return '';
 
   if (typeof idOrObject === 'string') {
-    return idOrObject === '[object Object]' ? '' : idOrObject;
+    return (idOrObject === '[object Object]' || idOrObject === '[object%20Object]') ? '' : idOrObject;
   }
 
   if (typeof idOrObject === 'object') {
@@ -19,7 +19,7 @@ export const extractId = (idOrObject: any): string => {
     const id = idOrObject._id || idOrObject.id;
     if (id) {
       if (typeof id === 'string') {
-        return id === '[object Object]' ? '' : id;
+        return (id === '[object Object]' || id === '[object%20Object]') ? '' : id;
       }
       return extractId(id); // Recurse if the _id field is itself an object
     }
@@ -29,7 +29,7 @@ export const extractId = (idOrObject: any): string => {
       try {
         const str = idOrObject.toString();
         // Only return if it's a meaningful ID string and not the default object representation
-        if (str && typeof str === 'string' && str !== '[object Object]') {
+        if (str && typeof str === 'string' && str !== '[object Object]' && str !== '[object%20Object]') {
           return str;
         }
       } catch (e) {

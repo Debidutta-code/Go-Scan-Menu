@@ -54,16 +54,20 @@ export const BranchSelection: React.FC = () => {
         if (filteredBranches.length === 1) {
           // Auto-redirect to the single branch without showing selection UI
           const bId = extractId(filteredBranches[0]);
-          navigate(`/staff/tables/${bId}`, { replace: true });
-          return;
+          if (bId) {
+            navigate(`/staff/tables/${bId}`, { replace: true });
+            return;
+          }
         }
 
         // If single restaurant type but somehow has multiple branches, still redirect to first active branch
         if (staff.restaurant?.type === 'single' && filteredBranches.length > 0) {
           const activeBranch = filteredBranches.find((b) => b.isActive) || filteredBranches[0];
           const bId = extractId(activeBranch);
-          navigate(`/staff/tables/${bId}`, { replace: true });
-          return;
+          if (bId) {
+            navigate(`/staff/tables/${bId}`, { replace: true });
+            return;
+          }
         }
 
         // Only set branches state if we're showing the selection UI (multiple branches for chain)

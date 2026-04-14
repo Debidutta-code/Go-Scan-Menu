@@ -1,10 +1,19 @@
 // Utility to safely extract string params from Express 5+ where params can be string | string[]
 export class ParamsUtil {
   static getString(param: string | string[] | undefined): string {
+    let value = '';
     if (Array.isArray(param)) {
-      return param[0] || '';
+      value = param[0] || '';
+    } else {
+      value = param || '';
     }
-    return param || '';
+
+    // Filter out malformed "[object Object]" strings from frontend bugs
+    if (value === '[object Object]' || value === '[object%20Object]') {
+      return '';
+    }
+
+    return value;
   }
 
   /**
@@ -17,7 +26,13 @@ export class ParamsUtil {
    */
   static extractId(idOrObject: any): string {
     if (!idOrObject) return '';
-    if (typeof idOrObject === 'string') return idOrObject;
+
+    if (typeof idOrObject === 'string') {
+      if (idOrObject === '[object Object]' || idOrObject === '[object%20Object]') {
+        return '';
+      }
+      return idOrObject;
+    }
 
     if (typeof idOrObject === 'object') {
       // Handle Mongoose/BSON ObjectId
@@ -26,12 +41,21 @@ export class ParamsUtil {
         typeof idOrObject.toString === 'function' &&
         (idOrObject._bsontype === 'ObjectID' || idOrObject.constructor.name === 'ObjectId')
       ) {
-        return idOrObject.toString();
+        const str = idOrObject.toString();
+        if (str === '[object Object]' || str === '[object%20Object]') {
+          return '';
+        }
+        return str;
       }
 
       const id = idOrObject._id || idOrObject.id;
       if (id) {
-        if (typeof id === 'string') return id;
+        if (typeof id === 'string') {
+          if (id === '[object Object]' || id === '[object%20Object]') {
+            return '';
+          }
+          return id;
+        }
         return this.extractId(id); // Recurse if the _id field is itself an object
       }
     }
