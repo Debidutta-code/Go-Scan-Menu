@@ -36,13 +36,19 @@ export class StaffService {
 
     // Fallback for legacy data (handle staffType if roleId/permissions missing)
     if (!role || !permissions) {
-      console.log('⚠️ Staff role/permissions not found, attempting fallback for legacy data');
+      console.log(
+        `⚠️ Staff role/permissions not found for ${staff.email}, attempting fallback for legacy data`
+      );
       const RoleModel = staff.model('Role');
-      const legacyRoleName = (staff as any).staffType || StaffRole.WAITER;
-      const foundRole = await RoleModel.findOne({
-        name: legacyRoleName,
-        isSystemRole: true,
-      });
+      const legacyRoleName = (staff as any).staffType;
+
+      let foundRole = null;
+      if (legacyRoleName) {
+        foundRole = await RoleModel.findOne({
+          name: legacyRoleName,
+          isSystemRole: true,
+        });
+      }
 
       if (foundRole) {
         role = foundRole as any;
