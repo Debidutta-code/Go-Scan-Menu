@@ -1,22 +1,14 @@
 // src/pages/staff/AddStaff.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { StaffService } from '@/modules/staff/services/staff.service';
+import { StaffPermissionsService } from '@/modules/staff/services/staffPermissions.service';
 import { InputField } from '@/shared/components/InputField';
 import { Button } from '@/shared/components/Button';
-import { StaffType } from '@/shared/types/staffPermissions.types';
+import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
 import { ArrowLeft } from 'lucide-react';
 import './AddStaff.css';
-
-const STAFF_TYPE_OPTIONS = [
-  { value: StaffType.OWNER, label: 'Owner' },
-  { value: StaffType.BRANCH_MANAGER, label: 'Branch Manager' },
-  { value: StaffType.MANAGER, label: 'Manager' },
-  { value: StaffType.WAITER, label: 'Waiter' },
-  { value: StaffType.KITCHEN_STAFF, label: 'Kitchen Staff' },
-  { value: StaffType.CASHIER, label: 'Cashier' },
-];
 
 export const AddStaff: React.FC = () => {
   const navigate = useNavigate();
@@ -28,13 +20,66 @@ export const AddStaff: React.FC = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    staffType: StaffType.WAITER,
+    staffType: '' as any,
     branchId: '',
   });
 
+  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
   const [serverError, setServerError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  const fetchRoles = async () => {
+    if (!token || !currentStaff?.restaurantId) return;
+    try {
+      setFetchLoading(true);
+      const response = await StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId);
+      if (response.data) {
+        setAvailableRoles(response.data);
+      }
+    } catch (err: any) {
+      setServerError(err.message || 'Failed to fetch roles');
+    } finally {
+      setFetchLoading(false);
+    }
+  };
+
+  // Get current user's role level
+  const currentUserLevel = useMemo(() => {
+    if (!currentStaff) return 99;
+    if (currentStaff.roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
+
+    const currentRole = availableRoles.find(r => r.name === currentStaff.roleName);
+    if (currentRole) return currentRole.level;
+
+    const roleLevelMap: Record<string, number> = {
+        [StaffRole.SUPER_ADMIN]: 1,
+        [StaffRole.OWNER]: 2,
+        [StaffRole.BRANCH_MANAGER]: 3,
+        [StaffRole.MANAGER]: 4,
+        [StaffRole.WAITER]: 5,
+        [StaffRole.KITCHEN_STAFF]: 5,
+        [StaffRole.CASHIER]: 5,
+    };
+    return roleLevelMap[currentStaff.roleName as string] || 99;
+  }, [currentStaff, availableRoles]);
+
+  // Filter roles based on hierarchy
+  const manageableRoles = useMemo(() => {
+    if (currentStaff?.roleName === StaffRole.SUPER_ADMIN) return availableRoles;
+    return availableRoles.filter(role => role.level > currentUserLevel);
+  }, [availableRoles, currentUserLevel, currentStaff]);
+
+  useEffect(() => {
+    if (manageableRoles.length > 0 && !formData.staffType) {
+      setFormData(prev => ({ ...prev, staffType: manageableRoles[0].name }));
+    }
+  }, [manageableRoles]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -63,6 +108,10 @@ export const AddStaff: React.FC = () => {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
+    if (!formData.staffType) {
+      newErrors.staffType = 'Role is required';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -75,6 +124,10 @@ export const AddStaff: React.FC = () => {
 
     try {
       setLoading(true);
+
+      // Get the full role object to find its _id
+      const selectedRole = availableRoles.find(r => r.name === formData.staffType);
+
       await StaffService.createStaff(token, {
         restaurantId: currentStaff.restaurantId,
         name: formData.name.trim(),
@@ -82,6 +135,7 @@ export const AddStaff: React.FC = () => {
         phone: formData.phone.trim(),
         password: formData.password,
         staffType: formData.staffType,
+        roleId: selectedRole?._id,
         branchId: formData.branchId || undefined,
       });
 
@@ -135,7 +189,7 @@ export const AddStaff: React.FC = () => {
               value={formData.name}
               error={errors.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              disabled={loading}
+              disabled={loading || fetchLoading}
               data-testid="name-input"
             />
 
@@ -146,7 +200,7 @@ export const AddStaff: React.FC = () => {
                 value={formData.email}
                 error={errors.email}
                 onChange={(e) => handleChange('email', e.target.value)}
-                disabled={loading}
+                disabled={loading || fetchLoading}
                 data-testid="email-input"
               />
 
@@ -156,7 +210,7 @@ export const AddStaff: React.FC = () => {
                 value={formData.phone}
                 error={errors.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
-                disabled={loading}
+                disabled={loading || fetchLoading}
                 data-testid="phone-input"
               />
             </div>
@@ -172,7 +226,7 @@ export const AddStaff: React.FC = () => {
                 value={formData.password}
                 error={errors.password}
                 onChange={(e) => handleChange('password', e.target.value)}
-                disabled={loading}
+                disabled={loading || fetchLoading}
                 data-testid="password-input"
               />
 
@@ -182,7 +236,7 @@ export const AddStaff: React.FC = () => {
                 value={formData.confirmPassword}
                 error={errors.confirmPassword}
                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                disabled={loading}
+                disabled={loading || fetchLoading}
                 data-testid="confirm-password-input"
               />
             </div>
@@ -199,16 +253,23 @@ export const AddStaff: React.FC = () => {
                 id="staffType"
                 value={formData.staffType}
                 onChange={(e) => handleChange('staffType', e.target.value)}
-                className="form-select"
-                disabled={loading}
+                className={`form-select ${errors.staffType ? 'error' : ''}`}
+                disabled={loading || fetchLoading || manageableRoles.length === 0}
                 data-testid="staff-type-select"
               >
-                {STAFF_TYPE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
+                {fetchLoading ? (
+                  <option>Loading roles...</option>
+                ) : manageableRoles.length === 0 ? (
+                  <option>No manageable roles</option>
+                ) : (
+                  manageableRoles.map((role) => (
+                    <option key={role.name} value={role.name}>
+                      {role.displayName}
+                    </option>
+                  ))
+                )}
               </select>
+              {errors.staffType && <p className="error-text">{errors.staffType}</p>}
               <p className="form-helper-text">
                 Role permissions can be configured in the Permissions tab
               </p>
@@ -229,7 +290,7 @@ export const AddStaff: React.FC = () => {
               type="submit"
               variant="primary"
               loading={loading}
-              disabled={loading}
+              disabled={loading || fetchLoading || manageableRoles.length === 0}
               data-testid="submit-button"
             >
               Create Staff Member

@@ -1,30 +1,23 @@
 // src/pages/staff/StaffList.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { StaffService } from '@/modules/staff/services/staff.service';
+import { StaffPermissionsService } from '@/modules/staff/services/staffPermissions.service';
 import { Staff } from '@/shared/types/staff.types';
-import { StaffType } from '@/shared/types/staffPermissions.types';
+import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
 import { Button } from '@/shared/components/Button';
 import { PermissionsModal } from '@/modules/staff/components/PermissionsModal';
-import { Plus, Edit, Trash2, Search, Shield } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Shield, ShieldAlert } from 'lucide-react';
+import { toast } from 'react-toastify';
 import './StaffList.css';
-
-const STAFF_TYPE_LABELS: Record<StaffType, string> = {
-    [StaffType.SUPER_ADMIN]: 'Super Admin',
-    [StaffType.OWNER]: 'Owner',
-    [StaffType.BRANCH_MANAGER]: 'Branch Manager',
-    [StaffType.MANAGER]: 'Manager',
-    [StaffType.WAITER]: 'Waiter',
-    [StaffType.KITCHEN_STAFF]: 'Kitchen Staff',
-    [StaffType.CASHIER]: 'Cashier',
-};
 
 export const StaffList: React.FC = () => {
     const navigate = useNavigate();
     const { token, staff: currentStaff } = useStaffAuth();
 
     const [staffList, setStaffList] = useState<Staff[]>([]);
+    const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterRole, setFilterRole] = useState<string>('all');
@@ -32,10 +25,11 @@ export const StaffList: React.FC = () => {
 
     // Permissions modal state
     const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
-    const [selectedStaffType, setSelectedStaffType] = useState<StaffType | null>(null);
+    const [selectedStaffType, setSelectedStaffType] = useState<StaffRole | null>(null);
 
     useEffect(() => {
         fetchStaff();
+        fetchRoles();
     }, []);
 
     const fetchStaff = async () => {
@@ -65,26 +59,86 @@ export const StaffList: React.FC = () => {
         }
     };
 
-    const handleDelete = async (staffId: string) => {
-        if (!token) return;
-        if (!confirm('Are you sure you want to delete this staff member?')) return;
-
+    const fetchRoles = async () => {
+        if (!token || !currentStaff?.restaurantId) return;
         try {
-            await StaffService.deleteStaff(token, staffId);
-            fetchStaff();
+            const response = await StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId);
+            if (response.data) {
+                setAvailableRoles(response.data);
+            }
         } catch (err: any) {
-            alert(err.message || 'Failed to delete staff');
+            console.error('Failed to fetch roles', err);
         }
     };
 
-    const handleManagePermissions = (staffType: StaffType) => {
+    // Get current user's role level
+    const currentUserLevel = useMemo(() => {
+        if (!currentStaff) return 99;
+        if (currentStaff.roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
+
+        const currentRole = availableRoles.find(r => r.name === currentStaff.roleName);
+        if (currentRole) return currentRole.level;
+
+        const roleLevelMap: Record<string, number> = {
+            [StaffRole.SUPER_ADMIN]: 1,
+            [StaffRole.OWNER]: 2,
+            [StaffRole.BRANCH_MANAGER]: 3,
+            [StaffRole.MANAGER]: 4,
+            [StaffRole.WAITER]: 5,
+            [StaffRole.KITCHEN_STAFF]: 5,
+            [StaffRole.CASHIER]: 5,
+        };
+        return roleLevelMap[currentStaff.roleName as string] || 99;
+    }, [currentStaff, availableRoles]);
+
+    // Check if current user can manage a specific staff member based on hierarchy
+    const canManageStaff = (staffMember: Staff) => {
+        if (currentStaff?.roleName === StaffRole.SUPER_ADMIN) return true;
+
+        const targetRole = availableRoles.find(r => r.name === staffMember.roleName);
+        const targetLevel = targetRole ? targetRole.level : 99;
+
+        // Numerically greater level means lower rank
+        return targetLevel > currentUserLevel;
+    };
+
+    const handleDelete = async (staffMember: Staff) => {
+        if (!token) return;
+
+        if (!canManageStaff(staffMember)) {
+            toast.error('Access denied - This is a top level role, ask for permission.', {
+                icon: <ShieldAlert size={20} />
+            });
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to delete ${staffMember.name}?`)) return;
+
+        try {
+            await StaffService.deleteStaff(token, staffMember._id);
+            toast.success('Staff member deleted successfully');
+            fetchStaff();
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to delete staff');
+        }
+    };
+
+    const handleManagePermissions = (staffType: StaffRole) => {
+        // Find the role level for this staff type
+        const targetRole = availableRoles.find(r => r.name === staffType);
+        if (currentStaff?.roleName !== StaffRole.SUPER_ADMIN && targetRole && targetRole.level <= currentUserLevel) {
+            toast.error('Access denied - This is a top level role, ask for permission.', {
+                icon: <ShieldAlert size={20} />
+            });
+            return;
+        }
+
         setSelectedStaffType(staffType);
         setIsPermissionsModalOpen(true);
     };
 
     const handlePermissionsSaved = () => {
-        // Optionally refetch staff or show success message
-        alert('Permissions updated successfully!');
+        toast.success('Permissions updated successfully!');
     };
 
     const filteredStaff = staffList.filter((staff) => {
@@ -93,7 +147,7 @@ export const StaffList: React.FC = () => {
             staff.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
             staff.phone.includes(searchQuery);
 
-        const matchesRole = filterRole === 'all' || staff.staffType === filterRole;
+        const matchesRole = filterRole === 'all' || staff.staffType === filterRole || staff.roleName === filterRole;
 
         return matchesSearch && matchesRole;
     });
@@ -149,8 +203,8 @@ export const StaffList: React.FC = () => {
                     data-testid="role-filter"
                 >
                     <option value="all">All Roles</option>
-                    {Object.entries(STAFF_TYPE_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
+                    {availableRoles.map(role => (
+                        <option key={role.name} value={role.name}>{role.displayName}</option>
                     ))}
                 </select>
             </div>
@@ -176,49 +230,60 @@ export const StaffList: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredStaff.map((staff) => (
-                                <tr key={staff._id} data-testid={`staff-row-${staff._id}`}>
-                                    <td className="staff-name">{staff.name}</td>
-                                    <td className="staff-email">{staff.email}</td>
-                                    <td className="staff-phone">{staff.phone}</td>
-                                    <td>
-                                        <span className="role-badge" data-testid={`role-badge-${staff.staffType}`}>
-                                            {STAFF_TYPE_LABELS[staff.staffType]}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className={`status-badge ${staff.isActive ? 'active' : 'inactive'}`} data-testid={`status-${staff._id}`}>
-                                            {staff.isActive ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </td>
-                                    <td className="action-buttons">
-                                        <button
-                                            className="icon-button permissions"
-                                            onClick={() => handleManagePermissions(staff.staffType)}
-                                            title="Manage Permissions"
-                                            data-testid={`permissions-button-${staff._id}`}
-                                        >
-                                            <Shield size={16} />
-                                        </button>
-                                        <button
-                                            className="icon-button edit"
-                                            onClick={() => navigate(`/staff/team/edit/${staff._id}`)}
-                                            title="Edit"
-                                            data-testid={`edit-button-${staff._id}`}
-                                        >
-                                            <Edit size={16} />
-                                        </button>
-                                        <button
-                                            className="icon-button delete"
-                                            onClick={() => handleDelete(staff._id)}
-                                            title="Delete"
-                                            data-testid={`delete-button-${staff._id}`}
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                            {filteredStaff.map((staff) => {
+                                const manageable = canManageStaff(staff);
+                                return (
+                                    <tr key={staff._id} data-testid={`staff-row-${staff._id}`} className={!manageable ? 'row-readonly' : ''}>
+                                        <td className="staff-name">{staff.name}</td>
+                                        <td className="staff-email">{staff.email}</td>
+                                        <td className="staff-phone">{staff.phone}</td>
+                                        <td>
+                                            <span className="role-badge" data-testid={`role-badge-${staff.staffType}`}>
+                                                {availableRoles.find(r => r.name === (staff.roleName || staff.staffType))?.displayName || staff.roleName || staff.staffType}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span className={`status-badge ${staff.isActive ? 'active' : 'inactive'}`} data-testid={`status-${staff._id}`}>
+                                                {staff.isActive ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </td>
+                                        <td className="action-buttons">
+                                            {manageable ? (
+                                                <>
+                                                    <button
+                                                        className="icon-button permissions"
+                                                        onClick={() => handleManagePermissions((staff.roleName || staff.staffType) as StaffRole)}
+                                                        title="Manage Permissions"
+                                                        data-testid={`permissions-button-${staff._id}`}
+                                                    >
+                                                        <Shield size={16} />
+                                                    </button>
+                                                    <button
+                                                        className="icon-button edit"
+                                                        onClick={() => navigate(`/staff/team/edit/${staff._id}`)}
+                                                        title="Edit"
+                                                        data-testid={`edit-button-${staff._id}`}
+                                                    >
+                                                        <Edit size={16} />
+                                                    </button>
+                                                    <button
+                                                        className="icon-button delete"
+                                                        onClick={() => handleDelete(staff)}
+                                                        title="Delete"
+                                                        data-testid={`delete-button-${staff._id}`}
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <span className="readonly-badge" title="Insufficient hierarchy level to manage this staff member">
+                                                    <Shield size={14} /> Read-only
+                                                </span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -234,7 +299,7 @@ export const StaffList: React.FC = () => {
                     isOpen={isPermissionsModalOpen}
                     onClose={() => setIsPermissionsModalOpen(false)}
                     restaurantId={currentStaff.restaurantId}
-                    staffType={selectedStaffType}
+                    staffType={selectedStaffType as any}
                     token={token || ''}
                     onSave={handlePermissionsSaved}
                 />

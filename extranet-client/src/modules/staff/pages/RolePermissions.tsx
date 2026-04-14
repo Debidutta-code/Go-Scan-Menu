@@ -1,20 +1,13 @@
 // src/pages/staff/RolePermissions.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { StaffPermissionsService } from '@/modules/staff/services/staffPermissions.service';
 import { Button } from '@/shared/components/Button';
-import { StaffType, IPermissions } from '@/shared/types/staffPermissions.types';
-import { Save, AlertCircle } from 'lucide-react';
+import { IPermissions } from '@/shared/types/staffPermissions.types';
+import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
+import { Save, AlertCircle, ShieldAlert } from 'lucide-react';
+import { toast } from 'react-toastify';
 import './RolePermissions.css';
-
-const STAFF_TYPE_OPTIONS = [
-    { value: StaffType.OWNER, label: 'Owner' },
-    { value: StaffType.BRANCH_MANAGER, label: 'Branch Manager' },
-    { value: StaffType.MANAGER, label: 'Manager' },
-    { value: StaffType.WAITER, label: 'Waiter' },
-    { value: StaffType.KITCHEN_STAFF, label: 'Kitchen Staff' },
-    { value: StaffType.CASHIER, label: 'Cashier' },
-];
 
 const PERMISSION_CATEGORIES = [
     {
@@ -112,19 +105,78 @@ const DEFAULT_PERMISSIONS: IPermissions = {
 export const RolePermissions: React.FC = () => {
     const { token, staff: currentStaff } = useStaffAuth();
 
-    const [selectedRole, setSelectedRole] = useState<StaffType>(StaffType.WAITER);
+    const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
+    const [selectedRoleName, setSelectedRoleName] = useState<StaffRole | ''>('');
     const [permissions, setPermissions] = useState<IPermissions>(DEFAULT_PERMISSIONS);
     const [loading, setLoading] = useState(false);
     const [fetchLoading, setFetchLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+    // Get current user's role level
+    const currentUserLevel = useMemo(() => {
+        if (!currentStaff) return 99;
+        if (currentStaff.roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
+
+        // Find current staff's role level from available roles or use a default mapping
+        const currentRole = availableRoles.find(r => r.name === currentStaff.roleName);
+        if (currentRole) return currentRole.level;
+
+        // Fallback mapping if roles haven't loaded yet
+        const roleLevelMap: Record<string, number> = {
+            [StaffRole.SUPER_ADMIN]: 1,
+            [StaffRole.OWNER]: 2,
+            [StaffRole.BRANCH_MANAGER]: 3,
+            [StaffRole.MANAGER]: 4,
+            [StaffRole.WAITER]: 5,
+            [StaffRole.KITCHEN_STAFF]: 5,
+            [StaffRole.CASHIER]: 5,
+        };
+        return roleLevelMap[currentStaff.roleName as string] || 99;
+    }, [currentStaff, availableRoles]);
+
+    // Filter roles based on hierarchy - only show roles with LOWER level (numerically HIGHER)
+    const manageableRoles = useMemo(() => {
+        if (currentStaff?.roleName === StaffRole.SUPER_ADMIN) return availableRoles;
+        return availableRoles.filter(role => role.level > currentUserLevel);
+    }, [availableRoles, currentUserLevel, currentStaff]);
+
     useEffect(() => {
-        fetchPermissions();
-    }, [selectedRole]);
+        fetchRoles();
+    }, []);
+
+    useEffect(() => {
+        if (selectedRoleName) {
+            fetchPermissions();
+        }
+    }, [selectedRoleName]);
+
+    const fetchRoles = async () => {
+        if (!token || !currentStaff?.restaurantId) return;
+        try {
+            setFetchLoading(true);
+            const response = await StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId);
+            if (response.data) {
+                setAvailableRoles(response.data);
+
+                // Set initial selected role to the first manageable one
+                const filtered = currentStaff?.roleName === StaffRole.SUPER_ADMIN
+                    ? response.data
+                    : response.data.filter(role => role.level > (currentStaff.roleName === StaffRole.SUPER_ADMIN ? 0 : currentUserLevel));
+
+                if (filtered.length > 0) {
+                    setSelectedRoleName(filtered[0].name);
+                }
+            }
+        } catch (err: any) {
+            setError(err.message || 'Failed to fetch roles');
+        } finally {
+            setFetchLoading(false);
+        }
+    };
 
     const fetchPermissions = async () => {
-        if (!token || !currentStaff?.restaurantId) return;
+        if (!token || !currentStaff?.restaurantId || !selectedRoleName) return;
 
         try {
             setFetchLoading(true);
@@ -132,17 +184,15 @@ export const RolePermissions: React.FC = () => {
             const response = await StaffPermissionsService.getPermissionsForStaffType(
                 token,
                 currentStaff.restaurantId,
-                selectedRole
+                selectedRoleName as any
             );
             if (response.data && response.data.permissions) {
-
                 setPermissions(response.data.permissions);
             } else {
                 setPermissions(DEFAULT_PERMISSIONS);
             }
         } catch (err: any) {
             if (err.message.includes('not found')) {
-                // No permissions set yet, use defaults
                 setPermissions(DEFAULT_PERMISSIONS);
             } else {
                 setError(err.message || 'Failed to fetch permissions');
@@ -180,7 +230,16 @@ export const RolePermissions: React.FC = () => {
     };
 
     const handleSave = async () => {
-        if (!token || !currentStaff?.restaurantId) return;
+        if (!token || !currentStaff?.restaurantId || !selectedRoleName) return;
+
+        // Final hierarchy check before saving
+        const targetRole = availableRoles.find(r => r.name === selectedRoleName);
+        if (currentStaff.roleName !== StaffRole.SUPER_ADMIN && targetRole && targetRole.level <= currentUserLevel) {
+            toast.error('Access denied - This is a top level role, ask for permission.', {
+                icon: <ShieldAlert size={20} />
+            });
+            return;
+        }
 
         try {
             setLoading(true);
@@ -190,13 +249,16 @@ export const RolePermissions: React.FC = () => {
             await StaffPermissionsService.updatePermissionsForStaffType(
                 token,
                 currentStaff.restaurantId,
-                selectedRole,
+                selectedRoleName as any,
                 { permissions }
             );
 
-            setSuccessMessage(`Permissions updated successfully for ${STAFF_TYPE_OPTIONS.find(o => o.value === selectedRole)?.label}!`);
+            const roleLabel = manageableRoles.find(r => r.name === selectedRoleName)?.displayName || selectedRoleName;
+            setSuccessMessage(`Permissions updated successfully for ${roleLabel}!`);
+            toast.success(`Permissions updated for ${roleLabel}`);
         } catch (err: any) {
             setError(err.message || 'Failed to update permissions');
+            toast.error(err.message || 'Failed to update permissions');
         } finally {
             setLoading(false);
         }
@@ -215,15 +277,18 @@ export const RolePermissions: React.FC = () => {
                         </label>
                         <select
                             id="roleSelect"
-                            value={selectedRole}
-                            onChange={(e) => setSelectedRole(e.target.value as StaffType)}
+                            value={selectedRoleName}
+                            onChange={(e) => setSelectedRoleName(e.target.value as StaffRole)}
                             className="role-selector"
-                            disabled={loading || fetchLoading}
+                            disabled={loading || fetchLoading || manageableRoles.length === 0}
                             data-testid="role-selector"
                         >
-                            {STAFF_TYPE_OPTIONS.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
+                            {manageableRoles.length === 0 && !fetchLoading && (
+                                <option value="">No manageable roles</option>
+                            )}
+                            {manageableRoles.map(role => (
+                                <option key={role.name} value={role.name}>
+                                    {role.displayName}
                                 </option>
                             ))}
                         </select>
@@ -233,7 +298,7 @@ export const RolePermissions: React.FC = () => {
                         variant="primary"
                         onClick={handleSave}
                         loading={loading}
-                        disabled={loading || fetchLoading}
+                        disabled={loading || fetchLoading || manageableRoles.length === 0}
                         size="sm"
                         className="save-btn"
                         data-testid="save-permissions-button"
@@ -262,6 +327,11 @@ export const RolePermissions: React.FC = () => {
             <div className="role-permissions-content">
                 {fetchLoading ? (
                     <div className="loading-state">Loading permissions...</div>
+                ) : manageableRoles.length === 0 ? (
+                    <div className="loading-state">
+                        <ShieldAlert size={48} style={{ marginBottom: '16px', color: '#6b7280' }} />
+                        <p>You don't have permission to manage any roles.</p>
+                    </div>
                 ) : (
                     <div className="permissions-grid">
                         {PERMISSION_CATEGORIES.map(category => {

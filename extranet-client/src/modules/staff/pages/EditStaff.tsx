@@ -1,35 +1,29 @@
 // src/pages/staff/EditStaff.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { StaffService } from '@/modules/staff/services/staff.service';
+import { StaffPermissionsService } from '@/modules/staff/services/staffPermissions.service';
 import { InputField } from '@/shared/components/InputField';
 import { Button } from '@/shared/components/Button';
 import { Staff } from '@/shared/types/staff.types';
-import { StaffType } from '@/shared/types/staffPermissions.types';
-import { ArrowLeft } from 'lucide-react';
+import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
+import { ArrowLeft, ShieldAlert } from 'lucide-react';
+import { toast } from 'react-toastify';
 import './EditStaff.css';
-
-const STAFF_TYPE_OPTIONS = [
-  { value: StaffType.OWNER, label: 'Owner' },
-  { value: StaffType.BRANCH_MANAGER, label: 'Branch Manager' },
-  { value: StaffType.MANAGER, label: 'Manager' },
-  { value: StaffType.WAITER, label: 'Waiter' },
-  { value: StaffType.KITCHEN_STAFF, label: 'Kitchen Staff' },
-  { value: StaffType.CASHIER, label: 'Cashier' },
-];
 
 export const EditStaff: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { token } = useStaffAuth();
+  const { token, staff: currentStaff } = useStaffAuth();
 
   const [staff, setStaff] = useState<Staff | null>(null);
+  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    staffType: StaffType.WAITER,
+    staffType: '' as any,
     isActive: true,
   });
 
@@ -40,18 +34,23 @@ export const EditStaff: React.FC = () => {
 
   useEffect(() => {
     if (id && token) {
-      fetchStaff();
+      fetchStaffAndRoles();
     }
   }, [id, token]);
 
-  const fetchStaff = async () => {
+  const fetchStaffAndRoles = async () => {
     if (!token || !id) return;
 
     try {
       setFetchLoading(true);
-      const response = await StaffService.getStaff(token, id);
-      const staffData = response.data;
+      const [staffRes, rolesRes] = await Promise.all([
+        StaffService.getStaff(token, id),
+        currentStaff?.restaurantId
+            ? StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId)
+            : Promise.resolve({ data: [] })
+      ]);
 
+      const staffData = staffRes.data;
       if (!staffData) {
         setServerError('Staff member not found');
         return;
@@ -62,15 +61,57 @@ export const EditStaff: React.FC = () => {
         name: staffData.name,
         email: staffData.email,
         phone: staffData.phone,
-        staffType: staffData.staffType,
+        staffType: staffData.roleName || staffData.staffType,
         isActive: staffData.isActive,
       });
+
+      if (rolesRes.data) {
+        setAvailableRoles(rolesRes.data);
+      }
     } catch (err: any) {
-      setServerError(err.message || 'Failed to fetch staff details');
+      setServerError(err.message || 'Failed to fetch details');
     } finally {
       setFetchLoading(false);
     }
   };
+
+  // Get current user's role level
+  const currentUserLevel = useMemo(() => {
+    if (!currentStaff) return 99;
+    if (currentStaff.roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
+
+    const currentRole = availableRoles.find(r => r.name === currentStaff.roleName);
+    if (currentRole) return currentRole.level;
+
+    const roleLevelMap: Record<string, number> = {
+        [StaffRole.SUPER_ADMIN]: 1,
+        [StaffRole.OWNER]: 2,
+        [StaffRole.BRANCH_MANAGER]: 3,
+        [StaffRole.MANAGER]: 4,
+        [StaffRole.WAITER]: 5,
+        [StaffRole.KITCHEN_STAFF]: 5,
+        [StaffRole.CASHIER]: 5,
+    };
+    return roleLevelMap[currentStaff.roleName as string] || 99;
+  }, [currentStaff, availableRoles]);
+
+  // Filter roles based on hierarchy
+  const manageableRoles = useMemo(() => {
+    if (currentStaff?.roleName === StaffRole.SUPER_ADMIN) return availableRoles;
+    return availableRoles.filter(role => role.level > currentUserLevel);
+  }, [availableRoles, currentUserLevel, currentStaff]);
+
+  // Check if current user can manage THIS specific staff member
+  const canManageThisStaff = useMemo(() => {
+    if (!staff) return false;
+    if (currentStaff?.roleName === StaffRole.SUPER_ADMIN) return true;
+
+    const targetRoleName = staff.roleName || staff.staffType;
+    const targetRole = availableRoles.find(r => r.name === targetRoleName);
+    const targetLevel = targetRole ? targetRole.level : 99;
+
+    return targetLevel > currentUserLevel;
+  }, [staff, currentStaff, currentUserLevel, availableRoles]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -99,16 +140,27 @@ export const EditStaff: React.FC = () => {
 
     if (!validateForm() || !token || !id) return;
 
+    if (!canManageThisStaff) {
+        toast.error('Access denied - This is a top level role, ask for permission.', {
+            icon: <ShieldAlert size={20} />
+        });
+        return;
+    }
+
     try {
       setLoading(true);
+      const selectedRole = availableRoles.find(r => r.name === formData.staffType);
+
       await StaffService.updateStaff(token, id, {
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         staffType: formData.staffType,
+        roleId: selectedRole?._id,
         isActive: formData.isActive,
       });
 
+      toast.success('Staff member updated successfully');
       navigate('/staff/team');
     } catch (err: any) {
       setServerError(err.message || 'Failed to update staff member');
@@ -165,6 +217,13 @@ export const EditStaff: React.FC = () => {
           </div>
         )}
 
+        {!canManageThisStaff && (
+          <div className="error-banner warning">
+            <ShieldAlert size={18} />
+            You have read-only access to this staff member due to hierarchy level.
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="edit-staff-form">
           <div className="form-section">
             <h3 className="section-title">Personal Information</h3>
@@ -175,7 +234,7 @@ export const EditStaff: React.FC = () => {
               value={formData.name}
               error={errors.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              disabled={loading}
+              disabled={loading || !canManageThisStaff}
               data-testid="name-input"
             />
 
@@ -186,7 +245,7 @@ export const EditStaff: React.FC = () => {
                 value={formData.email}
                 error={errors.email}
                 onChange={(e) => handleChange('email', e.target.value)}
-                disabled={loading}
+                disabled={loading || !canManageThisStaff}
                 data-testid="email-input"
               />
 
@@ -196,7 +255,7 @@ export const EditStaff: React.FC = () => {
                 value={formData.phone}
                 error={errors.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
-                disabled={loading}
+                disabled={loading || !canManageThisStaff}
                 data-testid="phone-input"
               />
             </div>
@@ -213,12 +272,18 @@ export const EditStaff: React.FC = () => {
                   value={formData.staffType}
                   onChange={(e) => handleChange('staffType', e.target.value)}
                   className="form-select"
-                  disabled={loading}
+                  disabled={loading || !canManageThisStaff}
                   data-testid="staff-type-select"
                 >
-                  {STAFF_TYPE_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+                  {/* Show the current role even if it's not manageable */}
+                  {!manageableRoles.some(r => r.name === formData.staffType) && (
+                    <option value={formData.staffType}>
+                      {availableRoles.find(r => r.name === formData.staffType)?.displayName || formData.staffType} (Current - Read Only)
+                    </option>
+                  )}
+                  {manageableRoles.map(role => (
+                    <option key={role.name} value={role.name}>
+                      {role.displayName}
                     </option>
                   ))}
                 </select>
@@ -234,7 +299,7 @@ export const EditStaff: React.FC = () => {
                   value={formData.isActive ? 'active' : 'inactive'}
                   onChange={(e) => handleChange('isActive', e.target.value === 'active')}
                   className="form-select"
-                  disabled={loading}
+                  disabled={loading || !canManageThisStaff}
                   data-testid="status-select"
                 >
                   <option value="active">Active</option>
@@ -257,15 +322,17 @@ export const EditStaff: React.FC = () => {
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              loading={loading}
-              disabled={loading}
-              data-testid="submit-button"
-            >
-              Save Changes
-            </Button>
+            {canManageThisStaff && (
+              <Button
+                type="submit"
+                variant="primary"
+                loading={loading}
+                disabled={loading}
+                data-testid="submit-button"
+              >
+                Save Changes
+              </Button>
+            )}
           </div>
         </form>
       </div>

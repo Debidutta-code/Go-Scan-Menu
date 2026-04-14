@@ -5,6 +5,7 @@ import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { MenuService } from '@/modules/menu/services/menu.service';
 import { Category } from '@/shared/types/menu.types';
 import { Button } from '@/shared/components/Button';
+import { PermissionGuard } from '@/shared/components/PermissionGuard';
 import { Breadcrumb } from '@/shared/components/Breadcrumb';
 import { CategoryPreview } from './CategoryPreview';
 import { CategoryListSkeleton } from './CategoryListSkeleton';
@@ -171,9 +172,11 @@ export const CategoryManagement: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="primary" onClick={handleAddCategory} size="sm">
-            + Add Category
-          </Button>
+          <PermissionGuard permission="menu.manageCategories">
+            <Button variant="primary" onClick={handleAddCategory} size="sm">
+              + Add Category
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -196,9 +199,11 @@ export const CategoryManagement: React.FC = () => {
                   <p className="empty-description">
                     Start by adding your first category to organize your menu
                   </p>
-                  <Button variant="primary" onClick={handleAddCategory}>
-                    + Add Category
-                  </Button>
+                  <PermissionGuard permission="menu.manageCategories">
+                    <Button variant="primary" onClick={handleAddCategory}>
+                      + Add Category
+                    </Button>
+                  </PermissionGuard>
                 </div>
               ) : (
                 <SortableContext

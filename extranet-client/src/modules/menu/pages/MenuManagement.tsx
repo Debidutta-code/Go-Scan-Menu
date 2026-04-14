@@ -4,6 +4,7 @@ import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { MenuAPI } from '@/modules/menu/pages/api/menu-api';
 import { MenuItem, Category } from '@/shared/types/menu.types';
 import { Button } from '@/shared/components/Button';
+import { PermissionGuard } from '@/shared/components/PermissionGuard';
 import { MenuItemCard } from '@/modules/menu/pages/components/MenuItemCard/MenuItemCard';
 import { getCategoryId } from '@/modules/menu/pages/utils/category-helpers';
 import { MenuModal } from './MenuModal';
@@ -176,23 +177,27 @@ export const MenuManagement: React.FC = () => {
             </select>
           </div>
 
-          <Button
-            variant="outline"
-            onClick={() => navigate('/staff/categories')}
-            data-testid="manage-categories-button"
-            size="sm"
-          >
-            Manage Categories
-          </Button>
+          <PermissionGuard permission="menu.manageCategories">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/staff/categories')}
+              data-testid="manage-categories-button"
+              size="sm"
+            >
+              Manage Categories
+            </Button>
+          </PermissionGuard>
 
-          <Button
-            variant="primary"
-            onClick={handleAddMenuItem}
-            data-testid="add-menu-item-button"
-            size="sm"
-          >
-            + Add Item
-          </Button>
+          <PermissionGuard permission="menu.create">
+            <Button
+              variant="primary"
+              onClick={handleAddMenuItem}
+              data-testid="add-menu-item-button"
+              size="sm"
+            >
+              + Add Item
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -215,9 +220,11 @@ export const MenuManagement: React.FC = () => {
                 <p className="empty-description">
                   Start by adding items to your menu
                 </p>
-                <Button variant="primary" onClick={handleAddMenuItem}>
-                  + Add Menu Item
-                </Button>
+                <PermissionGuard permission="menu.create">
+                  <Button variant="primary" onClick={handleAddMenuItem}>
+                    + Add Menu Item
+                  </Button>
+                </PermissionGuard>
               </div>
             ) : (
               <div className="menu-items-grid">

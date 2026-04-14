@@ -4,6 +4,7 @@ import env from '@/shared/config/env';
 import { ApiResponse } from '@/shared/types';
 import { extractId } from '@/shared/utils/id.util';
 import { IStaffTypePermissions, StaffType, UpdatePermissionsPayload } from '@/shared/types/staffPermissions.types';
+import { Role } from '@/shared/types/role.types';
 
 export class StaffPermissionsService {
   private static getHeaders(token?: string | null): HeadersInit {
@@ -37,6 +38,16 @@ export class StaffPermissionsService {
     } catch (error) {
       throw error instanceof Error ? error : new Error('Network error');
     }
+  }
+
+  // GET all staff type permissions for a restaurant (including levels and details)
+  static async getAllRestaurantRoles(token: string, restaurantId: any) {
+    const rId = extractId(restaurantId);
+    return this.request<Role[]>(
+      `/staff-type-permissions/${rId}`,
+      {},
+      token
+    );
   }
 
   // GET all staff type permissions for a restaurant

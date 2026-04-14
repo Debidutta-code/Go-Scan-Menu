@@ -4,6 +4,7 @@ import './MenuItemCard.css';
 import { MenuItem } from '@/shared/types/menu.types';
 import { Button } from '@/shared/components/Button';
 import { Switch } from '@/shared/components/Switch';
+import { PermissionGuard } from '@/shared/components/PermissionGuard';
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -57,16 +58,20 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
         </div>
 
         <div className="item-actions">
-          <Button variant="outline" onClick={() => onEdit(item._id)} data-testid="edit-button">
-            Edit
-          </Button>
-          <Button
-            variant="danger"
-            onClick={() => onDelete(item._id, item.name)}
-            data-testid="delete-button"
-          >
-            Delete
-          </Button>
+          <PermissionGuard permission="menu.update">
+            <Button variant="outline" onClick={() => onEdit(item._id)} data-testid="edit-button">
+              Edit
+            </Button>
+          </PermissionGuard>
+          <PermissionGuard permission="menu.delete">
+            <Button
+              variant="danger"
+              onClick={() => onDelete(item._id, item.name)}
+              data-testid="delete-button"
+            >
+              Delete
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
     </div>
