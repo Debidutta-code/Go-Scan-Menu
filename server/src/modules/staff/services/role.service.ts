@@ -436,10 +436,17 @@ export class RoleService {
     const roleMap = new Map<string, IRole>();
 
     // Start with system roles as base
-    systemRoles.forEach(r => roleMap.set(r.name, r));
+    systemRoles.forEach(r => {
+        // Ensure system roles always have the required fields
+        const rObj = r.toObject() as any;
+        roleMap.set(r.name, { ...rObj, _id: r._id.toString(), id: r._id.toString() } as any);
+    });
 
     // Override with restaurant-specific overrides
-    restaurantRoles.forEach(r => roleMap.set(r.name, r));
+    restaurantRoles.forEach(r => {
+        const rObj = r.toObject() as any;
+        roleMap.set(r.name, { ...rObj, _id: r._id.toString(), id: r._id.toString() } as any);
+    });
 
     return Array.from(roleMap.values());
   }

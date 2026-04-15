@@ -28,13 +28,16 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   }
 
   const roleLevelMap: Record<string, number> = {
-    [StaffRole.SUPER_ADMIN]: 1,
-    [StaffRole.OWNER]: 2,
-    [StaffRole.BRANCH_MANAGER]: 3,
-    [StaffRole.MANAGER]: 4,
-    [StaffRole.WAITER]: 5,
-    [StaffRole.KITCHEN_STAFF]: 5,
-    [StaffRole.CASHIER]: 5,
+    'super_admin': 1,
+    'owner': 2,
+    'restaurant_owner': 2,
+    'branch_manager': 3,
+    'manager': 4,
+    'store_manager': 4,
+    'waiter': 5,
+    'kitchen_staff': 5,
+    'kitchen': 5,
+    'cashier': 5,
   };
 
   const userRole = (
@@ -43,7 +46,14 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
     (staff.roleId && typeof staff.roleId === 'object' ? staff.roleId.name : '') ||
     ''
   ).toLowerCase();
-  const userLevel = roleLevelMap[userRole] || 99;
+
+  const userLevel = (staff as any).roleLevel ||
+                    (staff.roleId && typeof staff.roleId === 'object' ? (staff.roleId as any).level : null) ||
+                    roleLevelMap[userRole] ||
+                    99;
+
+  // Special bypass for SUPER_ADMIN or OWNER (if they have full perms)
+  const isHighLevel = userLevel <= 2;
 
   // Check Role requirement
   if (requiredRole) {
@@ -66,11 +76,19 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
 
   // Check Permission requirement
   if (permission) {
-    if (!staff.permissions) {
+    // High level bypass for permissions
+    if (isHighLevel) return <>{children}</>;
+
+    const permissions = staff.permissions ||
+                        (staff.roleId && typeof staff.roleId === 'object' ? staff.roleId.permissions : null);
+
+    if (!permissions) {
+        console.warn(`[PermissionGuard] No permissions found for user ${staff.email}`);
         return <>{fallback}</>;
     }
+
     const [module, action] = permission.split('.');
-    const modulePermissions = (staff.permissions as any)[module];
+    const modulePermissions = (permissions as any)[module];
 
     if (!modulePermissions || modulePermissions[action] !== true) {
       return <>{fallback}</>;

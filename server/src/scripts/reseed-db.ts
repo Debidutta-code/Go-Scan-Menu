@@ -85,10 +85,7 @@ async function reseed() {
         level: RoleLevel.RESTAURANT,
         accessScope: AccessScope.RESTAURANT,
         isSystemRole: true,
-        permissions: {
-          ...fullPerms,
-          staff: { ...fullPerms.staff, manageRoles: true },
-        },
+        permissions: fullPerms,
       },
       {
         name: StaffRole.BRANCH_MANAGER,
@@ -212,9 +209,26 @@ async function reseed() {
       { upsert: true, new: true }
     );
 
-    // 5. Create Staff for each role
+    // 5. Initialize Restaurant Roles
+    console.log('🔑 Initializing Restaurant-specific Roles...');
+    const systemRoles = await Role.find({ isSystemRole: true });
+    for (const sysRole of systemRoles) {
+      const { _id, createdAt, updatedAt, ...roleData } = sysRole.toObject() as any;
+      await Role.findOneAndUpdate(
+        { name: sysRole.name, restaurantId: restaurant._id },
+        {
+          ...roleData,
+          restaurantId: restaurant._id,
+          isSystemRole: false,
+        },
+        { upsert: true }
+      );
+    }
+    console.log('✅ Restaurant roles initialized');
+
+    // 6. Create Staff for each role
     console.log('👔 Creating Staff members...');
-    const roles = await Role.find({ isSystemRole: true });
+    const roles = await Role.find({ restaurantId: restaurant._id });
     for (const role of roles) {
       if (role.name === StaffRole.SUPER_ADMIN) continue; // SuperAdmin is in separate collection
 

@@ -126,17 +126,23 @@ export const RolePermissions: React.FC = () => {
 
         if (roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
 
+        if ((currentStaff as any).roleLevel) return (currentStaff as any).roleLevel;
+        if (currentStaff.roleId && typeof currentStaff.roleId === 'object' && (currentStaff.roleId as any).level) return (currentStaff.roleId as any).level;
+
         const currentRole = availableRoles.find(r => r.name === roleName);
         if (currentRole) return currentRole.level;
 
         const roleLevelMap: Record<string, number> = {
-            [StaffRole.SUPER_ADMIN]: 1,
-            [StaffRole.OWNER]: 2,
-            [StaffRole.BRANCH_MANAGER]: 3,
-            [StaffRole.MANAGER]: 4,
-            [StaffRole.WAITER]: 5,
-            [StaffRole.KITCHEN_STAFF]: 5,
-            [StaffRole.CASHIER]: 5,
+            'super_admin': 1,
+            'owner': 2,
+            'restaurant_owner': 2,
+            'branch_manager': 3,
+            'manager': 4,
+            'store_manager': 4,
+            'waiter': 5,
+            'kitchen_staff': 5,
+            'kitchen': 5,
+            'cashier': 5,
         };
         return roleLevelMap[roleName] || 99;
     }, [currentStaff, availableRoles]);
@@ -242,6 +248,22 @@ export const RolePermissions: React.FC = () => {
         setSuccessMessage(null);
     };
 
+    const handleInitialize = async () => {
+        if (!token || !currentStaff?.restaurantId) return;
+
+        try {
+            setLoading(true);
+            setError(null);
+            await StaffPermissionsService.initializeAllPermissions(token, currentStaff.restaurantId);
+            toast.success('Restaurant permissions initialized successfully!');
+            await fetchRoles();
+        } catch (err: any) {
+            setError(err.message || 'Failed to initialize permissions');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSave = async () => {
         if (!token || !currentStaff?.restaurantId || !selectedRoleName) return;
 
@@ -344,6 +366,16 @@ export const RolePermissions: React.FC = () => {
                     <div className="loading-state">
                         <ShieldAlert size={48} style={{ marginBottom: '16px', color: '#6b7280' }} />
                         <p>You don't have permission to manage any roles.</p>
+                        {currentStaff?.roleName === 'owner' && (
+                            <Button
+                                variant="primary"
+                                onClick={handleInitialize}
+                                loading={loading}
+                                style={{ marginTop: '16px' }}
+                            >
+                                Initialize Restaurant Roles
+                            </Button>
+                        )}
                     </div>
                 ) : (
                     <div className="permissions-grid">

@@ -74,6 +74,10 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
         );
     };
 
+    const permissions = staff?.permissions || (staff?.roleId && typeof staff.roleId === 'object' ? staff.roleId.permissions : null);
+    // Bypass for high level roles (Owner, SuperAdmin)
+    const isHighLevel = (staff as any)?.roleLevel <= 2 || (staff?.roleId && typeof staff.roleId === 'object' && (staff.roleId as any).level <= 2);
+
     const menuItems: MenuItem[] = [
         {
             label: 'Dashboard',
@@ -85,17 +89,17 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
             label: 'Menu Management',
             icon: <Menu size={20} />,
             path: '#', // Parent item doesn't navigate
-            permission: staff?.permissions?.menu?.view,
+            permission: isHighLevel || permissions?.menu?.view,
             subItems: [
                 {
                     label: 'Categories',
                     path: '/staff/categories',
-                    permission: staff?.permissions?.menu?.view
+                    permission: isHighLevel || permissions?.menu?.view
                 },
                 {
                     label: 'Menu Items',
                     path: '/staff/menu',
-                    permission: staff?.permissions?.menu?.view
+                    permission: isHighLevel || permissions?.menu?.view
                 }
             ]
         },
@@ -103,13 +107,13 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
             label: 'Staff',
             icon: <Users size={20} />,
             path: '/staff/team',
-            permission: staff?.permissions?.staff?.view
+            permission: isHighLevel || permissions?.staff?.view
         },
         {
             label: 'Role Permissions',
             icon: <Shield size={20} />,
             path: '/staff/permissions',
-            permission: staff?.permissions?.staff?.manageRoles
+            permission: isHighLevel || permissions?.staff?.manageRoles
         },
         {
             label: 'Tables & QR',
@@ -119,25 +123,25 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
                 : (staff?.allowedBranchIds?.length === 1)
                     ? `/staff/tables/${extractId(staff.allowedBranchIds[0])}`
                     : '/staff/tables',
-            permission: staff?.permissions?.tables?.view
+            permission: isHighLevel || permissions?.tables?.view
         },
         {
             label: 'Orders',
             icon: <ShoppingBag size={20} />,
             path: '/staff/orders',
-            permission: staff?.permissions?.orders?.view
+            permission: isHighLevel || permissions?.orders?.view
         },
         {
             label: 'Reports',
             icon: <FileBarChart size={20} />,
             path: '/staff/reports',
-            permission: staff?.permissions?.reports?.view
+            permission: isHighLevel || permissions?.reports?.view
         },
         {
             label: 'Settings',
             icon: <Settings size={20} />,
             path: '/staff/settings',
-            permission: staff?.permissions?.settings?.view
+            permission: isHighLevel || permissions?.settings?.view
         }
     ];
 

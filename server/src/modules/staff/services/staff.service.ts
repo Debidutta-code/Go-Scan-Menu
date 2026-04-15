@@ -20,85 +20,94 @@ export class StaffService {
   }
 
   private async enrichStaff(staff: IStaff) {
-    let role = staff.roleId as unknown as IRole;
-    let permissions = role?.permissions;
+    // 1. Resolve Data Sources (Doc vs Object)
+    const staffDoc = staff as any;
+    const roleDoc = staffDoc.roleId;
+    const restaurantDoc = staffDoc.restaurantId;
 
-    // Fallback for legacy data (handle staffType if roleId/permissions missing)
-    if (!role || !permissions) {
-      console.log(
-        `⚠️ Staff role/permissions not found for ${staff.email}, attempting fallback for legacy data`
-      );
+    // 2. Identify core auth values from ANY available source
+    const roleNameRaw = roleDoc?.name || (staff as any).staffType || 'waiter';
+    const roleName = roleNameRaw.toString().toLowerCase();
+
+    let permissions = roleDoc?.permissions;
+    let roleLevel = roleDoc?.level;
+
+    // 3. Robust Fallback (Database lookup for role details if missing)
+    if (!roleLevel || !permissions || Object.keys(permissions).length === 0) {
       const RoleModel = staff.model('Role');
-      const legacyRoleName = (staff as any).staffType;
-
-      let foundRole = null;
-      if (legacyRoleName) {
-        foundRole = await RoleModel.findOne({
-          name: legacyRoleName,
-          isSystemRole: true,
-        });
-      }
+      const foundRole = (await RoleModel.findOne({
+        name: roleName,
+        isSystemRole: true,
+      })) as any;
 
       if (foundRole) {
-        role = foundRole as any;
-        permissions = role.permissions;
-      } else {
-        // Ultimate fallback: empty permissions object instead of throwing
-        permissions = {
-          orders: {
-            view: false,
-            create: false,
-            update: false,
-            delete: false,
-            managePayment: false,
-            viewAllBranches: false,
-          },
-          menu: {
-            view: false,
-            create: false,
-            update: false,
-            delete: false,
-            manageCategories: false,
-            managePricing: false,
-          },
-          staff: { view: false, create: false, update: false, delete: false, manageRoles: false },
-          reports: { view: false, export: false, viewFinancials: false },
-          settings: {
-            view: false,
-            updateRestaurant: false,
-            updateBranch: false,
-            manageTaxes: false,
-          },
-          tables: { view: false, create: false, update: false, delete: false, manageQR: false },
-          customers: { view: false, manage: false },
-        } as any;
+        roleLevel = roleLevel || foundRole.level;
+        permissions = permissions || foundRole.permissions;
       }
     }
 
-    const restaurantIdValue = staff.restaurantId as any;
-    const restaurantId =
-      typeof restaurantIdValue === 'object' && restaurantIdValue?._id
-        ? restaurantIdValue._id.toString()
-        : staff.restaurantId.toString();
+    // Ensure defaults
+    roleLevel = roleLevel || 5;
+    permissions = permissions || {};
 
-    // Get restaurant data
-    const restaurant = await this.restaurantRepo.findById(restaurantId);
-    if (!restaurant) {
-      throw new AppError('Restaurant not found', 404);
+    // 4. Resolve Restaurant Info
+    let restaurantInfo = null;
+    if (restaurantDoc && restaurantDoc.name) {
+      restaurantInfo = {
+        _id: restaurantDoc._id.toString(),
+        id: restaurantDoc._id.toString(),
+        name: restaurantDoc.name,
+        type: restaurantDoc.type,
+        slug: restaurantDoc.slug,
+      };
+    } else if (staff.restaurantId) {
+      const restaurant = await this.restaurantRepo.findById(staff.restaurantId.toString());
+      if (restaurant) {
+        restaurantInfo = {
+          _id: restaurant._id.toString(),
+          id: restaurant._id.toString(),
+          name: restaurant.name,
+          type: restaurant.type,
+          slug: restaurant.slug,
+        };
+      }
     }
 
-    const staffData = staff.toObject();
-    return {
-      ...staffData,
-      roleName: role?.name || (staff as any).staffType,
-      permissions,
-      restaurant: {
-        _id: restaurant._id.toString(),
-        name: restaurant.name,
-        type: restaurant.type,
-        slug: restaurant.slug,
+    // 5. Final Explicit Assembly (Avoid any Mongoose proxy behavior)
+    // This is the object that will be JSON serialized to the client
+    const enriched: any = {
+      _id: staff._id.toString(),
+      id: staff._id.toString(),
+      name: staff.name,
+      email: staff.email,
+      phone: staff.phone,
+      isActive: staff.isActive,
+      preferences: staff.preferences,
+      restaurantId: staff.restaurantId?.toString(),
+      branchId: staff.branchId?.toString(),
+      allowedBranchIds: staff.allowedBranchIds.map(id => id.toString()),
+
+      // KEY AUTH FIELDS (Top Level)
+      roleName: roleName,
+      staffType: roleName,
+      roleLevel: roleLevel,
+      permissions: permissions,
+      restaurant: restaurantInfo,
+
+      // Preserve Nested structure for legacy components
+      roleId: {
+        _id: roleDoc?._id?.toString() || staff.roleId?.toString(),
+        id: roleDoc?._id?.toString() || staff.roleId?.toString(),
+        name: roleName,
+        level: roleLevel,
+        permissions: permissions
       },
+
+      createdAt: staff.createdAt,
+      updatedAt: staff.updatedAt
     };
+
+    return enriched;
   }
 
   async login(email: string, password: string) {
