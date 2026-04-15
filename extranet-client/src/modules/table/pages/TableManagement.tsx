@@ -7,7 +7,7 @@ import { BranchService } from '@/modules/branch/services/branch.service';
 import { Table, Branch } from '@/shared/types/table.types';
 import { Button } from '@/shared/components/Button';
 import { PermissionGuard } from '@/shared/components/PermissionGuard';
-import { RoleLevel } from '@/shared/types/role.types';
+import { RoleLevel, StaffRole } from '@/shared/types/role.types';
 import { QRCodeModal } from '@/modules/table/components/QRCodeModal';
 import { CreateTableModal } from '@/modules/table/components/CreateTableModal';
 import { BulkCreateTableModal } from '@/modules/table/components/BulkCreateTableModal';
@@ -386,7 +386,11 @@ export const TableManagement: React.FC = () => {
               </div>
             </div>
 
-            <PermissionGuard permission="tables.update" minLevel={RoleLevel.OPERATIONAL}>
+            <PermissionGuard
+              permission="tables.update"
+              requiredRole={[StaffRole.WAITER]}
+              minLevel={RoleLevel.OPERATIONAL}
+            >
               <select
                 className="hover-card-status-select"
                 value={hoveredTable.status}

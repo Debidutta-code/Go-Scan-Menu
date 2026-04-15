@@ -37,8 +37,8 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
     [StaffRole.CASHIER]: 5,
   };
 
-  const userRole = staff.roleName || (staff as any).staffType;
-  const userLevel = roleLevelMap[userRole as string] || 99;
+  const userRole = (staff.roleName || (staff as any).staffType || '').toLowerCase();
+  const userLevel = roleLevelMap[userRole] || 99;
 
   // Check Role requirement
   if (requiredRole) {
