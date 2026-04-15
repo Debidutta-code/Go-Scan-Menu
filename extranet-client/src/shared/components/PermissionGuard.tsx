@@ -43,8 +43,8 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   // Check Role requirement
   if (requiredRole) {
     // If specific roles are required, check if user has one of them or is higher rank
-    const hasRequiredRole = requiredRole.includes(userRole as StaffRole);
-    const minRequiredLevel = Math.min(...requiredRole.map(r => roleLevelMap[r] || 99));
+    const hasRequiredRole = requiredRole.some(r => r.toLowerCase() === userRole);
+    const minRequiredLevel = Math.min(...requiredRole.map(r => roleLevelMap[r.toLowerCase()] || 99));
 
     // User must either have the specific role OR be at a strictly higher rank (lower number)
     if (!hasRequiredRole && userLevel >= minRequiredLevel) {
