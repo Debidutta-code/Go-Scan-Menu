@@ -116,13 +116,19 @@ export const RolePermissions: React.FC = () => {
     // Get current user's role level
     const currentUserLevel = useMemo(() => {
         if (!currentStaff) return 99;
-        if (currentStaff.roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
 
-        // Find current staff's role level from available roles or use a default mapping
-        const currentRole = availableRoles.find(r => r.name === currentStaff.roleName);
+        const roleName = (
+            currentStaff.roleName ||
+            (currentStaff as any).staffType ||
+            (currentStaff.roleId && typeof currentStaff.roleId === 'object' ? currentStaff.roleId.name : '') ||
+            ''
+        ).toLowerCase();
+
+        if (roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
+
+        const currentRole = availableRoles.find(r => r.name === roleName);
         if (currentRole) return currentRole.level;
 
-        // Fallback mapping if roles haven't loaded yet
         const roleLevelMap: Record<string, number> = {
             [StaffRole.SUPER_ADMIN]: 1,
             [StaffRole.OWNER]: 2,
@@ -132,12 +138,19 @@ export const RolePermissions: React.FC = () => {
             [StaffRole.KITCHEN_STAFF]: 5,
             [StaffRole.CASHIER]: 5,
         };
-        return roleLevelMap[currentStaff.roleName as string] || 99;
+        return roleLevelMap[roleName] || 99;
     }, [currentStaff, availableRoles]);
 
     // Filter roles based on hierarchy - only show roles with LOWER level (numerically HIGHER)
     const manageableRoles = useMemo(() => {
-        if (currentStaff?.roleName === StaffRole.SUPER_ADMIN) return availableRoles;
+        const userRoleName = (
+            currentStaff?.roleName ||
+            (currentStaff as any)?.staffType ||
+            (currentStaff?.roleId && typeof currentStaff.roleId === 'object' ? currentStaff.roleId.name : '') ||
+            ''
+        ).toLowerCase();
+
+        if (userRoleName === StaffRole.SUPER_ADMIN) return availableRoles;
         return availableRoles.filter(role => role.level > currentUserLevel);
     }, [availableRoles, currentUserLevel, currentStaff]);
 
@@ -151,6 +164,12 @@ export const RolePermissions: React.FC = () => {
         }
     }, [selectedRoleName]);
 
+    useEffect(() => {
+        if (manageableRoles.length > 0 && !selectedRoleName) {
+            setSelectedRoleName(manageableRoles[0].name);
+        }
+    }, [manageableRoles, selectedRoleName]);
+
     const fetchRoles = async () => {
         if (!token || !currentStaff?.restaurantId) return;
         try {
@@ -159,14 +178,8 @@ export const RolePermissions: React.FC = () => {
             if (response.data) {
                 setAvailableRoles(response.data);
 
-                // Set initial selected role to the first manageable one
-                const filtered = currentStaff?.roleName === StaffRole.SUPER_ADMIN
-                    ? response.data
-                    : response.data.filter(role => role.level > (currentStaff.roleName === StaffRole.SUPER_ADMIN ? 0 : currentUserLevel));
-
-                if (filtered.length > 0) {
-                    setSelectedRoleName(filtered[0].name);
-                }
+                // We'll let the manageableRoles useMemo handle the filtering
+                // Just need to ensure we set an initial selection if possible
             }
         } catch (err: any) {
             setError(err.message || 'Failed to fetch roles');

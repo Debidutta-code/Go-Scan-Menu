@@ -85,7 +85,10 @@ async function reseed() {
         level: RoleLevel.RESTAURANT,
         accessScope: AccessScope.RESTAURANT,
         isSystemRole: true,
-        permissions: fullPerms,
+        permissions: {
+          ...fullPerms,
+          staff: { ...fullPerms.staff, manageRoles: true },
+        },
       },
       {
         name: StaffRole.BRANCH_MANAGER,
