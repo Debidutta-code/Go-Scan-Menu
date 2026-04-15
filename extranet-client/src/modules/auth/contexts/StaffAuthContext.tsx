@@ -19,6 +19,7 @@ interface StaffAuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   updateCurrentStaff: (updatedStaff: Partial<Staff>) => void;
+  refreshAuth: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -107,12 +108,29 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
     localStorage.setItem('staff_data', JSON.stringify(updatedStaff));
   };
 
+  const refreshAuth = async () => {
+    const storedToken = localStorage.getItem('staff_token');
+    if (!storedToken) return;
+
+    try {
+      const response = await StaffService.getCurrentUser(storedToken);
+      if (response.success && response.data) {
+        setStaff(response.data);
+        localStorage.setItem('staff_data', JSON.stringify(response.data));
+      }
+    } catch (err) {
+      console.error('Failed to refresh staff data:', err);
+      // If 401, the interceptor or event listener should handle logout
+    }
+  };
+
   const value: StaffAuthContextType = {
     staff,
     token,
     login,
     logout,
     updateCurrentStaff,
+    refreshAuth,
     isAuthenticated: !!token && !!staff,
     isLoading,
   };

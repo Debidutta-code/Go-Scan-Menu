@@ -99,7 +99,7 @@ export class StaffController {
   });
 
   getCurrentUser = catchAsync(async (req: Request, res: Response) => {
-    const staff = await this.staffService.getStaff(req.user!.id);
+    const staff = await this.staffService.getProfile(req.user!.id);
     sendResponse(res, 200, {
       message: 'Current user retrieved successfully',
       data: staff,

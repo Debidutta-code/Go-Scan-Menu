@@ -5,6 +5,7 @@ import { Menu as MenuIcon } from 'lucide-react';
 import { StaffSidebar } from './StaffSidebar';
 import { StaffNavbar } from './StaffNavbar';
 import './StaffLayout.css';
+import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { PageHeaderProvider, usePageHeaderContext } from '@/shared/contexts/PageHeaderContext';
 import { StaffSocketProvider } from '@/shared/contexts/StaffSocketContext';
 import { NotificationProvider } from '@/shared/contexts/NotificationContext';
@@ -17,10 +18,11 @@ const StaffLayoutContent: React.FC<{
 }> = ({ isSidebarOpen, toggleSidebar, isMobile }) => {
     const { title, breadcrumbs, actions } = usePageHeaderContext();
     const location = useLocation();
+    const { refreshAuth } = useStaffAuth();
 
     useEffect(() => {
-        console.log('StaffLayoutContent location changed:', location.pathname);
-    }, [location]);
+        refreshAuth();
+    }, [location.pathname]);
 
     return (
         <>

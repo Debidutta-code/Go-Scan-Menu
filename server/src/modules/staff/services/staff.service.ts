@@ -19,18 +19,7 @@ export class StaffService {
     this.roleRepo = new RoleRepository();
   }
 
-  async login(email: string, password: string) {
-    const staff = await this.staffRepo.findByEmail(email);
-
-    if (!staff || !staff.isActive) {
-      throw new AppError('Invalid credentials', 401);
-    }
-
-    const isPasswordValid = await BcryptUtil.compare(password, staff.password);
-    if (!isPasswordValid) {
-      throw new AppError('Invalid credentials', 401);
-    }
-
+  private async enrichStaff(staff: IStaff) {
     let role = staff.roleId as unknown as IRole;
     let permissions = role?.permissions;
 
@@ -92,6 +81,40 @@ export class StaffService {
         ? restaurantIdValue._id.toString()
         : staff.restaurantId.toString();
 
+    // Get restaurant data
+    const restaurant = await this.restaurantRepo.findById(restaurantId);
+    if (!restaurant) {
+      throw new AppError('Restaurant not found', 404);
+    }
+
+    const staffData = staff.toObject();
+    return {
+      ...staffData,
+      roleName: role?.name || (staff as any).staffType,
+      permissions,
+      restaurant: {
+        _id: restaurant._id.toString(),
+        name: restaurant.name,
+        type: restaurant.type,
+        slug: restaurant.slug,
+      },
+    };
+  }
+
+  async login(email: string, password: string) {
+    const staff = await this.staffRepo.findByEmail(email);
+
+    if (!staff || !staff.isActive) {
+      throw new AppError('Invalid credentials', 401);
+    }
+
+    const isPasswordValid = await BcryptUtil.compare(password, staff.password);
+    if (!isPasswordValid) {
+      throw new AppError('Invalid credentials', 401);
+    }
+
+    const enrichedStaff = await this.enrichStaff(staff);
+
     const branchIdValue = staff.branchId as any;
     const branchId = branchIdValue
       ? typeof branchIdValue === 'object' && branchIdValue?._id
@@ -106,32 +129,16 @@ export class StaffService {
     const token = JWTUtil.generateToken({
       id: staff._id.toString(),
       email: staff.email,
-      role: (role?.name || (staff as any).staffType) as StaffRole,
-      roleId: role?._id?.toString(),
-      restaurantId,
+      role: enrichedStaff.roleName as StaffRole,
+      roleId: (staff.roleId as any)?._id?.toString(),
+      restaurantId: enrichedStaff.restaurant?._id,
       branchId,
       allowedBranchIds,
-      permissions,
+      permissions: enrichedStaff.permissions,
     });
 
-    // Get restaurant data
-    const restaurant = await this.restaurantRepo.findById(restaurantId);
-    if (!restaurant) {
-      throw new AppError('Restaurant not found', 404);
-    }
-
-    const staffData = staff.toObject();
     return {
-      staff: {
-        ...staffData,
-        permissions,
-        restaurant: {
-          _id: restaurant._id.toString(),
-          name: restaurant.name,
-          type: restaurant.type,
-          slug: restaurant.slug,
-        },
-      },
+      staff: enrichedStaff,
       token,
     };
   }
@@ -163,6 +170,14 @@ export class StaffService {
       throw new AppError('Staff not found', 404);
     }
     return staff;
+  }
+
+  async getProfile(id: string) {
+    const staff = await this.staffRepo.findById(id);
+    if (!staff) {
+      throw new AppError('Staff not found', 404);
+    }
+    return this.enrichStaff(staff);
   }
 
   async getStaffByRestaurant(restaurantId: string, filter: any, page: number, limit: number) {

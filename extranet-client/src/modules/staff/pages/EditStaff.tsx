@@ -78,9 +78,17 @@ export const EditStaff: React.FC = () => {
   // Get current user's role level
   const currentUserLevel = useMemo(() => {
     if (!currentStaff) return 99;
-    if (currentStaff.roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
 
-    const currentRole = availableRoles.find(r => r.name === currentStaff.roleName);
+    const roleName = (
+        currentStaff.roleName ||
+        (currentStaff as any).staffType ||
+        (currentStaff.roleId && typeof currentStaff.roleId === 'object' ? currentStaff.roleId.name : '') ||
+        ''
+    ).toLowerCase();
+
+    if (roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
+
+    const currentRole = availableRoles.find(r => r.name === roleName);
     if (currentRole) return currentRole.level;
 
     const roleLevelMap: Record<string, number> = {
@@ -92,21 +100,42 @@ export const EditStaff: React.FC = () => {
         [StaffRole.KITCHEN_STAFF]: 5,
         [StaffRole.CASHIER]: 5,
     };
-    return roleLevelMap[currentStaff.roleName as string] || 99;
+    return roleLevelMap[roleName] || 99;
   }, [currentStaff, availableRoles]);
 
   // Filter roles based on hierarchy
   const manageableRoles = useMemo(() => {
-    if (currentStaff?.roleName === StaffRole.SUPER_ADMIN) return availableRoles;
+    const userRoleName = (
+        currentStaff?.roleName ||
+        (currentStaff as any)?.staffType ||
+        (currentStaff?.roleId && typeof currentStaff.roleId === 'object' ? currentStaff.roleId.name : '') ||
+        ''
+    ).toLowerCase();
+
+    if (userRoleName === StaffRole.SUPER_ADMIN) return availableRoles;
     return availableRoles.filter(role => role.level > currentUserLevel);
   }, [availableRoles, currentUserLevel, currentStaff]);
 
   // Check if current user can manage THIS specific staff member
   const canManageThisStaff = useMemo(() => {
     if (!staff) return false;
-    if (currentStaff?.roleName === StaffRole.SUPER_ADMIN) return true;
 
-    const targetRoleName = staff.roleName || staff.staffType;
+    const userRoleName = (
+        currentStaff?.roleName ||
+        (currentStaff as any)?.staffType ||
+        (currentStaff?.roleId && typeof currentStaff.roleId === 'object' ? currentStaff.roleId.name : '') ||
+        ''
+    ).toLowerCase();
+
+    if (userRoleName === StaffRole.SUPER_ADMIN) return true;
+
+    const targetRoleName = (
+        staff.roleName ||
+        (staff as any).staffType ||
+        (staff.roleId && typeof staff.roleId === 'object' ? staff.roleId.name : '') ||
+        ''
+    ).toLowerCase();
+
     const targetRole = availableRoles.find(r => r.name === targetRoleName);
     const targetLevel = targetRole ? targetRole.level : 99;
 
