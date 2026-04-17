@@ -28,7 +28,7 @@ export class RestaurantService {
   async createRestaurant(data: {
     name: string;
     slug: string;
-    type: 'single' | 'chain';
+    type: 'single' | 'branch-wise' | 'chain';
     owner: {
       name: string;
       email: string;
@@ -71,7 +71,7 @@ export class RestaurantService {
         startDate,
         endDate,
         isActive: true,
-        maxBranches: data.type === 'single' ? 1 : 5,
+        maxBranches: data.type === 'single' ? 1 : data.type === 'branch-wise' ? 5 : 10,
         currentBranches: 0,
         ...data.subscription,
       },
@@ -105,60 +105,59 @@ export class RestaurantService {
       ownerId: ownerStaff._id,
     });
 
-    // AUTO-CREATE DEFAULT BRANCH for single restaurants
-    if (data.type === 'single') {
-      try {
-        const defaultBranch = await this.branchRepo.create({
-          restaurantId: restaurant._id,
-          name: `${data.name} - Main Location`,
-          code: 'MAIN',
-          email: data.owner.email,
-          phone: data.owner.phone,
-          address: {
-            street: 'Main Street',
-            city: 'City',
-            state: 'State',
-            zipCode: '00000',
-            country: 'Country',
-            coordinates: {
-              latitude: 0,
-              longitude: 0,
-            },
+    // AUTO-CREATE MAIN BRANCH for all restaurants
+    try {
+      const defaultBranch = await this.branchRepo.create({
+        restaurantId: restaurant._id,
+        name: `${data.name} - Main Branch`,
+        code: 'MAIN',
+        email: data.owner.email,
+        phone: data.owner.phone,
+        address: {
+          street: 'Main Street',
+          city: 'City',
+          state: 'State',
+          zipCode: '00000',
+          country: 'Country',
+          coordinates: {
+            latitude: 0,
+            longitude: 0,
           },
-          settings: {
-            currency: restaurantData.defaultSettings?.currency || 'USD',
-            taxIds: [],
-            serviceChargePercentage: restaurantData.defaultSettings?.serviceChargePercentage || 0,
-            acceptOrders: true,
-            operatingHours: [
-              { day: 'monday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-              { day: 'tuesday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-              { day: 'wednesday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-              { day: 'thursday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-              { day: 'friday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-              { day: 'saturday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-              { day: 'sunday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            ],
-            minOrderAmount: 0,
-            deliveryAvailable: false,
-            takeawayAvailable: true,
-          },
-          isActive: true,
-        });
+        },
+        settings: {
+          currency: restaurantData.defaultSettings?.currency || 'USD',
+          taxIds: [],
+          serviceChargePercentage: restaurantData.defaultSettings?.serviceChargePercentage || 0,
+          acceptOrders: true,
+          operatingHours: [
+            { day: 'monday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
+            { day: 'tuesday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
+            { day: 'wednesday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
+            { day: 'thursday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
+            { day: 'friday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
+            { day: 'saturday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
+            { day: 'sunday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
+          ],
+          minOrderAmount: 0,
+          deliveryAvailable: false,
+          takeawayAvailable: true,
+        },
+        isMain: true,
+        isActive: true,
+      });
 
-        // Update restaurant's currentBranches count
-        await this.restaurantRepo.update(restaurant._id.toString(), {
-          subscription: {
-            ...restaurant.subscription,
-            currentBranches: 1,
-          },
-        });
+      // Update restaurant's currentBranches count
+      await this.restaurantRepo.update(restaurant._id.toString(), {
+        subscription: {
+          ...restaurant.subscription,
+          currentBranches: 1,
+        },
+      });
 
-        console.log(`✅ Auto-created default branch for single restaurant: ${defaultBranch.name}`);
-      } catch (error) {
-        console.error('⚠️  Failed to auto-create default branch:', error);
-        // Don't throw error - restaurant is already created
-      }
+      console.log(`✅ Auto-created main branch for restaurant: ${defaultBranch.name}`);
+    } catch (error) {
+      console.error('⚠️  Failed to auto-create main branch:', error);
+      // Don't throw error - restaurant is already created
     }
 
     return { restaurant, ownerStaff };

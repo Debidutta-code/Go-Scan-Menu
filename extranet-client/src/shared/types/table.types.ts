@@ -19,8 +19,16 @@ export interface Branch {
   restaurantId: string;
   name: string;
   code: string;
-  address: string;
+  address: string | {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
   phone: string;
+  email?: string;
+  isMain: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

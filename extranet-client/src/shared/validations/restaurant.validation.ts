@@ -14,7 +14,7 @@ export const createRestaurantSchema = z.object({
     .max(50, 'Slug must be less than 50 characters')
     .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
   
-  type: z.enum(['single', 'chain'], {
+  type: z.enum(['single', 'branch-wise', 'chain'], {
     required_error: 'Restaurant type is required',
   }),
   

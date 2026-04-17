@@ -150,7 +150,7 @@ async function reseed() {
       {
         name: 'Burger Heaven',
         slug: 'burger-heaven',
-        type: 'single',
+        type: 'chain',
         owner: { name: 'Owner User', email: 'owner@gmail.com', phone: '1234567890', password },
         isActive: true,
         subscription: { plan: 'pro', isActive: true, maxBranches: 10, currentBranches: 1 },
@@ -179,6 +179,7 @@ async function reseed() {
         restaurantId: restaurant._id,
         name: 'Main Branch',
         code: 'BH01',
+        isMain: true,
         email: 'branch@gmail.com',
         phone: '0987654321',
         address: {

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/modules/auth/contexts/AuthContext';
 import { RestaurantService } from '@/modules/restaurant/services/restaurant.service';
 import { Restaurant, RestaurantFilters } from '@/shared/types/restaurant.types';
+import { toast } from 'react-toastify';
 import './RestaurantList.css';
 
 export const RestaurantList: React.FC = () => {
@@ -96,13 +97,13 @@ export const RestaurantList: React.FC = () => {
     try {
       const res = await RestaurantService.deleteRestaurant(token, id);
       if (res.success) {
-        alert('Restaurant deleted successfully');
+        toast.success('Restaurant deleted successfully');
         loadRestaurants();
       } else {
-        alert(res.message || 'Failed to delete restaurant');
+        toast.error(res.message || 'Failed to delete restaurant');
       }
     } catch (err: any) {
-      alert(err.message || 'An error occurred while deleting the restaurant');
+      toast.error(err.message || 'An error occurred while deleting the restaurant');
     }
   };
 
@@ -127,7 +128,18 @@ export const RestaurantList: React.FC = () => {
     );
   };
 
-  const getTypeDisplay = (type: string) => (type === 'single' ? 'Single Location' : 'Chain');
+  const getTypeDisplay = (type: string) => {
+    switch (type) {
+      case 'single':
+        return 'Single Restaurant';
+      case 'branch-wise':
+        return 'Branch-wise';
+      case 'chain':
+        return 'Chain';
+      default:
+        return type;
+    }
+  };
 
   return (
     <div className="restaurant-list-container">
@@ -173,7 +185,8 @@ export const RestaurantList: React.FC = () => {
             className="filter-select"
           >
             <option value="">All Types</option>
-            <option value="single">Single Location</option>
+            <option value="single">Single Restaurant</option>
+            <option value="branch-wise">Branch-wise</option>
             <option value="chain">Chain</option>
           </select>
 

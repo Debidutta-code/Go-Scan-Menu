@@ -12,6 +12,7 @@ import {
   updateSubscriptionSchema,
   updateSettingsSchema,
 } from '@/shared/validations/restaurant.validation';
+import { toast } from 'react-toastify';
 import './EditRestaurant.css';
 
 type TabType = 'general' | 'theme' | 'subscription' | 'settings';
@@ -26,12 +27,11 @@ export const EditRestaurant: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
 
   // Form states for different tabs
   const [generalData, setGeneralData] = useState({
     name: '',
-    type: 'single' as 'single' | 'chain',
+    type: 'single' as 'single' | 'branch-wise' | 'chain',
     isActive: true,
   });
 
@@ -120,7 +120,6 @@ export const EditRestaurant: React.FC = () => {
 
   const clearMessages = () => {
     setError('');
-    setSuccessMessage('');
     setErrors({});
   };
 
@@ -134,13 +133,13 @@ export const EditRestaurant: React.FC = () => {
       const response = await RestaurantService.updateRestaurant(token, id, generalData);
 
       if (response.success) {
-        setSuccessMessage('General information updated successfully!');
+        toast.success('General information updated successfully!');
         loadRestaurant(); // Refresh data
       } else {
-        setError(response.message || 'Failed to update general information');
+        toast.error(response.message || 'Failed to update general information');
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred while saving');
+      toast.error(err.message || 'An error occurred while saving');
     } finally {
       setSaving(false);
     }
@@ -168,13 +167,13 @@ export const EditRestaurant: React.FC = () => {
       const response = await RestaurantService.updateTheme(token, id, themeData);
 
       if (response.success) {
-        setSuccessMessage('Theme updated successfully!');
+        toast.success('Theme updated successfully!');
         loadRestaurant();
       } else {
-        setError(response.message || 'Failed to update theme');
+        toast.error(response.message || 'Failed to update theme');
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred while saving theme');
+      toast.error(err.message || 'An error occurred while saving theme');
     } finally {
       setSaving(false);
     }
@@ -202,13 +201,13 @@ export const EditRestaurant: React.FC = () => {
       const response = await RestaurantService.updateSubscription(token, id, subscriptionData);
 
       if (response.success) {
-        setSuccessMessage('Subscription updated successfully!');
+        toast.success('Subscription updated successfully!');
         loadRestaurant();
       } else {
-        setError(response.message || 'Failed to update subscription');
+        toast.error(response.message || 'Failed to update subscription');
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred while saving subscription');
+      toast.error(err.message || 'An error occurred while saving subscription');
     } finally {
       setSaving(false);
     }
@@ -236,13 +235,13 @@ export const EditRestaurant: React.FC = () => {
       const response = await RestaurantService.updateSettings(token, id, settingsData);
 
       if (response.success) {
-        setSuccessMessage('Default settings updated successfully!');
+        toast.success('Default settings updated successfully!');
         loadRestaurant();
       } else {
-        setError(response.message || 'Failed to update settings');
+        toast.error(response.message || 'Failed to update settings');
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred while saving settings');
+      toast.error(err.message || 'An error occurred while saving settings');
     } finally {
       setSaving(false);
     }
@@ -287,7 +286,6 @@ export const EditRestaurant: React.FC = () => {
 
       {/* Messages */}
       {error && <div className="error-banner">{error}</div>}
-      {successMessage && <div className="success-banner">{successMessage}</div>}
 
       {/* Tabs */}
       <div className="tabs-container">
@@ -343,15 +341,16 @@ export const EditRestaurant: React.FC = () => {
                     onChange={(e) =>
                       setGeneralData({
                         ...generalData,
-                        type: e.target.value as 'single' | 'chain',
+                        type: e.target.value as 'single' | 'branch-wise' | 'chain',
                       })
                     }
                     className="select-input"
                     disabled={saving}
                     data-testid="general-type-select"
                   >
-                    <option value="single">Single Location</option>
-                    <option value="chain">Chain (Multiple Locations)</option>
+                    <option value="single">Single Restaurant</option>
+                    <option value="branch-wise">Branch-wise</option>
+                    <option value="chain">Chain</option>
                   </select>
                 </div>
 

@@ -63,6 +63,7 @@ export class BranchService {
         takeawayAvailable: true,
         ...data.settings,
       },
+      isMain: false, // Default to false for manual creation
       isActive: true,
     };
 

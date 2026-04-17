@@ -61,7 +61,8 @@ export const BranchSelection: React.FC = () => {
         }
 
         // If single restaurant type but somehow has multiple branches, still redirect to first active branch
-        if (staff.restaurant?.type === 'single' && filteredBranches.length > 0) {
+        const rType = staff.restaurant?.type as string;
+        if (rType === 'single' && filteredBranches.length > 0) {
           const activeBranch = filteredBranches.find((b) => b.isActive) || filteredBranches[0];
           const bId = extractId(activeBranch);
           if (bId) {
@@ -150,9 +151,11 @@ export const BranchSelection: React.FC = () => {
             {staff?.restaurant && (
               <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '4px' }}>
                 {staff.restaurant.name}
-                {staff.restaurant.type === 'single'
-                  ? ' (Single Location)'
-                  : ' (Multiple Locations)'}
+                {(staff.restaurant.type as string) === 'single'
+                  ? ' (Single Restaurant)'
+                  : (staff.restaurant.type as string) === 'branch-wise'
+                  ? ' (Branch-wise)'
+                  : ' (Chain)'}
               </p>
             )}
           </div>
@@ -201,7 +204,10 @@ export const BranchSelection: React.FC = () => {
                   </div>
                   <div className="info-row">
                     <span className="info-label">Address:</span>
-                    <span className="info-value">{branch.address}</span>
+                    <span className="info-value">
+                      {typeof branch.address === 'string' ? branch.address :
+                       `${branch.address.street}, ${branch.address.city}`}
+                    </span>
                   </div>
                   <div className="info-row">
                     <span className="info-label">Phone:</span>

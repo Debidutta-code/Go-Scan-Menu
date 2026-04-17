@@ -39,6 +39,7 @@ export interface IBranch extends Document {
     deliveryAvailable: boolean;
     takeawayAvailable: boolean;
   };
+  isMain: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -172,6 +173,10 @@ const branchSchema = new Schema<IBranch>(
         type: Boolean,
         default: true,
       },
+    },
+    isMain: {
+      type: Boolean,
+      default: false,
     },
     isActive: {
       type: Boolean,

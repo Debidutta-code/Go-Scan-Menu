@@ -4,7 +4,7 @@ export interface Restaurant {
   _id: string;
   name: string;
   slug: string;
-  type: 'single' | 'chain';
+  type: 'single' | 'branch-wise' | 'chain';
   owner: {
     name: string;
     email: string;
@@ -42,7 +42,7 @@ export interface Restaurant {
 export interface CreateRestaurantDto {
   name: string;
   slug: string;
-  type: 'single' | 'chain';
+  type: 'single' | 'branch-wise' | 'chain';
   owner: {
     name: string;
     email: string;
@@ -67,7 +67,7 @@ export interface CreateRestaurantDto {
 
 export interface RestaurantFilters {
   search?: string;
-  type?: 'single' | 'chain' | '';
+  type?: 'single' | 'branch-wise' | 'chain' | '';
   plan?: 'trial' | 'basic' | 'premium' | 'enterprise' | '';
   isActive?: boolean | '';
 }
