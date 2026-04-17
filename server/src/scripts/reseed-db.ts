@@ -7,14 +7,13 @@ import path from 'path';
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 // Use relative imports or setup ts-node correctly.
-// Since I'm creating this in server/src/scripts/reseed-db.ts, I'll use relative imports to the models.
 import { SuperAdmin } from '../modules/auth/auth.model';
 import { Role } from '../modules/staff/models/role.model';
 import { Staff } from '../modules/staff/models/staff.model';
 import { Restaurant } from '../modules/restaurant/models/restaurant.model';
 import { Branch } from '../modules/restaurant/models/branch.model';
 import { Category } from '../modules/menu/models/category.model';
-import { MenuItem } from '../modules/menu/models/menu-item.model';
+import { MenuItem, DietaryType } from '../modules/menu/models/menu-item.model';
 import { Table } from '../modules/table/models/table.model';
 import { StaffRole, RoleLevel, AccessScope } from '../types/role.types';
 
@@ -143,17 +142,34 @@ async function reseed() {
       { upsert: true }
     );
 
-    // 3. Create Restaurant
-    console.log('🏪 Creating Restaurant: Burger Heaven');
-    const restaurant = await Restaurant.findOneAndUpdate(
-      { slug: 'burger-heaven' },
-      {
-        name: 'Burger Heaven',
-        slug: 'burger-heaven',
-        type: 'chain',
-        owner: { name: 'Owner User', email: 'owner@gmail.com', phone: '1234567890', password },
+    const ownerRole = await Role.findOne({ name: StaffRole.OWNER });
+
+    async function createRestaurantData(
+      name: string,
+      slug: string,
+      type: 'single' | 'branch-wise' | 'chain',
+      ownerEmail: string,
+      maxBranches: number
+    ) {
+      console.log(`🏪 Creating Restaurant: ${name} (${type})`);
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 30);
+
+      const restaurant = await Restaurant.create({
+        name,
+        slug,
+        type,
+        owner: { name: `${name} Owner`, email: ownerEmail, phone: '1234567890', password },
         isActive: true,
-        subscription: { plan: 'pro', isActive: true, maxBranches: 10, currentBranches: 1 },
+        subscription: {
+          plan: 'trial',
+          startDate,
+          endDate,
+          isActive: true,
+          maxBranches,
+          currentBranches: 1,
+        },
         theme: {
           primaryColor: '#3498db',
           secondaryColor: '#95a5a6',
@@ -166,29 +182,23 @@ async function reseed() {
           serviceChargePercentage: 0,
           allowBranchOverride: false,
         },
-        menuSettings: { centralizedMenu: true, allowBranchSpecificItems: false },
-      },
-      { upsert: true, new: true }
-    );
+      });
 
-    // 4. Create Branch
-    console.log('🏢 Creating Branch: Main Branch');
-    const branch = await Branch.findOneAndUpdate(
-      { restaurantId: restaurant._id, code: 'BH01' },
-      {
+      console.log(`🏢 Creating Main Branch for ${name}`);
+      const branch = await Branch.create({
         restaurantId: restaurant._id,
-        name: 'Main Branch',
-        code: 'BH01',
+        name: `${name} - Main`,
+        code: `${slug.substring(0, 2).toUpperCase()}01`,
         isMain: true,
-        email: 'branch@gmail.com',
+        email: `branch@${slug}.com`,
         phone: '0987654321',
         address: {
-          street: '123 Burger St',
-          city: 'NY',
-          state: 'NY',
-          zipCode: '10001',
-          country: 'USA',
-          coordinates: { latitude: 40.7128, longitude: -74.006 },
+          street: 'Main Street',
+          city: 'City',
+          state: 'State',
+          zipCode: '00000',
+          country: 'Country',
+          coordinates: { latitude: 0, longitude: 0 },
         },
         isActive: true,
         settings: {
@@ -209,87 +219,62 @@ async function reseed() {
           deliveryAvailable: false,
           takeawayAvailable: true,
         },
-      },
-      { upsert: true, new: true }
-    );
+      });
 
-    // 5. Create Staff for each role
-    console.log('👔 Creating Staff members...');
-    const roles = await Role.find({ isSystemRole: true });
-    for (const role of roles) {
-      if (role.name === StaffRole.SUPER_ADMIN) continue; // SuperAdmin is in separate collection
-
-      const email = `${role.name}@gmail.com`;
-      console.log(`   - Creating ${role.name}: ${email}`);
-      const staffData = {
+      console.log(`👔 Creating Owner Staff for ${name}`);
+      const ownerStaff = await Staff.create({
         restaurantId: restaurant._id,
         branchId: branch._id,
-        roleId: role._id,
-        name: `${role.displayName} User`,
-        email: email,
+        roleId: ownerRole?._id,
+        name: `${name} Owner`,
+        email: ownerEmail,
         phone: '1234567890',
         password,
         isActive: true,
         allowedBranchIds: [branch._id],
-      };
+      });
 
-      const staff = await Staff.findOneAndUpdate({ email }, staffData, { upsert: true, new: true });
+      await Restaurant.findByIdAndUpdate(restaurant._id, { ownerId: ownerStaff._id });
 
-      if (role.name === StaffRole.OWNER) {
-        await Restaurant.findByIdAndUpdate(restaurant._id, { ownerId: staff._id });
-      }
-    }
-
-    // 6. Create Category
-    console.log('📂 Creating Category: Burgers');
-    const category = await Category.findOneAndUpdate(
-      { restaurantId: restaurant._id, name: 'Burgers' },
-      {
+      // Add a category and menu item
+      const category = await Category.create({
         restaurantId: restaurant._id,
-        name: 'Burgers',
-        description: 'Delicious burgers',
+        name: 'General',
         displayOrder: 1,
         isActive: true,
         scope: 'restaurant',
-      },
-      { upsert: true, new: true }
-    );
+      });
 
-    // 7. Create Menu Item
-    console.log('🍔 Creating Menu Item: Classic Burger');
-    await MenuItem.findOneAndUpdate(
-      { restaurantId: restaurant._id, name: 'Classic Burger' },
-      {
+      await MenuItem.create({
         restaurantId: restaurant._id,
         categoryId: category._id,
-        name: 'Classic Burger',
-        description: 'Our signature burger',
-        price: 10.99,
+        name: `${name} Special`,
+        price: 15.0,
         itemType: 'food',
-        dietaryType: 'NON_VEG',
+        dietaryType: DietaryType.VEG,
         isActive: true,
         isAvailable: true,
         scope: 'restaurant',
-      },
-      { upsert: true }
-    );
+      });
 
-    // 8. Create Table
-    console.log('🪑 Creating Table: A1');
-    await Table.findOneAndUpdate(
-      { branchId: branch._id, tableNumber: 'A1' },
-      {
+      // Add a table
+      await Table.create({
         restaurantId: restaurant._id,
         branchId: branch._id,
-        tableNumber: 'A1',
-        qrCode: `QR-${restaurant.slug}-${branch.code}-A1`,
+        tableNumber: 'T1',
+        qrCode: `QR-${slug}-T1`,
         capacity: 4,
-        location: 'indoor',
         status: 'available',
         isActive: true,
-      },
-      { upsert: true }
-    );
+      });
+
+      return { restaurant, branch };
+    }
+
+    // Create one of each type
+    await createRestaurantData('Single Cafe', 'single-cafe', 'single', 'single@gmail.com', 1);
+    await createRestaurantData('Pizza Local', 'pizza-local', 'branch-wise', 'branch@gmail.com', 5);
+    await createRestaurantData('Burger Heaven', 'burger-heaven', 'chain', 'owner@gmail.com', 10);
 
     console.log('✨ Seeding completed successfully!');
     process.exit(0);
