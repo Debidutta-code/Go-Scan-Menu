@@ -8,6 +8,7 @@ import { InputField } from '@/shared/components/InputField';
 import { Button } from '@/shared/components/Button';
 import { createRestaurantSchema } from '@/shared/validations/restaurant.validation';
 import { CreateRestaurantDto } from '@/shared/types/restaurant.types';
+import { toast } from 'react-toastify';
 import './CreateRestaurant.css';
 
 export const CreateRestaurant: React.FC = () => {
@@ -18,7 +19,7 @@ export const CreateRestaurant: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
-    type: 'single' as 'single' | 'chain',
+    type: 'single' as 'single' | 'branch-wise' | 'chain',
     ownerName: '',
     ownerEmail: '',
     ownerPhone: '',
@@ -38,7 +39,19 @@ export const CreateRestaurant: React.FC = () => {
   const [generalError, setGeneralError] = useState('');
 
   const handleInputChange = (field: keyof typeof formData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Auto-set max branches based on type
+    let newMaxBranches = formData.maxBranches;
+    if (field === 'type') {
+      if (value === 'single') newMaxBranches = 1;
+      else if (value === 'branch-wise') newMaxBranches = 5;
+      else if (value === 'chain') newMaxBranches = 10;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+      maxBranches: field === 'type' ? newMaxBranches : prev.maxBranches,
+    }));
     // Clear error for this field
     if (errors[field]) {
       setErrors((prev) => {
@@ -117,7 +130,7 @@ export const CreateRestaurant: React.FC = () => {
       const response = await RestaurantService.createRestaurant(token, dataToValidate);
 
       if (response.success) {
-        alert('Restaurant created successfully!');
+        toast.success('Restaurant created successfully!');
         navigate('/restaurants');
       } else {
         setGeneralError(response.message || 'Failed to create restaurant');
@@ -188,13 +201,16 @@ export const CreateRestaurant: React.FC = () => {
               <label className="field-label">Restaurant Type</label>
               <select
                 value={formData.type}
-                onChange={(e) => handleInputChange('type', e.target.value as 'single' | 'chain')}
+                onChange={(e) =>
+                  handleInputChange('type', e.target.value as 'single' | 'branch-wise' | 'chain')
+                }
                 className="select-input"
                 disabled={loading}
                 data-testid="restaurant-type-select"
               >
-                <option value="single">Single Location</option>
-                <option value="chain">Chain (Multiple Locations)</option>
+                <option value="single">Single Restaurant (Outlet)</option>
+                <option value="branch-wise">Branch-wise</option>
+                <option value="chain">Chain</option>
               </select>
               {errors['type'] && <span className="field-error">{errors['type']}</span>}
             </div>

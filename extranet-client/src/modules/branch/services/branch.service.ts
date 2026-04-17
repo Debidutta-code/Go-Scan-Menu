@@ -51,4 +51,24 @@ export class BranchService {
       throw new Error(message);
     }
   }
+
+  static async createBranch(
+    token: string,
+    restaurantId: any,
+    data: any
+  ): Promise<ApiResponse<Branch>> {
+    try {
+      const rId = extractId(restaurantId);
+      const response = await axiosInstance.post(
+        `/restaurants/${rId}/branches`,
+        data,
+        { headers: this.getHeaders(token) }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to create branch';
+      throw new Error(message);
+    }
+  }
 }

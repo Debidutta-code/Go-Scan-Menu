@@ -4,7 +4,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 export interface IRestaurant extends Document {
   name: string;
   slug: string;
-  type: 'single' | 'chain';
+  type: 'single' | 'branch-wise' | 'chain';
   ownerId?: Types.ObjectId; // Reference to Staff model
   owner: {
     name: string;
@@ -61,7 +61,7 @@ const restaurantSchema = new Schema<IRestaurant>(
     },
     type: {
       type: String,
-      enum: ['single', 'chain'],
+      enum: ['single', 'branch-wise', 'chain'],
       required: true,
     },
     ownerId: {
