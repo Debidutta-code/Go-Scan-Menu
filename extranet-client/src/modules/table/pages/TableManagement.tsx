@@ -6,6 +6,7 @@ import { TableService } from '@/modules/table/services/table.service';
 import { BranchService } from '@/modules/branch/services/branch.service';
 import { Table, Branch } from '@/shared/types/table.types';
 import { Button } from '@/shared/components/Button';
+import { extractId } from '@/shared/utils/id.util';
 import { PermissionGuard } from '@/shared/components/PermissionGuard';
 import { RoleLevel, StaffRole } from '@/shared/types/role.types';
 import { QRCodeModal } from '@/modules/table/components/QRCodeModal';
@@ -58,8 +59,8 @@ export const TableManagement: React.FC = () => {
       // Load tables (now includes branch details)
       const tablesResponse = await TableService.getTables(
         token,
-        staff.restaurantId,
-        branchId,
+        extractId(staff.restaurantId),
+        extractId(branchId),
         1,
         1000
       );
@@ -83,8 +84,8 @@ export const TableManagement: React.FC = () => {
     if (!window.confirm(`Are you sure you want to delete table "${tableNumber}"?`)) return;
 
     try {
-      const rid = typeof staff.restaurantId === 'string' ? staff.restaurantId : staff.restaurantId._id;
-      const response = await TableService.deleteTable(token, rid, tableId);
+      const rid = extractId(staff.restaurantId);
+      const response = await TableService.deleteTable(token, rid, extractId(tableId));
       if (response.success) {
         alert('Table deleted successfully');
         loadData();
@@ -99,11 +100,11 @@ export const TableManagement: React.FC = () => {
     if (!staff || !token) return;
 
     try {
-      const rid = typeof staff.restaurantId === 'string' ? staff.restaurantId : staff.restaurantId._id;
+      const rid = extractId(staff.restaurantId);
       const response = await TableService.updateTableStatus(
         token,
         rid,
-        tableId,
+        extractId(tableId),
         newStatus
       );
       if (response.success) {
@@ -259,7 +260,7 @@ export const TableManagement: React.FC = () => {
           <PermissionGuard permission="tables.manageQR" minLevel={RoleLevel.RESTAURANT}>
             <Button
               variant="outline"
-              onClick={() => navigate(`/staff/tables/${branchId}/qr-settings`)}
+              onClick={() => navigate(`/staff/tables/${extractId(branchId)}/qr-settings`)}
               data-testid="manage-qr-button"
               size="sm"
             >

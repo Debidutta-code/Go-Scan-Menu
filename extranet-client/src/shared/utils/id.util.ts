@@ -11,7 +11,17 @@ export const extractId = (idOrObject: any): string => {
   if (!idOrObject) return '';
 
   if (typeof idOrObject === 'string') {
-    return (idOrObject === '[object Object]' || idOrObject === '[object%20Object]') ? '' : idOrObject;
+    // If it's a string, check if it's a stringified object
+    if (
+      idOrObject === '[object Object]' ||
+      idOrObject === '[object%20Object]' ||
+      idOrObject.startsWith('{') ||
+      idOrObject.includes('owner:') ||
+      idOrObject.includes('name:')
+    ) {
+      return '';
+    }
+    return idOrObject;
   }
 
   if (typeof idOrObject === 'object') {

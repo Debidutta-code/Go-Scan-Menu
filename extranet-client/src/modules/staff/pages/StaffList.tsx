@@ -7,6 +7,7 @@ import { StaffPermissionsService } from '@/modules/staff/services/staffPermissio
 import { Staff } from '@/shared/types/staff.types';
 import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
 import { Button } from '@/shared/components/Button';
+import { extractId } from '@/shared/utils/id.util';
 import { PermissionsModal } from '@/modules/staff/components/PermissionsModal';
 import { Plus, Edit, Trash2, Search, Shield, ShieldAlert } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -260,7 +261,7 @@ export const StaffList: React.FC = () => {
                                                     </button>
                                                     <button
                                                         className="icon-button edit"
-                                                        onClick={() => navigate(`/staff/team/edit/${staff._id}`)}
+                                                        onClick={() => navigate(`/staff/team/edit/${extractId(staff._id)}`)}
                                                         title="Edit"
                                                         data-testid={`edit-button-${staff._id}`}
                                                     >
