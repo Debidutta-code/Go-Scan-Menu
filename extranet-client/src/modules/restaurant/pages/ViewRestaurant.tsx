@@ -11,6 +11,7 @@ import { Staff, CreateStaffPayload } from '@/shared/types/staff.types';
 import { BranchService } from '@/modules/branch/services/branch.service';
 import { Button } from '@/shared/components/Button';
 import { InputField } from '@/shared/components/InputField';
+import { extractId } from '@/shared/utils/id.util';
 import { createStaffSchema } from '@/shared/validations/staff.validation';
 import { toast } from 'react-toastify';
 import './ViewRestaurant.css';
@@ -327,7 +328,7 @@ export const ViewRestaurant: React.FC = () => {
           <Button variant="outline" onClick={() => navigate('/restaurants')}>
             ← Back to List
           </Button>
-          <Button variant="primary" onClick={() => navigate(`/restaurants/${id}/edit`)}>
+          <Button variant="primary" onClick={() => navigate(`/restaurants/${extractId(id)}/edit`)}>
             ✏️ Edit Restaurant
           </Button>
           <Button variant="danger" onClick={handleDelete}>
@@ -652,7 +653,7 @@ export const ViewRestaurant: React.FC = () => {
                 </div>
 
                 <div className="branch-card-actions">
-                  <Button variant="outline" size="sm" onClick={() => navigate(`/staff/tables/${branch._id}`)}>
+                  <Button variant="outline" size="sm" onClick={() => navigate(`/staff/tables/${extractId(branch._id)}`)}>
                     View Tables
                   </Button>
                 </div>

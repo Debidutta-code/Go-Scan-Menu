@@ -135,10 +135,9 @@ export const Orders: React.FC = () => {
     const fetchBranchInfo = useCallback(async () => {
         if (!token || !staff || !targetBranchId) return;
         try {
-            const rid = typeof staff.restaurantId === 'string'
-                ? { _id: staff.restaurantId } : staff.restaurantId;
-            if (!rid?._id) return;
-            const response = await BranchService.getBranch(token, rid, targetBranchId);
+            const rid = extractId(staff.restaurantId);
+            if (!rid) return;
+            const response = await BranchService.getBranch(token, rid, extractId(targetBranchId));
             if (response.success && response.data) setBranchInfo(response.data);
         } catch (err) {
             console.error('Failed to load branch info:', err);
@@ -168,8 +167,7 @@ export const Orders: React.FC = () => {
         setError('');
 
         try {
-            const rid = typeof staff.restaurantId === 'string'
-                ? staff.restaurantId : staff.restaurantId?._id;
+            const rid = extractId(staff.restaurantId);
 
             if (!rid) {
                 setError('Restaurant ID not found');
@@ -179,7 +177,7 @@ export const Orders: React.FC = () => {
             const response = await OrderService.getBranchOrdersFull(
                 token,
                 rid,
-                targetBranchId,
+                extractId(targetBranchId),
                 {
                     status: filters.statuses.join(',') || undefined,
                     paymentStatus: filters.paymentStatuses.join(',') || undefined,
@@ -316,8 +314,7 @@ export const Orders: React.FC = () => {
     // ── Action handlers (these still use REST since they mutate data) ─────────
     const handleStatusUpdate = useCallback(async (orderId: string, newStatus: string) => {
         if (!token || !staff) throw new Error('Not authenticated');
-        const rid = typeof staff.restaurantId === 'string'
-            ? staff.restaurantId : staff.restaurantId?._id;
+        const rid = extractId(staff.restaurantId);
         if (!rid) throw new Error('Restaurant ID not found');
 
         const response = await OrderService.updateOrderStatus(token, rid, orderId, newStatus);
@@ -331,8 +328,7 @@ export const Orders: React.FC = () => {
 
     const handleCancelOrder = useCallback(async (orderId: string) => {
         if (!token || !staff) throw new Error('Not authenticated');
-        const rid = typeof staff.restaurantId === 'string'
-            ? staff.restaurantId : staff.restaurantId?._id;
+        const rid = extractId(staff.restaurantId);
         if (!rid) throw new Error('Restaurant ID not found');
 
         const response = await OrderService.cancelOrder(token, rid, orderId);
@@ -346,8 +342,7 @@ export const Orders: React.FC = () => {
 
     const handlePaymentUpdate = useCallback(async (orderId: string, paymentStatus: string) => {
         if (!token || !staff) throw new Error('Not authenticated');
-        const rid = typeof staff.restaurantId === 'string'
-            ? staff.restaurantId : staff.restaurantId?._id;
+        const rid = extractId(staff.restaurantId);
         if (!rid) throw new Error('Restaurant ID not found');
 
         const response = await OrderService.updatePaymentStatus(token, rid, orderId, paymentStatus);

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/modules/auth/contexts/AuthContext';
 import { RestaurantService } from '@/modules/restaurant/services/restaurant.service';
 import { Restaurant, RestaurantFilters } from '@/shared/types/restaurant.types';
+import { extractId } from '@/shared/utils/id.util';
 import { toast } from 'react-toastify';
 import './RestaurantList.css';
 
@@ -293,7 +294,7 @@ export const RestaurantList: React.FC = () => {
                       <div className="action-buttons">
                         <button
                           className="btn-action btn-view"
-                          onClick={() => navigate(`/restaurants/${restaurant._id}`)}
+                          onClick={() => navigate(`/restaurants/${extractId(restaurant._id)}`)}
                           title="View Restaurant Details"
                           aria-label={`View ${restaurant.name}`}
                           data-testid={`view-restaurant-${restaurant._id}`}
@@ -303,7 +304,7 @@ export const RestaurantList: React.FC = () => {
 
                         <button
                           className="btn-action btn-edit"
-                          onClick={() => navigate(`/restaurants/${restaurant._id}/edit`)}
+                          onClick={() => navigate(`/restaurants/${extractId(restaurant._id)}/edit`)}
                           title="Edit Restaurant"
                           aria-label={`Edit ${restaurant.name}`}
                           data-testid={`edit-restaurant-${restaurant._id}`}

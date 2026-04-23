@@ -7,6 +7,7 @@ import { RestaurantService } from '@/modules/restaurant/services/restaurant.serv
 import { Restaurant } from '@/shared/types/restaurant.types';
 import { Button } from '@/shared/components/Button';
 import { InputField } from '@/shared/components/InputField';
+import { extractId } from '@/shared/utils/id.util';
 import {
   updateThemeSchema,
   updateSubscriptionSchema,
@@ -278,7 +279,7 @@ export const EditRestaurant: React.FC = () => {
           <p className="page-subtitle">{restaurant?.name || 'Loading...'}</p>
         </div>
         <div className="header-actions">
-          <Button variant="outline" onClick={() => navigate(`/restaurants/${id}`)}>
+          <Button variant="outline" onClick={() => navigate(`/restaurants/${extractId(id)}`)}>
             ← View Restaurant
           </Button>
         </div>
