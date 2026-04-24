@@ -72,13 +72,14 @@ export const ViewRestaurant: React.FC = () => {
   }, [id, token]);
 
   const loadRestaurant = async () => {
-    if (!id || !token) return;
+    const rId = extractId(id);
+    if (!rId || !token) return;
 
     setLoading(true);
     setError('');
 
     try {
-      const response = await RestaurantService.getRestaurant(token, id);
+      const response = await RestaurantService.getRestaurant(token, rId);
 
       if (response.success && response.data) {
         setRestaurant(response.data);
@@ -93,12 +94,13 @@ export const ViewRestaurant: React.FC = () => {
   };
 
   const loadBranches = async () => {
-    if (!id || !token) return;
+    const rId = extractId(id);
+    if (!rId || !token) return;
 
     setBranchLoading(true);
 
     try {
-      const response = await BranchService.getBranches(token, id);
+      const response = await BranchService.getBranches(token, rId);
 
       if (response.success && response.data) {
         setBranches(response.data.branches || []);
@@ -111,7 +113,8 @@ export const ViewRestaurant: React.FC = () => {
   };
 
   const handleAddBranch = async () => {
-    if (!id || !token) return;
+    const rId = extractId(id);
+    if (!rId || !token) return;
 
     if (!branchFormData.name || !branchFormData.code || !branchFormData.email || !branchFormData.phone) {
       toast.warning('Please fill in all required branch details');
@@ -121,10 +124,10 @@ export const ViewRestaurant: React.FC = () => {
     setBranchLoading(true);
 
     try {
-      const response = await BranchService.createBranch(token, id, branchFormData);
+      const response = await BranchService.createBranch(token, rId, branchFormData);
 
       if (response.success) {
-        toast.success('Branch added successfully!');
+        toast.success('Sub-branch added successfully!');
         setShowAddBranchForm(false);
         setBranchFormData({
           name: '',
@@ -152,12 +155,13 @@ export const ViewRestaurant: React.FC = () => {
   };
 
   const loadStaff = async () => {
-    if (!id || !token) return;
+    const rId = extractId(id);
+    if (!rId || !token) return;
 
     setStaffLoading(true);
 
     try {
-      const response = await StaffService.getStaffByRestaurant(token, id);
+      const response = await StaffService.getStaffByRestaurant(token, rId);
 
       if (response.success && response.data && Array.isArray(response.data.staff)) {
         setStaffList(response.data.staff);
@@ -173,12 +177,11 @@ export const ViewRestaurant: React.FC = () => {
   };
 
   const handleAddStaff = async () => {
-    if (!id || !token) return;
+    const rId = extractId(id);
+    if (!rId || !token) return;
 
     // Validate form data
     const result = createStaffSchema.safeParse(staffFormData);
-
-    console.log('Validation result:', result);
 
     if (!result.success) {
       const fieldErrors: typeof staffFormErrors = {};
@@ -197,7 +200,7 @@ export const ViewRestaurant: React.FC = () => {
     try {
       const payload: CreateStaffPayload = {
         ...staffFormData,
-        restaurantId: id,
+        restaurantId: rId,
       };
 
       const response = await StaffService.createStaff(token, payload);
@@ -249,7 +252,8 @@ export const ViewRestaurant: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    if (!id || !token || !restaurant) return;
+    const rId = extractId(id);
+    if (!rId || !token || !restaurant) return;
 
     if (
       !window.confirm(
@@ -260,16 +264,16 @@ export const ViewRestaurant: React.FC = () => {
     }
 
     try {
-      const response = await RestaurantService.deleteRestaurant(token, id);
+      const response = await RestaurantService.deleteRestaurant(token, rId);
 
       if (response.success) {
-        toast.success('Restaurant deleted successfully');
+        toast.success('Establishment deleted successfully');
         navigate('/restaurants');
       } else {
-        toast.error(response.message || 'Failed to delete restaurant');
+        toast.error(response.message || 'Failed to delete establishment');
       }
     } catch (err: any) {
-      toast.error(err.message || 'An error occurred while deleting the restaurant');
+      toast.error(err.message || 'An error occurred while deleting');
     }
   };
 
@@ -286,7 +290,7 @@ export const ViewRestaurant: React.FC = () => {
   if (loading) {
     return (
       <div className="view-restaurant-container">
-        <div className="loading-state">Loading restaurant details...</div>
+        <div className="loading-state">Loading details...</div>
       </div>
     );
   }
@@ -296,7 +300,7 @@ export const ViewRestaurant: React.FC = () => {
       <div className="view-restaurant-container">
         <div className="error-state">
           <h2>Error</h2>
-          <p>{error || 'Restaurant not found'}</p>
+          <p>{error || 'Establishment not found'}</p>
           <Button onClick={() => navigate('/restaurants')} variant="outline">
             ← Back to List
           </Button>
@@ -304,6 +308,8 @@ export const ViewRestaurant: React.FC = () => {
       </div>
     );
   }
+
+  const isMultiBranch = restaurant.type !== 'single';
 
   return (
     <div className="view-restaurant-container">
@@ -319,8 +325,8 @@ export const ViewRestaurant: React.FC = () => {
               {restaurant.isActive ? 'Active' : 'Inactive'}
             </span>
             <span className="type-badge">
-              {restaurant.type === 'single' ? 'Single Restaurant' :
-               restaurant.type === 'branch-wise' ? 'Branch-wise' : 'Chain'}
+              {restaurant.type === 'single' ? '🏠 Single Restaurant' :
+               restaurant.type === 'branch-wise' ? '🏢 Branch-wise' : '🌐 Main Branch (Chain)'}
             </span>
           </div>
         </div>
@@ -329,10 +335,10 @@ export const ViewRestaurant: React.FC = () => {
             ← Back to List
           </Button>
           <Button variant="primary" onClick={() => navigate(`/restaurants/${extractId(id)}/edit`)}>
-            ✏️ Edit Restaurant
+            ✏️ Edit
           </Button>
           <Button variant="danger" onClick={handleDelete}>
-            🗑️ Delete Restaurant
+            🗑️ Delete
           </Button>
         </div>
       </div>
@@ -349,7 +355,7 @@ export const ViewRestaurant: React.FC = () => {
           className={`tab-button ${activeTab === 'branches' ? 'active' : ''}`}
           onClick={() => setActiveTab('branches')}
         >
-          Branches ({restaurant.subscription.currentBranches})
+          {isMultiBranch ? 'Branches' : 'Location'} ({restaurant.subscription.currentBranches})
         </button>
         <button
           className={`tab-button ${activeTab === 'staff' ? 'active' : ''}`}
@@ -363,10 +369,10 @@ export const ViewRestaurant: React.FC = () => {
         <>
       {/* Metadata */}
       <div className="info-section">
-        <h2 className="section-title">Metadata</h2>
+        <h2 className="section-title">Establishment Metadata</h2>
         <div className="info-grid">
           <div className="info-item">
-            <label className="info-label">Restaurant ID</label>
+            <label className="info-label">Internal ID</label>
             <p className="info-value mono">{restaurant._id}</p>
           </div>
           <div className="info-item">
@@ -382,7 +388,7 @@ export const ViewRestaurant: React.FC = () => {
 
       {/* Owner Information */}
       <div className="info-section">
-        <h2 className="section-title">Owner Information</h2>
+        <h2 className="section-title">Primary Administrator</h2>
         <div className="info-grid">
           <div className="info-item">
             <label className="info-label">Full Name</label>
@@ -407,7 +413,7 @@ export const ViewRestaurant: React.FC = () => {
 
       {/* Subscription Details */}
       <div className="info-section">
-        <h2 className="section-title">Subscription Details</h2>
+        <h2 className="section-title">Subscription & Limits</h2>
         <div className="info-grid">
           <div className="info-item">
             <label className="info-label">Plan</label>
@@ -447,7 +453,7 @@ export const ViewRestaurant: React.FC = () => {
 
       {/* Theme Settings */}
       <div className="info-section">
-        <h2 className="section-title">Theme Settings</h2>
+        <h2 className="section-title">Visual Branding</h2>
         <div className="info-grid">
           <div className="info-item">
             <label className="info-label">Primary Color</label>
@@ -485,64 +491,16 @@ export const ViewRestaurant: React.FC = () => {
               {restaurant.theme.font}
             </p>
           </div>
-
-          {restaurant.theme.logo && (
-            <div className="info-item full-width">
-              <label className="info-label">Logo</label>
-              <div className="theme-image-container">
-                <img
-                  src={restaurant.theme.logo}
-                  alt="Restaurant Logo"
-                  className="theme-image logo"
-                />
-              </div>
-            </div>
-          )}
-
-          {restaurant.theme.bannerImage && (
-            <div className="info-item full-width">
-              <label className="info-label">Banner Image</label>
-              <div className="theme-image-container">
-                <img
-                  src={restaurant.theme.bannerImage}
-                  alt="Restaurant Banner"
-                  className="theme-image banner"
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
-
-      {/* Default Settings */}
-      <div className="info-section">
-        <h2 className="section-title">Default Settings</h2>
-        <div className="info-grid">
-          <div className="info-item">
-            <label className="info-label">Currency</label>
-            <p className="info-value">{restaurant.defaultSettings.currency}</p>
-          </div>
-          <div className="info-item">
-            <label className="info-label">Service Charge</label>
-            <p className="info-value">{restaurant.defaultSettings.serviceChargePercentage}%</p>
-          </div>
-          <div className="info-item">
-            <label className="info-label">Allow Branch Override</label>
-            <p className="info-value">
-              {restaurant.defaultSettings.allowBranchOverride ? 'Yes' : 'No'}
-            </p>
-          </div>
-        </div>
-      </div>
-
         </>
       )}
 
       {activeTab === 'branches' && (
         <div className="info-section">
           <div className="section-header">
-            <h2 className="section-title">Branch Management</h2>
-            {restaurant.type !== 'single' && (
+            <h2 className="section-title">{isMultiBranch ? 'Branch Management' : 'Location Details'}</h2>
+            {isMultiBranch && (
               <Button
                 variant="primary"
                 onClick={() => setShowAddBranchForm(!showAddBranchForm)}
@@ -617,7 +575,7 @@ export const ViewRestaurant: React.FC = () => {
               </div>
               <div className="form-actions">
                 <Button variant="primary" onClick={handleAddBranch} loading={branchLoading}>
-                  Create Branch
+                  Create Sub-branch
                 </Button>
               </div>
             </div>
@@ -668,13 +626,13 @@ export const ViewRestaurant: React.FC = () => {
       {/* Staff Management */}
       <div className="info-section">
         <div className="section-header">
-          <h2 className="section-title">Staff Management</h2>
+          <h2 className="section-title">System Users</h2>
           <Button
             variant="primary"
             onClick={() => setShowAddStaffForm(!showAddStaffForm)}
             data-testid="add-staff-button"
           >
-            {showAddStaffForm ? 'Cancel' : '+ Add Staff'}
+            {showAddStaffForm ? 'Cancel' : '+ Add User'}
           </Button>
         </div>
 
@@ -724,7 +682,7 @@ export const ViewRestaurant: React.FC = () => {
               />
 
               <div className="input-group">
-                <label className="input-label">Role</label>
+                <label className="input-label">System Role</label>
                 <select
                   className={`role-select ${staffFormErrors.staffType ? 'error' : ''}`}
                   value={staffFormData.staffType}
@@ -757,7 +715,7 @@ export const ViewRestaurant: React.FC = () => {
                 loading={staffLoading}
                 data-testid="submit-staff-button"
               >
-                Add Staff
+                Create User
               </Button>
             </div>
           </div>
@@ -766,7 +724,7 @@ export const ViewRestaurant: React.FC = () => {
         {/* Staff List */}
         <div className="staff-list">
           {staffLoading && !showAddStaffForm ? (
-            <div className="loading-state">Loading staff...</div>
+            <div className="loading-state">Loading users...</div>
           ) : staffList.length === 0 ? (
             <div className="empty-state">
               <p>No staff members found. Add your first staff member above.</p>
@@ -792,8 +750,8 @@ export const ViewRestaurant: React.FC = () => {
                       <td>{staff.phone || '—'}</td>
                       <td>
                         <span className="role-badge">
-                          {staff.staffType
-                            .replace('_', ' ')
+                          {(staff.roleName || staff.staffType)
+                            ?.replace('_', ' ')
                             .replace(/\b\w/g, (l) => l.toUpperCase())}
                         </span>
                       </td>
@@ -807,6 +765,7 @@ export const ViewRestaurant: React.FC = () => {
                           variant="danger"
                           onClick={() => handleDeleteStaff(staff._id, staff.name)}
                           data-testid={`delete-staff-${staff._id}`}
+                          size="sm"
                         >
                           Delete
                         </Button>

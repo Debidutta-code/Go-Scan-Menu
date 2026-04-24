@@ -46,6 +46,7 @@
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
+  margin-bottom: 24px;
 }
 
 .form-section {
@@ -109,6 +110,72 @@
   font-size: 13px;
   color: #e53e3e;
   margin-top: 4px;
+}
+
+/* Type Selection Cards */
+.type-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.type-card {
+  padding: 24px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  background: white;
+}
+
+.type-card:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.type-card.selected {
+  border-color: #667eea;
+  background: #f0f4ff;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.type-card-icon {
+  font-size: 40px;
+}
+
+.type-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+.type-card-description {
+  font-size: 14px;
+  color: #718096;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.type-card-badge {
+  font-size: 12px;
+  font-weight: 600;
+  background: #edf2f7;
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: #4a5568;
+}
+
+.type-card.selected .type-card-badge {
+  background: #667eea;
+  color: white;
 }
 
 .slug-field-group {
@@ -175,6 +242,44 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* Step navigation */
+.step-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+.step-item.active {
+  color: #667eea;
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.step-line {
+  width: 40px;
+  height: 2px;
+  background: #e2e8f0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .create-restaurant-container {
@@ -200,5 +305,9 @@
 
   .form-actions button {
     width: 100%;
+  }
+
+  .type-selection-grid {
+    grid-template-columns: 1fr;
   }
 }

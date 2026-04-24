@@ -119,6 +119,30 @@ async function reseed() {
           staff: { ...fullPerms.staff, manageRoles: false, delete: false },
         },
       },
+      {
+        name: StaffRole.KITCHEN_STAFF,
+        displayName: 'Kitchen Staff',
+        description: 'Kitchen staff for food preparation',
+        level: RoleLevel.OPERATIONAL,
+        accessScope: AccessScope.BRANCH_SINGLE,
+        isSystemRole: true,
+        permissions: {
+          ...fullPerms,
+          staff: { ...fullPerms.staff, manageRoles: false, delete: false },
+        },
+      },
+      {
+        name: StaffRole.CASHIER,
+        displayName: 'Cashier',
+        description: 'Staff for handling payments',
+        level: RoleLevel.OPERATIONAL,
+        accessScope: AccessScope.BRANCH_SINGLE,
+        isSystemRole: true,
+        permissions: {
+          ...fullPerms,
+          staff: { ...fullPerms.staff, manageRoles: false, delete: false },
+        },
+      },
     ];
 
     for (const roleData of rolesToSeed) {
@@ -171,7 +195,7 @@ async function reseed() {
           currentBranches: 1,
         },
         theme: {
-          primaryColor: '#3498db',
+          primaryColor: '#4f46e5',
           secondaryColor: '#95a5a6',
           accentColor: '#e74c3c',
           font: 'Roboto',
@@ -187,16 +211,16 @@ async function reseed() {
       console.log(`🏢 Creating Main Branch for ${name}`);
       const branch = await Branch.create({
         restaurantId: restaurant._id,
-        name: `${name} - Main`,
-        code: `${slug.substring(0, 2).toUpperCase()}01`,
+        name: `${name} - Main Branch`,
+        code: `MAIN`,
         isMain: true,
         email: `branch@${slug}.com`,
         phone: '0987654321',
         address: {
-          street: 'Main Street',
-          city: 'City',
+          street: '123 Main Street',
+          city: 'Capital City',
           state: 'State',
-          zipCode: '00000',
+          zipCode: '10001',
           country: 'Country',
           coordinates: { latitude: 0, longitude: 0 },
         },
@@ -239,7 +263,7 @@ async function reseed() {
       // Add a category and menu item
       const category = await Category.create({
         restaurantId: restaurant._id,
-        name: 'General',
+        name: 'Signature Dishes',
         displayOrder: 1,
         isActive: true,
         scope: 'restaurant',
@@ -261,11 +285,12 @@ async function reseed() {
       await Table.create({
         restaurantId: restaurant._id,
         branchId: branch._id,
-        tableNumber: 'T1',
-        qrCode: `QR-${slug}-T1`,
+        tableNumber: '1',
+        qrCode: `QR-${slug}-1`,
         capacity: 4,
         status: 'available',
         isActive: true,
+        location: 'indoor',
       });
 
       return { restaurant, branch };
