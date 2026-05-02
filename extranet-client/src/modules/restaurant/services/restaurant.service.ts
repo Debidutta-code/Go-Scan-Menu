@@ -3,12 +3,11 @@
 import { Restaurant, CreateRestaurantDto, PaginatedResponse } from '@/shared/types/restaurant.types';
 import { ApiResponse } from '@/shared/types';
 import { extractId } from '@/shared/utils/id.util';
-import env from '@/shared/config/env';
+import axiosInstance from '@/shared/services/axios.service';
 
 export class RestaurantService {
-  private static getHeaders(token: string): HeadersInit {
+  private static getHeaders(token: string): Record<string, string> {
     return {
-      'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     };
   }
@@ -28,11 +27,11 @@ export class RestaurantService {
       params.append('filter', JSON.stringify(filters));
     }
 
-    const response = await fetch(`${env.API_BASE_URL}/restaurants?${params}`, {
+    const response = await axiosInstance.get(`/restaurants?${params}`, {
       headers: this.getHeaders(token),
     });
 
-    return response.json();
+    return response.data;
   }
 
   static async getRestaurant(
@@ -40,24 +39,22 @@ export class RestaurantService {
     id: any
   ): Promise<ApiResponse<Restaurant>> {
     const rId = extractId(id);
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}`, {
+    const response = await axiosInstance.get(`/restaurants/${rId}`, {
       headers: this.getHeaders(token),
     });
 
-    return response.json();
+    return response.data;
   }
 
   static async createRestaurant(
     token: string,
     data: CreateRestaurantDto
   ): Promise<ApiResponse<{ restaurant: Restaurant }>> {
-    const response = await fetch(`${env.API_BASE_URL}/restaurants`, {
-      method: 'POST',
+    const response = await axiosInstance.post(`/restaurants`, data, {
       headers: this.getHeaders(token),
-      body: JSON.stringify(data),
     });
 
-    return response.json();
+    return response.data;
   }
 
   static async updateRestaurant(
@@ -66,13 +63,11 @@ export class RestaurantService {
     data: Partial<Restaurant>
   ): Promise<ApiResponse<Restaurant>> {
     const rId = extractId(id);
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}`, {
-      method: 'PUT',
+    const response = await axiosInstance.put(`/restaurants/${rId}`, data, {
       headers: this.getHeaders(token),
-      body: JSON.stringify(data),
     });
 
-    return response.json();
+    return response.data;
   }
 
   static async deleteRestaurant(
@@ -80,12 +75,11 @@ export class RestaurantService {
     id: any
   ): Promise<ApiResponse<Restaurant>> {
     const rId = extractId(id);
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}`, {
-      method: 'DELETE',
+    const response = await axiosInstance.delete(`/restaurants/${rId}`, {
       headers: this.getHeaders(token),
     });
 
-    return response.json();
+    return response.data;
   }
   
   static async updateTheme(
@@ -94,13 +88,11 @@ export class RestaurantService {
     theme: Partial<Restaurant['theme']>
   ): Promise<ApiResponse<Restaurant>> {
     const rId = extractId(id);
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}/theme`, {
-      method: 'PUT',
+    const response = await axiosInstance.put(`/restaurants/${rId}/theme`, theme, {
       headers: this.getHeaders(token),
-      body: JSON.stringify(theme),
     });
 
-    return response.json();
+    return response.data;
   }
 
   static async updateSubscription(
@@ -109,13 +101,11 @@ export class RestaurantService {
     subscription: Partial<Restaurant['subscription']>
   ): Promise<ApiResponse<Restaurant>> {
     const rId = extractId(id);
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}/subscription`, {
-      method: 'PUT',
+    const response = await axiosInstance.put(`/restaurants/${rId}/subscription`, subscription, {
       headers: this.getHeaders(token),
-      body: JSON.stringify(subscription),
     });
 
-    return response.json();
+    return response.data;
   }
 
   static async updateSettings(
@@ -124,13 +114,11 @@ export class RestaurantService {
     settings: Partial<Restaurant['defaultSettings']>
   ): Promise<ApiResponse<Restaurant>> {
     const rId = extractId(id);
-    const response = await fetch(`${env.API_BASE_URL}/restaurants/${rId}/settings`, {
-      method: 'PUT',
+    const response = await axiosInstance.put(`/restaurants/${rId}/settings`, settings, {
       headers: this.getHeaders(token),
-      body: JSON.stringify(settings),
     });
 
-    return response.json();
+    return response.data;
   }
 
 }

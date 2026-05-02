@@ -116,6 +116,30 @@ async function reseed() {
           staff: { ...fullPerms.staff, manageRoles: false, delete: false },
         },
       },
+      {
+        name: StaffRole.KITCHEN_STAFF,
+        displayName: 'Kitchen Staff',
+        description: 'Staff responsible for preparing orders',
+        level: RoleLevel.OPERATIONAL,
+        accessScope: AccessScope.BRANCH_SINGLE,
+        isSystemRole: true,
+        permissions: {
+          ...fullPerms,
+          staff: { ...fullPerms.staff, manageRoles: false, delete: false },
+        },
+      },
+      {
+        name: StaffRole.CASHIER,
+        displayName: 'Cashier',
+        description: 'Staff responsible for payments',
+        level: RoleLevel.OPERATIONAL,
+        accessScope: AccessScope.BRANCH_SINGLE,
+        isSystemRole: true,
+        permissions: {
+          ...fullPerms,
+          staff: { ...fullPerms.staff, manageRoles: false, delete: false },
+        },
+      },
     ];
 
     for (const roleData of rolesToSeed) {

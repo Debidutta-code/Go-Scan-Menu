@@ -1,6 +1,6 @@
 // src/services/menu.service.ts
 
-import env from '@/shared/config/env';
+import axiosInstance from '@/shared/services/axios.service';
 import { ApiResponse } from '@/shared/types';
 import { extractId } from '@/shared/utils/id.util';
 import {
@@ -13,68 +13,41 @@ import {
 } from '@/shared/types/menu.types';
 
 export class MenuService {
-  private static getHeaders(token?: string | null): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
+  private static getHeaders(token?: string | null): Record<string, string> {
+    const headers: Record<string, string> = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
     return headers;
   }
 
-  static async request<T>(
-    endpoint: string,
-    options: RequestInit = {},
-    token?: string | null
-  ): Promise<ApiResponse<T>> {
-    try {
-      const response = await fetch(`${env.API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers: this.getHeaders(token),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Request failed');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
-    }
-  }
-
   // Category APIs
   static async getCategories(token: string, restaurantId: any) {
     const rId = extractId(restaurantId);
-    return this.request<CategoryListResponse>(
+    const response = await axiosInstance.get<ApiResponse<CategoryListResponse>>(
       `/restaurants/${rId}/categories`,
-      {},
-      token
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   static async getCategory(token: string, restaurantId: any, categoryId: string) {
     const rId = extractId(restaurantId);
-    return this.request<Category>(
+    const response = await axiosInstance.get<ApiResponse<Category>>(
       `/restaurants/${rId}/categories/${categoryId}`,
-      {},
-      token
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   static async createCategory(token: string, restaurantId: any, payload: CreateCategoryPayload) {
     const rId = extractId(restaurantId);
-    return this.request<Category>(
+    const response = await axiosInstance.post<ApiResponse<Category>>(
       `/restaurants/${rId}/categories`,
-      {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      },
-      token
+      payload,
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   static async updateCategory(
@@ -84,14 +57,12 @@ export class MenuService {
     payload: Partial<CreateCategoryPayload>
   ) {
     const rId = extractId(restaurantId);
-    return this.request<Category>(
+    const response = await axiosInstance.put<ApiResponse<Category>>(
       `/restaurants/${rId}/categories/${categoryId}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-      },
-      token
+      payload,
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   /**
@@ -99,16 +70,15 @@ export class MenuService {
    * Uses public endpoint (no auth required)
    */
   static async getCategoryCount(
-    token: string,
+    _token: string,
     restaurantId: any,
     scope: 'restaurant' | 'branch' = 'restaurant'
   ) {
     const rId = extractId(restaurantId);
-    return this.request<{ count: number }>(
-      `/categories/public/${rId}/count?scope=${scope}`,
-      {},
-      null // No token needed for public endpoint
+    const response = await axiosInstance.get<ApiResponse<{ count: number }>>(
+      `/public/categories/${rId}/count?scope=${scope}`
     );
+    return response.data;
   }
 
   // Menu Item APIs
@@ -119,20 +89,20 @@ export class MenuService {
     limit: number = 50
   ) {
     const rId = extractId(restaurantId);
-    return this.request<MenuItemListResponse>(
+    const response = await axiosInstance.get<ApiResponse<MenuItemListResponse>>(
       `/restaurants/${rId}/menu-items?page=${page}&limit=${limit}`,
-      {},
-      token
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   static async getMenuItem(token: string, restaurantId: any, menuItemId: string) {
     const rId = extractId(restaurantId);
-    return this.request<MenuItem>(
+    const response = await axiosInstance.get<ApiResponse<MenuItem>>(
       `/restaurants/${rId}/menu-items/${menuItemId}`,
-      {},
-      token
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   static async getMenuItemsByCategory(
@@ -143,11 +113,11 @@ export class MenuService {
     limit: number = 50
   ) {
     const rId = extractId(restaurantId);
-    return this.request<MenuItemListResponse>(
+    const response = await axiosInstance.get<ApiResponse<MenuItemListResponse>>(
       `/restaurants/${rId}/menu-items/category/${categoryId}?page=${page}&limit=${limit}`,
-      {},
-      token
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   static async createMenuItem(
@@ -156,14 +126,12 @@ export class MenuService {
     payload: CreateMenuItemPayload
   ) {
     const rId = extractId(restaurantId);
-    return this.request<MenuItem>(
+    const response = await axiosInstance.post<ApiResponse<MenuItem>>(
       `/restaurants/${rId}/menu-items`,
-      {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      },
-      token
+      payload,
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   static async updateMenuItem(
@@ -173,14 +141,12 @@ export class MenuService {
     payload: Partial<CreateMenuItemPayload>
   ) {
     const rId = extractId(restaurantId);
-    return this.request<MenuItem>(
+    const response = await axiosInstance.put<ApiResponse<MenuItem>>(
       `/restaurants/${rId}/menu-items/${menuItemId}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-      },
-      token
+      payload,
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   static async updateAvailability(
@@ -190,25 +156,21 @@ export class MenuService {
     isAvailable: boolean
   ) {
     const rId = extractId(restaurantId);
-    return this.request<MenuItem>(
+    const response = await axiosInstance.patch<ApiResponse<MenuItem>>(
       `/restaurants/${rId}/menu-items/${menuItemId}/availability`,
-      {
-        method: 'PATCH',
-        body: JSON.stringify({ isAvailable }),
-      },
-      token
+      { isAvailable },
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   static async deleteMenuItem(token: string, restaurantId: any, menuItemId: string) {
     const rId = extractId(restaurantId);
-    return this.request<MenuItem>(
+    const response = await axiosInstance.delete<ApiResponse<MenuItem>>(
       `/restaurants/${rId}/menu-items/${menuItemId}`,
-      {
-        method: 'DELETE',
-      },
-      token
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   static async updateCategoryDisplayOrder(
@@ -218,13 +180,11 @@ export class MenuService {
     displayOrder: number
   ) {
     const rId = extractId(restaurantId);
-    return this.request<Category>(
+    const response = await axiosInstance.patch<ApiResponse<Category>>(
       `/restaurants/${rId}/categories/${categoryId}/display-order`,
-      {
-        method: 'PATCH',
-        body: JSON.stringify({ displayOrder }),
-      },
-      token
+      { displayOrder },
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 }

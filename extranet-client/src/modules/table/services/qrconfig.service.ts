@@ -1,6 +1,6 @@
 // src/services/qrconfig.service.ts
 
-import env from '@/shared/config/env';
+import axiosInstance from '@/shared/services/axios.service';
 import { ApiResponse } from '@/shared/types';
 import { extractId } from '@/shared/utils/id.util';
 
@@ -24,9 +24,8 @@ export interface QRConfig {
 }
 
 export class QRConfigService {
-  private static getHeaders(token: string): HeadersInit {
+  private static getHeaders(token: string): Record<string, string> {
     return {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     };
   }
@@ -35,26 +34,11 @@ export class QRConfigService {
     token: string,
     restaurantId: any
   ): Promise<ApiResponse<QRConfig>> {
-    try {
-      const rId = extractId(restaurantId);
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rId}/qr-config`,
-        {
-          method: 'GET',
-          headers: this.getHeaders(token),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch QR config');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
-    }
+    const rId = extractId(restaurantId);
+    const response = await axiosInstance.get(`/restaurants/${rId}/qr-config`, {
+      headers: this.getHeaders(token),
+    });
+    return response.data;
   }
 
   static async saveQRConfig(
@@ -62,78 +46,36 @@ export class QRConfigService {
     restaurantId: any,
     config: Partial<QRConfig>
   ): Promise<ApiResponse<QRConfig>> {
-    try {
-      const rId = extractId(restaurantId);
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rId}/qr-config`,
-        {
-          method: 'POST',
-          headers: this.getHeaders(token),
-          body: JSON.stringify(config),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to save QR config');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
-    }
+    const rId = extractId(restaurantId);
+    const response = await axiosInstance.post(
+      `/restaurants/${rId}/qr-config`,
+      config,
+      { headers: this.getHeaders(token) }
+    );
+    return response.data;
   }
 
   static async resetQRConfig(
     token: string,
     restaurantId: any
   ): Promise<ApiResponse<QRConfig>> {
-    try {
-      const rId = extractId(restaurantId);
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rId}/qr-config/reset`,
-        {
-          method: 'POST',
-          headers: this.getHeaders(token),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to reset QR config');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
-    }
+    const rId = extractId(restaurantId);
+    const response = await axiosInstance.post(
+      `/restaurants/${rId}/qr-config/reset`,
+      {},
+      { headers: this.getHeaders(token) }
+    );
+    return response.data;
   }
 
   static async deleteQRConfig(
     token: string,
     restaurantId: any
   ): Promise<ApiResponse<QRConfig>> {
-    try {
-      const rId = extractId(restaurantId);
-      const response = await fetch(
-        `${env.API_BASE_URL}/restaurants/${rId}/qr-config`,
-        {
-          method: 'DELETE',
-          headers: this.getHeaders(token),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete QR config');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
-    }
+    const rId = extractId(restaurantId);
+    const response = await axiosInstance.delete(`/restaurants/${rId}/qr-config`, {
+      headers: this.getHeaders(token),
+    });
+    return response.data;
   }
 }

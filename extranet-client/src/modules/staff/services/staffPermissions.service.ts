@@ -1,73 +1,48 @@
 // src/services/staffPermissions.service.ts
 
-import env from '@/shared/config/env';
+import axiosInstance from '@/shared/services/axios.service';
 import { ApiResponse } from '@/shared/types';
 import { extractId } from '@/shared/utils/id.util';
 import { IStaffTypePermissions, StaffType, UpdatePermissionsPayload } from '@/shared/types/staffPermissions.types';
 import { Role } from '@/shared/types/role.types';
 
 export class StaffPermissionsService {
-  private static getHeaders(token?: string | null): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
+  private static getHeaders(token?: string | null): Record<string, string> {
+    const headers: Record<string, string> = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
     return headers;
   }
 
-  private static async request<T>(
-    endpoint: string,
-    options: RequestInit = {},
-    token?: string | null
-  ): Promise<ApiResponse<T>> {
-    try {
-      const response = await fetch(`${env.API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers: this.getHeaders(token),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Request failed');
-      }
-
-      return data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Network error');
-    }
-  }
-
   // GET all staff type permissions for a restaurant (including levels and details)
   static async getAllRestaurantRoles(token: string, restaurantId: any) {
     const rId = extractId(restaurantId);
-    return this.request<Role[]>(
+    const response = await axiosInstance.get<ApiResponse<Role[]>>(
       `/staff-type-permissions/${rId}`,
-      {},
-      token
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   // GET all staff type permissions for a restaurant
   static async getAllStaffTypePermissions(token: string, restaurantId: any) {
     const rId = extractId(restaurantId);
-    return this.request<IStaffTypePermissions[]>(
+    const response = await axiosInstance.get<ApiResponse<IStaffTypePermissions[]>>(
       `/staff-type-permissions/${rId}`,
-      {},
-      token
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   // GET permissions for a specific staff type
   static async getPermissionsForStaffType(token: string, restaurantId: any, staffType: StaffType) {
     const rId = extractId(restaurantId);
-    return this.request<IStaffTypePermissions>(
+    const response = await axiosInstance.get<ApiResponse<IStaffTypePermissions>>(
       `/staff-type-permissions/${rId}/${staffType}`,
-      {},
-      token
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   // UPDATE permissions for a specific staff type
@@ -78,25 +53,22 @@ export class StaffPermissionsService {
     payload: UpdatePermissionsPayload
   ) {
     const rId = extractId(restaurantId);
-    return this.request<IStaffTypePermissions>(
+    const response = await axiosInstance.put<ApiResponse<IStaffTypePermissions>>(
       `/staff-type-permissions/${rId}/${staffType}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-      },
-      token
+      payload,
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 
   // Initialize all default permissions for a restaurant
   static async initializeAllPermissions(token: string, restaurantId: any) {
     const rId = extractId(restaurantId);
-    return this.request<null>(
+    const response = await axiosInstance.post<ApiResponse<null>>(
       `/staff-type-permissions/${rId}/initialize`,
-      {
-        method: 'POST',
-      },
-      token
+      {},
+      { headers: this.getHeaders(token) }
     );
+    return response.data;
   }
 }

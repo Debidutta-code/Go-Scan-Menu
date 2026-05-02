@@ -4,7 +4,7 @@ import { RestaurantRepository } from '../../restaurant/repositories/restaurant.r
 import { RoleRepository } from '../repositories/role.repository';
 import { IStaff } from '../models/staff.model';
 import { IRole } from '../models/role.model';
-import { BcryptUtil, JWTUtil } from '@/utils';
+import { BcryptUtil, JWTUtil, ParamsUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
 import { StaffRole } from '@/types/role.types';
 
@@ -83,9 +83,9 @@ export class StaffService {
       phone: staff.phone,
       isActive: staff.isActive,
       preferences: staff.preferences,
-      restaurantId: staff.restaurantId?.toString(),
-      branchId: staff.branchId?.toString(),
-      allowedBranchIds: staff.allowedBranchIds.map(id => id.toString()),
+      restaurantId: ParamsUtil.extractId(staff.restaurantId),
+      branchId: ParamsUtil.extractId(staff.branchId),
+      allowedBranchIds: staff.allowedBranchIds.map(id => ParamsUtil.extractId(id)),
 
       // KEY AUTH FIELDS (Top Level)
       roleName: roleName,
@@ -124,23 +124,15 @@ export class StaffService {
 
     const enrichedStaff = await this.enrichStaff(staff);
 
-    const branchIdValue = staff.branchId as any;
-    const branchId = branchIdValue
-      ? typeof branchIdValue === 'object' && branchIdValue?._id
-        ? branchIdValue._id.toString()
-        : branchIdValue.toString()
-      : undefined;
-
-    const allowedBranchIds = staff.allowedBranchIds.map((id: any) => {
-      return typeof id === 'object' && id?._id ? id._id.toString() : id.toString();
-    });
+    const branchId = ParamsUtil.extractId(staff.branchId);
+    const allowedBranchIds = staff.allowedBranchIds.map((id: any) => ParamsUtil.extractId(id));
 
     const token = JWTUtil.generateToken({
       id: staff._id.toString(),
       email: staff.email,
       role: enrichedStaff.roleName as StaffRole,
-      roleId: (staff.roleId as any)?._id?.toString(),
-      restaurantId: enrichedStaff.restaurant?._id,
+      roleId: ParamsUtil.extractId(staff.roleId),
+      restaurantId: ParamsUtil.extractId(staff.restaurantId),
       branchId,
       allowedBranchIds,
       permissions: enrichedStaff.permissions,

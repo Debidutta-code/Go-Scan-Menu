@@ -1,4 +1,4 @@
-import env from '@/shared/config/env';
+import axiosInstance from '@/shared/services/axios.service';
 import { MenuResponse } from '@/public-app/types/menu.types';
 
 export const menuApi = {
@@ -7,21 +7,11 @@ export const menuApi = {
     branchCode: string,
     qrCode?: string
   ): Promise<MenuResponse> => {
-    try {
-      const endpoint = qrCode
-        ? `/public/menu/${restaurantSlug}/${branchCode}/${qrCode}`
-        : `/public/menu/${restaurantSlug}/${branchCode}`;
+    const endpoint = qrCode
+      ? `/public/menu/${restaurantSlug}/${branchCode}/${qrCode}`
+      : `/public/menu/${restaurantSlug}/${branchCode}`;
 
-      const response = await fetch(`${env.API_BASE_URL}${endpoint}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to load menu');
-      }
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.get(endpoint);
+    return response.data;
   },
 };
