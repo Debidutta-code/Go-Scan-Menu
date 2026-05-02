@@ -48,7 +48,8 @@ export class AuthMiddleware {
       };
 
       next();
-    } catch {
+    } catch (error: any) {
+      console.error('[AuthMiddleware] Error:', error.message);
       return sendResponse(res, 401, {
         message: 'Authentication failed',
       });

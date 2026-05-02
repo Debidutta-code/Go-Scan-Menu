@@ -28,7 +28,8 @@ export class JWTUtil {
   static verifyToken(token: string): JWTPayload {
     try {
       return jwt.verify(token, config.jwt.secret as Secret) as JWTPayload;
-    } catch {
+    } catch (error: any) {
+      console.error('[JWTUtil] Verification failed:', error.message);
       throw new Error('Invalid or expired token');
     }
   }

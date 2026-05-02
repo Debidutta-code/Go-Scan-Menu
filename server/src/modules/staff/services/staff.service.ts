@@ -175,7 +175,7 @@ export class StaffService {
     if (!staff) {
       throw new AppError('Staff not found', 404);
     }
-    return staff;
+    return this.enrichStaff(staff);
   }
 
   async getProfile(id: string) {
@@ -187,11 +187,21 @@ export class StaffService {
   }
 
   async getStaffByRestaurant(restaurantId: string, filter: any, page: number, limit: number) {
-    return this.staffRepo.findByRestaurant(restaurantId, filter, page, limit);
+    const result = await this.staffRepo.findByRestaurant(restaurantId, filter, page, limit);
+    const enrichedStaff = await Promise.all(result.staff.map((s) => this.enrichStaff(s)));
+    return {
+      ...result,
+      staff: enrichedStaff,
+    };
   }
 
   async getStaffByBranch(branchId: string, page: number, limit: number) {
-    return this.staffRepo.findByBranch(branchId, page, limit);
+    const result = await this.staffRepo.findByBranch(branchId, page, limit);
+    const enrichedStaff = await Promise.all(result.staff.map((s) => this.enrichStaff(s)));
+    return {
+      ...result,
+      staff: enrichedStaff,
+    };
   }
 
   async updateStaff(id: string, data: Partial<IStaff>) {
