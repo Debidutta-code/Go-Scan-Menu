@@ -289,6 +289,36 @@ async function reseed() {
         isActive: true,
       });
 
+      // Create extra staff for testing (Manager and Waiter)
+      const managerRole = await Role.findOne({ name: StaffRole.MANAGER });
+      const waiterRole = await Role.findOne({ name: StaffRole.WAITER });
+
+      console.log(`👨‍🍳 Creating Manager Staff for ${name}`);
+      await Staff.create({
+        restaurantId: restaurant._id,
+        branchId: branch._id,
+        roleId: managerRole?._id,
+        name: `${name} Manager`,
+        email: `manager@${slug}.com`,
+        phone: '1112223333',
+        password,
+        isActive: true,
+        allowedBranchIds: [branch._id],
+      });
+
+      console.log(`🤵 Creating Waiter Staff for ${name}`);
+      await Staff.create({
+        restaurantId: restaurant._id,
+        branchId: branch._id,
+        roleId: waiterRole?._id,
+        name: `${name} Waiter`,
+        email: `waiter@${slug}.com`,
+        phone: '4445556666',
+        password,
+        isActive: true,
+        allowedBranchIds: [branch._id],
+      });
+
       return { restaurant, branch };
     }
 

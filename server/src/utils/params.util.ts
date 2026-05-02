@@ -49,7 +49,7 @@ export class ParamsUtil {
       }
 
       const id = idOrObject._id || idOrObject.id;
-      if (id) {
+      if (id && id !== idOrObject) { // Prevent infinite recursion if id field refers to self
         if (typeof id === 'string') {
           if (id === '[object Object]' || id === '[object%20Object]') {
             return '';

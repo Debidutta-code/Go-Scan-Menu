@@ -50,7 +50,15 @@ export class StaffService {
     roleLevel = roleLevel || 5;
     permissions = permissions || {};
 
-    // 4. Resolve Restaurant Info
+    // 4. Final Explicit Assembly (Avoid any Mongoose proxy behavior)
+    // We normalize all IDs here to ensure they are plain strings
+    const staffIdStr = ParamsUtil.extractId(staff._id);
+    const restaurantIdStr = ParamsUtil.extractId(staff.restaurantId);
+    const branchIdStr = ParamsUtil.extractId(staff.branchId);
+    const roleIdStr = ParamsUtil.extractId(staff.roleId);
+    const allowedBranchIdsStr = (staff.allowedBranchIds || []).map(id => ParamsUtil.extractId(id));
+
+    // Resolve Restaurant Info
     let restaurantInfo = null;
     if (restaurantDoc && restaurantDoc.name) {
       restaurantInfo = {
@@ -76,16 +84,16 @@ export class StaffService {
     // 5. Final Explicit Assembly (Avoid any Mongoose proxy behavior)
     // This is the object that will be JSON serialized to the client
     const enriched: any = {
-      _id: staff._id.toString(),
-      id: staff._id.toString(),
+      _id: staffIdStr,
+      id: staffIdStr,
       name: staff.name,
       email: staff.email,
       phone: staff.phone,
       isActive: staff.isActive,
       preferences: staff.preferences,
-      restaurantId: ParamsUtil.extractId(staff.restaurantId),
-      branchId: ParamsUtil.extractId(staff.branchId),
-      allowedBranchIds: staff.allowedBranchIds.map(id => ParamsUtil.extractId(id)),
+      restaurantId: restaurantIdStr,
+      branchId: branchIdStr,
+      allowedBranchIds: allowedBranchIdsStr,
 
       // KEY AUTH FIELDS (Top Level)
       roleName: roleName,
@@ -96,8 +104,8 @@ export class StaffService {
 
       // Preserve Nested structure for legacy components
       roleId: {
-        _id: roleDoc?._id?.toString() || staff.roleId?.toString(),
-        id: roleDoc?._id?.toString() || staff.roleId?.toString(),
+        _id: roleIdStr,
+        id: roleIdStr,
         name: roleName,
         level: roleLevel,
         permissions: permissions
@@ -124,17 +132,14 @@ export class StaffService {
 
     const enrichedStaff = await this.enrichStaff(staff);
 
-    const branchId = ParamsUtil.extractId(staff.branchId);
-    const allowedBranchIds = staff.allowedBranchIds.map((id: any) => ParamsUtil.extractId(id));
-
     const token = JWTUtil.generateToken({
-      id: staff._id.toString(),
-      email: staff.email,
+      id: enrichedStaff.id,
+      email: enrichedStaff.email,
       role: enrichedStaff.roleName as StaffRole,
-      roleId: ParamsUtil.extractId(staff.roleId),
-      restaurantId: ParamsUtil.extractId(staff.restaurantId),
-      branchId,
-      allowedBranchIds,
+      roleId: enrichedStaff.roleId.id,
+      restaurantId: enrichedStaff.restaurantId,
+      branchId: enrichedStaff.branchId,
+      allowedBranchIds: enrichedStaff.allowedBranchIds,
       permissions: enrichedStaff.permissions,
     });
 

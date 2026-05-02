@@ -1,8 +1,6 @@
 // src/public-app/services/order.service.ts
-import env from '@/shared/config/env';
-import axios, { AxiosError } from 'axios';
-
-const API_BASE_URL = env.API_BASE_URL || 'http://localhost:5000/api/v1';
+import axiosInstance from '@/shared/services/axios.service';
+import { AxiosError } from 'axios';
 
 interface ApiResponse<T = any> {
     success: boolean;
