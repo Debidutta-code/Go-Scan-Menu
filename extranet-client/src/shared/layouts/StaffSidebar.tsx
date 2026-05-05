@@ -76,8 +76,13 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
     };
 
     const permissions = staff?.permissions || (staff?.roleId && typeof staff.roleId === 'object' ? staff.roleId.permissions : null);
+
     // Bypass for high level roles (Owner, SuperAdmin)
-    const isHighLevel = (staff as any)?.roleLevel <= 2 || (staff?.roleId && typeof staff.roleId === 'object' && (staff.roleId as any).level <= 2);
+    const isHighLevel =
+        (staff as any)?.roleLevel <= 2 ||
+        (staff?.roleId && typeof staff.roleId === 'object' && (staff.roleId as any).level <= 2) ||
+        staff?.staffType === 'owner' ||
+        staff?.staffType === 'super_admin';
 
     const menuItems: MenuItem[] = [
         {
