@@ -100,7 +100,6 @@ export const QRManagement: React.FC = () => {
     try {
       // Load branch details
       const branchResponse = await BranchService.getBranch(
-        token,
         staff.restaurantId,
         branchId
       );

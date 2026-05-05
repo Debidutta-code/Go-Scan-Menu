@@ -98,7 +98,7 @@ export const ViewRestaurant: React.FC = () => {
     setBranchLoading(true);
 
     try {
-      const response = await BranchService.getBranches(token, id);
+      const response = await BranchService.getBranches(id);
 
       if (response.success && response.data) {
         setBranches(response.data.branches || []);
@@ -121,7 +121,7 @@ export const ViewRestaurant: React.FC = () => {
     setBranchLoading(true);
 
     try {
-      const response = await BranchService.createBranch(token, id, branchFormData);
+      const response = await BranchService.createBranch(id, branchFormData);
 
       if (response.success) {
         toast.success('Branch added successfully!');

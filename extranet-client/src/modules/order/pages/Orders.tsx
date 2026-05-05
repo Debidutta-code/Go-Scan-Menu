@@ -108,7 +108,7 @@ export const Orders: React.FC = () => {
         if (!token || !staff) return;
         setBranchesLoading(true);
         try {
-            const response = await BranchService.getBranches(token, staff.restaurantId);
+            const response = await BranchService.getBranches(staff.restaurantId);
             if (response.success && response.data) {
                 let list = response.data.branches || [];
                 if (staff.staffType !== 'owner' && staff.allowedBranchIds?.length > 0)
@@ -137,7 +137,7 @@ export const Orders: React.FC = () => {
         try {
             const rid = extractId(staff.restaurantId);
             if (!rid) return;
-            const response = await BranchService.getBranch(token, rid, extractId(targetBranchId));
+            const response = await BranchService.getBranch(rid, extractId(targetBranchId));
             if (response.success && response.data) setBranchInfo(response.data);
         } catch (err) {
             console.error('Failed to load branch info:', err);

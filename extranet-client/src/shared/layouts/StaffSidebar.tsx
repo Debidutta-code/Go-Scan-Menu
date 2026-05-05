@@ -13,7 +13,8 @@ import {
     ChevronRight,
     UtensilsCrossed,
     FileBarChart,
-    ShoppingBag
+    ShoppingBag,
+    Store
 } from 'lucide-react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { extractId } from '@/shared/utils/id.util';
@@ -124,6 +125,24 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
                     ? `/staff/tables/${extractId(staff.allowedBranchIds[0])}`
                     : '/staff/tables',
             permission: isHighLevel || permissions?.tables?.view
+        },
+        {
+            label: 'Outlet Management',
+            icon: <Store size={20} />,
+            path: '#',
+            permission: isHighLevel || permissions?.settings?.updateRestaurant,
+            subItems: [
+                {
+                    label: 'All Outlets',
+                    path: '/staff/branch-settings',
+                    permission: isHighLevel || permissions?.settings?.updateRestaurant
+                },
+                {
+                    label: 'Add Outlet',
+                    path: '/staff/branch-settings?add=true',
+                    permission: isHighLevel || permissions?.settings?.updateRestaurant
+                }
+            ]
         },
         {
             label: 'Orders',

@@ -39,8 +39,11 @@ export class BranchService {
       throw new AppError('Maximum branches reached for current plan', 403);
     }
 
+    // Auto-generate code if not provided
+    const code = data.code || `B${Math.floor(100 + Math.random() * 900)}`;
+
     // Check unique code within restaurant
-    const existingCode = await this.branchRepo.findByCodeAndRestaurant(data.code, restaurantId);
+    const existingCode = await this.branchRepo.findByCodeAndRestaurant(code, restaurantId);
     if (existingCode) {
       throw new AppError('Branch code already exists in this restaurant', 400);
     }
@@ -48,10 +51,13 @@ export class BranchService {
     const branchData: Partial<IBranch> = {
       restaurantId: new Types.ObjectId(restaurantId),
       name: data.name,
-      code: data.code.toUpperCase(),
+      code: code.toUpperCase(),
       email: data.email,
       phone: data.phone,
-      address: data.address,
+      address: {
+        ...data.address,
+        coordinates: data.address.coordinates || { latitude: 0, longitude: 0 }
+      },
       settings: {
         currency: restaurant.defaultSettings.currency,
         taxIds: restaurant.defaultSettings.defaultTaxIds,

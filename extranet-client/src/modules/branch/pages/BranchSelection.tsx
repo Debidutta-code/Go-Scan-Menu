@@ -33,7 +33,7 @@ export const BranchSelection: React.FC = () => {
     setError('');
 
     try {
-      const response = await BranchService.getBranches(token, staff.restaurantId);
+      const response = await BranchService.getBranches(staff.restaurantId);
 
       if (response.success && response.data) {
         const branchList = response.data.branches || [];
