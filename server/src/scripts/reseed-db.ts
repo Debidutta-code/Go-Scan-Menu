@@ -145,6 +145,7 @@ async function reseed() {
     for (const roleData of rolesToSeed) {
       await Role.findOneAndUpdate({ name: roleData.name, isSystemRole: true }, roleData, {
         upsert: true,
+        new: true,
       });
     }
     console.log('✅ Roles seeded');

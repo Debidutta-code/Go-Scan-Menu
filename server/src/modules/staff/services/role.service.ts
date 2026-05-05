@@ -154,12 +154,14 @@ export class RoleService {
     ];
 
     for (const roleData of systemRoles) {
-      const exists = await this.roleRepo.exists(roleData.name);
-      if (!exists) {
+      const existingRole = await this.roleRepo.findByName(roleData.name);
+      if (!existingRole) {
         await this.roleRepo.create(roleData as Partial<IRole>);
         console.log(`✅ Seeded system role: ${roleData.name}`);
       } else {
-        console.log(`ℹ️  Role already exists: ${roleData.name}`);
+        // Update existing system role to ensure latest permissions
+        await this.roleRepo.update(existingRole._id.toString(), roleData as Partial<IRole>);
+        console.log(`🔄 Updated system role: ${roleData.name}`);
       }
     }
   }

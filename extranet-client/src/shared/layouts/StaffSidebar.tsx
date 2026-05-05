@@ -130,7 +130,7 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
             label: 'Outlet Management',
             icon: <Store size={20} />,
             path: '#',
-            permission: isHighLevel || permissions?.settings?.updateRestaurant,
+            permission: isHighLevel || permissions?.settings?.updateRestaurant || permissions?.settings?.updateBranch,
             subItems: [
                 {
                     label: 'All Outlets',
