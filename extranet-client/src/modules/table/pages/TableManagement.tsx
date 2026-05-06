@@ -1,7 +1,7 @@
 // src/pages/staff/TableManagement.tsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, Store } from 'lucide-react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { TableService } from '@/modules/table/services/table.service';
 import { BranchService } from '@/modules/branch/services/branch.service';
@@ -287,19 +287,32 @@ export const TableManagement: React.FC = () => {
       <div className="table-page-toolbar">
         <div className="toolbar-left-group">
           <h1 className="table-page-title" data-testid="table-management-title">
-            Table Management {isMultiOutlet ? 'Multi-Outlet' : 'Single-Outlet'} {restaurantType}
+            Table Management
           </h1>
 
+          {!isMultiOutlet && branch && (
+            <span className="single-branch-display">
+               - {branch.name}
+            </span>
+          )}
+
+          {loading && !branch && <span className="branch-name-skeleton"></span>}
+        </div>
+
+        <div className="table-toolbar-actions">
           {isMultiOutlet && branches.length >= 1 && (
             <div className="branch-selector-container" ref={branchDropdownRef}>
               <button
                 className={`branch-selector-toggle ${isBranchDropdownOpen ? 'active' : ''}`}
                 onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
               >
-                <span className="current-branch-name">
-                  {loading ? 'Loading...' : branch?.name || 'Select Branch'}
-                </span>
-                <ChevronDown size={18} className={`chevron-icon ${isBranchDropdownOpen ? 'rotate' : ''}`} />
+                <div className="branch-toggle-content">
+                  <Store size={16} className="branch-icon" />
+                  <span className="current-branch-name">
+                    {loading ? 'Loading...' : branch?.name || 'Select Branch'}
+                  </span>
+                </div>
+                <ChevronDown size={16} className={`chevron-icon ${isBranchDropdownOpen ? 'rotate' : ''}`} />
               </button>
 
               {isBranchDropdownOpen && (
@@ -338,17 +351,6 @@ export const TableManagement: React.FC = () => {
               )}
             </div>
           )}
-
-          {!isMultiOutlet && branch && (
-            <span className="single-branch-display">
-               - {branch.name}
-            </span>
-          )}
-
-          {loading && !branch && <span className="branch-name-skeleton"></span>}
-        </div>
-
-        <div className="table-toolbar-actions">
           <div className="table-filter-container">
             <select
               className="table-filter-select"
