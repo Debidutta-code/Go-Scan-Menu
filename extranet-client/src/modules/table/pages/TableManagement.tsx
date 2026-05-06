@@ -300,7 +300,7 @@ export const TableManagement: React.FC = () => {
       <div className="table-page-toolbar">
         <div className="toolbar-left-group">
           <h1 className="table-page-title" data-testid="table-management-title">
-            Table Management
+            Table Management {isMultiOutlet ? 'Multi-Outlet' : 'Single-Outlet'}
           </h1>
 
           {isMultiOutlet && branches.length > 1 && (
