@@ -19,7 +19,7 @@ export class BranchService {
     try {
       const rId = extractId(restaurantId);
       const response = await axiosInstance.get(
-        `/restaurants/${rId}/branches`,
+        `/restaurants/${rId}/branches?limit=1000`,
         { headers: this.getHeaders() }
       );
 

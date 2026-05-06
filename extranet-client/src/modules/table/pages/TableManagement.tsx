@@ -72,19 +72,30 @@ export const TableManagement: React.FC = () => {
   }, []);
 
   const loadBranches = async () => {
-    if (!staff || !token) return;
+    if (!staff || !token || !staff.restaurantId) return;
     try {
       const response = await BranchService.getAllBranches(staff.restaurantId);
+
+      let branchesData = [];
       if (response.success && response.data) {
-        // Filter branches based on staff's allowed branches
-        let filteredBranches = response.data;
-        if (
-          staff.staffType !== 'owner' &&
-          staff.allowedBranchIds &&
-          staff.allowedBranchIds.length > 0
-        ) {
-          filteredBranches = response.data.filter((b) =>
-            staff.allowedBranchIds.includes(b._id)
+        if (Array.isArray(response.data)) {
+          branchesData = response.data;
+        } else if (Array.isArray((response.data as any).branches)) {
+          branchesData = (response.data as any).branches;
+        }
+      }
+
+      if (branchesData.length > 0) {
+        const isHighLevel =
+          (staff.roleLevel && staff.roleLevel <= 2) ||
+          staff.staffType === 'owner' ||
+          staff.staffType === 'super_admin' ||
+          (staff.roleName && staff.roleName.toLowerCase() === 'owner');
+
+        let filteredBranches = branchesData;
+        if (!isHighLevel && staff.allowedBranchIds && staff.allowedBranchIds.length > 0) {
+          filteredBranches = branchesData.filter((b: any) =>
+            staff.allowedBranchIds.includes(extractId(b))
           );
         }
         setBranches(filteredBranches);
@@ -104,7 +115,6 @@ export const TableManagement: React.FC = () => {
     setError('');
 
     try {
-      // Load tables (now includes branch details)
       const tablesResponse = await TableService.getTables(
         token,
         extractId(staff.restaurantId),
@@ -157,7 +167,6 @@ export const TableManagement: React.FC = () => {
       );
       if (response.success) {
         loadData();
-        // Update local state for immediate feedback in hover card
         if (hoveredTable && hoveredTable._id === tableId) {
           setHoveredTable({ ...hoveredTable, status: newStatus });
         }
@@ -191,11 +200,6 @@ export const TableManagement: React.FC = () => {
     return staff.permissions.tables?.create || staff.staffType === 'owner';
   };
 
-  const canDeleteTables = () => {
-    if (!staff || !staff.permissions) return false;
-    return staff.permissions.tables?.delete || staff.staffType === 'owner';
-  };
-
   const filteredTables =
     selectedStatus === 'all'
       ? tables
@@ -226,7 +230,6 @@ export const TableManagement: React.FC = () => {
     };
   };
 
-  // Group tables by location
   const groupTablesByLocation = (tablesToGroup: Table[]) => {
     const grouped: Record<string, Table[]> = {};
     tablesToGroup.forEach((table) => {
@@ -237,7 +240,6 @@ export const TableManagement: React.FC = () => {
       grouped[location].push(table);
     });
 
-    // Sort tables within each location by table number
     Object.keys(grouped).forEach((location) => {
       grouped[location].sort((a, b) => {
         const aNum = parseInt(a.tableNumber.replace(/\D/g, ''), 10);
@@ -251,33 +253,20 @@ export const TableManagement: React.FC = () => {
 
   const handleMouseEnterCube = (e: React.MouseEvent, table: Table) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-
-    // Get the bounding box of the hovered element
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-
-    // Initial suggested position (below and slightly to the right)
     let x = rect.left + 15;
     let y = rect.bottom + 10;
-
-    // Viewport boundary check
     const cardWidth = 280;
-    const cardHeight = 220; // Estimated height
-
-    // Flip if going off right side
+    const cardHeight = 220;
     if (x + cardWidth > window.innerWidth) {
       x = rect.right - cardWidth - 15;
     }
-
-    // Flip if going off bottom side
     if (y + cardHeight > window.innerHeight) {
       y = rect.top - cardHeight - 10;
     }
-
     setMousePos({ x, y });
     setHoveredTable(table);
   };
-
-  // Remove handleMouseMoveCube since we want static positioning
 
   const handleMouseLeaveCube = () => {
     hoverTimeoutRef.current = setTimeout(() => {
@@ -290,20 +279,18 @@ export const TableManagement: React.FC = () => {
   const statusCounts = getStatusCounts();
   const groupedTables = groupTablesByLocation(filteredTables);
 
-
   const restaurantType = staff?.restaurant?.type;
   const isMultiOutlet = (restaurantType as string) === 'chain' || (restaurantType as string) === 'branch-wise';
 
   return (
     <div className="table-management-layout">
-      {/* Page Toolbar */}
       <div className="table-page-toolbar">
         <div className="toolbar-left-group">
           <h1 className="table-page-title" data-testid="table-management-title">
             Table Management {isMultiOutlet ? 'Multi-Outlet' : 'Single-Outlet'} {restaurantType}
           </h1>
 
-          {isMultiOutlet && branches.length > 1 && (
+          {isMultiOutlet && branches.length >= 1 && (
             <div className="branch-selector-container" ref={branchDropdownRef}>
               <button
                 className={`branch-selector-toggle ${isBranchDropdownOpen ? 'active' : ''}`}
@@ -362,7 +349,6 @@ export const TableManagement: React.FC = () => {
         </div>
 
         <div className="table-toolbar-actions">
-          {/* Status Filter Dropdown */}
           <div className="table-filter-container">
             <select
               className="table-filter-select"
@@ -414,7 +400,6 @@ export const TableManagement: React.FC = () => {
 
       {error && <div className="error-banner">{error}</div>}
 
-      {/* Main Content */}
       <div className="table-management-content" style={{ display: loading ? 'none' : 'flex' }}>
         <div className="table-list-panel">
           <div className="panel-header">
@@ -473,7 +458,6 @@ export const TableManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Interactive Hover Card */}
       {hoveredTable && (
         <div
           className="table-hover-card"
@@ -560,7 +544,6 @@ export const TableManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Modals */}
       {qrModalOpen && selectedTable && (
         <QRCodeModal
           table={selectedTable}
