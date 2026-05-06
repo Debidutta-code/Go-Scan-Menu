@@ -1,5 +1,5 @@
 // src/components/layout/StaffSidebar.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -18,8 +18,6 @@ import {
 } from 'lucide-react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { extractId } from '@/shared/utils/id.util';
-import { BranchService } from '@/modules/branch/services/branch.service';
-import { Branch } from '@/shared/types/table.types';
 import './StaffSidebar.css';
 
 interface StaffSidebarProps {
@@ -54,8 +52,7 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
     const { staff, logout, token } = useStaffAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [expandedMenus, setExpandedMenus] = useState<string[]>(['Menu Management', 'Outlet Management']);
-    const [branches, setBranches] = useState<Branch[]>([]);
+    const [expandedMenus, setExpandedMenus] = useState<string[]>(['Menu Management']);
 
     const permissions = staff?.permissions || (staff?.roleId && typeof staff.roleId === 'object' ? staff.roleId.permissions : null);
 
@@ -66,29 +63,6 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
     // Check restaurant type for multi-outlet management
     const restaurantType = staff?.restaurant?.type;
     const isMultiOutlet = (restaurantType as string) === 'chain' || (restaurantType as string) === 'branch-wise';
-
-    useEffect(() => {
-        const fetchBranches = async () => {
-            if (staff?.restaurantId && (isHighLevel || permissions?.settings?.view) && isMultiOutlet) {
-                try {
-                    const response = await BranchService.getAllBranches(staff.restaurantId);
-                    if (response.success && response.data) {
-                        // Handle both array and paginated response { data: { branches: [] } }
-                        const branchData = Array.isArray(response.data)
-                            ? response.data
-                            : (response.data as any).branches || [];
-                        setBranches(branchData);
-                    }
-                } catch (err) {
-                    console.error('Failed to fetch branches for sidebar:', err);
-                }
-            }
-        };
-
-        if (staff) {
-            fetchBranches();
-        }
-    }, [staff, isHighLevel, permissions]);
 
     const handleLogout = () => {
         if (window.confirm('Are you sure you want to logout?')) {
@@ -161,20 +135,8 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
         {
             label: 'Outlet Management',
             icon: <Store size={20} />,
-            path: '#',
-            permission: isMultiOutlet && (isHighLevel || permissions?.settings?.updateRestaurant || permissions?.settings?.updateBranch),
-            subItems: [
-                ...branches.map(branch => ({
-                    label: branch.name,
-                    path: `/staff/branch-settings?id=${extractId(branch._id)}`,
-                    permission: true
-                })),
-                {
-                    label: 'Add New Outlet',
-                    path: '/staff/branch-settings?add=true',
-                    permission: isHighLevel || permissions?.settings?.updateRestaurant
-                }
-            ]
+            path: '/staff/branch-settings',
+            permission: isMultiOutlet && (isHighLevel || permissions?.settings?.updateRestaurant || permissions?.settings?.updateBranch)
         },
         {
             label: 'Orders',
