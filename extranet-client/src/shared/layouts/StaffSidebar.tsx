@@ -60,15 +60,16 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
     const permissions = staff?.permissions || (staff?.roleId && typeof staff.roleId === 'object' ? staff.roleId.permissions : null);
 
     // Bypass for high level roles (Owner, SuperAdmin)
-    const isHighLevel =
-        (staff as any)?.roleLevel <= 2 ||
-        (staff?.roleId && typeof staff.roleId === 'object' && (staff.roleId as any).level <= 2) ||
-        staff?.staffType === 'owner' ||
-        staff?.staffType === 'super_admin';
+    const roleLevel = staff?.roleLevel || (staff?.roleId && typeof staff.roleId === 'object' ? (staff.roleId as any).level : 5);
+    const isHighLevel = roleLevel <= 2 || staff?.staffType === 'owner' || staff?.staffType === 'super_admin' || staff?.roleName === 'owner' || staff?.roleName === 'super_admin';
+
+    // Check restaurant type for multi-outlet management
+    const restaurantType = staff?.restaurant?.type;
+    const isMultiOutlet = (restaurantType as string) === 'chain' || (restaurantType as string) === 'branch-wise';
 
     useEffect(() => {
         const fetchBranches = async () => {
-            if (staff?.restaurantId && (isHighLevel || permissions?.settings?.view)) {
+            if (staff?.restaurantId && (isHighLevel || permissions?.settings?.view) && isMultiOutlet) {
                 try {
                     const response = await BranchService.getAllBranches(staff.restaurantId);
                     if (response.success && response.data) {
@@ -161,7 +162,7 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
             label: 'Outlet Management',
             icon: <Store size={20} />,
             path: '#',
-            permission: isHighLevel || permissions?.settings?.updateRestaurant || permissions?.settings?.updateBranch,
+            permission: isMultiOutlet && (isHighLevel || permissions?.settings?.updateRestaurant || permissions?.settings?.updateBranch),
             subItems: [
                 ...branches.map(branch => ({
                     label: branch.name,
