@@ -1,5 +1,5 @@
 // src/components/layout/StaffSidebar.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { extractId } from '@/shared/utils/id.util';
+import { BranchService } from '@/modules/branch/services/branch.service';
+import { Branch } from '@/shared/types/table.types';
 import './StaffSidebar.css';
 
 interface StaffSidebarProps {
@@ -49,10 +51,43 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
     isMobile,
     closeMobileSidebar
 }) => {
-    const { staff, logout } = useStaffAuth();
+    const { staff, logout, token } = useStaffAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [expandedMenus, setExpandedMenus] = useState<string[]>(['Menu Management']);
+    const [expandedMenus, setExpandedMenus] = useState<string[]>(['Menu Management', 'Outlet Management']);
+    const [branches, setBranches] = useState<Branch[]>([]);
+
+    const permissions = staff?.permissions || (staff?.roleId && typeof staff.roleId === 'object' ? staff.roleId.permissions : null);
+
+    // Bypass for high level roles (Owner, SuperAdmin)
+    const isHighLevel =
+        (staff as any)?.roleLevel <= 2 ||
+        (staff?.roleId && typeof staff.roleId === 'object' && (staff.roleId as any).level <= 2) ||
+        staff?.staffType === 'owner' ||
+        staff?.staffType === 'super_admin';
+
+    useEffect(() => {
+        const fetchBranches = async () => {
+            if (staff?.restaurantId && (isHighLevel || permissions?.settings?.view)) {
+                try {
+                    const response = await BranchService.getAllBranches(staff.restaurantId);
+                    if (response.success && response.data) {
+                        // Handle both array and paginated response { data: { branches: [] } }
+                        const branchData = Array.isArray(response.data)
+                            ? response.data
+                            : (response.data as any).branches || [];
+                        setBranches(branchData);
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch branches for sidebar:', err);
+                }
+            }
+        };
+
+        if (staff) {
+            fetchBranches();
+        }
+    }, [staff, isHighLevel, permissions]);
 
     const handleLogout = () => {
         if (window.confirm('Are you sure you want to logout?')) {
@@ -74,15 +109,6 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
                 : [...prev, label]
         );
     };
-
-    const permissions = staff?.permissions || (staff?.roleId && typeof staff.roleId === 'object' ? staff.roleId.permissions : null);
-
-    // Bypass for high level roles (Owner, SuperAdmin)
-    const isHighLevel =
-        (staff as any)?.roleLevel <= 2 ||
-        (staff?.roleId && typeof staff.roleId === 'object' && (staff.roleId as any).level <= 2) ||
-        staff?.staffType === 'owner' ||
-        staff?.staffType === 'super_admin';
 
     const menuItems: MenuItem[] = [
         {
@@ -137,13 +163,13 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
             path: '#',
             permission: isHighLevel || permissions?.settings?.updateRestaurant || permissions?.settings?.updateBranch,
             subItems: [
+                ...branches.map(branch => ({
+                    label: branch.name,
+                    path: `/staff/branch-settings?id=${extractId(branch._id)}`,
+                    permission: true
+                })),
                 {
-                    label: 'All Outlets',
-                    path: '/staff/branch-settings',
-                    permission: isHighLevel || permissions?.settings?.updateRestaurant
-                },
-                {
-                    label: 'Add Outlet',
+                    label: 'Add New Outlet',
                     path: '/staff/branch-settings?add=true',
                     permission: isHighLevel || permissions?.settings?.updateRestaurant
                 }

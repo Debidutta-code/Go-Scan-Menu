@@ -125,3 +125,19 @@
         grid-template-columns: 1fr;
     }
 }
+
+.highlight-card {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    background: rgba(99, 102, 241, 0.1) !important;
+}
+
+.delete-btn {
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.delete-btn:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-color: #ef4444 !important;
+}

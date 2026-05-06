@@ -86,4 +86,44 @@ export class BranchService {
       throw new Error(message);
     }
   }
+
+  static async updateBranch(
+    restaurantId: any,
+    branchId: any,
+    data: any
+  ): Promise<ApiResponse<Branch>> {
+    try {
+      const rId = extractId(restaurantId);
+      const bId = extractId(branchId);
+      const response = await axiosInstance.put(
+        `/restaurants/${rId}/branches/${bId}`,
+        data,
+        { headers: this.getHeaders() }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to update branch';
+      throw new Error(message);
+    }
+  }
+
+  static async deleteBranch(
+    restaurantId: any,
+    branchId: any
+  ): Promise<ApiResponse<void>> {
+    try {
+      const rId = extractId(restaurantId);
+      const bId = extractId(branchId);
+      const response = await axiosInstance.delete(
+        `/restaurants/${rId}/branches/${bId}`,
+        { headers: this.getHeaders() }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to delete branch';
+      throw new Error(message);
+    }
+  }
 }

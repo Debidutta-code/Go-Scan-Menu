@@ -8,6 +8,8 @@ import { InputField } from '@/shared/components/InputField';
 import { Button } from '@/shared/components/Button';
 import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
 import { ArrowLeft } from 'lucide-react';
+import { BranchService } from '@/modules/branch/services/branch.service';
+import { Branch } from '@/shared/types/table.types';
 import './AddStaff.css';
 
 export const AddStaff: React.FC = () => {
@@ -25,25 +27,36 @@ export const AddStaff: React.FC = () => {
   });
 
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
+  const [availableBranches, setAvailableBranches] = useState<Branch[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [serverError, setServerError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchRoles();
+    fetchInitialData();
   }, []);
 
-  const fetchRoles = async () => {
+  const fetchInitialData = async () => {
     if (!token || !currentStaff?.restaurantId) return;
     try {
       setFetchLoading(true);
-      const response = await StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId);
-      if (response.data) {
-        setAvailableRoles(response.data);
+      const [rolesRes, branchesRes] = await Promise.all([
+        StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId),
+        BranchService.getBranches(currentStaff.restaurantId)
+      ]);
+
+      if (rolesRes.data) {
+        setAvailableRoles(rolesRes.data);
+      }
+      if (branchesRes.data) {
+          const branchData = Array.isArray(branchesRes.data)
+              ? branchesRes.data
+              : (branchesRes.data as any).branches || [];
+          setAvailableBranches(branchData);
       }
     } catch (err: any) {
-      setServerError(err.message || 'Failed to fetch roles');
+      setServerError(err.message || 'Failed to fetch initial data');
     } finally {
       setFetchLoading(false);
     }
@@ -259,6 +272,30 @@ export const AddStaff: React.FC = () => {
 
           <div className="form-section">
             <h3 className="section-title">Role & Access</h3>
+
+            <div className="form-group">
+              <label htmlFor="branchId" className="form-label">
+                Assigned Branch
+              </label>
+              <select
+                id="branchId"
+                value={formData.branchId}
+                onChange={(e) => handleChange('branchId', e.target.value)}
+                className="form-select"
+                disabled={loading || fetchLoading}
+                data-testid="branch-select"
+              >
+                <option value="">All Branches / Main</option>
+                {availableBranches.map((branch) => (
+                  <option key={branch._id} value={branch._id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+              <p className="form-helper-text">
+                Select the primary branch for this staff member
+              </p>
+            </div>
 
             <div className="form-group">
               <label htmlFor="staffType" className="form-label">

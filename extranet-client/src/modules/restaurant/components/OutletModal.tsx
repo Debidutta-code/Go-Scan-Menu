@@ -7,13 +7,17 @@ import { InputField } from '@/shared/components/InputField';
 import { toast } from 'react-toastify';
 import './OutletModal.css';
 
+import { useEffect } from 'react';
+import { extractId } from '@/shared/utils/id.util';
+
 interface OutletModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    branch?: any;
 }
 
-export const OutletModal: React.FC<OutletModalProps> = ({ isOpen, onClose, onSuccess }) => {
+export const OutletModal: React.FC<OutletModalProps> = ({ isOpen, onClose, onSuccess, branch }) => {
     const { staff } = useStaffAuth();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -26,6 +30,32 @@ export const OutletModal: React.FC<OutletModalProps> = ({ isOpen, onClose, onSuc
         zipCode: '',
         country: 'India'
     });
+
+    useEffect(() => {
+        if (branch) {
+            setFormData({
+                name: branch.name || '',
+                email: branch.email || '',
+                phone: branch.phone || '',
+                street: branch.address?.street || '',
+                city: branch.address?.city || '',
+                state: branch.address?.state || '',
+                zipCode: branch.address?.zipCode || '',
+                country: branch.address?.country || 'India'
+            });
+        } else {
+            setFormData({
+                name: '',
+                email: '',
+                phone: '',
+                street: '',
+                city: '',
+                state: '',
+                zipCode: '',
+                country: 'India'
+            });
+        }
+    }, [branch, isOpen]);
 
     if (!isOpen) return null;
 
@@ -47,13 +77,19 @@ export const OutletModal: React.FC<OutletModalProps> = ({ isOpen, onClose, onSuc
                 }
             };
 
-            const response = await BranchService.createBranch(staff.restaurantId, payload);
+            let response;
+            if (branch) {
+                response = await BranchService.updateBranch(staff.restaurantId, extractId(branch._id), payload);
+            } else {
+                response = await BranchService.createBranch(staff.restaurantId, payload);
+            }
+
             if (response.success) {
-                toast.success('Outlet created successfully!');
+                toast.success(branch ? 'Outlet updated successfully!' : 'Outlet created successfully!');
                 onSuccess();
             }
         } catch (error: any) {
-            toast.error(error.message || 'Failed to create outlet');
+            toast.error(error.message || (branch ? 'Failed to update outlet' : 'Failed to create outlet'));
         } finally {
             setLoading(false);
         }
@@ -67,7 +103,7 @@ export const OutletModal: React.FC<OutletModalProps> = ({ isOpen, onClose, onSuc
         <div className="outlet-modal-overlay">
             <div className="outlet-modal-content">
                 <div className="outlet-modal-header">
-                    <h2>Add New Outlet</h2>
+                    <h2>{branch ? 'Edit Outlet' : 'Add New Outlet'}</h2>
                     <button onClick={onClose} className="close-btn">
                         <X size={24} />
                     </button>
@@ -147,7 +183,7 @@ export const OutletModal: React.FC<OutletModalProps> = ({ isOpen, onClose, onSuc
                             Cancel
                         </Button>
                         <Button variant="primary" type="submit" loading={loading}>
-                            Create Outlet
+                            {branch ? 'Update Outlet' : 'Create Outlet'}
                         </Button>
                     </div>
                 </form>
