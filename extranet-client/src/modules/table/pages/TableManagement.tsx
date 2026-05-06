@@ -1,6 +1,7 @@
 // src/pages/staff/TableManagement.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Search, ChevronDown } from 'lucide-react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { TableService } from '@/modules/table/services/table.service';
 import { BranchService } from '@/modules/branch/services/branch.service';
@@ -23,6 +24,10 @@ export const TableManagement: React.FC = () => {
 
   const [tables, setTables] = useState<Table[]>([]);
   const [branch, setBranch] = useState<Branch | null>(null);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
+  const [branchSearchTerm, setBranchSearchTerm] = useState('');
+  const branchDropdownRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -45,6 +50,49 @@ export const TableManagement: React.FC = () => {
       loadData();
     }
   }, [staff, token, branchId]);
+
+  useEffect(() => {
+    if (staff && token) {
+      const restaurantType = staff?.restaurant?.type;
+      const isMultiOutlet = (restaurantType as string) === 'chain' || (restaurantType as string) === 'branch-wise';
+      if (isMultiOutlet) {
+        loadBranches();
+      }
+    }
+  }, [staff, token]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (branchDropdownRef.current && !branchDropdownRef.current.contains(event.target as Node)) {
+        setIsBranchDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const loadBranches = async () => {
+    if (!staff || !token) return;
+    try {
+      const response = await BranchService.getAllBranches(staff.restaurantId);
+      if (response.success && response.data) {
+        // Filter branches based on staff's allowed branches
+        let filteredBranches = response.data;
+        if (
+          staff.staffType !== 'owner' &&
+          staff.allowedBranchIds &&
+          staff.allowedBranchIds.length > 0
+        ) {
+          filteredBranches = response.data.filter((b) =>
+            staff.allowedBranchIds.includes(b._id)
+          );
+        }
+        setBranches(filteredBranches);
+      }
+    } catch (err) {
+      console.error('Failed to load branches', err);
+    }
+  };
 
   const loadData = async () => {
     if (!staff || !token || !branchId) {
@@ -153,6 +201,21 @@ export const TableManagement: React.FC = () => {
       ? tables
       : tables.filter((table) => table.status === selectedStatus);
 
+  const filteredBranches = useMemo(() => {
+    if (!branchSearchTerm.trim()) return branches;
+    const term = branchSearchTerm.toLowerCase();
+    return branches.filter(b =>
+      b.name.toLowerCase().includes(term) ||
+      b.code.toLowerCase().includes(term)
+    );
+  }, [branches, branchSearchTerm]);
+
+  const handleBranchSelect = (bId: string) => {
+    setIsBranchDropdownOpen(false);
+    setBranchSearchTerm('');
+    navigate(`/staff/tables/${bId}`);
+  };
+
   const getStatusCounts = () => {
     return {
       all: tables.length,
@@ -228,17 +291,75 @@ export const TableManagement: React.FC = () => {
   const groupedTables = groupTablesByLocation(filteredTables);
 
 
+  const restaurantType = staff?.restaurant?.type;
+  const isMultiOutlet = (restaurantType as string) === 'chain' || (restaurantType as string) === 'branch-wise';
+
   return (
     <div className="table-management-layout">
       {/* Page Toolbar */}
       <div className="table-page-toolbar">
-        <h1 className="table-page-title" data-testid="table-management-title">
-          Table Management {loading ? (
-            <span className="branch-name-skeleton"></span>
-          ) : (
-            branch && `- ${branch.name}`
+        <div className="toolbar-left-group">
+          <h1 className="table-page-title" data-testid="table-management-title">
+            Table Management
+          </h1>
+
+          {isMultiOutlet && branches.length > 1 && (
+            <div className="branch-selector-container" ref={branchDropdownRef}>
+              <button
+                className={`branch-selector-toggle ${isBranchDropdownOpen ? 'active' : ''}`}
+                onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+              >
+                <span className="current-branch-name">
+                  {loading ? 'Loading...' : branch?.name || 'Select Branch'}
+                </span>
+                <ChevronDown size={18} className={`chevron-icon ${isBranchDropdownOpen ? 'rotate' : ''}`} />
+              </button>
+
+              {isBranchDropdownOpen && (
+                <div className="branch-selector-dropdown">
+                  <div className="dropdown-search-wrapper">
+                    <Search size={16} className="search-icon" />
+                    <input
+                      type="text"
+                      className="dropdown-search-input"
+                      placeholder="Search outlets..."
+                      value={branchSearchTerm}
+                      onChange={(e) => setBranchSearchTerm(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  <div className="branch-options-list">
+                    {filteredBranches.length > 0 ? (
+                      filteredBranches.map((b) => (
+                        <div
+                          key={b._id}
+                          className={`branch-option-item ${b._id === branchId ? 'selected' : ''}`}
+                          onClick={() => handleBranchSelect(b._id)}
+                        >
+                          <div className="branch-option-info">
+                            <span className="branch-option-name">{b.name}</span>
+                            <span className="branch-option-code">{b.code}</span>
+                          </div>
+                          {b.isMain && <span className="main-branch-badge">Main</span>}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="no-branches-found">No outlets found</div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
-        </h1>
+
+          {!isMultiOutlet && branch && (
+            <span className="single-branch-display">
+               - {branch.name}
+            </span>
+          )}
+
+          {loading && !branch && <span className="branch-name-skeleton"></span>}
+        </div>
 
         <div className="table-toolbar-actions">
           {/* Status Filter Dropdown */}

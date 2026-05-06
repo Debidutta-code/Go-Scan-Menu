@@ -326,7 +326,36 @@ async function reseed() {
     // Create one of each type
     await createRestaurantData('Single Cafe', 'single-cafe', 'single', 'single@gmail.com', 1);
     await createRestaurantData('Pizza Local', 'pizza-local', 'branch-wise', 'branch@gmail.com', 5);
-    await createRestaurantData('Burger Heaven', 'burger-heaven', 'chain', 'owner@gmail.com', 10);
+    const { restaurant: chainRest } = await createRestaurantData('Burger Heaven', 'burger-heaven', 'chain', 'owner@gmail.com', 10);
+
+    console.log(`🏢 Creating Secondary Branch for Burger Heaven`);
+    await Branch.create({
+      restaurantId: chainRest._id,
+      name: `Burger Heaven - Second Outlet`,
+      code: `BH02`,
+      isMain: false,
+      email: `branch2@burger-heaven.com`,
+      phone: '1231231234',
+      address: {
+        street: 'Second Street',
+        city: 'City',
+        state: 'State',
+        zipCode: '00000',
+        country: 'Country',
+        coordinates: { latitude: 0, longitude: 0 },
+      },
+      isActive: true,
+      settings: {
+        currency: 'USD',
+        taxIds: [],
+        serviceChargePercentage: 0,
+        acceptOrders: true,
+        operatingHours: [],
+        minOrderAmount: 0,
+        deliveryAvailable: false,
+        takeawayAvailable: true,
+      },
+    });
 
     console.log('✨ Seeding completed successfully!');
     process.exit(0);
