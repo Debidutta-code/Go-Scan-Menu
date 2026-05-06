@@ -31,11 +31,11 @@ export const BranchSettings: React.FC = () => {
         try {
             setLoading(true);
             const response = await BranchService.getBranches(staff.restaurantId);
-            if (response.success) {
+            if (response.success && response.data) {
                 // Handle both array and paginated response
                 const branchData = Array.isArray(response.data)
                     ? response.data
-                    : response.data.branches || [];
+                    : (response.data as any).branches || [];
                 setBranches(branchData);
             }
         } catch (error) {
@@ -115,7 +115,7 @@ export const BranchSettings: React.FC = () => {
                     <div
                         key={branch._id}
                         className="branch-card"
-                        ref={el => branchRefs.current[branch._id] = el}
+                        ref={el => { if (el) branchRefs.current[branch._id] = el; }}
                     >
                         <div className="branch-card-header">
                             <div className="branch-icon">
@@ -147,7 +147,7 @@ export const BranchSettings: React.FC = () => {
                         </div>
 
                         <div className="branch-card-footer">
-                            <Button variant="secondary" size="sm" onClick={() => handleEdit(branch)}>Edit Details</Button>
+                            <Button variant="outline" size="sm" onClick={() => handleEdit(branch)}>Edit Details</Button>
                             <Button
                                 variant="outline"
                                 size="sm"

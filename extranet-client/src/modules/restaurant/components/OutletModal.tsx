@@ -179,7 +179,7 @@ export const OutletModal: React.FC<OutletModalProps> = ({ isOpen, onClose, onSuc
                     </div>
 
                     <div className="form-actions">
-                        <Button variant="secondary" onClick={onClose} type="button" disabled={loading}>
+                        <Button variant="outline" onClick={onClose} type="button" disabled={loading}>
                             Cancel
                         </Button>
                         <Button variant="primary" type="submit" loading={loading}>
