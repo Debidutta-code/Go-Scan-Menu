@@ -61,20 +61,22 @@
 }
 
 .branch-selector-toggle {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 14px;
-  background: white;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  color: #334155;
+  gap: 8px;
+  padding: 0 16px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid #6366f1;
+  border-radius: 8px;
+  color: #6366f1;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   min-width: 200px;
   justify-content: space-between;
+  white-space: nowrap;
 }
 
 .branch-toggle-content {
@@ -85,19 +87,20 @@
 }
 
 .branch-icon {
-  color: #64748b;
+  color: #6366f1;
   flex-shrink: 0;
 }
 
 .branch-selector-toggle:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: #f3f4f6;
+  color: #4f46e5;
+  border-color: #4f46e5;
 }
 
 .branch-selector-toggle.active {
-  background: white;
-  border-color: #0ea5e9;
-  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+  background: #f3f4f6;
+  color: #4f46e5;
+  border-color: #4f46e5;
 }
 
 .current-branch-name {
@@ -280,27 +283,38 @@
 }
 
 .table-filter-select {
-  padding: 10px 16px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #475569;
-  background: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid #6366f1;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6366f1;
+  background: transparent;
   cursor: pointer;
   outline: none;
   min-width: 160px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236366f1' d='M1 4l5 4 5-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
 }
 
 .table-filter-select:hover {
-  border-color: #cbd5e1;
-  background-color: #f8fafc;
+  background-color: #f3f4f6;
+  color: #4f46e5;
+  border-color: #4f46e5;
 }
 
 .table-filter-select:focus {
-  border-color: #0ea5e9;
-  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+  background-color: #f3f4f6;
+  color: #4f46e5;
+  border-color: #4f46e5;
 }
 
 /* Main Content */
