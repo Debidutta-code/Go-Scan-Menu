@@ -86,16 +86,16 @@
   position: relative;
 }
 
-.branch-selector-toggle {
+.table-controls-bar .branch-selector-toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 0 14px;
   height: 38px;
-  background: #f0f0ff;
-  border: 1.5px solid #c7c5f9;
+  background: #f0f0ff !important;
+  border: 1.5px solid #c7c5f9 !important;
   border-radius: 10px;
-  color: #4338ca;
+  color: #4338ca !important;
   font-weight: 600;
   font-size: 0.82rem;
   cursor: pointer;
@@ -113,22 +113,22 @@
   overflow: hidden;
 }
 
-.branch-icon {
+.table-controls-bar .branch-selector-toggle .branch-icon {
   color: #6366f1;
   flex-shrink: 0;
   opacity: 0.75;
 }
 
-.branch-selector-toggle:hover {
-  background: #e8e7ff;
-  border-color: #a5b4fc;
-  color: #3730a3;
+.table-controls-bar .branch-selector-toggle:hover {
+  background: #e8e7ff !important;
+  border-color: #a5b4fc !important;
+  color: #3730a3 !important;
 }
 
-.branch-selector-toggle.active {
-  background: #e8e7ff;
-  border-color: #818cf8;
-  color: #3730a3;
+.table-controls-bar .branch-selector-toggle.active {
+  background: #e8e7ff !important;
+  border-color: #818cf8 !important;
+  color: #3730a3 !important;
 }
 
 .current-branch-name {
@@ -138,7 +138,7 @@
   max-width: 220px;
 }
 
-.chevron-icon {
+.table-controls-bar .branch-selector-toggle .chevron-icon {
   color: #818cf8;
   opacity: 0.65;
   transition: transform 0.2s ease;
@@ -681,7 +681,7 @@
     width: 100%;
   }
 
-  .branch-selector-toggle {
+  .table-controls-bar .branch-selector-toggle {
     width: 100%;
   }
 
