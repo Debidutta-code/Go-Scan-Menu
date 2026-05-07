@@ -299,73 +299,7 @@ export const TableManagement: React.FC = () => {
           {loading && !branch && <span className="branch-name-skeleton"></span>}
         </div>
 
-        <div className="table-toolbar-actions">
-          {isMultiOutlet && branches.length >= 1 && (
-            <div className="branch-selector-container" ref={branchDropdownRef}>
-              <button
-                className={`branch-selector-toggle ${isBranchDropdownOpen ? 'active' : ''}`}
-                onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-              >
-                <div className="branch-toggle-content">
-                  <Store size={16} className="branch-icon" />
-                  <span className="current-branch-name">
-                    {loading ? 'Loading...' : branch?.name || 'Select Branch'}
-                  </span>
-                </div>
-                <ChevronDown size={16} className={`chevron-icon ${isBranchDropdownOpen ? 'rotate' : ''}`} />
-              </button>
-
-              {isBranchDropdownOpen && (
-                <div className="branch-selector-dropdown">
-                  <div className="dropdown-search-wrapper">
-                    <Search size={16} className="search-icon" />
-                    <input
-                      type="text"
-                      className="dropdown-search-input"
-                      placeholder="Search outlets..."
-                      value={branchSearchTerm}
-                      onChange={(e) => setBranchSearchTerm(e.target.value)}
-                      autoFocus
-                    />
-                  </div>
-                  <div className="branch-options-list">
-                    {filteredBranches.length > 0 ? (
-                      filteredBranches.map((b) => (
-                        <div
-                          key={b._id}
-                          className={`branch-option-item ${b._id === branchId ? 'selected' : ''}`}
-                          onClick={() => handleBranchSelect(b._id)}
-                        >
-                          <div className="branch-option-info">
-                            <span className="branch-option-name">{b.name}</span>
-                            <span className="branch-option-code">{b.code}</span>
-                          </div>
-                          {b.isMain && <span className="main-branch-badge">Main</span>}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="no-branches-found">No outlets found</div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          <div className="table-filter-container">
-            <select
-              className="table-filter-select"
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              data-testid="status-filter"
-            >
-              <option value="all">All {!loading && `(${statusCounts.all})`}</option>
-              <option value="available">Available {!loading && `(${statusCounts.available})`}</option>
-              <option value="occupied">Occupied {!loading && `(${statusCounts.occupied})`}</option>
-              <option value="reserved">Reserved {!loading && `(${statusCounts.reserved})`}</option>
-              <option value="maintenance">Maintenance {!loading && `(${statusCounts.maintenance})`}</option>
-            </select>
-          </div>
-
+        <div className="header-qr-action">
           <PermissionGuard permission="tables.manageQR" minLevel={RoleLevel.RESTAURANT}>
             <Button
               variant="outline"
@@ -373,10 +307,80 @@ export const TableManagement: React.FC = () => {
               data-testid="manage-qr-button"
               size="sm"
             >
-              🎨 QR Codes
+              QR Codes
             </Button>
           </PermissionGuard>
+        </div>
+      </div>
 
+      <div className="table-controls-bar">
+        {isMultiOutlet && branches.length >= 1 && (
+          <div className="branch-selector-container" ref={branchDropdownRef}>
+            <button
+              className={`branch-selector-toggle ${isBranchDropdownOpen ? 'active' : ''}`}
+              onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+            >
+              <div className="branch-toggle-content">
+                <Store size={16} className="branch-icon" />
+                <span className="current-branch-name">
+                  {loading ? 'Loading...' : branch?.name || 'Select Branch'}
+                </span>
+              </div>
+              <ChevronDown size={16} className={`chevron-icon ${isBranchDropdownOpen ? 'rotate' : ''}`} />
+            </button>
+
+            {isBranchDropdownOpen && (
+              <div className="branch-selector-dropdown">
+                <div className="dropdown-search-wrapper">
+                  <Search size={16} className="search-icon" />
+                  <input
+                    type="text"
+                    className="dropdown-search-input"
+                    placeholder="Search outlets..."
+                    value={branchSearchTerm}
+                    onChange={(e) => setBranchSearchTerm(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+                <div className="branch-options-list">
+                  {filteredBranches.length > 0 ? (
+                    filteredBranches.map((b) => (
+                      <div
+                        key={b._id}
+                        className={`branch-option-item ${b._id === branchId ? 'selected' : ''}`}
+                        onClick={() => handleBranchSelect(b._id)}
+                      >
+                        <div className="branch-option-info">
+                          <span className="branch-option-name">{b.name}</span>
+                          <span className="branch-option-code">{b.code}</span>
+                        </div>
+                        {b.isMain && <span className="main-branch-badge">Main</span>}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-branches-found">No outlets found</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        <div className="table-filter-container">
+          <select
+            className="table-filter-select"
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            data-testid="status-filter"
+          >
+            <option value="all">All {!loading && `(${statusCounts.all})`}</option>
+            <option value="available">Available {!loading && `(${statusCounts.available})`}</option>
+            <option value="occupied">Occupied {!loading && `(${statusCounts.occupied})`}</option>
+            <option value="reserved">Reserved {!loading && `(${statusCounts.reserved})`}</option>
+            <option value="maintenance">Maintenance {!loading && `(${statusCounts.maintenance})`}</option>
+          </select>
+        </div>
+
+        <div className="controls-actions">
           <PermissionGuard permission="tables.create" minLevel={RoleLevel.BRANCH_SINGLE}>
             <Button
               variant="outline"
