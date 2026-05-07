@@ -14,76 +14,15 @@
   flex-shrink: 0;
 }
 
-/* ─── Wrapper — mirrors .table-management-layout ───────────── */
+/* ─── Wrapper
+     Sits directly after .table-controls-bar in the DOM.
+     Mirrors .table-management-content / .table-list-panel layout. ── */
 .tms-wrapper {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: #fdfdfd;
-  overflow: hidden;
-}
-
-/* ─── Controls Bar — mirrors .table-controls-bar ──────────── */
-.tms-controls-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 32px;
-  background: #ffffff;
-  border-bottom: 1px solid #f0f0f0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  flex-shrink: 0;
-}
-
-/* Branch selector pill — mirrors .branch-selector-toggle */
-.tms-branch-pill {
-  width: 190px;
-  height: 38px;
-  border-radius: 10px;
-  /* slightly tinted to hint at the indigo pill */
-  background: linear-gradient(90deg, #ebebff 25%, #e0e0fa 50%, #ebebff 75%) !important;
-  background-size: 200% 100% !important;
-}
-
-/* Status filter pill — mirrors .table-filter-select */
-.tms-filter-pill {
-  width: 148px;
-  height: 38px;
-  border-radius: 10px;
-}
-
-/* Action buttons pushed to the right — mirrors .controls-actions */
-.tms-controls-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
-}
-
-/* Outline button — mirrors "+ Add Table" */
-.tms-btn-outline {
-  width: 100px;
-  height: 34px;
-  border-radius: 8px;
-}
-
-/* Primary button — mirrors "+ Bulk Add" */
-.tms-btn-primary {
-  width: 96px;
-  height: 34px;
-  border-radius: 8px;
-  /* tinted indigo shimmer to hint at the filled button */
-  background: linear-gradient(90deg, #c7c5f9 25%, #b5b2f7 50%, #c7c5f9 75%) !important;
-  background-size: 200% 100% !important;
-}
-
-/* ─── Content — mirrors .table-management-content ─────────── */
-.tms-content {
   flex: 1;
-  overflow: hidden;
-  background: #fafafa;
   display: flex;
   flex-direction: column;
+  background: #fafafa;
+  overflow: hidden;
 }
 
 /* ─── Panel header — mirrors .panel-header ────────────────── */
@@ -92,7 +31,7 @@
   flex-shrink: 0;
 }
 
-/* Uppercase label — mirrors .panel-title */
+/* Uppercase stats label — mirrors .panel-title */
 .tms-panel-title {
   width: 220px;
   height: 13px;
@@ -131,7 +70,7 @@
   border-radius: 6px;
 }
 
-/* Table count badge — mirrors .location-count */
+/* Table count — mirrors .location-count */
 .tms-location-count {
   width: 56px;
   height: 14px;
@@ -156,34 +95,12 @@
 
 /* ─── Responsive ───────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .tms-controls-bar {
-    padding: 10px 20px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .tms-branch-pill {
-    width: 100%;
-  }
-
-  .tms-filter-pill {
-    flex: 1;
-    min-width: 0;
-    width: auto;
-  }
-
-  .tms-controls-actions {
-    margin-left: 0;
-    width: 100%;
-    justify-content: flex-end;
+  .tms-panel-header {
+    padding: 16px 20px;
   }
 
   .tms-locations {
     padding: 0 20px 20px;
-  }
-
-  .tms-panel-header {
-    padding: 16px 20px;
   }
 
   .tms-cube-grid {
