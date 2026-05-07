@@ -321,7 +321,7 @@ export const TableManagement: React.FC = () => {
               onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
             >
               <div className="branch-toggle-content">
-                <Store size={16} className="branch-icon" />
+                <Store size={5} className="branch-icon" />
                 <span className="current-branch-name">
                   {loading ? 'Loading...' : branch?.name || 'Select Branch'}
                 </span>
@@ -332,7 +332,7 @@ export const TableManagement: React.FC = () => {
             {isBranchDropdownOpen && (
               <div className="branch-selector-dropdown">
                 <div className="dropdown-search-wrapper">
-                  <Search size={16} className="search-icon" />
+                  {/* <Search size={16} className="search-icon" /> */}
                   <input
                     type="text"
                     className="dropdown-search-input"
