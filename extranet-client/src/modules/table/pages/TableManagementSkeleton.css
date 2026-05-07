@@ -1,112 +1,193 @@
 /* src/pages/staff/TableManagementSkeleton.css */
 
-.table-management-skeleton {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background: #fdfdfd;
+/* ─── Shimmer animation ────────────────────────────────────── */
+@keyframes tms-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-.skeleton-shimmer {
-    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-    background-size: 200% 100%;
-    animation: table-skeleton-shimmer 1.5s infinite linear;
-    border-radius: 4px;
+.tms-shimmer {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e9eaec 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: tms-shimmer 1.5s infinite linear;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
-@keyframes table-skeleton-shimmer {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
+/* ─── Wrapper — mirrors .table-management-layout ───────────── */
+.tms-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fdfdfd;
+  overflow: hidden;
 }
 
-.skeleton-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 32px;
-    background: white;
-    border-bottom: 1px solid #f0f0f0;
+/* ─── Controls Bar — mirrors .table-controls-bar ──────────── */
+.tms-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #f0f0f0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
 }
 
-.skeleton-title {
-    width: 300px;
-    height: 32px;
+/* Branch selector pill — mirrors .branch-selector-toggle */
+.tms-branch-pill {
+  width: 190px;
+  height: 38px;
+  border-radius: 10px;
+  /* slightly tinted to hint at the indigo pill */
+  background: linear-gradient(90deg, #ebebff 25%, #e0e0fa 50%, #ebebff 75%) !important;
+  background-size: 200% 100% !important;
 }
 
-.skeleton-toolbar-actions {
-    display: flex;
-    gap: 16px;
+/* Status filter pill — mirrors .table-filter-select */
+.tms-filter-pill {
+  width: 148px;
+  height: 38px;
+  border-radius: 10px;
 }
 
-.skeleton-button {
-    width: 100px;
-    height: 38px;
-    border-radius: 8px;
+/* Action buttons pushed to the right — mirrors .controls-actions */
+.tms-controls-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
-.skeleton-content {
-    padding: 32px;
-    flex: 1;
+/* Outline button — mirrors "+ Add Table" */
+.tms-btn-outline {
+  width: 100px;
+  height: 34px;
+  border-radius: 8px;
 }
 
-.skeleton-panel-header {
-    width: 250px;
-    height: 20px;
-    margin-bottom: 32px;
+/* Primary button — mirrors "+ Bulk Add" */
+.tms-btn-primary {
+  width: 96px;
+  height: 34px;
+  border-radius: 8px;
+  /* tinted indigo shimmer to hint at the filled button */
+  background: linear-gradient(90deg, #c7c5f9 25%, #b5b2f7 50%, #c7c5f9 75%) !important;
+  background-size: 200% 100% !important;
 }
 
-.skeleton-location-group {
-    margin-bottom: 40px;
+/* ─── Content — mirrors .table-management-content ─────────── */
+.tms-content {
+  flex: 1;
+  overflow: hidden;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
 }
 
-.skeleton-location-header {
-    width: 180px;
-    height: 28px;
-    margin-bottom: 16px;
-    border-bottom: 2px solid #f1f5f9;
+/* ─── Panel header — mirrors .panel-header ────────────────── */
+.tms-panel-header {
+  padding: 16px 32px;
+  flex-shrink: 0;
 }
 
-.skeleton-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 12px;
+/* Uppercase label — mirrors .panel-title */
+.tms-panel-title {
+  width: 220px;
+  height: 13px;
+  border-radius: 4px;
 }
 
-.skeleton-cube {
-    aspect-ratio: 1 / 1;
-    width: 100%;
-    max-width: 60px;
-    border-radius: 12px;
+/* ─── Location groups — mirrors .tables-by-location ───────── */
+.tms-locations {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 0 32px 32px;
+  overflow-y: auto;
 }
 
+/* ─── Single group — mirrors .location-group ──────────────── */
+.tms-location-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Location header row — mirrors .location-header */
+.tms-location-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+/* Location name — mirrors .location-name (h3) */
+.tms-location-name {
+  width: 100px;
+  height: 22px;
+  border-radius: 6px;
+}
+
+/* Table count badge — mirrors .location-count */
+.tms-location-count {
+  width: 56px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+/* ─── Cube grid — mirrors .location-tables-grid ───────────── */
+.tms-cube-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 12px;
+  padding: 4px;
+}
+
+/* Single cube — mirrors .table-cube */
+.tms-cube {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  max-width: 60px;
+  border-radius: 12px;
+}
+
+/* ─── Responsive ───────────────────────────────────────────── */
 @media (max-width: 768px) {
-    .skeleton-toolbar {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 16px 20px;
-        gap: 16px;
-    }
+  .tms-controls-bar {
+    padding: 10px 20px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 
-    .skeleton-toolbar-actions {
-        width: 100%;
-    }
+  .tms-branch-pill {
+    width: 100%;
+  }
 
-    .skeleton-title {
-        width: 200px;
-    }
+  .tms-filter-pill {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
 
-    .skeleton-content {
-        padding: 20px;
-    }
+  .tms-controls-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
 
-    .skeleton-grid {
-        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-        gap: 8px;
-    }
+  .tms-locations {
+    padding: 0 20px 20px;
+  }
+
+  .tms-panel-header {
+    padding: 16px 20px;
+  }
+
+  .tms-cube-grid {
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 8px;
+  }
 }
