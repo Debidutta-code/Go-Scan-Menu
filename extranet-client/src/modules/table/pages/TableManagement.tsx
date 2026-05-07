@@ -321,7 +321,7 @@ export const TableManagement: React.FC = () => {
               onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
             >
               <div className="branch-toggle-content">
-                <Store size={5} className="branch-icon" />
+                {/* <Store size={5} className="branch-icon" /> */}
                 <span className="current-branch-name">
                   {loading ? 'Loading...' : branch?.name || 'Select Branch'}
                 </span>
