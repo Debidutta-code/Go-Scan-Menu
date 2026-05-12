@@ -35,7 +35,7 @@ const StaffLayoutContent: React.FC<{
             {/* Page Header Section Removed - Title moved to Navbar */}
 
             <main className="staff-main-content">
-                <Outlet key={location.pathname} />
+                <Outlet />
             </main>
         </>
     );

@@ -115,8 +115,13 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
     try {
       const response = await StaffService.getCurrentUser(storedToken);
       if (response.success && response.data) {
-        setStaff(response.data);
-        localStorage.setItem('staff_data', JSON.stringify(response.data));
+        const newDataStr = JSON.stringify(response.data);
+        const oldDataStr = localStorage.getItem('staff_data');
+
+        if (newDataStr !== oldDataStr) {
+          setStaff(response.data);
+          localStorage.setItem('staff_data', newDataStr);
+        }
       }
     } catch (err) {
       console.error('Failed to refresh staff data:', err);
