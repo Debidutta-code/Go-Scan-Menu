@@ -8,6 +8,10 @@ export class TableRepository {
     return table;
   }
 
+  async createMany(data: Partial<ITable>[]): Promise<ITable[]> {
+    return Table.insertMany(data) as unknown as ITable[];
+  }
+
   async findById(id: string): Promise<ITable | null> {
     return Table.findById(id).populate('restaurantId').populate('branchId');
   }

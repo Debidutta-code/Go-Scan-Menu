@@ -22,6 +22,9 @@ const canManageTables = [
 // Create table
 router.post('/', ...canManageTables, tableController.createTable);
 
+// Bulk create tables
+router.post('/bulk', ...canManageTables, tableController.createBulkTables);
+
 // Get all tables by branch
 router.get('/branch/:branchId', tableController.getTablesByBranch);
 

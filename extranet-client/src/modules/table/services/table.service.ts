@@ -72,43 +72,19 @@ export class TableService {
     payload: BulkCreateTablePayload
   ): Promise<ApiResponse<{ tables: Table[]; created: number }>> {
     try {
-      const tables: CreateTablePayload[] = [];
-      for (let i = payload.startNumber; i <= payload.endNumber; i++) {
-        tables.push({
-          tableNumber: `${payload.prefix}${i}`,
-          capacity: payload.capacity,
-          location: payload.location || 'indoor',
-        });
-      }
+      const rId = extractId(restaurantId);
+      const bId = extractId(branchId);
 
-      const createdTables: Table[] = [];
-      const errors: string[] = [];
+      const response = await axiosInstance.post(
+        `/restaurants/${rId}/tables/bulk`,
+        { ...payload, branchId: bId },
+        { headers: this.getHeaders(token) }
+      );
 
-      for (const tableData of tables) {
-        try {
-          const result = await this.createTable(token, restaurantId, branchId, tableData);
-          if (result.success && result.data) {
-            createdTables.push(result.data);
-          }
-        } catch (err: any) {
-          errors.push(`${tableData.tableNumber}: ${err.message}`);
-        }
-      }
-
-      if (createdTables.length === 0) {
-        throw new Error(`Failed to create tables. Errors: ${errors.join(', ')}`);
-      }
-
-      return {
-        success: true,
-        message: `Created ${createdTables.length} tables${errors.length > 0 ? `. Errors: ${errors.join(', ')}` : ''}`,
-        data: {
-          tables: createdTables,
-          created: createdTables.length,
-        },
-      };
+      return response.data;
     } catch (error: any) {
-      throw error instanceof Error ? error : new Error('Network error');
+      const message = error.response?.data?.message || error.message || 'Failed to create bulk tables';
+      throw new Error(message);
     }
   }
 

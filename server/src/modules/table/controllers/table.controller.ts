@@ -30,6 +30,28 @@ export class TableController {
     });
   });
 
+  createBulkTables = catchAsync(async (req: Request, res: Response) => {
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
+    const branchId = ParamsUtil.getString(req.params.branchId) || req.body.branchId;
+
+    if (!restaurantId || !branchId) {
+      sendResponse(res, 400, {
+        message: 'Restaurant ID and Branch ID are required',
+      });
+      return;
+    }
+
+    const tables = await this.tableService.createBulkTables(restaurantId, branchId, req.body);
+
+    sendResponse(res, 201, {
+      message: `${tables.length} tables created successfully`,
+      data: {
+        tables,
+        created: tables.length,
+      },
+    });
+  });
+
   getTable = catchAsync(async (req: Request, res: Response) => {
     const table = await this.tableService.getTable(ParamsUtil.getString(req.params.id));
 

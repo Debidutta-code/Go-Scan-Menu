@@ -57,6 +57,51 @@ export class TableService {
     return table;
   }
 
+  async createBulkTables(
+    restaurantId: string,
+    branchId: string,
+    data: {
+      prefix?: string;
+      startNumber: number;
+      endNumber: number;
+      capacity: number;
+      location?: ITable['location'];
+    }
+  ) {
+    // Check if branch exists
+    const branch = await this.branchRepo.findByIdAndRestaurant(branchId, restaurantId);
+    if (!branch || !branch.isActive) {
+      throw new AppError('Branch not found or inactive', 404);
+    }
+
+    const tablesToCreate: Partial<ITable>[] = [];
+    const prefix = data.prefix || '';
+
+    for (let i = data.startNumber; i <= data.endNumber; i++) {
+      const tableNumber = `${prefix}${i}`;
+
+      // Check if table number already exists in this branch
+      const existingTable = await this.tableRepo.findByTableNumber(branchId, tableNumber);
+      if (existingTable) {
+        throw new AppError(`Table number ${tableNumber} already exists in this branch`, 400);
+      }
+
+      tablesToCreate.push({
+        restaurantId: new Types.ObjectId(restaurantId),
+        branchId: new Types.ObjectId(branchId),
+        tableNumber,
+        qrCode: `${restaurantId}-${branchId}-${nanoid(10)}`,
+        capacity: data.capacity,
+        location: data.location || 'indoor',
+        status: 'available',
+        isActive: true,
+      });
+    }
+
+    const tables = await this.tableRepo.createMany(tablesToCreate);
+    return tables;
+  }
+
   async getTable(id: string): Promise<ITable> {
     const table = await this.tableRepo.findById(id);
     if (!table || !table.isActive) {
