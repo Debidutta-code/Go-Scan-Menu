@@ -3,6 +3,7 @@ import { TableRepository } from '../repositories/table.repository';
 import { BranchRepository } from '../../restaurant/repositories/branch.repository';
 import { ITable } from '../models/table.model';
 import { AppError } from '@/utils/AppError';
+import { ParamsUtil } from '@/utils';
 import { Types } from 'mongoose';
 import { nanoid } from 'nanoid';
 import { RestaurantRepository } from '../../restaurant/repositories/restaurant.repository';
@@ -145,14 +146,18 @@ export class TableService {
       throw new AppError('Table not found', 404);
     }
 
-    if (table.restaurantId.toString() !== restaurantId) {
+    // Normalize IDs to plain strings for comparison
+    const tableRestaurantId = ParamsUtil.extractId(table.restaurantId);
+    const providedRestaurantId = ParamsUtil.extractId(restaurantId);
+
+    if (tableRestaurantId !== providedRestaurantId) {
       throw new AppError('Table does not belong to this restaurant', 403);
     }
 
     // If updating table number, check uniqueness
     if (data.tableNumber && data.tableNumber !== table.tableNumber) {
       const existingTable = await this.tableRepo.findByTableNumber(
-        table.branchId.toString(),
+        ParamsUtil.extractId(table.branchId),
         data.tableNumber
       );
       if (existingTable) {
@@ -188,7 +193,11 @@ export class TableService {
       throw new AppError('Table not found', 404);
     }
 
-    if (table.restaurantId.toString() !== restaurantId) {
+    // Normalize IDs to plain strings for comparison
+    const tableRestaurantId = ParamsUtil.extractId(table.restaurantId);
+    const providedRestaurantId = ParamsUtil.extractId(restaurantId);
+
+    if (tableRestaurantId !== providedRestaurantId) {
       throw new AppError('Table does not belong to this restaurant', 403);
     }
 
@@ -206,11 +215,15 @@ export class TableService {
       throw new AppError('Table not found', 404);
     }
 
-    if (table.restaurantId.toString() !== restaurantId) {
+    // Normalize IDs to plain strings for comparison
+    const tableRestaurantId = ParamsUtil.extractId(table.restaurantId);
+    const providedRestaurantId = ParamsUtil.extractId(restaurantId);
+
+    if (tableRestaurantId !== providedRestaurantId) {
       throw new AppError('Table does not belong to this restaurant', 403);
     }
 
-    const newQrCode = `${restaurantId}-${table.branchId.toString()}-${nanoid(10)}`;
+    const newQrCode = `${providedRestaurantId}-${ParamsUtil.extractId(table.branchId)}-${nanoid(10)}`;
 
     const updatedTable = await this.tableRepo.update(id, { qrCode: newQrCode });
     if (!updatedTable) {
@@ -230,21 +243,22 @@ export class TableService {
       throw new AppError('Table not found', 404);
     }
 
-    console.log('Table restaurantId:', table.restaurantId._id.toString());
-    console.log('Provided restaurantId:', restaurantId);
+    // Normalize IDs to plain strings for comparison
+    const tableRestaurantId = ParamsUtil.extractId(table.restaurantId);
+    const providedRestaurantId = ParamsUtil.extractId(restaurantId);
 
-    if (table.restaurantId._id.toString() !== restaurantId) {
+    if (tableRestaurantId !== providedRestaurantId) {
       throw new AppError('Table does not belong to this restaurant', 403);
     }
 
     // Get branch to get branch code
-    const branch = await this.branchRepo.findById(table.branchId._id.toString());
+    const branch = await this.branchRepo.findById(ParamsUtil.extractId(table.branchId));
     if (!branch) {
       throw new AppError('Branch not found', 404);
     }
 
     // Get restaurant to get slug
-    const restaurant = await this.restaurantRepo.findById(restaurantId);
+    const restaurant = await this.restaurantRepo.findById(providedRestaurantId);
     if (!restaurant) {
       throw new AppError('Restaurant not found', 404);
     }
