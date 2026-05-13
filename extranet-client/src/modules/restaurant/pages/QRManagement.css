@@ -1,4 +1,69 @@
-/* src/pages/staff/QRManagement.css */
+/* src/modules/restaurant/pages/QRManagement.css */
+
+.sadmin-qr-management-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sadmin-qr-management-container .qr-management-layout {
+  flex: 1;
+  min-height: 0;
+}
+
+.sadmin-qr-management-container .selector-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.sadmin-qr-management-container .admin-select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  font-size: 0.9rem;
+  color: #374151;
+  outline: none;
+  min-width: 200px;
+}
+
+.sadmin-qr-management-container .admin-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.sadmin-qr-management-container .admin-select:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.sadmin-qr-management-container .qr-management-content.dimmed {
+  position: relative;
+}
+
+.sadmin-qr-management-container .selection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sadmin-qr-management-container .selection-overlay h3 {
+  background: white;
+  padding: 24px 48px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  color: #4b5563;
+  font-weight: 600;
+}
 
 .qr-management-layout {
   height: 100%;
