@@ -43,6 +43,22 @@ export const Dashboard: React.FC = () => {
               </button>
             </div>
 
+            {/* QR Management Module */}
+            <div className="module-card" data-testid="qr-management-card">
+              <div className="module-icon">🖼️</div>
+              <h3 className="module-title">QR Management</h3>
+              <p className="module-description">
+                Configure QR code designs, templates, and styles for all restaurant outlets.
+              </p>
+              <button
+                className="module-button primary"
+                onClick={() => navigate('/qr-management')}
+                data-testid="qr-management-button"
+              >
+                Manage QR Codes
+              </button>
+            </div>
+
             {/* Staff Module - Coming Soon */}
             <div className="module-card" data-testid="staff-card">
               <div className="module-icon">👥</div>

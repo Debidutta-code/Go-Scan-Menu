@@ -299,18 +299,6 @@ export const TableManagement: React.FC = () => {
           {loading && !branch && <span className="branch-name-skeleton"></span>}
         </div>
 
-        <div className="header-qr-action">
-          <PermissionGuard permission="tables.manageQR" minLevel={RoleLevel.RESTAURANT}>
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/staff/tables/${extractId(branchId)}/qr-settings`)}
-              data-testid="manage-qr-button"
-              size="sm"
-            >
-              QR Codes
-            </Button>
-          </PermissionGuard>
-        </div>
       </div>
 
       <div className="table-controls-bar">
