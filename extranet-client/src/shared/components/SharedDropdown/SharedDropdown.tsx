@@ -1,72 +1,97 @@
 // src/shared/components/SharedDropdown/SharedDropdown.tsx
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import './SharedDropdown.css';
 
 // ── Option shape ───────────────────────────────────────────────────────────────
 export interface DropdownOption {
-  /** Unique identifier returned in onChange */
   value: string;
-  /** Main option label */
   label: string;
-  /** Optional secondary line shown below the label */
   description?: string;
-  /** Small coloured circle dot (pass a CSS colour string) */
   dot?: string;
-  /** Icon node rendered in a coloured box left of the label */
   icon?: React.ReactNode;
-  /** Badge count shown on the right */
   count?: number;
-  /** Accent colours when this option is active.
-   *  bg   → active row background
-   *  text → active label / count text
-   *  iconBg → coloured icon-box background (defaults to bg) */
   accent?: { bg: string; text: string; iconBg?: string };
 }
 
 // ── Trigger shape ──────────────────────────────────────────────────────────────
 export interface DropdownTrigger {
-  /** Main label shown on the button */
   label: string;
-  /** Smaller text shown next to / below the label (optional) */
   subLabel?: string;
-  /** Icon or image rendered left of the label */
   icon?: React.ReactNode;
-  /** Coloured dot indicator (compact variant) — CSS colour string */
   dot?: string;
-  /** Coloured badge count on the trigger button (optional) */
   count?: number;
-  /** Accent colours used for the count badge on the trigger */
   accent?: { bg: string; text: string };
 }
 
 // ── Props ──────────────────────────────────────────────────────────────────────
 export interface SharedDropdownProps {
-  /** Current selected value — used to derive active state */
   value: string;
-  /** Options list */
   options: DropdownOption[];
-  /** Trigger button configuration */
   trigger: DropdownTrigger;
-  /** Called when the user picks an option */
   onChange: (value: string) => void;
-  /** Visual variant
-   *  - `toolbar`   → wider trigger with icon box + label + count badge + desc row
-   *  - `compact`   → narrower trigger with dot indicator, used inside cards / panels
-   */
   variant?: 'toolbar' | 'compact';
-  /** Extra className on the root wrapper */
   className?: string;
-  /** data-testid forwarded to the trigger button */
   testId?: string;
-  /** Whether counts are loading — hides count badges while true */
   loading?: boolean;
-  /** Minimum pixel width of the dropdown panel (default: 240) */
   panelWidth?: number;
-  /** Align panel to the right edge of the trigger (default: left) */
   alignRight?: boolean;
 }
 
-// ── Chevron SVG ───────────────────────────────────────────────────────────────
+// ── Panel position type ───────────────────────────────────────────────────────
+interface PanelPos {
+  top?: number;
+  bottom?: number;
+  left: number;
+  minWidth: number;
+  openUp: boolean;
+}
+
+const PANEL_MAX_HEIGHT = 320;
+const PANEL_GAP        = 7;
+const VIEWPORT_MARGIN  = 8;
+
+/** Rough estimate of rendered panel height */
+const estimatePanelHeight = (options: DropdownOption[]) => {
+  const h = options.reduce((acc, o) => acc + (o.description ? 54 : 40), 0) + 10;
+  return Math.min(h, PANEL_MAX_HEIGHT);
+};
+
+/** Compute fixed panel position that avoids all viewport edges */
+const computePanelPos = (
+  rect: DOMRect,
+  panelWidth: number,
+  options: DropdownOption[],
+): PanelPos => {
+  const vw      = window.innerWidth;
+  const vh      = window.innerHeight;
+  const panelH  = estimatePanelHeight(options);
+
+  // Vertical: prefer below; flip up if not enough space and more room above
+  const spaceBelow = vh - rect.bottom - PANEL_GAP;
+  const spaceAbove = rect.top - PANEL_GAP;
+  const openUp     = spaceBelow < panelH && spaceAbove > spaceBelow;
+
+  let top: number | undefined;
+  let bottom: number | undefined;
+
+  if (openUp) {
+    bottom = vh - rect.top + PANEL_GAP;
+  } else {
+    top = rect.bottom + PANEL_GAP;
+  }
+
+  // Horizontal: align to trigger left, but clamp within viewport
+  let left = rect.left;
+  if (left + panelWidth > vw - VIEWPORT_MARGIN) {
+    left = vw - panelWidth - VIEWPORT_MARGIN;
+  }
+  if (left < VIEWPORT_MARGIN) left = VIEWPORT_MARGIN;
+
+  return { top, bottom, left, minWidth: panelWidth, openUp };
+};
+
+// ── Chevron ───────────────────────────────────────────────────────────────────
 const Chevron: React.FC<{ open: boolean }> = ({ open }) => (
   <svg
     width="13" height="13" viewBox="0 0 24 24" fill="none"
@@ -79,7 +104,7 @@ const Chevron: React.FC<{ open: boolean }> = ({ open }) => (
   </svg>
 );
 
-// ── Checkmark SVG ─────────────────────────────────────────────────────────────
+// ── Check ─────────────────────────────────────────────────────────────────────
 const Check: React.FC<{ color?: string }> = ({ color }) => (
   <svg
     width="13" height="13" viewBox="0 0 24 24" fill="none"
@@ -105,18 +130,52 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
   panelWidth = 240,
   alignRight = false,
 }) => {
-  const [open, setOpen]   = useState(false);
-  const wrapperRef        = useRef<HTMLDivElement>(null);
+  const [open, setOpen]         = useState(false);
+  const [panelPos, setPanelPos] = useState<PanelPos | null>(null);
+  const wrapperRef              = useRef<HTMLDivElement>(null);
+  const panelRef                = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
+  // Open: measure trigger rect → compute position → show panel
+  const openPanel = useCallback(() => {
+    if (!wrapperRef.current) return;
+    const rect = wrapperRef.current.getBoundingClientRect();
+    setPanelPos(computePanelPos(rect, panelWidth, options));
+    setOpen(true);
+  }, [panelWidth, options]);
+
+  // Keep position fresh while open (scroll / resize)
   useEffect(() => {
+    if (!open) return;
+    const update = () => {
+      if (!wrapperRef.current) return;
+      setPanelPos(computePanelPos(
+        wrapperRef.current.getBoundingClientRect(),
+        panelWidth,
+        options,
+      ));
+    };
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [open, panelWidth, options]);
+
+  // Close on outside click (checks both trigger wrapper and portal panel)
+  useEffect(() => {
+    if (!open) return;
     const handle = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node))
+      const t = e.target as Node;
+      if (!wrapperRef.current?.contains(t) && !panelRef.current?.contains(t)) {
         setOpen(false);
+      }
     };
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
-  }, []);
+  }, [open]);
+
+  const handleToggle = () => (open ? setOpen(false) : openPanel());
 
   const handleSelect = (val: string) => {
     onChange(val);
@@ -125,22 +184,32 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
 
   const activeOption = options.find((o) => o.value === value);
 
-  // ── Render ───────────────────────────────────────────────
+  // Portal panel style — position: fixed so it escapes every overflow/clip
+  const portalStyle: React.CSSProperties = panelPos
+    ? {
+        position:  'fixed',
+        zIndex:    99999,
+        minWidth:  panelPos.minWidth,
+        left:      panelPos.left,
+        ...(panelPos.top    !== undefined ? { top:    panelPos.top    } : {}),
+        ...(panelPos.bottom !== undefined ? { bottom: panelPos.bottom } : {}),
+      }
+    : {};
+
+  // ── Render ────────────────────────────────────────────────
   return (
     <div
       className={`sd-wrapper sd-variant-${variant} ${className}`}
       ref={wrapperRef}
     >
-
-      {/* ── Trigger button ── */}
+      {/* Trigger */}
       <button
         className={`sd-trigger ${open ? 'open' : ''}`}
-        onClick={() => setOpen((o) => !o)}
+        onClick={handleToggle}
         data-testid={testId}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        {/* Icon box (toolbar) or dot (compact) */}
         {variant === 'toolbar' && trigger.icon && (
           <span
             className="sd-trigger-icon-wrap"
@@ -157,7 +226,6 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
           />
         )}
 
-        {/* Label block */}
         <span className="sd-trigger-text">
           <span className="sd-trigger-label">{trigger.label}</span>
           {trigger.subLabel && (
@@ -165,7 +233,6 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
           )}
         </span>
 
-        {/* Count badge */}
         {!loading && trigger.count !== undefined && (
           <span
             className="sd-trigger-count"
@@ -182,11 +249,12 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
         <Chevron open={open} />
       </button>
 
-      {/* ── Dropdown panel ── */}
-      {open && (
+      {/* Panel — portalled to document.body to escape all overflow clipping */}
+      {open && panelPos && createPortal(
         <div
-          className={`sd-panel ${alignRight ? 'align-right' : 'align-left'}`}
-          style={{ minWidth: panelWidth }}
+          ref={panelRef}
+          className={`sd-panel ${panelPos.openUp ? 'open-up' : 'open-down'}`}
+          style={portalStyle}
           role="listbox"
           aria-label="Select option"
         >
@@ -201,15 +269,12 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
                 style={isActive && opt.accent ? { background: opt.accent.bg } : undefined}
                 onClick={() => handleSelect(opt.value)}
               >
-                {/* Icon box */}
                 {opt.icon && (
                   <span
                     className="sd-option-icon-wrap"
                     style={{
                       background: opt.accent?.iconBg ?? opt.accent?.bg ?? '#f1f5f9',
-                      color:      isActive
-                        ? opt.accent?.text ?? 'inherit'
-                        : opt.dot ?? 'inherit',
+                      color: isActive ? opt.accent?.text ?? 'inherit' : opt.dot ?? 'inherit',
                     }}
                     aria-hidden="true"
                   >
@@ -217,15 +282,10 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
                   </span>
                 )}
 
-                {/* Dot */}
                 {!opt.icon && opt.dot && (
-                  <span
-                    className="sd-option-dot"
-                    style={{ background: opt.dot }}
-                  />
+                  <span className="sd-option-dot" style={{ background: opt.dot }} />
                 )}
 
-                {/* Label + description */}
                 <span className="sd-option-text">
                   <span
                     className="sd-option-label"
@@ -238,7 +298,6 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
                   )}
                 </span>
 
-                {/* Count badge */}
                 {!loading && opt.count !== undefined && (
                   <span
                     className="sd-option-count"
@@ -251,14 +310,14 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
                   </span>
                 )}
 
-                {/* Active checkmark */}
                 {isActive && !opt.count && (
                   <Check color={opt.accent?.text} />
                 )}
               </button>
             );
           })}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

@@ -1,8 +1,13 @@
 /* src/shared/components/SharedDropdown/SharedDropdown.css */
 
-/* ─── Fade-in ──────────────────────────────────────────────── */
-@keyframes sd-fade-in {
+/* ─── Animations ───────────────────────────────────────────── */
+@keyframes sd-fade-in-down {
   from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sd-fade-in-up {
+  from { opacity: 0; transform: translateY(5px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -46,7 +51,7 @@
   color: #18181b;
 }
 
-/* Compact variant trigger — tighter, used inside cards */
+/* Compact variant */
 .sd-variant-compact .sd-trigger {
   height: 38px;
   padding: 0 12px;
@@ -70,8 +75,6 @@
 }
 
 /* ─── Trigger internals ────────────────────────────────────── */
-
-/* Icon box — toolbar variant */
 .sd-trigger-icon-wrap {
   display: flex;
   align-items: center;
@@ -81,7 +84,6 @@
   flex-shrink: 0;
 }
 
-/* Dot indicator — compact variant */
 .sd-trigger-dot {
   width: 8px;
   height: 8px;
@@ -90,7 +92,6 @@
   background: #94a3b8;
 }
 
-/* Label column */
 .sd-trigger-text {
   display: flex;
   align-items: center;
@@ -115,7 +116,6 @@
   white-space: nowrap;
 }
 
-/* Count badge on trigger */
 .sd-trigger-count {
   font-size: 0.68rem;
   font-weight: 700;
@@ -127,7 +127,6 @@
   flex-shrink: 0;
 }
 
-/* Chevron */
 .sd-chevron {
   flex-shrink: 0;
   color: #94a3b8;
@@ -140,22 +139,38 @@
 }
 
 /* ─── Panel ────────────────────────────────────────────────── */
+/*
+ * The panel is rendered via React portal into document.body with
+ * position:fixed applied inline. These classes handle only visuals
+ * and animation — no position/z-index here (set inline by the component).
+ */
 .sd-panel {
-  position: absolute;
-  top: calc(100% + 7px);
   background: white;
   border-radius: 14px;
   box-shadow:
     0 8px 30px -4px rgba(0, 0, 0, 0.13),
     0 0 0 1px rgba(0, 0, 0, 0.05);
-  z-index: 1050;
   overflow: hidden;
   padding: 5px;
-  animation: sd-fade-in 0.17s ease-out;
+  max-height: 320px;
+  overflow-y: auto;
 }
 
-.sd-panel.align-left  { left: 0; }
-.sd-panel.align-right { right: 0; }
+.sd-panel.open-down {
+  animation: sd-fade-in-down 0.17s ease-out;
+  transform-origin: top center;
+}
+
+.sd-panel.open-up {
+  animation: sd-fade-in-up 0.17s ease-out;
+  transform-origin: bottom center;
+}
+
+/* ─── Scrollbar ────────────────────────────────────────────── */
+.sd-panel::-webkit-scrollbar        { width: 4px; }
+.sd-panel::-webkit-scrollbar-track  { background: transparent; }
+.sd-panel::-webkit-scrollbar-thumb  { background: #e2e8f0; border-radius: 4px; }
+.sd-panel::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
 
 /* ─── Option row ───────────────────────────────────────────── */
 .sd-option {
@@ -175,17 +190,9 @@
   user-select: none;
 }
 
-.sd-option:last-child {
-  margin-bottom: 0;
-}
+.sd-option:last-child { margin-bottom: 0; }
 
-.sd-option:hover {
-  background: #f4f4f5;
-}
-
-/* .sd-option.active {
-  background: #f4f4f5;
-} */
+.sd-option:hover { background: #f4f4f5; }
 
 /* Icon box */
 .sd-option-icon-wrap {
@@ -199,7 +206,7 @@
   transition: background 0.12s;
 }
 
-/* Dot indicator */
+/* Dot */
 .sd-option-dot {
   width: 8px;
   height: 8px;
@@ -207,7 +214,7 @@
   flex-shrink: 0;
 }
 
-/* Label + description column */
+/* Label + description */
 .sd-option-text {
   display: flex;
   flex-direction: column;
@@ -225,9 +232,7 @@
   text-overflow: ellipsis;
 }
 
-.sd-option.active .sd-option-label {
-  font-weight: 700;
-}
+.sd-option.active .sd-option-label { font-weight: 700; }
 
 .sd-option-desc {
   font-size: 0.72rem;
@@ -247,22 +252,11 @@
   line-height: 1.4;
 }
 
-/* Checkmark icon */
+/* Checkmark */
 .sd-check-icon {
   flex-shrink: 0;
   margin-left: auto;
 }
-
-/* ─── Scrollbar inside panel (when many options) ───────────── */
-.sd-panel {
-  max-height: 320px;
-  overflow-y: auto;
-}
-
-.sd-panel::-webkit-scrollbar { width: 4px; }
-.sd-panel::-webkit-scrollbar-track { background: transparent; }
-.sd-panel::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
-.sd-panel::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
 
 /* ─── Responsive ───────────────────────────────────────────── */
 @media (max-width: 768px) {
