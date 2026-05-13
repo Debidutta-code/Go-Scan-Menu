@@ -15,8 +15,9 @@
 }
 
 /* ─── Wrapper
-     Sits directly after .table-controls-bar in the DOM.
-     Mirrors .table-management-content / .table-list-panel layout. ── */
+     Sits inside .table-management-content area only.
+     Does NOT cover the toolbar — toolbar stays fully interactive
+     while tables are loading. ── */
 .tms-wrapper {
   flex: 1;
   display: flex;
@@ -91,6 +92,19 @@
   width: 100%;
   max-width: 60px;
   border-radius: 12px;
+}
+
+/* ─── Branch button skeleton (inside toolbar) ─────────────── */
+/* Used when branch list is loading — only replaces the selector pill,
+   never affects the main skeleton or table content area. */
+.branch-btn-skeleton {
+  display: inline-block;
+  width: 170px;
+  height: 34px;
+  border-radius: 9px;
+  background: linear-gradient(90deg, #f0f0ff 25%, #e8e7ff 50%, #f0f0ff 75%);
+  background-size: 200% 100%;
+  animation: tms-shimmer 1.5s infinite linear;
 }
 
 /* ─── Responsive ───────────────────────────────────────────── */

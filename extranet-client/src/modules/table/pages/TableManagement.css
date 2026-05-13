@@ -61,22 +61,6 @@
   white-space: nowrap;
 }
 
-/* Branch name skeleton */
-.branch-name-skeleton {
-  display: inline-block;
-  width: 120px;
-  height: 22px;
-  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-  background-size: 200% 100%;
-  animation: table-skeleton-shimmer 1.5s infinite linear;
-  border-radius: 4px;
-}
-
-@keyframes table-skeleton-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
 /* ─── Branch Selector (now in toolbar) ────────────────────── */
 .branch-selector-container {
   position: relative;
@@ -229,41 +213,169 @@
   font-size: 0.875rem;
 }
 
-/* ─── Status Filter (now in toolbar) ──────────────────────── */
-.table-filter-container {
-  display: flex;
-  align-items: center;
+/* ─── Status Filter Dropdown (matches Add Table style) ─────── */
+.status-filter-wrapper {
+  position: relative;
 }
 
-.table-filter-select {
+.status-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   height: 34px;
-  padding: 0 30px 0 12px;
+  padding: 0 12px;
+  background: #fafafa;
   border: 1.5px solid #e4e4e7;
   border-radius: 9px;
-  font-size: 0.8rem;
-  font-weight: 500;
   color: #3f3f46;
-  background: #fafafa;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  outline: none;
-  min-width: 140px;
-  transition: all 0.15s ease;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 12 12'%3E%3Cpath fill='%23a1a1aa' d='M1 4l5 4 5-4'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
   letter-spacing: -0.01em;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  min-width: 160px;
+  justify-content: space-between;
 }
 
-.table-filter-select:hover {
-  background-color: #f4f4f5;
+.status-filter-btn:hover {
+  background: #f4f4f5;
   border-color: #d4d4d8;
   color: #18181b;
 }
 
-.table-filter-select:focus {
-  border-color: #a5b4fc;
-  box-shadow: 0 0 0 3px rgba(165, 180, 252, 0.2);
+.status-filter-btn.active {
+  background: #f0f0f0;
+  border-color: #c4c4c8;
+  color: #18181b;
+}
+
+.status-filter-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.status-filter-text {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+}
+
+.status-filter-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+.status-filter-count {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 100px;
+  line-height: 1.4;
+}
+
+.status-chevron {
+  transition: transform 0.2s ease;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.status-chevron.rotate {
+  transform: rotate(180deg);
+}
+
+/* Status filter dropdown panel */
+.status-filter-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 260px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  z-index: 1001;
+  overflow: hidden;
+  animation: dropdown-fade-in 0.18s ease-out;
+  padding: 6px;
+}
+
+/* Status option row — mirrors .add-dropdown-item */
+.status-filter-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  background: none;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  margin-bottom: 1px;
+}
+
+.status-filter-option:hover {
+  background: #f4f4f5;
+}
+
+.status-filter-option.active {
+  background: #f0f0ff;
+}
+
+/* Coloured icon box — mirrors .add-dropdown-icon */
+.sfo-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  /* background & color set inline per-status */
+}
+
+/* Text column — mirrors .add-dropdown-text */
+.sfo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sfo-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.status-filter-option.active .sfo-label {
+  color: #3730a3;
+}
+
+.sfo-desc {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sfo-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+  flex-shrink: 0;
+  line-height: 1.4;
+  /* background & color set inline per-status */
 }
 
 /* ─── Add Table Dropdown Button ────────────────────────────── */
@@ -661,11 +773,11 @@
     width: 100%;
   }
 
-  .table-filter-container {
+  .status-filter-wrapper {
     flex: 1;
   }
 
-  .table-filter-select {
+  .status-filter-btn {
     width: 100%;
   }
 
