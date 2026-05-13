@@ -1,10 +1,12 @@
-// src/components/BulkCreateTableModal.tsx
+// src/modules/table/components/BulkCreateTableModal.tsx
 import React, { useState } from 'react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { TableService } from '@/modules/table/services/table.service';
 import { Button } from '@/shared/components/Button';
 import { InputField } from '@/shared/components/InputField';
-import './QRCodeModal.css';
+import './BulkCreateTableModal.css';
+
+type Location = 'indoor' | 'outdoor' | 'balcony' | 'rooftop' | 'private room';
 
 interface BulkCreateTableModalProps {
   branchId: string;
@@ -18,31 +20,29 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
   onSuccess,
 }) => {
   const { staff, token } = useStaffAuth();
+
   const [formData, setFormData] = useState({
-    prefix: '',
+    prefix:      '',
     startNumber: 1,
-    endNumber: 10,
-    capacity: 4,
-    location: 'indoor' as 'indoor' | 'outdoor' | 'balcony' | 'rooftop' | 'private room',
+    endNumber:   10,
+    capacity:    4,
+    location:    'indoor' as Location,
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error,   setError]   = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!staff || !token) return;
 
     if (formData.startNumber > formData.endNumber) {
-      setError('Start number must be less than or equal to end number');
+      setError('Start number must be ≤ end number');
       return;
     }
-
     if (formData.endNumber - formData.startNumber > 100) {
       setError('Cannot create more than 100 tables at once');
       return;
     }
-
     if (formData.capacity < 1) {
       setError('Capacity must be at least 1');
       return;
@@ -58,7 +58,6 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
         branchId,
         formData
       );
-
       if (response.success) {
         alert(response.message || 'Tables created successfully');
         onSuccess();
@@ -71,7 +70,7 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
 
   const getPreview = () => {
     const count = formData.endNumber - formData.startNumber + 1;
-    const examples = [];
+    const examples: string[] = [];
     for (
       let i = formData.startNumber;
       i <= Math.min(formData.startNumber + 2, formData.endNumber);
@@ -80,7 +79,7 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
       examples.push(`${formData.prefix}${i}`);
     }
     if (count > 3) {
-      examples.push('...');
+      examples.push('…');
       examples.push(`${formData.prefix}${formData.endNumber}`);
     }
     return { count, examples: examples.join(', ') };
@@ -89,18 +88,36 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
   const preview = getPreview();
 
   return (
-    <div className="modal-overlay" onClick={onClose} data-testid="bulk-create-modal">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 className="modal-title">Bulk Create Tables</h2>
-          <button className="modal-close" onClick={onClose} data-testid="close-modal">
-            ×
+    <div
+      className="bcm-overlay"
+      onClick={onClose}
+      data-testid="bulk-create-modal"
+    >
+      <div className="bcm-container" onClick={(e) => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="bcm-header">
+          <div className="bcm-header-left">
+            <span className="bcm-badge">Bulk Create</span>
+            <h2 className="bcm-title">Bulk Add Tables</h2>
+          </div>
+          <button
+            className="bcm-close"
+            onClick={onClose}
+            data-testid="close-modal"
+            aria-label="Close"
+          >
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+              <path d="M1 1l16 16M17 1L1 17" stroke="currentColor" strokeWidth="2.2"
+                strokeLinecap="round" />
+            </svg>
           </button>
         </div>
 
-        <div className="modal-body">
-          <form onSubmit={handleSubmit} className="table-form">
-            {error && <div className="error-banner">{error}</div>}
+        {/* Body */}
+        <div className="bcm-body">
+          <form onSubmit={handleSubmit} className="bcm-form">
+            {error && <div className="bcm-error">{error}</div>}
 
             <InputField
               label="Table Number Prefix (optional)"
@@ -111,7 +128,7 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
               data-testid="prefix-input"
             />
 
-            <div className="form-row">
+            <div className="bcm-row">
               <InputField
                 label="Start Number"
                 type="number"
@@ -123,7 +140,6 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
                 required
                 data-testid="start-number-input"
               />
-
               <InputField
                 label="End Number"
                 type="number"
@@ -138,7 +154,7 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
             </div>
 
             <InputField
-              label="Capacity (number of seats)"
+              label="Capacity (seats per table)"
               type="number"
               value={formData.capacity}
               onChange={(e) =>
@@ -149,16 +165,13 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
               data-testid="capacity-input"
             />
 
-            <div className="form-field">
-              <label className="form-label">Location</label>
+            <div className="bcm-field">
+              <label className="bcm-label">Location</label>
               <select
-                className="form-select"
+                className="bcm-select"
                 value={formData.location}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    location: e.target.value as typeof formData.location,
-                  })
+                  setFormData({ ...formData, location: e.target.value as Location })
                 }
                 data-testid="location-select"
               >
@@ -170,35 +183,46 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
               </select>
             </div>
 
-            <div className="preview-section">
-              <h3 className="preview-title">Preview:</h3>
-              <p className="preview-text">
-                <strong>{preview.count}</strong> tables will be created:
+            {/* Preview */}
+            <div className="bcm-preview">
+              <div className="bcm-preview-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 8v4m0 4h.01" />
+                </svg>
+                <span>Preview</span>
+              </div>
+              <p className="bcm-preview-count">
+                <strong>{preview.count}</strong> table{preview.count !== 1 ? 's' : ''} will be created
               </p>
-              <p className="preview-examples">{preview.examples}</p>
-            </div>
-
-            <div className="form-actions">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={loading}
-                data-testid="cancel-button"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                disabled={loading}
-                data-testid="submit-button"
-              >
-                {loading ? 'Creating...' : `Create ${preview.count} Tables`}
-              </Button>
+              <p className="bcm-preview-examples">{preview.examples}</p>
             </div>
           </form>
         </div>
+
+        {/* Footer */}
+        <div className="bcm-footer">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
+            data-testid="cancel-button"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={loading}
+            onClick={handleSubmit as any}
+            data-testid="submit-button"
+          >
+            {loading ? 'Creating…' : `Create ${preview.count} Tables`}
+          </Button>
+        </div>
+
       </div>
     </div>
   );

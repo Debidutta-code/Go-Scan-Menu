@@ -1,7 +1,7 @@
 // src/pages/staff/TableManagement.tsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Search, ChevronDown, Store } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { TableService } from '@/modules/table/services/table.service';
 import { BranchService } from '@/modules/branch/services/branch.service';
@@ -11,9 +11,8 @@ import { extractId } from '@/shared/utils/id.util';
 import { PermissionGuard } from '@/shared/components/PermissionGuard';
 import { RoleLevel, StaffRole } from '@/shared/types/role.types';
 import { QRCodeModal } from '@/modules/table/components/QRCodeModal';
-import { CreateTableModal } from '@/modules/table/components/CreateTableModal';
+import { TableFormModal } from '@/modules/table/components/TableFormModal';
 import { BulkCreateTableModal } from '@/modules/table/components/BulkCreateTableModal';
-import { EditTableModal } from '@/modules/table/components/EditTableModal';
 import { TableManagementSkeleton } from './TableManagementSkeleton';
 import './TableManagement.css';
 
@@ -32,6 +31,10 @@ export const TableManagement: React.FC = () => {
   const [error, setError] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
+  // Add-table dropdown
+  const [addDropdownOpen, setAddDropdownOpen] = useState(false);
+  const addDropdownRef = useRef<HTMLDivElement>(null);
+
   // Modal states
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
@@ -46,25 +49,33 @@ export const TableManagement: React.FC = () => {
   const isOverCard = useRef(false);
 
   useEffect(() => {
-    if (staff && token && branchId) {
-      loadData();
-    }
+    if (staff && token && branchId) loadData();
   }, [staff, token, branchId]);
 
   useEffect(() => {
     if (staff && token) {
       const restaurantType = staff?.restaurant?.type;
-      const isMultiOutlet = (restaurantType as string) === 'chain' || (restaurantType as string) === 'branch-wise';
-      if (isMultiOutlet) {
-        loadBranches();
-      }
+      const isMultiOutlet =
+        (restaurantType as string) === 'chain' ||
+        (restaurantType as string) === 'branch-wise';
+      if (isMultiOutlet) loadBranches();
     }
   }, [staff, token]);
 
+  // Close branch dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (branchDropdownRef.current && !branchDropdownRef.current.contains(event.target as Node)) {
+      if (
+        branchDropdownRef.current &&
+        !branchDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsBranchDropdownOpen(false);
+      }
+      if (
+        addDropdownRef.current &&
+        !addDropdownRef.current.contains(event.target as Node)
+      ) {
+        setAddDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -75,8 +86,7 @@ export const TableManagement: React.FC = () => {
     if (!staff || !token || !staff.restaurantId) return;
     try {
       const response = await BranchService.getAllBranches(staff.restaurantId);
-
-      let branchesData = [];
+      let branchesData: any[] = [];
       if (response.success && response.data) {
         if (Array.isArray(response.data)) {
           branchesData = response.data;
@@ -84,14 +94,12 @@ export const TableManagement: React.FC = () => {
           branchesData = (response.data as any).branches;
         }
       }
-
       if (branchesData.length > 0) {
         const isHighLevel =
           (staff.roleLevel && staff.roleLevel <= 2) ||
           staff.staffType === 'owner' ||
           staff.staffType === 'super_admin' ||
           (staff.roleName && staff.roleName.toLowerCase() === 'owner');
-
         let filteredBranches = branchesData;
         if (!isHighLevel && staff.allowedBranchIds && staff.allowedBranchIds.length > 0) {
           filteredBranches = branchesData.filter((b: any) =>
@@ -110,10 +118,8 @@ export const TableManagement: React.FC = () => {
       setLoading(false);
       return;
     }
-
     setLoading(true);
     setError('');
-
     try {
       const tablesResponse = await TableService.getTables(
         token,
@@ -122,12 +128,9 @@ export const TableManagement: React.FC = () => {
         1,
         1000
       );
-
       if (tablesResponse.success && tablesResponse.data) {
         setTables(tablesResponse.data.tables || []);
-        if (tablesResponse.data.branch) {
-          setBranch(tablesResponse.data.branch);
-        }
+        if (tablesResponse.data.branch) setBranch(tablesResponse.data.branch);
       }
     } catch (err: any) {
       setError(err?.message || 'Failed to load table data');
@@ -138,9 +141,7 @@ export const TableManagement: React.FC = () => {
 
   const handleDeleteTable = async (tableId: string, tableNumber: string) => {
     if (!staff || !token) return;
-
     if (!window.confirm(`Are you sure you want to delete table "${tableNumber}"?`)) return;
-
     try {
       const rid = extractId(staff.restaurantId);
       const response = await TableService.deleteTable(token, rid, extractId(tableId));
@@ -156,7 +157,6 @@ export const TableManagement: React.FC = () => {
 
   const handleUpdateStatus = async (tableId: string, newStatus: Table['status']) => {
     if (!staff || !token) return;
-
     try {
       const rid = extractId(staff.restaurantId);
       const response = await TableService.updateTableStatus(
@@ -188,29 +188,18 @@ export const TableManagement: React.FC = () => {
     setHoveredTable(null);
   };
 
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout();
-      navigate('/staff/login');
-    }
-  };
-
-  const canManageTables = () => {
-    if (!staff || !staff.permissions) return false;
-    return staff.permissions.tables?.create || staff.staffType === 'owner';
-  };
-
   const filteredTables =
     selectedStatus === 'all'
       ? tables
-      : tables.filter((table) => table.status === selectedStatus);
+      : tables.filter((t) => t.status === selectedStatus);
 
   const filteredBranches = useMemo(() => {
     if (!branchSearchTerm.trim()) return branches;
     const term = branchSearchTerm.toLowerCase();
-    return branches.filter(b =>
-      b.name.toLowerCase().includes(term) ||
-      b.code.toLowerCase().includes(term)
+    return branches.filter(
+      (b) =>
+        b.name.toLowerCase().includes(term) ||
+        b.code.toLowerCase().includes(term)
     );
   }, [branches, branchSearchTerm]);
 
@@ -220,34 +209,28 @@ export const TableManagement: React.FC = () => {
     navigate(`/staff/tables/${bId}`);
   };
 
-  const getStatusCounts = () => {
-    return {
-      all: tables.length,
-      available: tables.filter((t) => t.status === 'available').length,
-      occupied: tables.filter((t) => t.status === 'occupied').length,
-      reserved: tables.filter((t) => t.status === 'reserved').length,
-      maintenance: tables.filter((t) => t.status === 'maintenance').length,
-    };
-  };
+  const getStatusCounts = () => ({
+    all: tables.length,
+    available: tables.filter((t) => t.status === 'available').length,
+    occupied: tables.filter((t) => t.status === 'occupied').length,
+    reserved: tables.filter((t) => t.status === 'reserved').length,
+    maintenance: tables.filter((t) => t.status === 'maintenance').length,
+  });
 
   const groupTablesByLocation = (tablesToGroup: Table[]) => {
     const grouped: Record<string, Table[]> = {};
     tablesToGroup.forEach((table) => {
-      const location = table.location;
-      if (!grouped[location]) {
-        grouped[location] = [];
-      }
-      grouped[location].push(table);
+      const loc = table.location;
+      if (!grouped[loc]) grouped[loc] = [];
+      grouped[loc].push(table);
     });
-
-    Object.keys(grouped).forEach((location) => {
-      grouped[location].sort((a, b) => {
+    Object.keys(grouped).forEach((loc) => {
+      grouped[loc].sort((a, b) => {
         const aNum = parseInt(a.tableNumber.replace(/\D/g, ''), 10);
         const bNum = parseInt(b.tableNumber.replace(/\D/g, ''), 10);
         return aNum - bNum;
       });
     });
-
     return grouped;
   };
 
@@ -258,21 +241,15 @@ export const TableManagement: React.FC = () => {
     let y = rect.bottom + 10;
     const cardWidth = 280;
     const cardHeight = 220;
-    if (x + cardWidth > window.innerWidth) {
-      x = rect.right - cardWidth - 15;
-    }
-    if (y + cardHeight > window.innerHeight) {
-      y = rect.top - cardHeight - 10;
-    }
+    if (x + cardWidth > window.innerWidth) x = rect.right - cardWidth - 15;
+    if (y + cardHeight > window.innerHeight) y = rect.top - cardHeight - 10;
     setMousePos({ x, y });
     setHoveredTable(table);
   };
 
   const handleMouseLeaveCube = () => {
     hoverTimeoutRef.current = setTimeout(() => {
-      if (!isOverCard.current) {
-        setHoveredTable(null);
-      }
+      if (!isOverCard.current) setHoveredTable(null);
     }, 100);
   };
 
@@ -280,10 +257,19 @@ export const TableManagement: React.FC = () => {
   const groupedTables = groupTablesByLocation(filteredTables);
 
   const restaurantType = staff?.restaurant?.type;
-  const isMultiOutlet = (restaurantType as string) === 'chain' || (restaurantType as string) === 'branch-wise';
+  const isMultiOutlet =
+    (restaurantType as string) === 'chain' ||
+    (restaurantType as string) === 'branch-wise';
+
+  const canManageTables = () => {
+    if (!staff || !staff.permissions) return false;
+    return staff.permissions.tables?.create || staff.staffType === 'owner';
+  };
 
   return (
     <div className="table-management-layout">
+
+      {/* ── Toolbar ── */}
       <div className="table-page-toolbar">
         <div className="toolbar-left-group">
           <h1 className="table-page-title" data-testid="table-management-title">
@@ -291,108 +277,148 @@ export const TableManagement: React.FC = () => {
           </h1>
 
           {!isMultiOutlet && branch && (
-            <span className="single-branch-display">
-               - {branch.name}
-            </span>
+            <span className="single-branch-display"> — {branch.name}</span>
+          )}
+          {loading && !branch && <span className="branch-name-skeleton" />}
+
+          {/* Branch selector — inline in header for multi-outlet */}
+          {isMultiOutlet && branches.length >= 1 && (
+            <div className="branch-selector-container" ref={branchDropdownRef}>
+              <button
+                className={`branch-selector-toggle ${isBranchDropdownOpen ? 'active' : ''}`}
+                onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+              >
+                <span className="current-branch-name">
+                  {loading ? 'Loading…' : branch?.name || 'Select Branch'}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className={`chevron-icon ${isBranchDropdownOpen ? 'rotate' : ''}`}
+                />
+              </button>
+
+              {isBranchDropdownOpen && (
+                <div className="branch-selector-dropdown">
+                  <div className="dropdown-search-wrapper">
+                    <input
+                      type="text"
+                      className="dropdown-search-input"
+                      placeholder="Search outlets…"
+                      value={branchSearchTerm}
+                      onChange={(e) => setBranchSearchTerm(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  <div className="branch-options-list">
+                    {filteredBranches.length > 0 ? (
+                      filteredBranches.map((b) => (
+                        <div
+                          key={b._id}
+                          className={`branch-option-item ${b._id === branchId ? 'selected' : ''}`}
+                          onClick={() => handleBranchSelect(b._id)}
+                        >
+                          <div className="branch-option-info">
+                            <span className="branch-option-name">{b.name}</span>
+                            <span className="branch-option-code">{b.code}</span>
+                          </div>
+                          {b.isMain && <span className="main-branch-badge">Main</span>}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="no-branches-found">No outlets found</div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
-          {loading && !branch && <span className="branch-name-skeleton"></span>}
+          {/* Status filter — inline in header */}
+          <div className="table-filter-container">
+            <select
+              className="table-filter-select"
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              data-testid="status-filter"
+            >
+              <option value="all">All {!loading && `(${statusCounts.all})`}</option>
+              <option value="available">Available {!loading && `(${statusCounts.available})`}</option>
+              <option value="occupied">Occupied {!loading && `(${statusCounts.occupied})`}</option>
+              <option value="reserved">Reserved {!loading && `(${statusCounts.reserved})`}</option>
+              <option value="maintenance">Maintenance {!loading && `(${statusCounts.maintenance})`}</option>
+            </select>
+          </div>
         </div>
 
-      </div>
-
-      <div className="table-controls-bar">
-        {isMultiOutlet && branches.length >= 1 && (
-          <div className="branch-selector-container" ref={branchDropdownRef}>
+        {/* Right side — single "+ Add Table" dropdown */}
+        <PermissionGuard permission="tables.create" minLevel={RoleLevel.BRANCH_SINGLE}>
+          <div className="add-table-dropdown-wrapper" ref={addDropdownRef}>
             <button
-              className={`branch-selector-toggle ${isBranchDropdownOpen ? 'active' : ''}`}
-              onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+              className={`add-table-btn ${addDropdownOpen ? 'active' : ''}`}
+              onClick={() => setAddDropdownOpen(!addDropdownOpen)}
+              data-testid="add-table-button"
             >
-              <div className="branch-toggle-content">
-                {/* <Store size={5} className="branch-icon" /> */}
-                <span className="current-branch-name">
-                  {loading ? 'Loading...' : branch?.name || 'Select Branch'}
-                </span>
-              </div>
-              <ChevronDown size={16} className={`chevron-icon ${isBranchDropdownOpen ? 'rotate' : ''}`} />
+              + Add Table
+              <ChevronDown
+                size={14}
+                className={`add-chevron ${addDropdownOpen ? 'rotate' : ''}`}
+              />
             </button>
 
-            {isBranchDropdownOpen && (
-              <div className="branch-selector-dropdown">
-                <div className="dropdown-search-wrapper">
-                  {/* <Search size={16} className="search-icon" /> */}
-                  <input
-                    type="text"
-                    className="dropdown-search-input"
-                    placeholder="Search outlets..."
-                    value={branchSearchTerm}
-                    onChange={(e) => setBranchSearchTerm(e.target.value)}
-                    autoFocus
-                  />
-                </div>
-                <div className="branch-options-list">
-                  {filteredBranches.length > 0 ? (
-                    filteredBranches.map((b) => (
-                      <div
-                        key={b._id}
-                        className={`branch-option-item ${b._id === branchId ? 'selected' : ''}`}
-                        onClick={() => handleBranchSelect(b._id)}
-                      >
-                        <div className="branch-option-info">
-                          <span className="branch-option-name">{b.name}</span>
-                          <span className="branch-option-code">{b.code}</span>
-                        </div>
-                        {b.isMain && <span className="main-branch-badge">Main</span>}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="no-branches-found">No outlets found</div>
-                  )}
-                </div>
+            {addDropdownOpen && (
+              <div className="add-table-dropdown">
+                <button
+                  className="add-dropdown-item"
+                  onClick={() => {
+                    setAddDropdownOpen(false);
+                    setCreateModalOpen(true);
+                  }}
+                  data-testid="single-table-option"
+                >
+                  <span className="add-dropdown-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="3" />
+                      <path d="M12 8v8M8 12h8" />
+                    </svg>
+                  </span>
+                  <div className="add-dropdown-text">
+                    <span className="add-dropdown-label">Single Table</span>
+                    <span className="add-dropdown-desc">Add one table manually</span>
+                  </div>
+                </button>
+
+                <button
+                  className="add-dropdown-item"
+                  onClick={() => {
+                    setAddDropdownOpen(false);
+                    setBulkCreateModalOpen(true);
+                  }}
+                  data-testid="bulk-add-option"
+                >
+                  <span className="add-dropdown-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="3" width="8" height="8" rx="2" />
+                      <rect x="14" y="3" width="8" height="8" rx="2" />
+                      <rect x="2" y="15" width="8" height="8" rx="2" />
+                      <rect x="14" y="15" width="8" height="8" rx="2" />
+                    </svg>
+                  </span>
+                  <div className="add-dropdown-text">
+                    <span className="add-dropdown-label">Bulk Add Tables</span>
+                    <span className="add-dropdown-desc">Create multiple tables at once</span>
+                  </div>
+                </button>
               </div>
             )}
           </div>
-        )}
-        <div className="table-filter-container">
-          <select
-            className="table-filter-select"
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            data-testid="status-filter"
-          >
-            <option value="all">All {!loading && `(${statusCounts.all})`}</option>
-            <option value="available">Available {!loading && `(${statusCounts.available})`}</option>
-            <option value="occupied">Occupied {!loading && `(${statusCounts.occupied})`}</option>
-            <option value="reserved">Reserved {!loading && `(${statusCounts.reserved})`}</option>
-            <option value="maintenance">Maintenance {!loading && `(${statusCounts.maintenance})`}</option>
-          </select>
-        </div>
-
-        <div className="controls-actions">
-          <PermissionGuard permission="tables.create" minLevel={RoleLevel.BRANCH_SINGLE}>
-            <Button
-              variant="outline"
-              onClick={() => setCreateModalOpen(true)}
-              data-testid="add-table-button"
-              size="sm"
-            >
-              + Add Table
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => setBulkCreateModalOpen(true)}
-              data-testid="bulk-add-button"
-              size="sm"
-            >
-              + Bulk Add
-            </Button>
-          </PermissionGuard>
-        </div>
+        </PermissionGuard>
       </div>
 
-      {loading && <TableManagementSkeleton />}
-
       {error && <div className="error-banner">{error}</div>}
+
+      {loading && <TableManagementSkeleton />}
 
       <div className="table-management-content" style={{ display: loading ? 'none' : 'flex' }}>
         <div className="table-list-panel">
@@ -452,13 +478,11 @@ export const TableManagement: React.FC = () => {
         </div>
       </div>
 
+      {/* Hover card */}
       {hoveredTable && (
         <div
           className="table-hover-card"
-          style={{
-            left: mousePos.x,
-            top: mousePos.y
-          }}
+          style={{ left: mousePos.x, top: mousePos.y }}
           onMouseEnter={() => {
             isOverCard.current = true;
             if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -507,20 +531,12 @@ export const TableManagement: React.FC = () => {
 
             <div className="hover-card-actions">
               <PermissionGuard permission="tables.view">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleShowQR(hoveredTable)}
-                >
+                <Button variant="outline" size="sm" onClick={() => handleShowQR(hoveredTable)}>
                   QR
                 </Button>
               </PermissionGuard>
               <PermissionGuard permission="tables.update" minLevel={RoleLevel.BRANCH_SINGLE}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEdit(hoveredTable)}
-                >
+                <Button variant="outline" size="sm" onClick={() => handleEdit(hoveredTable)}>
                   Edit
                 </Button>
               </PermissionGuard>
@@ -528,7 +544,9 @@ export const TableManagement: React.FC = () => {
                 <Button
                   variant="danger"
                   size="sm"
-                  onClick={() => handleDeleteTable(hoveredTable._id, hoveredTable.tableNumber)}
+                  onClick={() =>
+                    handleDeleteTable(hoveredTable._id, hoveredTable.tableNumber)
+                  }
                 >
                   Del
                 </Button>
@@ -538,24 +556,20 @@ export const TableManagement: React.FC = () => {
         </div>
       )}
 
+      {/* Modals */}
       {qrModalOpen && selectedTable && (
         <QRCodeModal
           table={selectedTable}
-          onClose={() => {
-            setQrModalOpen(false);
-            setSelectedTable(null);
-          }}
+          onClose={() => { setQrModalOpen(false); setSelectedTable(null); }}
         />
       )}
 
       {createModalOpen && branchId && (
-        <CreateTableModal
+        <TableFormModal
+          mode="create"
           branchId={branchId}
           onClose={() => setCreateModalOpen(false)}
-          onSuccess={() => {
-            setCreateModalOpen(false);
-            loadData();
-          }}
+          onSuccess={() => { setCreateModalOpen(false); loadData(); }}
         />
       )}
 
@@ -563,25 +577,16 @@ export const TableManagement: React.FC = () => {
         <BulkCreateTableModal
           branchId={branchId}
           onClose={() => setBulkCreateModalOpen(false)}
-          onSuccess={() => {
-            setBulkCreateModalOpen(false);
-            loadData();
-          }}
+          onSuccess={() => { setBulkCreateModalOpen(false); loadData(); }}
         />
       )}
 
       {editModalOpen && selectedTable && (
-        <EditTableModal
+        <TableFormModal
+          mode="edit"
           table={selectedTable}
-          onClose={() => {
-            setEditModalOpen(false);
-            setSelectedTable(null);
-          }}
-          onSuccess={() => {
-            setEditModalOpen(false);
-            setSelectedTable(null);
-            loadData();
-          }}
+          onClose={() => { setEditModalOpen(false); setSelectedTable(null); }}
+          onSuccess={() => { setEditModalOpen(false); setSelectedTable(null); loadData(); }}
         />
       )}
     </div>
