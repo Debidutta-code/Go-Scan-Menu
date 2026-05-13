@@ -1,7 +1,6 @@
 // src/pages/staff/TableManagement.tsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { TableService } from '@/modules/table/services/table.service';
 import { BranchService } from '@/modules/branch/services/branch.service';
@@ -14,7 +13,9 @@ import { QRCodeModal } from '@/modules/table/components/QRCodeModal';
 import { TableFormModal } from '@/modules/table/components/TableFormModal';
 import { BulkCreateTableModal } from '@/modules/table/components/BulkCreateTableModal';
 import { TableManagementSkeleton } from './TableManagementSkeleton';
+import { SharedDropdown, DropdownOption } from '@/shared/components/SharedDropdown/SharedDropdown';
 import './TableManagement.css';
+import { ChevronDown } from 'lucide-react';
 
 // Status meta — dot colour, badge colours, label
 const STATUS_META: Record<
@@ -93,6 +94,24 @@ const STATUS_META: Record<
   },
 };
 
+// Derive SharedDropdown-compatible options from STATUS_META (built once, outside component)
+const STATUS_OPTIONS: DropdownOption[] = Object.entries(STATUS_META).map(([key, meta]) => ({
+  value:       key,
+  label:       meta.label,
+  description: key === 'all' ? 'Show all tables' : `${meta.label} tables only`,
+  dot:         meta.dot,
+  icon:        meta.icon,
+  accent:      { bg: meta.bg, text: meta.text, iconBg: meta.bg },
+}));
+
+// Compact options for the hover-card status changer (no icon/desc, just dot + label)
+const STATUS_CHANGE_OPTIONS: DropdownOption[] = [
+  { value: 'available',   label: 'Set Available',   dot: '#10b981', accent: { bg: '#ecfdf5', text: '#065f46' } },
+  { value: 'occupied',    label: 'Set Occupied',    dot: '#ef4444', accent: { bg: '#fef2f2', text: '#991b1b' } },
+  { value: 'reserved',    label: 'Set Reserved',    dot: '#f59e0b', accent: { bg: '#fffbeb', text: '#92400e' } },
+  { value: 'maintenance', label: 'Set Maintenance', dot: '#64748b', accent: { bg: '#f1f5f9', text: '#475569' } },
+];
+
 export const TableManagement: React.FC = () => {
   const navigate  = useNavigate();
   const { branchId } = useParams<{ branchId: string }>();
@@ -155,6 +174,7 @@ export const TableManagement: React.FC = () => {
         setStatusDropdownOpen(false);
       if (addDropdownRef.current && !addDropdownRef.current.contains(e.target as Node))
         setAddDropdownOpen(false);
+
     };
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
@@ -315,7 +335,7 @@ export const TableManagement: React.FC = () => {
   const restaurantType = staff?.restaurant?.type as string;
   const isMultiOutlet  = restaurantType === 'chain' || restaurantType === 'branch-wise';
   const canManageTables = () => !!(staff?.permissions?.tables?.create || staff?.staffType === 'owner');
-  const currentMeta     = STATUS_META[selectedStatus] ?? STATUS_META.all;
+
 
   return (
     <div className="table-management-layout">
@@ -393,76 +413,28 @@ export const TableManagement: React.FC = () => {
             </div>
           )}
 
-          {/* ── Status filter dropdown — styled to match Add Table ── */}
-          <div className="status-filter-wrapper" ref={statusDropdownRef}>
-            <button
-              className={`status-filter-btn ${statusDropdownOpen ? 'active' : ''}`}
-              onClick={() => setStatusDropdownOpen((o) => !o)}
-              data-testid="status-filter"
-            >
-              <span
-                className="status-filter-icon-wrap"
-                style={{ color: currentMeta.dot }}
-              >
-                {currentMeta.icon}
-              </span>
-              <div className="status-filter-text">
-                <span className="status-filter-label">{currentMeta.label}</span>
-                {!loading && (
-                  <span
-                    className="status-filter-count"
-                    style={{ background: currentMeta.bg, color: currentMeta.text }}
-                  >
-                    {statusCounts[selectedStatus as keyof typeof statusCounts] ?? 0}
-                  </span>
-                )}
-              </div>
-              <ChevronDown
-                size={13}
-                className={`status-chevron ${statusDropdownOpen ? 'rotate' : ''}`}
-              />
-            </button>
-
-            {statusDropdownOpen && (
-              <div className="status-filter-dropdown">
-                {Object.entries(STATUS_META).map(([key, meta]) => {
-                  const count    = statusCounts[key as keyof typeof statusCounts] ?? 0;
-                  const isActive = selectedStatus === key;
-                  return (
-                    <button
-                      key={key}
-                      className={`status-filter-option ${isActive ? 'active' : ''}`}
-                      onClick={() => { setSelectedStatus(key); setStatusDropdownOpen(false); }}
-                    >
-                      <span
-                        className="sfo-icon-wrap"
-                        style={{ color: meta.dot, background: meta.bg }}
-                      >
-                        {meta.icon}
-                      </span>
-                      <div className="sfo-text">
-                        <span className="sfo-label">{meta.label}</span>
-                        <span className="sfo-desc">
-                          {key === 'all' ? 'Show all tables' : `${meta.label} tables only`}
-                        </span>
-                      </div>
-                      {!loading && (
-                        <span
-                          className="sfo-count"
-                          style={{
-                            background: isActive ? meta.bg   : '#f1f5f9',
-                            color:      isActive ? meta.text : '#64748b',
-                          }}
-                        >
-                          {count}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          {/* ── Status filter — SharedDropdown (toolbar variant) ── */}
+          <SharedDropdown
+            variant="toolbar"
+            value={selectedStatus}
+            options={STATUS_OPTIONS.map((opt) => ({
+              ...opt,
+              count: statusCounts[opt.value as keyof typeof statusCounts] ?? 0,
+            }))}
+            trigger={{
+              label:  STATUS_META[selectedStatus]?.label ?? 'All Tables',
+              icon:   STATUS_META[selectedStatus]?.icon,
+              count:  statusCounts[selectedStatus as keyof typeof statusCounts] ?? 0,
+              accent: {
+                bg:   STATUS_META[selectedStatus]?.bg   ?? '#f1f5f9',
+                text: STATUS_META[selectedStatus]?.text ?? '#475569',
+              },
+            }}
+            onChange={setSelectedStatus}
+            loading={loading}
+            panelWidth={260}
+            testId="status-filter"
+          />
         </div>
 
         {/* ── Add Table ── */}
@@ -621,18 +593,19 @@ export const TableManagement: React.FC = () => {
               requiredRole={[StaffRole.WAITER]}
               minLevel={RoleLevel.OPERATIONAL}
             >
-              <select
-                className="hover-card-status-select"
+              {/* Status changer — SharedDropdown (compact variant) */}
+              <SharedDropdown
+                variant="compact"
                 value={hoveredTable.status}
-                onChange={(e) =>
-                  handleUpdateStatus(hoveredTable._id, e.target.value as Table['status'])
-                }
-              >
-                <option value="available">Set Available</option>
-                <option value="occupied">Set Occupied</option>
-                <option value="reserved">Set Reserved</option>
-                <option value="maintenance">Set Maintenance</option>
-              </select>
+                options={STATUS_CHANGE_OPTIONS}
+                trigger={{
+                  label: hoveredTable.status.charAt(0).toUpperCase() + hoveredTable.status.slice(1),
+                  dot:   STATUS_CHANGE_OPTIONS.find(o => o.value === hoveredTable.status)?.dot,
+                }}
+                onChange={(val) => handleUpdateStatus(hoveredTable._id, val as Table['status'])}
+                panelWidth={220}
+                className="hc-status-sd"
+              />
             </PermissionGuard>
 
             <div className="hover-card-actions">
