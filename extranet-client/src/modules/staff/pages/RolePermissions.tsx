@@ -147,7 +147,7 @@ export const RolePermissions: React.FC = () => {
         return roleLevelMap[roleName] || 99;
     }, [currentStaff, availableRoles]);
 
-    // Filter roles based on hierarchy - only show roles with LOWER level (numerically HIGHER)
+    // Filter roles based on hierarchy — only show roles with lower rank (numerically higher level)
     const manageableRoles = useMemo(() => {
         const userRoleName = (
             currentStaff?.roleName ||
@@ -183,9 +183,6 @@ export const RolePermissions: React.FC = () => {
             const response = await StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId);
             if (response.data) {
                 setAvailableRoles(response.data);
-
-                // We'll let the manageableRoles useMemo handle the filtering
-                // Just need to ensure we set an initial selection if possible
             }
         } catch (err: any) {
             setError(err.message || 'Failed to fetch roles');
@@ -267,7 +264,6 @@ export const RolePermissions: React.FC = () => {
     const handleSave = async () => {
         if (!token || !currentStaff?.restaurantId || !selectedRoleName) return;
 
-        // Final hierarchy check before saving
         const targetRole = availableRoles.find(r => r.name === selectedRoleName);
         if (currentStaff.roleName !== StaffRole.SUPER_ADMIN && targetRole && targetRole.level <= currentUserLevel) {
             toast.error('Access denied - This is a top level role, ask for permission.', {
@@ -301,9 +297,13 @@ export const RolePermissions: React.FC = () => {
 
     return (
         <div className="role-permissions-layout" data-testid="role-permissions-page">
-            {/* Page Actions Toolbar */}
+
+            {/* ── Page Toolbar ── mirrors StaffList toolbar structure */}
             <div className="permissions-page-toolbar">
-                <h1 className="permissions-page-title">Role Permissions</h1>
+                <div className="toolbar-left">
+                    <h1 className="permissions-page-title">Role Permissions</h1>
+                    <p className="permissions-page-subtitle">Configure access controls for each role</p>
+                </div>
 
                 <div className="permissions-toolbar-actions">
                     <div className="role-selector-wrapper">
@@ -344,10 +344,10 @@ export const RolePermissions: React.FC = () => {
                 </div>
             </div>
 
-            {/* Alert Messages */}
+            {/* ── Alert Banners ── */}
             {error && (
                 <div className="error-banner" data-testid="error-message">
-                    <AlertCircle size={18} />
+                    <AlertCircle size={16} />
                     {error}
                 </div>
             )}
@@ -358,20 +358,25 @@ export const RolePermissions: React.FC = () => {
                 </div>
             )}
 
-            {/* Main Content */}
+            {/* ── Main Content ── */}
             <div className="role-permissions-content">
                 {fetchLoading ? (
                     <div className="loading-state">Loading permissions...</div>
                 ) : manageableRoles.length === 0 ? (
                     <div className="loading-state">
-                        <ShieldAlert size={48} style={{ marginBottom: '16px', color: '#6b7280' }} />
-                        <p>You don't have permission to manage any roles.</p>
+                        <ShieldAlert size={40} style={{ marginBottom: '12px', color: '#9ca3af' }} />
+                        <p style={{ margin: '0 0 4px', fontWeight: 600, color: '#111827' }}>
+                            No manageable roles
+                        </p>
+                        <p style={{ margin: '0 0 16px', fontSize: '0.8rem' }}>
+                            You don't have permission to manage any roles.
+                        </p>
                         {currentStaff?.roleName === 'owner' && (
                             <Button
                                 variant="primary"
                                 onClick={handleInitialize}
                                 loading={loading}
-                                style={{ marginTop: '16px' }}
+                                size="sm"
                             >
                                 Initialize Restaurant Roles
                             </Button>
@@ -384,7 +389,11 @@ export const RolePermissions: React.FC = () => {
                             const allChecked = category.permissions.every(p => categoryPerms[p.key]);
 
                             return (
-                                <div key={category.key} className="permission-category-card" data-testid={`category-${category.key}`}>
+                                <div
+                                    key={category.key}
+                                    className="permission-category-card"
+                                    data-testid={`category-${category.key}`}
+                                >
                                     <div className="category-header">
                                         <div>
                                             <h3 className="category-title">{category.label}</h3>
@@ -410,7 +419,9 @@ export const RolePermissions: React.FC = () => {
                                                 <input
                                                     type="checkbox"
                                                     checked={categoryPerms[permission.key] || false}
-                                                    onChange={(e) => handlePermissionChange(category.key, permission.key, e.target.checked)}
+                                                    onChange={(e) =>
+                                                        handlePermissionChange(category.key, permission.key, e.target.checked)
+                                                    }
                                                     disabled={loading}
                                                     className="permission-checkbox"
                                                 />
