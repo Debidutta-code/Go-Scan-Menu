@@ -5,9 +5,36 @@ import { StaffPermissionsService } from '@/modules/staff/services/staffPermissio
 import { Button } from '@/shared/components/Button';
 import { IPermissions } from '@/shared/types/staffPermissions.types';
 import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
-import { Save, AlertCircle, ShieldAlert } from 'lucide-react';
+import {
+    Save,
+    AlertCircle,
+    ShieldAlert,
+    ShoppingCart,
+    UtensilsCrossed,
+    Users,
+    BarChart3,
+    Settings2,
+    LayoutGrid,
+    UserCheck,
+} from 'lucide-react';
 import { toast } from 'react-toastify';
 import './RolePermissions.css';
+
+// ── Per-category visual config ───────────────────────────────────────────────
+const CATEGORY_META: Record<string, {
+    icon: React.ReactNode;
+    color: string;
+    bg: string;
+    accent: string;
+}> = {
+    orders:    { icon: <ShoppingCart    size={15} />, color: '#b45309', bg: '#fef3c7', accent: '#f59e0b' },
+    menu:      { icon: <UtensilsCrossed size={15} />, color: '#047857', bg: '#d1fae5', accent: '#10b981' },
+    staff:     { icon: <Users           size={15} />, color: '#1d4ed8', bg: '#dbeafe', accent: '#3b82f6' },
+    reports:   { icon: <BarChart3       size={15} />, color: '#6d28d9', bg: '#ede9fe', accent: '#8b5cf6' },
+    settings:  { icon: <Settings2      size={15} />, color: '#374151', bg: '#f1f5f9', accent: '#64748b' },
+    tables:    { icon: <LayoutGrid      size={15} />, color: '#0e7490', bg: '#cffafe', accent: '#06b6d4' },
+    customers: { icon: <UserCheck       size={15} />, color: '#be185d', bg: '#fce7f3', accent: '#ec4899' },
+};
 
 const PERMISSION_CATEGORIES = [
     {
@@ -15,12 +42,12 @@ const PERMISSION_CATEGORIES = [
         label: 'Order Management',
         description: 'Control access to order operations',
         permissions: [
-            { key: 'view', label: 'View Orders' },
-            { key: 'create', label: 'Create Orders' },
-            { key: 'update', label: 'Update Orders' },
-            { key: 'delete', label: 'Delete Orders' },
-            { key: 'managePayment', label: 'Manage Payment' },
-            { key: 'viewAllBranches', label: 'View All Branches Orders' },
+            { key: 'view',            label: 'View orders' },
+            { key: 'create',          label: 'Create orders' },
+            { key: 'update',          label: 'Update orders' },
+            { key: 'delete',          label: 'Delete orders' },
+            { key: 'managePayment',   label: 'Manage payment' },
+            { key: 'viewAllBranches', label: 'View all branches' },
         ],
     },
     {
@@ -28,12 +55,12 @@ const PERMISSION_CATEGORIES = [
         label: 'Menu Management',
         description: 'Control access to menu operations',
         permissions: [
-            { key: 'view', label: 'View Menu' },
-            { key: 'create', label: 'Add Menu Items' },
-            { key: 'update', label: 'Update Menu Items' },
-            { key: 'delete', label: 'Delete Menu Items' },
-            { key: 'manageCategories', label: 'Manage Categories' },
-            { key: 'managePricing', label: 'Manage Pricing' },
+            { key: 'view',             label: 'View menu' },
+            { key: 'create',           label: 'Add menu items' },
+            { key: 'update',           label: 'Update menu items' },
+            { key: 'delete',           label: 'Delete menu items' },
+            { key: 'manageCategories', label: 'Manage categories' },
+            { key: 'managePricing',    label: 'Manage pricing' },
         ],
     },
     {
@@ -41,11 +68,11 @@ const PERMISSION_CATEGORIES = [
         label: 'Staff Management',
         description: 'Control access to staff operations',
         permissions: [
-            { key: 'view', label: 'View Staff' },
-            { key: 'create', label: 'Add Staff Members' },
-            { key: 'update', label: 'Update Staff Details' },
-            { key: 'delete', label: 'Delete Staff' },
-            { key: 'manageRoles', label: 'Manage Roles & Permissions' },
+            { key: 'view',        label: 'View staff' },
+            { key: 'create',      label: 'Add staff members' },
+            { key: 'update',      label: 'Update staff details' },
+            { key: 'delete',      label: 'Delete staff' },
+            { key: 'manageRoles', label: 'Manage roles & permissions' },
         ],
     },
     {
@@ -53,20 +80,20 @@ const PERMISSION_CATEGORIES = [
         label: 'Reports & Analytics',
         description: 'Control access to reports and analytics',
         permissions: [
-            { key: 'view', label: 'View Reports' },
-            { key: 'export', label: 'Export Reports' },
-            { key: 'viewFinancials', label: 'View Financial Reports' },
+            { key: 'view',           label: 'View reports' },
+            { key: 'export',         label: 'Export reports' },
+            { key: 'viewFinancials', label: 'View financial reports' },
         ],
     },
     {
         key: 'settings',
-        label: 'Settings Management',
+        label: 'Settings',
         description: 'Control access to settings',
         permissions: [
-            { key: 'view', label: 'View Settings' },
-            { key: 'updateRestaurant', label: 'Update Restaurant Settings' },
-            { key: 'updateBranch', label: 'Update Branch Settings' },
-            { key: 'manageTaxes', label: 'Manage Taxes' },
+            { key: 'view',             label: 'View settings' },
+            { key: 'updateRestaurant', label: 'Update restaurant settings' },
+            { key: 'updateBranch',     label: 'Update branch settings' },
+            { key: 'manageTaxes',      label: 'Manage taxes' },
         ],
     },
     {
@@ -74,11 +101,11 @@ const PERMISSION_CATEGORIES = [
         label: 'Table Management',
         description: 'Control access to table operations',
         permissions: [
-            { key: 'view', label: 'View Tables' },
-            { key: 'create', label: 'Create Tables' },
-            { key: 'update', label: 'Update Tables' },
-            { key: 'delete', label: 'Delete Tables' },
-            { key: 'manageQR', label: 'Manage QR Codes' },
+            { key: 'view',     label: 'View tables' },
+            { key: 'create',   label: 'Create tables' },
+            { key: 'update',   label: 'Update tables' },
+            { key: 'delete',   label: 'Delete tables' },
+            { key: 'manageQR', label: 'Manage QR codes' },
         ],
     },
     {
@@ -86,37 +113,35 @@ const PERMISSION_CATEGORIES = [
         label: 'Customer Management',
         description: 'Control access to customer operations',
         permissions: [
-            { key: 'view', label: 'View Customers' },
-            { key: 'manage', label: 'Manage Customer Details' },
+            { key: 'view',   label: 'View customers' },
+            { key: 'manage', label: 'Manage customer details' },
         ],
     },
 ];
 
 const DEFAULT_PERMISSIONS: IPermissions = {
-    orders: { view: false, create: false, update: false, delete: false, managePayment: false, viewAllBranches: false },
-    menu: { view: false, create: false, update: false, delete: false, manageCategories: false, managePricing: false },
-    staff: { view: false, create: false, update: false, delete: false, manageRoles: false },
-    reports: { view: false, export: false, viewFinancials: false },
-    settings: { view: false, updateRestaurant: false, updateBranch: false, manageTaxes: false },
-    tables: { view: false, create: false, update: false, delete: false, manageQR: false },
+    orders:    { view: false, create: false, update: false, delete: false, managePayment: false, viewAllBranches: false },
+    menu:      { view: false, create: false, update: false, delete: false, manageCategories: false, managePricing: false },
+    staff:     { view: false, create: false, update: false, delete: false, manageRoles: false },
+    reports:   { view: false, export: false, viewFinancials: false },
+    settings:  { view: false, updateRestaurant: false, updateBranch: false, manageTaxes: false },
+    tables:    { view: false, create: false, update: false, delete: false, manageQR: false },
     customers: { view: false, manage: false },
 };
 
 export const RolePermissions: React.FC = () => {
     const { token, staff: currentStaff } = useStaffAuth();
 
-    const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
+    const [availableRoles, setAvailableRoles]     = useState<Role[]>([]);
     const [selectedRoleName, setSelectedRoleName] = useState<StaffRole | ''>('');
-    const [permissions, setPermissions] = useState<IPermissions>(DEFAULT_PERMISSIONS);
-    const [loading, setLoading] = useState(false);
-    const [fetchLoading, setFetchLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [permissions, setPermissions]           = useState<IPermissions>(DEFAULT_PERMISSIONS);
+    const [loading, setLoading]                   = useState(false);
+    const [fetchLoading, setFetchLoading]         = useState(false);
+    const [error, setError]                       = useState<string | null>(null);
+    const [successMessage, setSuccessMessage]     = useState<string | null>(null);
 
-    // Get current user's role level
     const currentUserLevel = useMemo(() => {
         if (!currentStaff) return 99;
-
         const roleName = (
             currentStaff.roleName ||
             (currentStaff as any).staffType ||
@@ -125,29 +150,21 @@ export const RolePermissions: React.FC = () => {
         ).toLowerCase();
 
         if (roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
-
         if ((currentStaff as any).roleLevel) return (currentStaff as any).roleLevel;
-        if (currentStaff.roleId && typeof currentStaff.roleId === 'object' && (currentStaff.roleId as any).level) return (currentStaff.roleId as any).level;
+        if (currentStaff.roleId && typeof currentStaff.roleId === 'object' && (currentStaff.roleId as any).level)
+            return (currentStaff.roleId as any).level;
 
         const currentRole = availableRoles.find(r => r.name === roleName);
         if (currentRole) return currentRole.level;
 
-        const roleLevelMap: Record<string, number> = {
-            'super_admin': 1,
-            'owner': 2,
-            'restaurant_owner': 2,
-            'branch_manager': 3,
-            'manager': 4,
-            'store_manager': 4,
-            'waiter': 5,
-            'kitchen_staff': 5,
-            'kitchen': 5,
-            'cashier': 5,
+        const map: Record<string, number> = {
+            super_admin: 1, owner: 2, restaurant_owner: 2,
+            branch_manager: 3, manager: 4, store_manager: 4,
+            waiter: 5, kitchen_staff: 5, kitchen: 5, cashier: 5,
         };
-        return roleLevelMap[roleName] || 99;
+        return map[roleName] || 99;
     }, [currentStaff, availableRoles]);
 
-    // Filter roles based on hierarchy — only show roles with lower rank (numerically higher level)
     const manageableRoles = useMemo(() => {
         const userRoleName = (
             currentStaff?.roleName ||
@@ -155,35 +172,23 @@ export const RolePermissions: React.FC = () => {
             (currentStaff?.roleId && typeof currentStaff.roleId === 'object' ? currentStaff.roleId.name : '') ||
             ''
         ).toLowerCase();
-
         if (userRoleName === StaffRole.SUPER_ADMIN) return availableRoles;
         return availableRoles.filter(role => role.level > currentUserLevel);
     }, [availableRoles, currentUserLevel, currentStaff]);
 
+    useEffect(() => { fetchRoles(); }, []);
+    useEffect(() => { if (selectedRoleName) fetchPermissions(); }, [selectedRoleName]);
     useEffect(() => {
-        fetchRoles();
-    }, []);
-
-    useEffect(() => {
-        if (selectedRoleName) {
-            fetchPermissions();
-        }
-    }, [selectedRoleName]);
-
-    useEffect(() => {
-        if (manageableRoles.length > 0 && !selectedRoleName) {
+        if (manageableRoles.length > 0 && !selectedRoleName)
             setSelectedRoleName(manageableRoles[0].name);
-        }
-    }, [manageableRoles, selectedRoleName]);
+    }, [manageableRoles]);
 
     const fetchRoles = async () => {
         if (!token || !currentStaff?.restaurantId) return;
         try {
             setFetchLoading(true);
-            const response = await StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId);
-            if (response.data) {
-                setAvailableRoles(response.data);
-            }
+            const res = await StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId);
+            if (res.data) setAvailableRoles(res.data);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch roles');
         } finally {
@@ -193,26 +198,16 @@ export const RolePermissions: React.FC = () => {
 
     const fetchPermissions = async () => {
         if (!token || !currentStaff?.restaurantId || !selectedRoleName) return;
-
         try {
             setFetchLoading(true);
             setError(null);
-            const response = await StaffPermissionsService.getPermissionsForStaffType(
-                token,
-                currentStaff.restaurantId,
-                selectedRoleName as any
+            const res = await StaffPermissionsService.getPermissionsForStaffType(
+                token, currentStaff.restaurantId, selectedRoleName as any
             );
-            if (response.data && response.data.permissions) {
-                setPermissions(response.data.permissions);
-            } else {
-                setPermissions(DEFAULT_PERMISSIONS);
-            }
+            setPermissions(res.data?.permissions ?? DEFAULT_PERMISSIONS);
         } catch (err: any) {
-            if (err.message.includes('not found')) {
-                setPermissions(DEFAULT_PERMISSIONS);
-            } else {
-                setError(err.message || 'Failed to fetch permissions');
-            }
+            setPermissions(DEFAULT_PERMISSIONS);
+            if (!err.message.includes('not found')) setError(err.message || 'Failed to fetch permissions');
         } finally {
             setFetchLoading(false);
         }
@@ -221,38 +216,26 @@ export const RolePermissions: React.FC = () => {
     const handlePermissionChange = (category: string, permission: string, value: boolean) => {
         setPermissions(prev => ({
             ...prev,
-            [category]: {
-                ...prev[category as keyof IPermissions],
-                [permission]: value,
-            },
+            [category]: { ...prev[category as keyof IPermissions], [permission]: value },
         }));
         setSuccessMessage(null);
     };
 
     const handleSelectAll = (category: string, value: boolean) => {
-        const categoryPerms = PERMISSION_CATEGORIES.find(c => c.key === category);
-        if (!categoryPerms) return;
-
-        const updatedCategory: any = {};
-        categoryPerms.permissions.forEach(perm => {
-            updatedCategory[perm.key] = value;
-        });
-
-        setPermissions(prev => ({
-            ...prev,
-            [category]: updatedCategory,
-        }));
+        const cat = PERMISSION_CATEGORIES.find(c => c.key === category);
+        if (!cat) return;
+        const updated: any = {};
+        cat.permissions.forEach(p => { updated[p.key] = value; });
+        setPermissions(prev => ({ ...prev, [category]: updated }));
         setSuccessMessage(null);
     };
 
     const handleInitialize = async () => {
         if (!token || !currentStaff?.restaurantId) return;
-
         try {
             setLoading(true);
-            setError(null);
             await StaffPermissionsService.initializeAllPermissions(token, currentStaff.restaurantId);
-            toast.success('Restaurant permissions initialized successfully!');
+            toast.success('Restaurant permissions initialized!');
             await fetchRoles();
         } catch (err: any) {
             setError(err.message || 'Failed to initialize permissions');
@@ -263,29 +246,20 @@ export const RolePermissions: React.FC = () => {
 
     const handleSave = async () => {
         if (!token || !currentStaff?.restaurantId || !selectedRoleName) return;
-
         const targetRole = availableRoles.find(r => r.name === selectedRoleName);
         if (currentStaff.roleName !== StaffRole.SUPER_ADMIN && targetRole && targetRole.level <= currentUserLevel) {
-            toast.error('Access denied - This is a top level role, ask for permission.', {
-                icon: <ShieldAlert size={20} />
-            });
+            toast.error('Access denied — this is a higher-level role.', { icon: <ShieldAlert size={20} /> });
             return;
         }
-
         try {
             setLoading(true);
             setError(null);
             setSuccessMessage(null);
-
             await StaffPermissionsService.updatePermissionsForStaffType(
-                token,
-                currentStaff.restaurantId,
-                selectedRoleName as any,
-                { permissions }
+                token, currentStaff.restaurantId, selectedRoleName as any, { permissions }
             );
-
             const roleLabel = manageableRoles.find(r => r.name === selectedRoleName)?.displayName || selectedRoleName;
-            setSuccessMessage(`Permissions updated successfully for ${roleLabel}!`);
+            setSuccessMessage(`Permissions updated for ${roleLabel}`);
             toast.success(`Permissions updated for ${roleLabel}`);
         } catch (err: any) {
             setError(err.message || 'Failed to update permissions');
@@ -296,25 +270,23 @@ export const RolePermissions: React.FC = () => {
     };
 
     return (
-        <div className="role-permissions-layout" data-testid="role-permissions-page">
+        <div className="rp-layout" data-testid="role-permissions-page">
 
-            {/* ── Page Toolbar ── mirrors StaffList toolbar structure */}
-            <div className="permissions-page-toolbar">
-                <div className="toolbar-left">
-                    <h1 className="permissions-page-title">Role Permissions</h1>
-                    <p className="permissions-page-subtitle">Configure access controls for each role</p>
+            {/* Toolbar */}
+            <div className="rp-toolbar">
+                <div className="rp-toolbar-left">
+                    <h1 className="rp-title">Role Permissions</h1>
+                    <p className="rp-subtitle">Configure access controls for each role</p>
                 </div>
 
-                <div className="permissions-toolbar-actions">
-                    <div className="role-selector-wrapper">
-                        <label htmlFor="roleSelect" className="role-selector-label">
-                            Role:
-                        </label>
+                <div className="rp-toolbar-actions">
+                    <div className="rp-role-wrap">
+                        <label htmlFor="roleSelect" className="rp-role-label">Role</label>
                         <select
                             id="roleSelect"
                             value={selectedRoleName}
-                            onChange={(e) => setSelectedRoleName(e.target.value as StaffRole)}
-                            className="role-selector"
+                            onChange={e => setSelectedRoleName(e.target.value as StaffRole)}
+                            className="rp-role-select"
                             disabled={loading || fetchLoading || manageableRoles.length === 0}
                             data-testid="role-selector"
                         >
@@ -322,9 +294,7 @@ export const RolePermissions: React.FC = () => {
                                 <option value="">No manageable roles</option>
                             )}
                             {manageableRoles.map(role => (
-                                <option key={role.name} value={role.name}>
-                                    {role.displayName}
-                                </option>
+                                <option key={role.name} value={role.name}>{role.displayName}</option>
                             ))}
                         </select>
                     </div>
@@ -335,100 +305,129 @@ export const RolePermissions: React.FC = () => {
                         loading={loading}
                         disabled={loading || fetchLoading || manageableRoles.length === 0}
                         size="sm"
-                        className="save-btn"
                         data-testid="save-permissions-button"
                     >
-                        <Save size={18} />
-                        Save Changes
+                        <Save size={15} />
+                        Save changes
                     </Button>
                 </div>
             </div>
 
-            {/* ── Alert Banners ── */}
+            {/* Banners */}
             {error && (
-                <div className="error-banner" data-testid="error-message">
-                    <AlertCircle size={16} />
-                    {error}
+                <div className="rp-banner rp-banner--error" data-testid="error-message">
+                    <AlertCircle size={14} /> {error}
                 </div>
             )}
-
             {successMessage && (
-                <div className="success-banner" data-testid="success-message">
+                <div className="rp-banner rp-banner--success" data-testid="success-message">
                     {successMessage}
                 </div>
             )}
 
-            {/* ── Main Content ── */}
-            <div className="role-permissions-content">
+            {/* Content */}
+            <div className="rp-content">
                 {fetchLoading ? (
-                    <div className="loading-state">Loading permissions...</div>
+                    <div className="rp-empty">
+                        <span className="rp-spinner" />
+                        <p>Loading permissions…</p>
+                    </div>
                 ) : manageableRoles.length === 0 ? (
-                    <div className="loading-state">
-                        <ShieldAlert size={40} style={{ marginBottom: '12px', color: '#9ca3af' }} />
-                        <p style={{ margin: '0 0 4px', fontWeight: 600, color: '#111827' }}>
-                            No manageable roles
-                        </p>
-                        <p style={{ margin: '0 0 16px', fontSize: '0.8rem' }}>
-                            You don't have permission to manage any roles.
-                        </p>
+                    <div className="rp-empty">
+                        <span className="rp-empty-shield"><ShieldAlert size={30} /></span>
+                        <p className="rp-empty-title">No manageable roles</p>
+                        <p className="rp-empty-sub">You don't have permission to manage any roles.</p>
                         {currentStaff?.roleName === 'owner' && (
-                            <Button
-                                variant="primary"
-                                onClick={handleInitialize}
-                                loading={loading}
-                                size="sm"
-                            >
-                                Initialize Restaurant Roles
+                            <Button variant="primary" onClick={handleInitialize} loading={loading} size="sm">
+                                Initialize restaurant roles
                             </Button>
                         )}
                     </div>
                 ) : (
-                    <div className="permissions-grid">
+                    <div className="rp-grid">
                         {PERMISSION_CATEGORIES.map(category => {
-                            const categoryPerms = permissions[category.key as keyof IPermissions] as any;
-                            const allChecked = category.permissions.every(p => categoryPerms[p.key]);
+                            const meta         = CATEGORY_META[category.key];
+                            const catPerms     = permissions[category.key as keyof IPermissions] as any;
+                            const enabledCount = category.permissions.filter(p => catPerms[p.key]).length;
+                            const total        = category.permissions.length;
+                            const allOn        = enabledCount === total;
 
                             return (
                                 <div
                                     key={category.key}
-                                    className="permission-category-card"
+                                    className="rp-card"
+                                    style={{ '--accent': meta.accent } as React.CSSProperties}
                                     data-testid={`category-${category.key}`}
                                 >
-                                    <div className="category-header">
-                                        <div>
-                                            <h3 className="category-title">{category.label}</h3>
-                                            <p className="category-description">{category.description}</p>
+                                    {/* Card header */}
+                                    <div className="rp-card-head">
+                                        <div className="rp-card-meta">
+                                            <span
+                                                className="rp-icon-chip"
+                                                style={{ background: meta.bg, color: meta.color }}
+                                                aria-hidden="true"
+                                            >
+                                                {meta.icon}
+                                            </span>
+                                            <div>
+                                                <h3 className="rp-card-title">{category.label}</h3>
+                                                <p className="rp-card-desc">{category.description}</p>
+                                            </div>
                                         </div>
-                                        <button
-                                            className="select-all-button"
-                                            onClick={() => handleSelectAll(category.key, !allChecked)}
-                                            disabled={loading}
-                                            data-testid={`select-all-${category.key}`}
-                                        >
-                                            {allChecked ? 'Deselect All' : 'Select All'}
-                                        </button>
+
+                                        <div className="rp-card-controls">
+                                            <span
+                                                className="rp-count"
+                                                style={{
+                                                    background: enabledCount > 0 ? meta.bg : '#f3f4f6',
+                                                    color:      enabledCount > 0 ? meta.color : '#9ca3af',
+                                                }}
+                                            >
+                                                {enabledCount}/{total}
+                                            </span>
+                                            <button
+                                                className="rp-select-all"
+                                                onClick={() => handleSelectAll(category.key, !allOn)}
+                                                disabled={loading}
+                                                data-testid={`select-all-${category.key}`}
+                                            >
+                                                {allOn ? 'Clear all' : 'Select all'}
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <div className="permissions-list">
-                                        {category.permissions.map(permission => (
-                                            <label
-                                                key={permission.key}
-                                                className="permission-checkbox-label"
-                                                data-testid={`permission-${category.key}-${permission.key}`}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={categoryPerms[permission.key] || false}
-                                                    onChange={(e) =>
-                                                        handlePermissionChange(category.key, permission.key, e.target.checked)
-                                                    }
-                                                    disabled={loading}
-                                                    className="permission-checkbox"
-                                                />
-                                                <span className="permission-label-text">{permission.label}</span>
-                                            </label>
-                                        ))}
-                                    </div>
+                                    {/* Permission rows */}
+                                    <ul className="rp-perm-list">
+                                        {category.permissions.map(permission => {
+                                            const checked = catPerms[permission.key] || false;
+                                            const uid = `toggle-${category.key}-${permission.key}`;
+                                            return (
+                                                <li
+                                                    key={permission.key}
+                                                    className={`rp-perm-row${checked ? ' rp-perm-row--on' : ''}`}
+                                                    data-testid={`permission-${category.key}-${permission.key}`}
+                                                >
+                                                    <label htmlFor={uid} className="rp-perm-label">
+                                                        {permission.label}
+                                                    </label>
+                                                    <label htmlFor={uid} className="rp-toggle" aria-label={permission.label}>
+                                                        <input
+                                                            type="checkbox"
+                                                            id={uid}
+                                                            checked={checked}
+                                                            onChange={e =>
+                                                                handlePermissionChange(category.key, permission.key, e.target.checked)
+                                                            }
+                                                            disabled={loading}
+                                                        />
+                                                        <span className="rp-toggle-track">
+                                                            <span className="rp-toggle-thumb" />
+                                                        </span>
+                                                    </label>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
                                 </div>
                             );
                         })}
