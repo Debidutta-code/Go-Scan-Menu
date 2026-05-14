@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { StaffPermissionsService } from '@/modules/staff/services/staffPermissions.service';
 import { Button } from '@/shared/components/Button';
+import { SharedDropdown, DropdownOption, DropdownTrigger } from '@/shared/components/SharedDropdown/SharedDropdown';
 import { IPermissions } from '@/shared/types/staffPermissions.types';
 import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
 import {
@@ -16,24 +17,21 @@ import {
     Settings2,
     LayoutGrid,
     UserCheck,
+    ChevronDown,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import './RolePermissions.css';
+import { RolePermissionsSkeleton } from '../components';
 
-// ── Per-category visual config ───────────────────────────────────────────────
-const CATEGORY_META: Record<string, {
-    icon: React.ReactNode;
-    color: string;
-    bg: string;
-    accent: string;
-}> = {
-    orders:    { icon: <ShoppingCart    size={15} />, color: '#b45309', bg: '#fef3c7', accent: '#f59e0b' },
-    menu:      { icon: <UtensilsCrossed size={15} />, color: '#047857', bg: '#d1fae5', accent: '#10b981' },
-    staff:     { icon: <Users           size={15} />, color: '#1d4ed8', bg: '#dbeafe', accent: '#3b82f6' },
-    reports:   { icon: <BarChart3       size={15} />, color: '#6d28d9', bg: '#ede9fe', accent: '#8b5cf6' },
-    settings:  { icon: <Settings2      size={15} />, color: '#374151', bg: '#f1f5f9', accent: '#64748b' },
-    tables:    { icon: <LayoutGrid      size={15} />, color: '#0e7490', bg: '#cffafe', accent: '#06b6d4' },
-    customers: { icon: <UserCheck       size={15} />, color: '#be185d', bg: '#fce7f3', accent: '#ec4899' },
+// ── Per-category visual config (neutral — no bright colours) ─────────────────
+const CATEGORY_META: Record<string, { icon: React.ReactNode }> = {
+    orders:    { icon: <ShoppingCart    size={14} /> },
+    menu:      { icon: <UtensilsCrossed size={14} /> },
+    staff:     { icon: <Users           size={14} /> },
+    reports:   { icon: <BarChart3       size={14} /> },
+    settings:  { icon: <Settings2       size={14} /> },
+    tables:    { icon: <LayoutGrid      size={14} /> },
+    customers: { icon: <UserCheck       size={14} /> },
 };
 
 const PERMISSION_CATEGORIES = [
@@ -202,7 +200,7 @@ export const RolePermissions: React.FC = () => {
             setFetchLoading(true);
             setError(null);
             const res = await StaffPermissionsService.getPermissionsForStaffType(
-                token, currentStaff.restaurantId, selectedRoleName as any
+                token, currentStaff.restaurantId, selectedRoleName as any,
             );
             setPermissions(res.data?.permissions ?? DEFAULT_PERMISSIONS);
         } catch (err: any) {
@@ -248,7 +246,7 @@ export const RolePermissions: React.FC = () => {
         if (!token || !currentStaff?.restaurantId || !selectedRoleName) return;
         const targetRole = availableRoles.find(r => r.name === selectedRoleName);
         if (currentStaff.roleName !== StaffRole.SUPER_ADMIN && targetRole && targetRole.level <= currentUserLevel) {
-            toast.error('Access denied — this is a higher-level role.', { icon: <ShieldAlert size={20} /> });
+            toast.error('Access denied — this is a higher-level role.', { icon: <ShieldAlert size={18} /> });
             return;
         }
         try {
@@ -256,7 +254,7 @@ export const RolePermissions: React.FC = () => {
             setError(null);
             setSuccessMessage(null);
             await StaffPermissionsService.updatePermissionsForStaffType(
-                token, currentStaff.restaurantId, selectedRoleName as any, { permissions }
+                token, currentStaff.restaurantId, selectedRoleName as any, { permissions },
             );
             const roleLabel = manageableRoles.find(r => r.name === selectedRoleName)?.displayName || selectedRoleName;
             setSuccessMessage(`Permissions updated for ${roleLabel}`);
@@ -269,6 +267,26 @@ export const RolePermissions: React.FC = () => {
         }
     };
 
+    // ── Build SharedDropdown options from manageable roles ──────────────────
+    const dropdownOptions: DropdownOption[] = manageableRoles.map(role => ({
+        value: role.name,
+        label: role.displayName,
+    }));
+
+    const selectedRole = manageableRoles.find(r => r.name === selectedRoleName);
+    const dropdownTrigger: DropdownTrigger = {
+        label: selectedRole?.displayName ?? (fetchLoading ? 'Loading…' : 'Select role'),
+    };
+
+    // ── Show skeleton on initial role fetch ─────────────────────────────────
+    if (fetchLoading && availableRoles.length === 0) {
+        return (
+            <div className="rp-layout" data-testid="role-permissions-page">
+                <RolePermissionsSkeleton />
+            </div>
+        );
+    }
+
     return (
         <div className="rp-layout" data-testid="role-permissions-page">
 
@@ -280,24 +298,22 @@ export const RolePermissions: React.FC = () => {
                 </div>
 
                 <div className="rp-toolbar-actions">
-                    <div className="rp-role-wrap">
-                        <label htmlFor="roleSelect" className="rp-role-label">Role</label>
-                        <select
-                            id="roleSelect"
-                            value={selectedRoleName}
-                            onChange={e => setSelectedRoleName(e.target.value as StaffRole)}
-                            className="rp-role-select"
-                            disabled={loading || fetchLoading || manageableRoles.length === 0}
-                            data-testid="role-selector"
-                        >
-                            {manageableRoles.length === 0 && !fetchLoading && (
-                                <option value="">No manageable roles</option>
-                            )}
-                            {manageableRoles.map(role => (
-                                <option key={role.name} value={role.name}>{role.displayName}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {manageableRoles.length > 0 && (
+                        <div className="rp-role-wrap">
+                            <span className="rp-role-label">Role</span>
+                            <SharedDropdown
+                                value={selectedRoleName}
+                                options={dropdownOptions}
+                                trigger={dropdownTrigger}
+                                onChange={val => setSelectedRoleName(val as StaffRole)}
+                                variant="compact"
+                                panelWidth={220}
+                                loading={fetchLoading}
+                                disabled={loading || fetchLoading || manageableRoles.length === 0}
+                                testId="role-selector"
+                            />
+                        </div>
+                    )}
 
                     <Button
                         variant="primary"
@@ -307,7 +323,7 @@ export const RolePermissions: React.FC = () => {
                         size="sm"
                         data-testid="save-permissions-button"
                     >
-                        <Save size={15} />
+                        <Save size={14} />
                         Save changes
                     </Button>
                 </div>
@@ -316,7 +332,7 @@ export const RolePermissions: React.FC = () => {
             {/* Banners */}
             {error && (
                 <div className="rp-banner rp-banner--error" data-testid="error-message">
-                    <AlertCircle size={14} /> {error}
+                    <AlertCircle size={13} /> {error}
                 </div>
             )}
             {successMessage && (
@@ -327,14 +343,17 @@ export const RolePermissions: React.FC = () => {
 
             {/* Content */}
             <div className="rp-content">
-                {fetchLoading ? (
-                    <div className="rp-empty">
-                        <span className="rp-spinner" />
-                        <p>Loading permissions…</p>
+                {fetchLoading && availableRoles.length > 0 ? (
+                    /* Subsequent fetch: show grid skeleton inline */
+                    <div className="rp-grid">
+                        {/* Re-use the grid portion of the skeleton inline */}
+                        {Array.from({ length: 7 }).map((_, i) => (
+                            <div key={i} className="rp-card" style={{ minHeight: 180, opacity: 0.5 }} />
+                        ))}
                     </div>
                 ) : manageableRoles.length === 0 ? (
                     <div className="rp-empty">
-                        <span className="rp-empty-shield"><ShieldAlert size={30} /></span>
+                        <span className="rp-empty-shield"><ShieldAlert size={26} /></span>
                         <p className="rp-empty-title">No manageable roles</p>
                         <p className="rp-empty-sub">You don't have permission to manage any roles.</p>
                         {currentStaff?.roleName === 'owner' && (
@@ -356,17 +375,12 @@ export const RolePermissions: React.FC = () => {
                                 <div
                                     key={category.key}
                                     className="rp-card"
-                                    style={{ '--accent': meta.accent } as React.CSSProperties}
                                     data-testid={`category-${category.key}`}
                                 >
                                     {/* Card header */}
                                     <div className="rp-card-head">
                                         <div className="rp-card-meta">
-                                            <span
-                                                className="rp-icon-chip"
-                                                style={{ background: meta.bg, color: meta.color }}
-                                                aria-hidden="true"
-                                            >
+                                            <span className="rp-icon-chip" aria-hidden="true">
                                                 {meta.icon}
                                             </span>
                                             <div>
@@ -376,13 +390,7 @@ export const RolePermissions: React.FC = () => {
                                         </div>
 
                                         <div className="rp-card-controls">
-                                            <span
-                                                className="rp-count"
-                                                style={{
-                                                    background: enabledCount > 0 ? meta.bg : '#f3f4f6',
-                                                    color:      enabledCount > 0 ? meta.color : '#9ca3af',
-                                                }}
-                                            >
+                                            <span className={`rp-count${enabledCount > 0 ? ' rp-count--active' : ''}`}>
                                                 {enabledCount}/{total}
                                             </span>
                                             <button
