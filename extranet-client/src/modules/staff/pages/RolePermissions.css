@@ -58,6 +58,37 @@
   white-space: nowrap;
 }
 
+/* ── Unsaved changes pill ────────────────────────────────────────────────── */
+.rp-unsaved-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: #fef9ec;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  white-space: nowrap;
+  animation: rp-fade-in 0.15s ease-out;
+}
+
+.rp-unsaved-pill::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
+}
+
+@keyframes rp-fade-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Banners ─────────────────────────────────────────────────────────────── */
 .rp-banner {
   display: flex;
@@ -160,11 +191,23 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: box-shadow 0.18s;
+  transition: box-shadow 0.18s, border-color 0.18s;
 }
 
 .rp-card:hover {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Ghost placeholder during role-switch fetch */
+.rp-card--ghost {
+  min-height: 180px;
+  background: #f9fafb;
+  border-color: #f3f4f6;
+}
+
+/* Dirty card: subtle amber left border */
+.rp-card--dirty {
+  border-left: 3px solid #f59e0b;
 }
 
 /* Card header */
@@ -184,7 +227,6 @@
   min-width: 0;
 }
 
-/* Icon chip — neutral grey, no color */
 .rp-icon-chip {
   display: flex;
   align-items: center;
@@ -203,6 +245,20 @@
   color: #111827;
   margin: 0 0 2px;
   line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Dot next to card title when category has unsaved changes */
+.rp-card-dirty-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
+  margin-bottom: 1px; /* optical alignment */
 }
 
 .rp-card-desc {
@@ -212,11 +268,11 @@
   line-height: 1.4;
 }
 
-/* Header right */
+/* Header right: count + reset + select-all */
 .rp-card-controls {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   flex-shrink: 0;
 }
 
@@ -237,6 +293,34 @@
 .rp-count--active {
   background: #111827;
   color: #fff;
+}
+
+/* Reset button — amber-tinted, only shown when card is dirty */
+.rp-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  padding: 3px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s;
+  animation: rp-fade-in 0.15s ease-out;
+}
+
+.rp-reset-btn:hover {
+  background: #fde68a;
+  border-color: #fcd34d;
+}
+
+.rp-reset-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .rp-select-all {
@@ -271,16 +355,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   padding: 9px 14px;
   border-bottom: 1px solid #f9fafb;
   transition: background 0.12s;
 }
 
 .rp-perm-row:last-child { border-bottom: none; }
-.rp-perm-row:hover { background: #fafafa; }
+.rp-perm-row:hover      { background: #fafafa; }
 
 .rp-perm-row--on .rp-perm-label { color: #111827; }
+
+/* Highlight dirty row with very faint amber tint */
+.rp-perm-row--dirty {
+  background: #fffbf0;
+}
+
+.rp-perm-row--dirty:hover {
+  background: #fef9e7;
+}
 
 .rp-perm-label {
   font-size: 0.8rem;
@@ -289,6 +382,18 @@
   user-select: none;
   transition: color 0.12s;
   flex: 1;
+  min-width: 0;
+}
+
+/* Per-permission unsaved change dot */
+.rp-perm-dirty-mark {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
+  /* sits between label and toggle */
 }
 
 /* ── Toggle switch ───────────────────────────────────────────────────────── */
@@ -350,7 +455,7 @@
     gap: 10px;
   }
   .rp-toolbar-left    { width: 100%; }
-  .rp-toolbar-actions { width: 100%; justify-content: space-between; }
+  .rp-toolbar-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
   .rp-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 }
 
@@ -358,4 +463,5 @@
   .rp-toolbar-actions { flex-direction: column; align-items: stretch; }
   .rp-grid { grid-template-columns: 1fr; }
   .rp-content { padding: 16px; }
+  .rp-unsaved-pill { align-self: flex-start; }
 }

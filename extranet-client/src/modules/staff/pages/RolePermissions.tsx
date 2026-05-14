@@ -1,5 +1,5 @@
 // src/pages/staff/RolePermissions.tsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { StaffPermissionsService } from '@/modules/staff/services/staffPermissions.service';
 import { Button } from '@/shared/components/Button';
@@ -17,13 +17,13 @@ import {
     Settings2,
     LayoutGrid,
     UserCheck,
-    ChevronDown,
+    RotateCcw,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import './RolePermissions.css';
 import { RolePermissionsSkeleton } from '../components';
 
-// ── Per-category visual config (neutral — no bright colours) ─────────────────
+// ── Category config ───────────────────────────────────────────────────────────
 const CATEGORY_META: Record<string, { icon: React.ReactNode }> = {
     orders:    { icon: <ShoppingCart    size={14} /> },
     menu:      { icon: <UtensilsCrossed size={14} /> },
@@ -127,17 +127,46 @@ const DEFAULT_PERMISSIONS: IPermissions = {
     customers: { view: false, manage: false },
 };
 
+const clonePerms = (p: IPermissions): IPermissions => JSON.parse(JSON.stringify(p));
+
 export const RolePermissions: React.FC = () => {
     const { token, staff: currentStaff } = useStaffAuth();
 
     const [availableRoles, setAvailableRoles]     = useState<Role[]>([]);
     const [selectedRoleName, setSelectedRoleName] = useState<StaffRole | ''>('');
+
+    // Live (editable) state
     const [permissions, setPermissions]           = useState<IPermissions>(DEFAULT_PERMISSIONS);
+    // Snapshot of last fetched / successfully saved state — used for dirty-check & reset
+    const [savedPermissions, setSavedPermissions] = useState<IPermissions>(DEFAULT_PERMISSIONS);
+
     const [loading, setLoading]                   = useState(false);
     const [fetchLoading, setFetchLoading]         = useState(false);
     const [error, setError]                       = useState<string | null>(null);
     const [successMessage, setSuccessMessage]     = useState<string | null>(null);
 
+    // ── Dirty helpers ─────────────────────────────────────────────────────────
+
+    // Overall dirty flag — true when live permissions differ from saved
+    const isDirty = useMemo(
+        () => JSON.stringify(permissions) !== JSON.stringify(savedPermissions),
+        [permissions, savedPermissions],
+    );
+
+    // Set of "category.permissionKey" strings that have changed vs saved
+    const dirtyKeys = useMemo(() => {
+        const set = new Set<string>();
+        PERMISSION_CATEGORIES.forEach(cat => {
+            const live  = (permissions[cat.key as keyof IPermissions] as any) ?? {};
+            const saved = (savedPermissions[cat.key as keyof IPermissions] as any) ?? {};
+            cat.permissions.forEach(p => {
+                if (!!live[p.key] !== !!saved[p.key]) set.add(`${cat.key}.${p.key}`);
+            });
+        });
+        return set;
+    }, [permissions, savedPermissions]);
+
+    // ── Role helpers ──────────────────────────────────────────────────────────
     const currentUserLevel = useMemo(() => {
         if (!currentStaff) return 99;
         const roleName = (
@@ -146,15 +175,12 @@ export const RolePermissions: React.FC = () => {
             (currentStaff.roleId && typeof currentStaff.roleId === 'object' ? currentStaff.roleId.name : '') ||
             ''
         ).toLowerCase();
-
         if (roleName === StaffRole.SUPER_ADMIN) return RoleLevel.PLATFORM;
         if ((currentStaff as any).roleLevel) return (currentStaff as any).roleLevel;
         if (currentStaff.roleId && typeof currentStaff.roleId === 'object' && (currentStaff.roleId as any).level)
             return (currentStaff.roleId as any).level;
-
         const currentRole = availableRoles.find(r => r.name === roleName);
         if (currentRole) return currentRole.level;
-
         const map: Record<string, number> = {
             super_admin: 1, owner: 2, restaurant_owner: 2,
             branch_manager: 3, manager: 4, store_manager: 4,
@@ -174,6 +200,7 @@ export const RolePermissions: React.FC = () => {
         return availableRoles.filter(role => role.level > currentUserLevel);
     }, [availableRoles, currentUserLevel, currentStaff]);
 
+    // ── Effects ───────────────────────────────────────────────────────────────
     useEffect(() => { fetchRoles(); }, []);
     useEffect(() => { if (selectedRoleName) fetchPermissions(); }, [selectedRoleName]);
     useEffect(() => {
@@ -181,6 +208,7 @@ export const RolePermissions: React.FC = () => {
             setSelectedRoleName(manageableRoles[0].name);
     }, [manageableRoles]);
 
+    // ── API ───────────────────────────────────────────────────────────────────
     const fetchRoles = async () => {
         if (!token || !currentStaff?.restaurantId) return;
         try {
@@ -202,15 +230,20 @@ export const RolePermissions: React.FC = () => {
             const res = await StaffPermissionsService.getPermissionsForStaffType(
                 token, currentStaff.restaurantId, selectedRoleName as any,
             );
-            setPermissions(res.data?.permissions ?? DEFAULT_PERMISSIONS);
+            const fetched = res.data?.permissions ?? DEFAULT_PERMISSIONS;
+            setPermissions(clonePerms(fetched));
+            setSavedPermissions(clonePerms(fetched));   // sync saved baseline
         } catch (err: any) {
-            setPermissions(DEFAULT_PERMISSIONS);
+            const blank = clonePerms(DEFAULT_PERMISSIONS);
+            setPermissions(blank);
+            setSavedPermissions(blank);
             if (!err.message.includes('not found')) setError(err.message || 'Failed to fetch permissions');
         } finally {
             setFetchLoading(false);
         }
     };
 
+    // ── Mutation handlers ─────────────────────────────────────────────────────
     const handlePermissionChange = (category: string, permission: string, value: boolean) => {
         setPermissions(prev => ({
             ...prev,
@@ -228,6 +261,13 @@ export const RolePermissions: React.FC = () => {
         setSuccessMessage(null);
     };
 
+    // Reset a single card's category to last-saved state — no API call
+    const handleResetCategory = useCallback((category: string) => {
+        const savedCat = savedPermissions[category as keyof IPermissions] as any;
+        if (!savedCat) return;
+        setPermissions(prev => ({ ...prev, [category]: { ...savedCat } }));
+    }, [savedPermissions]);
+
     const handleInitialize = async () => {
         if (!token || !currentStaff?.restaurantId) return;
         try {
@@ -243,7 +283,7 @@ export const RolePermissions: React.FC = () => {
     };
 
     const handleSave = async () => {
-        if (!token || !currentStaff?.restaurantId || !selectedRoleName) return;
+        if (!token || !currentStaff?.restaurantId || !selectedRoleName || !isDirty) return;
         const targetRole = availableRoles.find(r => r.name === selectedRoleName);
         if (currentStaff.roleName !== StaffRole.SUPER_ADMIN && targetRole && targetRole.level <= currentUserLevel) {
             toast.error('Access denied — this is a higher-level role.', { icon: <ShieldAlert size={18} /> });
@@ -256,6 +296,8 @@ export const RolePermissions: React.FC = () => {
             await StaffPermissionsService.updatePermissionsForStaffType(
                 token, currentStaff.restaurantId, selectedRoleName as any, { permissions },
             );
+            // Commit live state as new saved baseline
+            setSavedPermissions(clonePerms(permissions));
             const roleLabel = manageableRoles.find(r => r.name === selectedRoleName)?.displayName || selectedRoleName;
             setSuccessMessage(`Permissions updated for ${roleLabel}`);
             toast.success(`Permissions updated for ${roleLabel}`);
@@ -267,18 +309,18 @@ export const RolePermissions: React.FC = () => {
         }
     };
 
-    // ── Build SharedDropdown options from manageable roles ──────────────────
+    // ── Dropdown props ────────────────────────────────────────────────────────
     const dropdownOptions: DropdownOption[] = manageableRoles.map(role => ({
         value: role.name,
         label: role.displayName,
     }));
 
-    const selectedRole = manageableRoles.find(r => r.name === selectedRoleName);
+    const selectedRole    = manageableRoles.find(r => r.name === selectedRoleName);
     const dropdownTrigger: DropdownTrigger = {
         label: selectedRole?.displayName ?? (fetchLoading ? 'Loading…' : 'Select role'),
     };
 
-    // ── Show skeleton on initial role fetch ─────────────────────────────────
+    // ── Initial load skeleton ─────────────────────────────────────────────────
     if (fetchLoading && availableRoles.length === 0) {
         return (
             <div className="rp-layout" data-testid="role-permissions-page">
@@ -287,6 +329,7 @@ export const RolePermissions: React.FC = () => {
         );
     }
 
+    // ── Main render ───────────────────────────────────────────────────────────
     return (
         <div className="rp-layout" data-testid="role-permissions-page">
 
@@ -315,11 +358,19 @@ export const RolePermissions: React.FC = () => {
                         </div>
                     )}
 
+                    {/* Unsaved-changes pill — only visible when dirty */}
+                    {isDirty && !loading && (
+                        <span className="rp-unsaved-pill" aria-live="polite">
+                            Unsaved changes
+                        </span>
+                    )}
+
                     <Button
                         variant="primary"
                         onClick={handleSave}
                         loading={loading}
-                        disabled={loading || fetchLoading || manageableRoles.length === 0}
+                        // Disabled until there are actual changes
+                        disabled={!isDirty || loading || fetchLoading || manageableRoles.length === 0}
                         size="sm"
                         data-testid="save-permissions-button"
                     >
@@ -344,11 +395,9 @@ export const RolePermissions: React.FC = () => {
             {/* Content */}
             <div className="rp-content">
                 {fetchLoading && availableRoles.length > 0 ? (
-                    /* Subsequent fetch: show grid skeleton inline */
                     <div className="rp-grid">
-                        {/* Re-use the grid portion of the skeleton inline */}
                         {Array.from({ length: 7 }).map((_, i) => (
-                            <div key={i} className="rp-card" style={{ minHeight: 180, opacity: 0.5 }} />
+                            <div key={i} className="rp-card rp-card--ghost" />
                         ))}
                     </div>
                 ) : manageableRoles.length === 0 ? (
@@ -365,16 +414,19 @@ export const RolePermissions: React.FC = () => {
                 ) : (
                     <div className="rp-grid">
                         {PERMISSION_CATEGORIES.map(category => {
-                            const meta         = CATEGORY_META[category.key];
-                            const catPerms     = permissions[category.key as keyof IPermissions] as any;
-                            const enabledCount = category.permissions.filter(p => catPerms[p.key]).length;
-                            const total        = category.permissions.length;
-                            const allOn        = enabledCount === total;
+                            const meta          = CATEGORY_META[category.key];
+                            const catPerms      = permissions[category.key as keyof IPermissions] as any;
+                            const enabledCount  = category.permissions.filter(p => catPerms[p.key]).length;
+                            const total         = category.permissions.length;
+                            const allOn         = enabledCount === total;
+                            const catDirty      = category.permissions.some(
+                                p => dirtyKeys.has(`${category.key}.${p.key}`),
+                            );
 
                             return (
                                 <div
                                     key={category.key}
-                                    className="rp-card"
+                                    className={`rp-card${catDirty ? ' rp-card--dirty' : ''}`}
                                     data-testid={`category-${category.key}`}
                                 >
                                     {/* Card header */}
@@ -384,7 +436,16 @@ export const RolePermissions: React.FC = () => {
                                                 {meta.icon}
                                             </span>
                                             <div>
-                                                <h3 className="rp-card-title">{category.label}</h3>
+                                                <h3 className="rp-card-title">
+                                                    {category.label}
+                                                    {catDirty && (
+                                                        <span
+                                                            className="rp-card-dirty-dot"
+                                                            aria-label="unsaved changes"
+                                                            title="This category has unsaved changes"
+                                                        />
+                                                    )}
+                                                </h3>
                                                 <p className="rp-card-desc">{category.description}</p>
                                             </div>
                                         </div>
@@ -393,6 +454,21 @@ export const RolePermissions: React.FC = () => {
                                             <span className={`rp-count${enabledCount > 0 ? ' rp-count--active' : ''}`}>
                                                 {enabledCount}/{total}
                                             </span>
+
+                                            {/* Reset button — appears only when this card has unsaved changes */}
+                                            {catDirty && (
+                                                <button
+                                                    className="rp-reset-btn"
+                                                    onClick={() => handleResetCategory(category.key)}
+                                                    disabled={loading}
+                                                    title="Reset to last saved state"
+                                                    data-testid={`reset-${category.key}`}
+                                                >
+                                                    <RotateCcw size={11} />
+                                                    Reset
+                                                </button>
+                                            )}
+
                                             <button
                                                 className="rp-select-all"
                                                 onClick={() => handleSelectAll(category.key, !allOn)}
@@ -407,17 +483,33 @@ export const RolePermissions: React.FC = () => {
                                     {/* Permission rows */}
                                     <ul className="rp-perm-list">
                                         {category.permissions.map(permission => {
-                                            const checked = catPerms[permission.key] || false;
-                                            const uid = `toggle-${category.key}-${permission.key}`;
+                                            const checked      = catPerms[permission.key] || false;
+                                            const isPermDirty  = dirtyKeys.has(`${category.key}.${permission.key}`);
+                                            const uid          = `toggle-${category.key}-${permission.key}`;
+
                                             return (
                                                 <li
                                                     key={permission.key}
-                                                    className={`rp-perm-row${checked ? ' rp-perm-row--on' : ''}`}
+                                                    className={[
+                                                        'rp-perm-row',
+                                                        checked      ? 'rp-perm-row--on'    : '',
+                                                        isPermDirty  ? 'rp-perm-row--dirty' : '',
+                                                    ].filter(Boolean).join(' ')}
                                                     data-testid={`permission-${category.key}-${permission.key}`}
                                                 >
                                                     <label htmlFor={uid} className="rp-perm-label">
                                                         {permission.label}
                                                     </label>
+
+                                                    {/* Per-permission unsaved dot */}
+                                                    {isPermDirty && (
+                                                        <span
+                                                            className="rp-perm-dirty-mark"
+                                                            aria-label="unsaved change"
+                                                            title="Changed — not yet saved"
+                                                        />
+                                                    )}
+
                                                     <label htmlFor={uid} className="rp-toggle" aria-label={permission.label}>
                                                         <input
                                                             type="checkbox"
