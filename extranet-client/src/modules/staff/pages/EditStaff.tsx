@@ -8,7 +8,8 @@ import { InputField } from '@/shared/components/InputField';
 import { Button } from '@/shared/components/Button';
 import { Staff } from '@/shared/types/staff.types';
 import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
-import { ArrowLeft, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, ShieldAlert, Users, Activity } from 'lucide-react';
+import { SharedDropdown } from '@/shared/components/SharedDropdown/SharedDropdown';
 import { toast } from 'react-toastify';
 import './EditStaff.css';
 
@@ -228,142 +229,157 @@ export const EditStaff: React.FC = () => {
           className="back-button"
           onClick={() => navigate('/staff/team')}
           data-testid="back-button"
+          title="Back to Team"
         >
           <ArrowLeft size={20} />
-          Back to Team
         </button>
-      </div>
-
-      <div className="edit-staff-card">
-        <div className="edit-staff-card-header">
+        <div className="edit-staff-title-area">
           <h1 className="edit-staff-title">Edit Staff Member</h1>
           <p className="edit-staff-subtitle">Update staff information and role</p>
         </div>
+      </div>
 
-        {serverError && (
-          <div className="error-banner" data-testid="error-message">
-            {serverError}
-          </div>
-        )}
-
-        {!canManageThisStaff && (
-          <div className="error-banner warning">
-            <ShieldAlert size={18} />
-            You have read-only access to this staff member due to hierarchy level.
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="edit-staff-form">
-          <div className="form-section">
-            <h3 className="section-title">Personal Information</h3>
-            
-            <InputField
-              label="Full Name"
-              type="text"
-              value={formData.name}
-              error={errors.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              disabled={loading || !canManageThisStaff}
-              data-testid="name-input"
-            />
-
-            <div className="form-row">
-              <InputField
-                label="Email Address"
-                type="email"
-                value={formData.email}
-                error={errors.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                disabled={loading || !canManageThisStaff}
-                data-testid="email-input"
-              />
-
-              <InputField
-                label="Phone Number"
-                type="tel"
-                value={formData.phone}
-                error={errors.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
-                disabled={loading || !canManageThisStaff}
-                data-testid="phone-input"
-              />
+      <div className="edit-staff-content">
+        <div className="edit-staff-card">
+          {serverError && (
+            <div className="error-banner" data-testid="error-message">
+              {serverError}
             </div>
-          </div>
+          )}
 
-          <div className="form-section">
-            <h3 className="section-title">Role & Status</h3>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="staffType" className="form-label">Staff Role</label>
-                <select
-                  id="staffType"
-                  value={formData.staffType}
-                  onChange={(e) => handleChange('staffType', e.target.value)}
-                  className="form-select"
-                  disabled={loading || !canManageThisStaff}
-                  data-testid="staff-type-select"
-                >
-                  {/* Show the current role even if it's not manageable */}
-                  {!manageableRoles.some(r => r.name === formData.staffType) && (
-                    <option value={formData.staffType}>
-                      {availableRoles.find(r => r.name === formData.staffType)?.displayName || formData.staffType} (Current - Read Only)
-                    </option>
-                  )}
-                  {manageableRoles.map(role => (
-                    <option key={role.name} value={role.name}>
-                      {role.displayName}
-                    </option>
-                  ))}
-                </select>
-                <p className="form-helper-text">
-                  Role permissions are configured in the Permissions tab
-                </p>
+          {!canManageThisStaff && (
+            <div className="error-banner warning">
+              <ShieldAlert size={18} />
+              You have read-only access to this staff member due to hierarchy level.
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="edit-staff-form">
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Personal Information</h3>
+                <p className="section-subtitle">Basic details about the staff member</p>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="isActive" className="form-label">Account Status</label>
-                <select
-                  id="isActive"
-                  value={formData.isActive ? 'active' : 'inactive'}
-                  onChange={(e) => handleChange('isActive', e.target.value === 'active')}
-                  className="form-select"
+              <InputField
+                label="Full Name"
+                type="text"
+                value={formData.name}
+                error={errors.name}
+                onChange={(e) => handleChange('name', e.target.value)}
+                disabled={loading || !canManageThisStaff}
+                placeholder="John Doe"
+                data-testid="name-input"
+              />
+
+              <div className="form-row">
+                <InputField
+                  label="Email Address"
+                  type="email"
+                  value={formData.email}
+                  error={errors.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
                   disabled={loading || !canManageThisStaff}
-                  data-testid="status-select"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <p className="form-helper-text">
-                  Inactive accounts cannot log in
-                </p>
+                  placeholder="john@example.com"
+                  data-testid="email-input"
+                />
+
+                <InputField
+                  label="Phone Number"
+                  type="tel"
+                  value={formData.phone}
+                  error={errors.phone}
+                  onChange={(e) => handleChange('phone', e.target.value)}
+                  disabled={loading || !canManageThisStaff}
+                  placeholder="+1234567890"
+                  data-testid="phone-input"
+                />
               </div>
             </div>
-          </div>
 
-          <div className="form-actions">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate('/staff/team')}
-              disabled={loading}
-              data-testid="cancel-button"
-            >
-              Cancel
-            </Button>
-            {canManageThisStaff && (
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Role & Status</h3>
+                <p className="section-subtitle">Manage role assignment and account state</p>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Staff Role</label>
+                  <SharedDropdown
+                    variant="compact"
+                    value={formData.staffType}
+                    options={[
+                      ...(!manageableRoles.some(r => r.name === formData.staffType) ? [{
+                        value: formData.staffType,
+                        label: `${availableRoles.find(r => r.name === formData.staffType)?.displayName || formData.staffType} (Current - Read Only)`
+                      }] : []),
+                      ...manageableRoles.map(role => ({
+                        value: role.name,
+                        label: role.displayName
+                      }))
+                    ]}
+                    trigger={{
+                      label: availableRoles.find(r => r.name === formData.staffType)?.displayName || formData.staffType,
+                      icon: <Users size={18} />
+                    }}
+                    onChange={(val) => handleChange('staffType', val)}
+                    loading={fetchLoading}
+                    disabled={!canManageThisStaff || loading}
+                    testId="staff-type-select"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Account Status</label>
+                  <SharedDropdown
+                    variant="compact"
+                    value={formData.isActive ? 'active' : 'inactive'}
+                    options={[
+                      { value: 'active', label: 'Active', dot: '#22c55e' },
+                      { value: 'inactive', label: 'Inactive', dot: '#ef4444' }
+                    ]}
+                    trigger={{
+                      label: formData.isActive ? 'Active' : 'Inactive',
+                      icon: <Activity size={18} />,
+                      dot: formData.isActive ? '#22c55e' : '#ef4444'
+                    }}
+                    onChange={(val) => handleChange('isActive', val === 'active')}
+                    loading={fetchLoading}
+                    disabled={!canManageThisStaff || loading}
+                    testId="status-select"
+                  />
+                </div>
+              </div>
+              <p className="form-helper-text">
+                Role permissions can be configured in the Role Permissions section.
+              </p>
+            </div>
+
+            <div className="form-actions">
               <Button
-                type="submit"
-                variant="primary"
-                loading={loading}
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/staff/team')}
                 disabled={loading}
-                data-testid="submit-button"
+                data-testid="cancel-button"
               >
-                Save Changes
+                Cancel
               </Button>
-            )}
-          </div>
-        </form>
+              {canManageThisStaff && (
+                <Button
+                  type="submit"
+                  variant="primary"
+                  loading={loading}
+                  disabled={loading}
+                  data-testid="submit-button"
+                >
+                  Save Changes
+                </Button>
+              )}
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

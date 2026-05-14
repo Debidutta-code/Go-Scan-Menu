@@ -1,152 +1,164 @@
 /* src/pages/staff/StaffList.css */
 
-.staff-list-container {
-  padding: 32px;
-  max-width: 1400px;
-  margin: 0 auto;
+.staff-management-layout {
+  height: 100%;
   background: #f9fafb;
-  min-height: 100vh;
-}
-
-.staff-list-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.staff-list-title {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 4px;
-}
-
-.staff-list-subtitle {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0;
-}
-
-.staff-list-header button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
+/* Alert Messages */
 .error-banner {
   background: #fef2f2;
   border: 1px solid #fecaca;
   color: #991b1b;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 24px;
+  padding: 6px 16px;
   text-align: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
 }
 
-.staff-list-filters {
+/* Page Actions Toolbar */
+.staff-page-toolbar {
   display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
   background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
-.search-box {
-  flex: 1;
+.staff-page-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.staff-page-subtitle {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 2px 0 0;
+}
+
+.staff-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.staff-search-container {
   position: relative;
+  width: 250px;
 }
 
-.search-icon {
+.staff-search-container .search-icon {
   position: absolute;
-  left: 12px;
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
   color: #9ca3af;
+  pointer-events: none;
 }
 
-.search-input {
+.staff-search-input {
   width: 100%;
-  padding: 10px 12px 10px 40px;
+  padding: 8px 12px 8px 34px;
   border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.875rem;
+  outline: none;
   transition: border-color 0.2s;
 }
 
-.search-input:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+.staff-search-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
-.role-filter {
-  padding: 10px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  background: white;
-  cursor: pointer;
-  min-width: 180px;
-  transition: border-color 0.2s;
+.role-dropdown {
+  min-width: 160px;
 }
 
-.role-filter:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.staff-table-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+/* Main Content */
+.staff-management-content {
+  display: flex;
+  flex: 1;
   overflow: hidden;
+  height: 100%;
+  position: relative;
+}
+
+/* Panel Layout */
+.staff-list-panel {
+  flex: 1;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 12px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.staff-list-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Table Styles */
+.staff-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
 }
 
 .staff-table {
   width: 100%;
   border-collapse: collapse;
-}
-
-.staff-table thead {
-  background: #f9fafb;
-  border-bottom: 2px solid #e5e7eb;
+  min-width: 800px;
 }
 
 .staff-table th {
-  padding: 16px;
+  padding: 12px 24px;
   text-align: left;
   font-size: 0.75rem;
   font-weight: 600;
   color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-
-.staff-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s;
-}
-
-.staff-table tbody tr:hover {
   background: #f9fafb;
-}
-
-.staff-table tbody tr:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .staff-table td {
-  padding: 16px;
+  padding: 16px 24px;
   font-size: 0.875rem;
   color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.staff-table tr:last-child td {
+  border-bottom: none;
+}
+
+.staff-table tr:hover {
+  background: #f9fafb;
 }
 
 .staff-name {
@@ -154,28 +166,20 @@
   color: #111827;
 }
 
-.staff-email {
-  color: #6b7280;
-}
-
-.staff-phone {
-  color: #6b7280;
-}
-
 .role-badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 4px 10px;
   background: #eef2ff;
   color: #4f46e5;
-  border-radius: 12px;
+  border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 500;
 }
 
 .status-badge {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 500;
 }
@@ -192,107 +196,142 @@
 
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: 4px;
 }
 
 .icon-button {
-  padding: 8px;
+  padding: 6px;
   border: none;
   background: transparent;
   cursor: pointer;
   border-radius: 6px;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #6b7280;
 }
 
 .icon-button:hover {
   background: #f3f4f6;
-}
-
-.icon-button.edit {
-  color: #6366f1;
+  color: #111827;
 }
 
 .icon-button.edit:hover {
-  background: #eef2ff;
-}
-
-.icon-button.permissions {
-  color: #10b981;
-}
-
-.icon-button.permissions:hover {
-  background: #d1fae5;
-}
-
-.icon-button.delete {
-  color: #dc2626;
+  color: #2563eb;
+  background: #eff6ff;
 }
 
 .icon-button.delete:hover {
-  background: #fee2e2;
+  color: #dc2626;
+  background: #fef2f2;
 }
 
+.icon-button.permissions:hover {
+  color: #059669;
+  background: #ecfdf5;
+}
+
+.readonly-badge {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #f9fafb;
+  border-radius: 4px;
+}
+
+/* Empty State */
 .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
   text-align: center;
-  padding: 80px 24px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.empty-state p {
-  font-size: 1rem;
-  color: #6b7280;
-  margin: 0 0 24px;
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.empty-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
 }
 
 .staff-count {
-  margin-top: 16px;
-  text-align: center;
-  font-size: 0.875rem;
+  padding: 12px 24px;
+  border-top: 1px solid #f3f4f6;
+  font-size: 0.75rem;
   color: #6b7280;
+  text-align: center;
+  background: #f9fafb;
+  flex-shrink: 0;
 }
 
-.loading-state {
-  text-align: center;
-  padding: 80px 24px;
-  font-size: 1rem;
-  color: #6b7280;
+/* Custom Scrollbar */
+.staff-list-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.staff-list-container::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.staff-list-container::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.staff-list-container::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .staff-list-container {
-    padding: 16px;
+@media (max-width: 1024px) {
+  .staff-page-toolbar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
-  .staff-list-header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
-
-  .staff-list-header button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .staff-list-filters {
-    flex-direction: column;
-  }
-
-  .role-filter {
+  .toolbar-left {
     width: 100%;
   }
 
-  .staff-table-container {
-    overflow-x: auto;
+  .staff-toolbar-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
-  .staff-table {
-    min-width: 800px;
+  .staff-search-container {
+    flex: 1;
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .staff-toolbar-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .staff-search-container {
+    width: 100%;
+  }
+
+  .btn-text {
+    display: none;
+  }
+
+  .role-dropdown {
+    width: 100%;
   }
 }

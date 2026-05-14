@@ -34,6 +34,7 @@ export interface SharedDropdownProps {
   className?: string;
   testId?: string;
   loading?: boolean;
+  disabled?: boolean;
   panelWidth?: number;
   alignRight?: boolean;
 }
@@ -127,6 +128,7 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
   className = '',
   testId,
   loading = false,
+  disabled = false,
   panelWidth = 240,
   alignRight = false,
 }) => {
@@ -175,7 +177,10 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
     return () => document.removeEventListener('mousedown', handle);
   }, [open]);
 
-  const handleToggle = () => (open ? setOpen(false) : openPanel());
+  const handleToggle = () => {
+    if (disabled || loading) return;
+    open ? setOpen(false) : openPanel();
+  };
 
   const handleSelect = (val: string) => {
     onChange(val);
@@ -199,12 +204,12 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
   // ── Render ────────────────────────────────────────────────
   return (
     <div
-      className={`sd-wrapper sd-variant-${variant} ${className}`}
+      className={`sd-wrapper sd-variant-${variant} ${disabled ? 'sd-disabled' : ''} ${className}`}
       ref={wrapperRef}
     >
       {/* Trigger */}
       <button
-        className={`sd-trigger ${open ? 'open' : ''}`}
+        className={`sd-trigger ${open ? 'open' : ''} ${disabled ? 'disabled' : ''}`}
         onClick={handleToggle}
         data-testid={testId}
         aria-haspopup="listbox"

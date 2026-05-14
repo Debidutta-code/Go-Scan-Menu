@@ -7,9 +7,10 @@ import { StaffPermissionsService } from '@/modules/staff/services/staffPermissio
 import { InputField } from '@/shared/components/InputField';
 import { Button } from '@/shared/components/Button';
 import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Users, Building2 } from 'lucide-react';
 import { BranchService } from '@/modules/branch/services/branch.service';
 import { Branch } from '@/shared/types/table.types';
+import { SharedDropdown, DropdownOption } from '@/shared/components/SharedDropdown/SharedDropdown';
 import './AddStaff.css';
 
 export const AddStaff: React.FC = () => {
@@ -189,166 +190,175 @@ export const AddStaff: React.FC = () => {
           className="back-button"
           onClick={() => navigate('/staff/team')}
           data-testid="back-button"
+          title="Back to Team"
         >
           <ArrowLeft size={20} />
-          Back to Team
         </button>
-      </div>
-
-      <div className="add-staff-card">
-        <div className="add-staff-card-header">
+        <div className="add-staff-title-area">
           <h1 className="add-staff-title">Add New Staff Member</h1>
           <p className="add-staff-subtitle">Create a new staff account with assigned role</p>
         </div>
+      </div>
 
-        {serverError && (
-          <div className="error-banner" data-testid="error-message">
-            {serverError}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="add-staff-form">
-          <div className="form-section">
-            <h3 className="section-title">Personal Information</h3>
-
-            <InputField
-              label="Full Name"
-              type="text"
-              value={formData.name}
-              error={errors.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              disabled={loading || fetchLoading}
-              data-testid="name-input"
-            />
-
-            <div className="form-row">
-              <InputField
-                label="Email Address"
-                type="email"
-                value={formData.email}
-                error={errors.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                disabled={loading || fetchLoading}
-                data-testid="email-input"
-              />
-
-              <InputField
-                label="Phone Number"
-                type="tel"
-                value={formData.phone}
-                error={errors.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
-                disabled={loading || fetchLoading}
-                data-testid="phone-input"
-              />
+      <div className="add-staff-content">
+        <div className="add-staff-card">
+          {serverError && (
+            <div className="error-banner" data-testid="error-message">
+              {serverError}
             </div>
-          </div>
+          )}
 
-          <div className="form-section">
-            <h3 className="section-title">Account Security</h3>
-
-            <div className="form-row">
-              <InputField
-                label="Password"
-                type="password"
-                value={formData.password}
-                error={errors.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                disabled={loading || fetchLoading}
-                data-testid="password-input"
-              />
+          <form onSubmit={handleSubmit} className="add-staff-form">
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Personal Information</h3>
+                <p className="section-subtitle">Basic details about the staff member</p>
+              </div>
 
               <InputField
-                label="Confirm Password"
-                type="password"
-                value={formData.confirmPassword}
-                error={errors.confirmPassword}
-                onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                label="Full Name"
+                type="text"
+                value={formData.name}
+                error={errors.name}
+                onChange={(e) => handleChange('name', e.target.value)}
                 disabled={loading || fetchLoading}
-                data-testid="confirm-password-input"
+                placeholder="John Doe"
+                data-testid="name-input"
               />
+
+              <div className="form-row">
+                <InputField
+                  label="Email Address"
+                  type="email"
+                  value={formData.email}
+                  error={errors.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  disabled={loading || fetchLoading}
+                  placeholder="john@example.com"
+                  data-testid="email-input"
+                />
+
+                <InputField
+                  label="Phone Number"
+                  type="tel"
+                  value={formData.phone}
+                  error={errors.phone}
+                  onChange={(e) => handleChange('phone', e.target.value)}
+                  disabled={loading || fetchLoading}
+                  placeholder="+1234567890"
+                  data-testid="phone-input"
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="form-section">
-            <h3 className="section-title">Role & Access</h3>
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Account Security</h3>
+                <p className="section-subtitle">Set up login credentials</p>
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="branchId" className="form-label">
-                Assigned Branch
-              </label>
-              <select
-                id="branchId"
-                value={formData.branchId}
-                onChange={(e) => handleChange('branchId', e.target.value)}
-                className="form-select"
-                disabled={loading || fetchLoading}
-                data-testid="branch-select"
-              >
-                <option value="">All Branches / Main</option>
-                {availableBranches.map((branch) => (
-                  <option key={branch._id} value={branch._id}>
-                    {branch.name}
-                  </option>
-                ))}
-              </select>
+              <div className="form-row">
+                <InputField
+                  label="Password"
+                  type="password"
+                  value={formData.password}
+                  error={errors.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  disabled={loading || fetchLoading}
+                  placeholder="••••••••"
+                  data-testid="password-input"
+                />
+
+                <InputField
+                  label="Confirm Password"
+                  type="password"
+                  value={formData.confirmPassword}
+                  error={errors.confirmPassword}
+                  onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                  disabled={loading || fetchLoading}
+                  placeholder="••••••••"
+                  data-testid="confirm-password-input"
+                />
+              </div>
+            </div>
+
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Role & Access</h3>
+                <p className="section-subtitle">Assign a role and branch access</p>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Staff Role</label>
+                  <SharedDropdown
+                    variant="compact"
+                    value={formData.staffType}
+                    options={manageableRoles.map(role => ({
+                      value: role.name,
+                      label: role.displayName
+                    }))}
+                    trigger={{
+                      label: manageableRoles.find(r => r.name === formData.staffType)?.displayName || 'Select Role',
+                      icon: <Users size={18} />
+                    }}
+                    onChange={(val) => handleChange('staffType', val)}
+                    loading={fetchLoading}
+                    className={errors.staffType ? 'error' : ''}
+                    testId="staff-type-select"
+                  />
+                  {errors.staffType && <p className="error-text">{errors.staffType}</p>}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Assigned Branch</label>
+                  <SharedDropdown
+                    variant="compact"
+                    value={formData.branchId}
+                    options={[
+                      { value: '', label: 'All Branches / Main' },
+                      ...availableBranches.map(branch => ({
+                        value: branch._id,
+                        label: branch.name
+                      }))
+                    ]}
+                    trigger={{
+                      label: availableBranches.find(b => b._id === formData.branchId)?.name || 'All Branches / Main',
+                      icon: <Building2 size={18} />
+                    }}
+                    onChange={(val) => handleChange('branchId', val)}
+                    loading={fetchLoading}
+                    testId="branch-select"
+                  />
+                </div>
+              </div>
               <p className="form-helper-text">
-                Select the primary branch for this staff member
+                Role permissions can be configured in the Role Permissions section.
               </p>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="staffType" className="form-label">
-                Staff Role
-              </label>
-              <select
-                id="staffType"
-                value={formData.staffType}
-                onChange={(e) => handleChange('staffType', e.target.value)}
-                className={`form-select ${errors.staffType ? 'error' : ''}`}
+            <div className="form-actions">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/staff/team')}
+                disabled={loading}
+                data-testid="cancel-button"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                loading={loading}
                 disabled={loading || fetchLoading || manageableRoles.length === 0}
-                data-testid="staff-type-select"
+                data-testid="submit-button"
               >
-                {fetchLoading ? (
-                  <option>Loading roles...</option>
-                ) : manageableRoles.length === 0 ? (
-                  <option>No manageable roles</option>
-                ) : (
-                  manageableRoles.map((role) => (
-                    <option key={role.name} value={role.name}>
-                      {role.displayName}
-                    </option>
-                  ))
-                )}
-              </select>
-              {errors.staffType && <p className="error-text">{errors.staffType}</p>}
-              <p className="form-helper-text">
-                Role permissions can be configured in the Permissions tab
-              </p>
+                Create Staff Member
+              </Button>
             </div>
-          </div>
-
-          <div className="form-actions">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate('/staff/team')}
-              disabled={loading}
-              data-testid="cancel-button"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              loading={loading}
-              disabled={loading || fetchLoading || manageableRoles.length === 0}
-              data-testid="submit-button"
-            >
-              Create Staff Member
-            </Button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

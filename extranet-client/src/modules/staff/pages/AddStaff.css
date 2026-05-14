@@ -1,59 +1,76 @@
 /* src/pages/staff/AddStaff.css */
 
 .add-staff-container {
-  padding: 32px;
-  max-width: 900px;
-  margin: 0 auto;
+  height: 100%;
   background: #f9fafb;
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .add-staff-header {
-  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
 .back-button {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: white;
-  border: 1px solid #e5e7eb;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
-  font-size: 0.875rem;
-  color: #374151;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #6b7280;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .back-button:hover {
   background: #f9fafb;
+  color: #111827;
   border-color: #d1d5db;
 }
 
-.add-staff-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 40px;
-}
-
-.add-staff-card-header {
-  margin-bottom: 32px;
-  text-align: center;
+.add-staff-title-area {
+  flex: 1;
 }
 
 .add-staff-title {
-  font-size: 1.875rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 600;
   color: #111827;
-  margin: 0 0 8px;
+  margin: 0;
 }
 
 .add-staff-subtitle {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: #6b7280;
-  margin: 0;
+  margin: 2px 0 0;
+}
+
+.add-staff-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.add-staff-card {
+  width: 100%;
+  max-width: 800px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 32px;
+  height: fit-content;
 }
 
 .error-banner {
@@ -64,6 +81,7 @@
   border-radius: 8px;
   margin-bottom: 24px;
   text-align: center;
+  font-size: 0.875rem;
 }
 
 .add-staff-form {
@@ -78,13 +96,21 @@
   gap: 20px;
 }
 
+.section-header {
+  margin-bottom: 4px;
+}
+
 .section-title {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #111827;
-  margin: 0 0 8px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #e5e7eb;
+  margin: 0;
+}
+
+.section-subtitle {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 4px 0 0;
 }
 
 .form-row {
@@ -96,7 +122,7 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .form-label {
@@ -106,30 +132,41 @@
 }
 
 .form-select {
-  padding: 12px 16px;
+  padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 0.875rem;
   background: white;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+  outline: none;
 }
 
 .form-select:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-select.error {
+  border-color: #ef4444;
 }
 
 .form-select:disabled {
   background: #f3f4f6;
   cursor: not-allowed;
+  color: #9ca3af;
 }
 
 .form-helper-text {
   font-size: 0.75rem;
   color: #6b7280;
-  margin: 0;
+  margin: 4px 0 0;
+}
+
+.error-text {
+  font-size: 0.75rem;
+  color: #ef4444;
+  margin: 4px 0 0;
 }
 
 .form-actions {
@@ -137,25 +174,41 @@
   gap: 12px;
   justify-content: flex-end;
   padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 8px;
 }
 
 .form-actions button {
-  min-width: 140px;
+  min-width: 120px;
+}
+
+/* Custom scrollbar */
+.add-staff-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.add-staff-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.add-staff-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.add-staff-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .add-staff-container {
+  .add-staff-content {
     padding: 16px;
   }
 
   .add-staff-card {
-    padding: 24px;
-  }
-
-  .add-staff-title {
-    font-size: 1.5rem;
+    padding: 20px;
+    border-radius: 12px;
   }
 
   .form-row {

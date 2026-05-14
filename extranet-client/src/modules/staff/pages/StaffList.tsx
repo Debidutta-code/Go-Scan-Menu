@@ -7,10 +7,12 @@ import { StaffPermissionsService } from '@/modules/staff/services/staffPermissio
 import { Staff } from '@/shared/types/staff.types';
 import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
 import { Button } from '@/shared/components/Button';
+import { SharedDropdown, DropdownOption } from '@/shared/components/SharedDropdown/SharedDropdown';
 import { extractId } from '@/shared/utils/id.util';
 import { PermissionsModal } from '@/modules/staff/components/PermissionsModal';
-import { Plus, Edit, Trash2, Search, Shield, ShieldAlert } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Shield, ShieldAlert, Users } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { StaffListSkeleton } from './StaffListSkeleton';
 import './StaffList.css';
 
 export const StaffList: React.FC = () => {
@@ -153,29 +155,70 @@ export const StaffList: React.FC = () => {
         return matchesSearch && matchesRole;
     });
 
-    if (loading) {
-        return (
-            <div className="staff-list-container">
-                <div className="loading-state">Loading staff...</div>
-            </div>
-        );
-    }
+    const roleOptions: DropdownOption[] = useMemo(() => {
+        const options: DropdownOption[] = [
+            { value: 'all', label: 'All Roles' }
+        ];
+
+        availableRoles.forEach(role => {
+            options.push({
+                value: role.name,
+                label: role.displayName
+            });
+        });
+
+        return options;
+    }, [availableRoles]);
+
+    const currentRoleLabel = useMemo(() => {
+        if (filterRole === 'all') return 'All Roles';
+        return availableRoles.find(r => r.name === filterRole)?.displayName || filterRole;
+    }, [filterRole, availableRoles]);
 
     return (
-        <div className="staff-list-container" data-testid="staff-list-page">
-            <div className="staff-list-header">
-                <div>
-                    <h1 className="staff-list-title">Team Management</h1>
-                    <p className="staff-list-subtitle">Manage your restaurant staff members</p>
+        <div className="staff-management-layout" data-testid="staff-list-page">
+            {/* Page Actions Toolbar */}
+            <div className="staff-page-toolbar">
+                <div className="toolbar-left">
+                    <h1 className="staff-page-title">Team Management</h1>
+                    <p className="staff-page-subtitle">Manage your restaurant staff members</p>
                 </div>
-                <Button
-                    variant="primary"
-                    onClick={() => navigate('/staff/team/add')}
-                    data-testid="add-staff-button"
-                >
-                    <Plus size={18} />
-                    Add Staff Member
-                </Button>
+
+                <div className="staff-toolbar-actions">
+                    <div className="staff-search-container">
+                        <Search size={18} className="search-icon" />
+                        <input
+                            type="text"
+                            placeholder="Search by name, email..."
+                            className="staff-search-input"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            data-testid="search-input"
+                        />
+                    </div>
+
+                    <SharedDropdown
+                        value={filterRole}
+                        options={roleOptions}
+                        trigger={{
+                            label: currentRoleLabel,
+                            icon: <Users size={18} />
+                        }}
+                        onChange={setFilterRole}
+                        className="role-dropdown"
+                        testId="role-filter"
+                    />
+
+                    <Button
+                        variant="primary"
+                        onClick={() => navigate('/staff/team/add')}
+                        data-testid="add-staff-button"
+                        size="sm"
+                    >
+                        <Plus size={18} />
+                        <span className="btn-text">Add Member</span>
+                    </Button>
+                </div>
             </div>
 
             {error && (
@@ -184,114 +227,102 @@ export const StaffList: React.FC = () => {
                 </div>
             )}
 
-            <div className="staff-list-filters">
-                <div className="search-box">
-                    <Search size={18} className="search-icon" />
-                    <input
-                        type="text"
-                        placeholder="Search by name, email, or phone..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="search-input"
-                        data-testid="search-input"
-                    />
-                </div>
+            <div className="staff-management-content">
+                <div className="staff-list-panel">
+                    <div className="panel-header">
+                        <h2 className="panel-title">Staff Members {!loading && `(${filteredStaff.length})`}</h2>
+                    </div>
 
-                <select
-                    value={filterRole}
-                    onChange={(e) => setFilterRole(e.target.value)}
-                    className="role-filter"
-                    data-testid="role-filter"
-                >
-                    <option value="all">All Roles</option>
-                    {availableRoles.map(role => (
-                        <option key={role.name} value={role.name}>{role.displayName}</option>
-                    ))}
-                </select>
-            </div>
-
-            {filteredStaff.length === 0 ? (
-                <div className="empty-state" data-testid="empty-state">
-                    <p>No staff members found</p>
-                    <Button variant="outline" onClick={() => navigate('/staff/team/add')}>
-                        Add Your First Staff Member
-                    </Button>
+                    <div className="staff-list-container">
+                        {loading ? (
+                            <StaffListSkeleton />
+                        ) : filteredStaff.length === 0 ? (
+                            <div className="empty-state" data-testid="empty-state">
+                                <div className="empty-icon">👥</div>
+                                <p className="empty-title">No staff members found</p>
+                                <Button variant="outline" onClick={() => navigate('/staff/team/add')}>
+                                    Add Your First Staff Member
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="staff-table-wrapper">
+                                <table className="staff-table" data-testid="staff-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredStaff.map((staff) => {
+                                            const manageable = canManageStaff(staff);
+                                            return (
+                                                <tr key={staff._id} data-testid={`staff-row-${staff._id}`} className={!manageable ? 'row-readonly' : ''}>
+                                                    <td className="staff-name">{staff.name}</td>
+                                                    <td className="staff-email">{staff.email}</td>
+                                                    <td className="staff-phone">{staff.phone}</td>
+                                                    <td>
+                                                        <span className="role-badge" data-testid={`role-badge-${staff.staffType}`}>
+                                                            {availableRoles.find(r => r.name === (staff.roleName || staff.staffType))?.displayName || staff.roleName || staff.staffType}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span className={`status-badge ${staff.isActive ? 'active' : 'inactive'}`} data-testid={`status-${staff._id}`}>
+                                                            {staff.isActive ? 'Active' : 'Inactive'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="action-buttons">
+                                                        {manageable ? (
+                                                            <>
+                                                                <button
+                                                                    className="icon-button permissions"
+                                                                    onClick={() => handleManagePermissions((staff.roleName || staff.staffType) as StaffRole)}
+                                                                    title="Manage Permissions"
+                                                                    data-testid={`permissions-button-${staff._id}`}
+                                                                >
+                                                                    <Shield size={16} />
+                                                                </button>
+                                                                <button
+                                                                    className="icon-button edit"
+                                                                    onClick={() => navigate(`/staff/team/edit/${extractId(staff._id)}`)}
+                                                                    title="Edit"
+                                                                    data-testid={`edit-button-${staff._id}`}
+                                                                >
+                                                                    <Edit size={16} />
+                                                                </button>
+                                                                <button
+                                                                    className="icon-button delete"
+                                                                    onClick={() => handleDelete(staff)}
+                                                                    title="Delete"
+                                                                    data-testid={`delete-button-${staff._id}`}
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <span className="readonly-badge" title="Insufficient hierarchy level to manage this staff member">
+                                                                <Shield size={14} /> Read-only
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                    {!loading && filteredStaff.length > 0 && (
+                        <div className="staff-count" data-testid="staff-count">
+                            Showing {filteredStaff.length} of {staffList.length} staff members
+                        </div>
+                    )}
                 </div>
-            ) : (
-                <div className="staff-table-container">
-                    <table className="staff-table" data-testid="staff-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredStaff.map((staff) => {
-                                const manageable = canManageStaff(staff);
-                                return (
-                                    <tr key={staff._id} data-testid={`staff-row-${staff._id}`} className={!manageable ? 'row-readonly' : ''}>
-                                        <td className="staff-name">{staff.name}</td>
-                                        <td className="staff-email">{staff.email}</td>
-                                        <td className="staff-phone">{staff.phone}</td>
-                                        <td>
-                                            <span className="role-badge" data-testid={`role-badge-${staff.staffType}`}>
-                                                {availableRoles.find(r => r.name === (staff.roleName || staff.staffType))?.displayName || staff.roleName || staff.staffType}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className={`status-badge ${staff.isActive ? 'active' : 'inactive'}`} data-testid={`status-${staff._id}`}>
-                                                {staff.isActive ? 'Active' : 'Inactive'}
-                                            </span>
-                                        </td>
-                                        <td className="action-buttons">
-                                            {manageable ? (
-                                                <>
-                                                    <button
-                                                        className="icon-button permissions"
-                                                        onClick={() => handleManagePermissions((staff.roleName || staff.staffType) as StaffRole)}
-                                                        title="Manage Permissions"
-                                                        data-testid={`permissions-button-${staff._id}`}
-                                                    >
-                                                        <Shield size={16} />
-                                                    </button>
-                                                    <button
-                                                        className="icon-button edit"
-                                                        onClick={() => navigate(`/staff/team/edit/${extractId(staff._id)}`)}
-                                                        title="Edit"
-                                                        data-testid={`edit-button-${staff._id}`}
-                                                    >
-                                                        <Edit size={16} />
-                                                    </button>
-                                                    <button
-                                                        className="icon-button delete"
-                                                        onClick={() => handleDelete(staff)}
-                                                        title="Delete"
-                                                        data-testid={`delete-button-${staff._id}`}
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <span className="readonly-badge" title="Insufficient hierarchy level to manage this staff member">
-                                                    <Shield size={14} /> Read-only
-                                                </span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-
-            <div className="staff-count" data-testid="staff-count">
-                Showing {filteredStaff.length} of {staffList.length} staff members
             </div>
 
             {/* Permissions Management Modal */}
