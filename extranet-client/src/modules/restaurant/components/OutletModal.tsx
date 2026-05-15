@@ -4,6 +4,8 @@ import { BranchService } from '@/modules/branch/services/branch.service';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { Button } from '@/shared/components/Button';
 import { InputField } from '@/shared/components/InputField';
+import { SharedDropdown } from '@/shared/components/SharedDropdown/SharedDropdown';
+import { Globe } from 'lucide-react';
 import { toast } from 'react-toastify';
 import './OutletModal.css';
 
@@ -168,14 +170,24 @@ export const OutletModal: React.FC<OutletModalProps> = ({ isOpen, onClose, onSuc
                             placeholder="123456"
                             required
                         />
-                        <InputField
-                            label="Country"
-                            name="country"
-                            value={formData.country}
-                            onChange={handleChange}
-                            placeholder="India"
-                            required
-                        />
+                        <div className="form-group">
+                            <label className="form-label">Country</label>
+                            <SharedDropdown
+                                variant="compact"
+                                value={formData.country}
+                                options={[
+                                    { value: 'India', label: 'India' },
+                                    { value: 'USA', label: 'USA' },
+                                    { value: 'UK', label: 'UK' },
+                                    { value: 'UAE', label: 'UAE' }
+                                ]}
+                                trigger={{
+                                    label: formData.country || 'Select Country',
+                                    icon: <Globe size={18} />
+                                }}
+                                onChange={(val) => setFormData({ ...formData, country: val })}
+                            />
+                        </div>
                     </div>
 
                     <div className="form-actions">

@@ -1,0 +1,49 @@
+/* extranet-client/src/modules/branch/pages/BranchListSkeleton.css */
+
+.branch-list-skeleton {
+  padding: 0;
+  width: 100%;
+}
+
+.branch-skeleton-row {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  animation: branch-skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.branch-skeleton-cell {
+  flex: 1;
+  padding: 0 8px;
+}
+
+.branch-skeleton-bar {
+  height: 16px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: branch-skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.branch-skeleton-bar.small { width: 40%; }
+.branch-skeleton-bar.medium { width: 70%; }
+.branch-skeleton-bar.large { width: 90%; }
+.branch-skeleton-bar.badge { width: 80px; height: 24px; border-radius: 12px; }
+.branch-skeleton-bar.circle { width: 32px; height: 32px; border-radius: 50%; }
+
+.branch-skeleton-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+@keyframes branch-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes branch-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
