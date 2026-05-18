@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: row;
-  background: #f9fafb;
+  background: var(--bg-secondary);
 }
 
 .menuitem-form-side {
@@ -11,12 +11,12 @@
   align-items: flex-start;
   justify-content: center;
   padding: 32px;
-  background: #ffffff;
+  background: var(--white);
   overflow-y: auto;
 }
 
 .menuitem-form-card {
-  background: white;
+  background: var(--white);
   border-radius: 16px;
   width: 100%;
   max-width: 600px;
@@ -29,15 +29,15 @@
 
 .form-title {
   font-size: 2rem;
-  font-weight: 700;
-  color: #111827;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
   margin: 16px 0 8px;
   letter-spacing: -0.025em;
 }
 
 .form-subtitle {
   font-size: 1rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -55,80 +55,80 @@
 
 .form-label {
   font-size: 14px;
-  font-weight: 600;
-  color: #374151;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-700);
 }
 
 .required-label {
-  color: #dc2626;
+  color: var(--danger-600);
 }
 
 .optional-label {
   font-size: 13px;
   font-weight: 400;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .form-textarea {
   padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
   font-size: 15px;
   font-family: inherit;
-  color: #111827;
-  background: white;
+  color: var(--text-primary);
+  background: var(--white);
   outline: none;
   transition: all 0.2s ease;
   resize: vertical;
 }
 
 .form-textarea:focus {
-  border-color: #6366f1;
+  border-color: var(--primary-500);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .form-textarea:disabled {
-  background: #f9fafb;
+  background: var(--bg-secondary);
   cursor: not-allowed;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .form-select {
   padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
   font-size: 15px;
-  color: #111827;
-  background: white;
+  color: var(--text-primary);
+  background: var(--white);
   outline: none;
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .form-select:focus {
-  border-color: #6366f1;
+  border-color: var(--primary-500);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .form-select:disabled {
-  background: #f9fafb;
+  background: var(--bg-secondary);
   cursor: not-allowed;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .form-select.error {
-  border-color: #dc2626;
+  border-color: var(--danger-600);
 }
 
 .error-text {
   font-size: 13px;
-  color: #dc2626;
+  color: var(--danger-600);
   margin-top: -4px;
 }
 
 .field-help-text {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 4px 0 0 0;
 }
 
@@ -143,7 +143,7 @@
   align-items: center;
   gap: 10px;
   font-size: 15px;
-  color: #374151;
+  color: var(--gray-700);
   cursor: pointer;
 }
 
@@ -169,9 +169,9 @@
   flex-direction: column;
   gap: 12px;
   padding: 20px;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  border: var(--border-width-1) solid var(--gray-200);
 }
 
 .section-header {
@@ -183,8 +183,8 @@
 
 .section-title {
   font-size: 16px;
-  font-weight: 600;
-  color: #374151;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-700);
   margin: 0;
 }
 
@@ -200,33 +200,33 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: var(--border-width-1) solid var(--gray-200);
 }
 
 .form-input {
   flex: 1;
   min-width: 150px;
   padding: 10px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
   font-size: 14px;
-  color: #111827;
-  background: white;
+  color: var(--text-primary);
+  background: var(--white);
   outline: none;
   transition: all 0.2s ease;
 }
 
 .form-input:focus {
-  border-color: #6366f1;
+  border-color: var(--primary-500);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .form-input:disabled {
-  background: #f9fafb;
+  background: var(--bg-secondary);
   cursor: not-allowed;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .checkbox-label-inline {
@@ -234,7 +234,7 @@
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: #374151;
+  color: var(--gray-700);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -252,7 +252,7 @@
   align-items: flex-start;
   justify-content: center;
   padding: 32px;
-  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
   overflow-y: auto;
   position: sticky;
   top: 0;
@@ -265,7 +265,7 @@
   justify-content: center;
   min-height: 100vh;
   font-size: 18px;
-  color: #718096;
+  color: var(--gray-500);
 }
 
 /* Responsive */
@@ -312,10 +312,10 @@
 .radio-card {
   position: relative;
   cursor: pointer;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-xl);
   padding: 20px;
-  background: white;
+  background: var(--white);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -323,13 +323,13 @@
 }
 
 .radio-card:hover {
-  border-color: #6366f1;
-  background: #f5f3ff;
+  border-color: var(--primary-500);
+  background: var(--primary-50);
 }
 
 .radio-card.selected {
-  border-color: #6366f1;
-  background: #eef2ff;
+  border-color: var(--primary-500);
+  background: var(--primary-50);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
@@ -353,12 +353,12 @@
 
 .radio-card-label {
   font-size: 15px;
-  font-weight: 600;
-  color: #374151;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-700);
 }
 
 .radio-card.selected .radio-card-label {
-  color: #6366f1;
+  color: var(--primary-500);
 }
 
 /* Selection Card Grid (for Dietary Types, Drink Properties) */
@@ -376,10 +376,10 @@
 .selection-card {
   position: relative;
   cursor: pointer;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-xl);
   padding: 16px;
-  background: white;
+  background: var(--white);
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -389,19 +389,19 @@
 }
 
 .selection-card:hover:not(:disabled) {
-  border-color: #6366f1;
-  background: #f5f3ff;
+  border-color: var(--primary-500);
+  background: var(--primary-50);
   transform: translateY(-2px);
 }
 
 .selection-card.selected {
-  border-color: #6366f1;
-  background: #eef2ff;
+  border-color: var(--primary-500);
+  background: var(--primary-50);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .selection-card.error {
-  border-color: #dc2626;
+  border-color: var(--danger-600);
 }
 
 .selection-card:disabled {
@@ -416,12 +416,12 @@
 
 .selection-card-label {
   font-size: 13px;
-  font-weight: 600;
-  color: #374151;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-700);
 }
 
 .selection-card.selected .selection-card-label {
-  color: #6366f1;
+  color: var(--primary-500);
 }
 
 /* Checkbox Card Grid (for Allergens, Nutrition Tags) */
@@ -435,23 +435,23 @@
 .checkbox-card {
   position: relative;
   cursor: pointer;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--gray-200);
   border-radius: 10px;
   padding: 12px 16px;
-  background: white;
+  background: var(--white);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
 }
 
 .checkbox-card:hover {
-  border-color: #6366f1;
-  background: #f5f3ff;
+  border-color: var(--primary-500);
+  background: var(--primary-50);
 }
 
 .checkbox-card.selected {
-  border-color: #6366f1;
-  background: #eef2ff;
+  border-color: var(--primary-500);
+  background: var(--primary-50);
 }
 
 .checkbox-card-input {
@@ -471,34 +471,34 @@
 .checkbox-card-check {
   width: 20px;
   height: 20px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--gray-300);
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   color: transparent;
-  background: white;
+  background: var(--white);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .checkbox-card.selected .checkbox-card-check {
-  background: #6366f1;
-  border-color: #6366f1;
+  background: var(--primary-500);
+  border-color: var(--primary-500);
   color: white;
 }
 
 .checkbox-card-label {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--gray-700);
   flex: 1;
 }
 
 .checkbox-card.selected .checkbox-card-label {
-  color: #6366f1;
-  font-weight: 600;
+  color: var(--primary-500);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Responsive adjustments */

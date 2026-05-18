@@ -1,9 +1,9 @@
 /* src/pages/staff/CategoryListSkeleton.css */
 
 .staff-category-sort-skeleton-item {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  background: var(--white);
+  border: var(--border-width-1) solid var(--gray-200);
+  border-radius: var(--radius-lg);
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -14,7 +14,7 @@
 .staff-category-sort-skeleton-handle {
   width: 20px;
   height: 48px;
-  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
   background-size: 200% 100%;
   animation: staff-category-sort-skeleton-shimmer 1.5s infinite;
   border-radius: 4px;
@@ -36,7 +36,7 @@
 
 .staff-category-sort-skeleton-title {
   height: 20px;
-  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
   background-size: 200% 100%;
   animation: staff-category-sort-skeleton-shimmer 1.5s infinite;
   border-radius: 4px;
@@ -46,7 +46,7 @@
 
 .staff-category-sort-skeleton-description {
   height: 16px;
-  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
   background-size: 200% 100%;
   animation: staff-category-sort-skeleton-shimmer 1.5s infinite;
   border-radius: 4px;
@@ -62,7 +62,7 @@
 .staff-category-sort-skeleton-badge {
   height: 24px;
   width: 100px;
-  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
   background-size: 200% 100%;
   animation: staff-category-sort-skeleton-shimmer 1.5s infinite;
   border-radius: 6px;
@@ -71,7 +71,7 @@
 .staff-category-sort-skeleton-button {
   width: 60px;
   height: 36px;
-  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
   background-size: 200% 100%;
   animation: staff-category-sort-skeleton-shimmer 1.5s infinite;
   border-radius: 6px;

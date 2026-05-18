@@ -22,7 +22,7 @@
 }
 
 .menu-modal-container {
-  background: white;
+  background: var(--white);
   border-radius: 16px;
   max-width: 900px; /* Wider than category modal for more complex form */
   width: 100%;
@@ -47,21 +47,21 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--white);
+  border: var(--border-width-1) solid var(--gray-200);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 10;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .menu-modal-close:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-  color: #111827;
+  background: var(--bg-secondary);
+  border-color: var(--gray-300);
+  color: var(--text-primary);
   transform: rotate(90deg);
 }
 
@@ -76,7 +76,7 @@
   flex: 1;
   padding: 32px;
   overflow-y: auto;
-  background: #ffffff;
+  background: var(--white);
 }
 
 .menu-modal-header {
@@ -85,15 +85,15 @@
 
 .menu-modal-title {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #111827;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
   margin: 0 0 6px 0;
   letter-spacing: -0.025em;
 }
 
 .menu-modal-subtitle {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -112,26 +112,26 @@
 
 .form-label {
   font-size: 13px;
-  font-weight: 600;
-  color: #374151;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-700);
 }
 
-.required-label { color: #dc2626; }
-.optional-label { color: #9ca3af; font-weight: 400; font-size: 12px; }
+.required-label { color: var(--danger-600); }
+.optional-label { color: var(--text-tertiary); font-weight: 400; font-size: 12px; }
 
 .form-textarea, .form-select, .form-input {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
   font-size: 14px;
-  color: #111827;
-  background: white;
+  color: var(--text-primary);
+  background: var(--white);
   outline: none;
   transition: all 0.2s ease;
 }
 
 .form-textarea:focus, .form-select:focus, .form-input:focus {
-  border-color: #6366f1;
+  border-color: var(--primary-500);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
@@ -151,25 +151,25 @@
 .radio-card {
   position: relative;
   cursor: pointer;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-xl);
   padding: 16px;
-  background: white;
+  background: var(--white);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.radio-card:hover { border-color: #6366f1; background: #f5f3ff; }
-.radio-card.selected { border-color: #6366f1; background: #eef2ff; }
+.radio-card:hover { border-color: var(--primary-500); background: var(--primary-50); }
+.radio-card.selected { border-color: var(--primary-500); background: var(--primary-50); }
 
 .radio-card-input { position: absolute; opacity: 0; width: 0; height: 0; }
 
 .radio-card-content { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .radio-card-icon { font-size: 1.5rem; }
-.radio-card-label { font-size: 14px; font-weight: 600; color: #374151; }
-.radio-card.selected .radio-card-label { color: #6366f1; }
+.radio-card-label { font-size: 14px; font-weight: var(--font-weight-semibold); color: var(--gray-700); }
+.radio-card.selected .radio-card-label { color: var(--primary-500); }
 
 /* Selection Grid */
 .selection-card-grid {
@@ -181,10 +181,10 @@
 
 .selection-card {
   cursor: pointer;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--gray-200);
   border-radius: 10px;
   padding: 12px;
-  background: white;
+  background: var(--white);
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -193,13 +193,13 @@
   text-align: center;
 }
 
-.selection-card:hover:not(:disabled) { border-color: #6366f1; background: #f5f3ff; }
-.selection-card.selected { border-color: #6366f1; background: #eef2ff; }
+.selection-card:hover:not(:disabled) { border-color: var(--primary-500); background: var(--primary-50); }
+.selection-card.selected { border-color: var(--primary-500); background: var(--primary-50); }
 .selection-card:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .selection-card-icon { font-size: 1.5rem; }
-.selection-card-label { font-size: 12px; font-weight: 600; color: #374151; }
-.selection-card.selected .selection-card-label { color: #6366f1; }
+.selection-card-label { font-size: 12px; font-weight: var(--font-weight-semibold); color: var(--gray-700); }
+.selection-card.selected .selection-card-label { color: var(--primary-500); }
 
 /* Checkbox Grid */
 .checkbox-card-grid {
@@ -210,40 +210,40 @@
 
 .checkbox-card {
   cursor: pointer;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-lg);
   padding: 10px;
-  background: white;
+  background: var(--white);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
 }
 
-.checkbox-card:hover { border-color: #6366f1; background: #f5f3ff; }
-.checkbox-card.selected { border-color: #6366f1; background: #eef2ff; }
+.checkbox-card:hover { border-color: var(--primary-500); background: var(--primary-50); }
+.checkbox-card.selected { border-color: var(--primary-500); background: var(--primary-50); }
 
 .checkbox-card-input { position: absolute; opacity: 0; width: 0; height: 0; }
 
 .checkbox-card-content { display: flex; align-items: center; gap: 8px; width: 100%; }
 .checkbox-card-check {
-  width: 18px; height: 18px; border: 2px solid #d1d5db; border-radius: 4px;
+  width: 18px; height: 18px; border: 2px solid var(--gray-300); border-radius: 4px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; color: transparent; background: white; flex-shrink: 0;
+  font-size: 12px; color: transparent; background: var(--white); flex-shrink: 0;
 }
-.checkbox-card.selected .checkbox-card-check { background: #6366f1; border-color: #6366f1; color: white; }
-.checkbox-card-label { font-size: 13px; font-weight: 500; color: #374151; }
-.checkbox-card.selected .checkbox-card-label { color: #6366f1; font-weight: 600; }
+.checkbox-card.selected .checkbox-card-check { background: var(--primary-500); border-color: var(--primary-500); color: white; }
+.checkbox-card-label { font-size: 13px; font-weight: 500; color: var(--gray-700); }
+.checkbox-card.selected .checkbox-card-label { color: var(--primary-500); font-weight: var(--font-weight-semibold); }
 
 /* Dynamic Items */
 .form-section {
   padding: 16px;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  border: var(--border-width-1) solid var(--gray-200);
 }
 
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.section-title { font-size: 14px; font-weight: 600; margin: 0; }
+.section-title { font-size: 14px; font-weight: var(--font-weight-semibold); margin: 0; }
 
 .dynamic-item-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 
@@ -253,23 +253,23 @@
   gap: 12px;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--gray-200);
 }
 .menu-modal-actions button { flex: 1; }
 
 /* Helper Text */
-.field-help-text { font-size: 12px; color: #6b7280; margin: 4px 0 0 0; }
-.error-text { font-size: 12px; color: #dc2626; margin-top: 4px; }
+.field-help-text { font-size: 12px; color: var(--text-secondary); margin: 4px 0 0 0; }
+.error-text { font-size: 12px; color: var(--danger-600); margin-top: 4px; }
 
 /* Preview Side */
 .menu-modal-preview-side {
   width: 350px;
-  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
   padding: 32px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  border-left: 1px solid #e5e7eb;
+  border-left: 1px solid var(--gray-200);
 }
 
 .preview-wrapper {
