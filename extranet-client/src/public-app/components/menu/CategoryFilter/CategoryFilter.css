@@ -42,7 +42,7 @@
 .public-category-filter-icon {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -75,7 +75,7 @@
 
 .public-category-filter-name {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: #4a5568;
   text-align: center;
   white-space: nowrap;

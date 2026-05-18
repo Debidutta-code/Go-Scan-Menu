@@ -10,13 +10,13 @@
     position: relative;
     width: 44px;
     height: 22px;
-    background-color: #e5e7eb;
+    background-color: var(--gray-200);
     border-radius: 11px;
     transition: background-color 0.2s ease;
 }
 
 .switch-track.checked {
-    background-color: #10b981;
+    background-color: var(--success-500);
     /* Success green */
 }
 
@@ -38,20 +38,20 @@
 
 .switch-label {
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.025em;
-    color: #6b7280;
+    color: var(--text-secondary);
 }
 
 .switch-track.checked+.switch-label {
-    color: #059669;
+    color: var(--success-600);
 }
 
 .switch-container:hover .switch-track:not(.checked) {
-    background-color: #d1d5db;
+    background-color: var(--gray-300);
 }
 
 .switch-container:hover .switch-track.checked {
-    background-color: #059669;
+    background-color: var(--success-600);
 }

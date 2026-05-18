@@ -30,7 +30,7 @@
   border-radius: 9px;
   color: #3f3f46;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   letter-spacing: -0.01em;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
@@ -59,7 +59,7 @@
   gap: 9px;
   min-width: 100%;
   justify-content: flex-start;
-  background: white;
+  background: var(--white);
   border: 1.5px solid #e2e8f0;
 }
 
@@ -71,7 +71,7 @@
 .sd-variant-compact .sd-trigger.open {
   border-color: #a5b4fc;
   box-shadow: 0 0 0 3px rgba(165, 180, 252, 0.18);
-  background: white;
+  background: var(--white);
 }
 
 /* ─── Trigger internals ────────────────────────────────────── */
@@ -102,7 +102,7 @@
 
 .sd-trigger-label {
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: inherit;
   white-space: nowrap;
   overflow: hidden;
@@ -118,7 +118,7 @@
 
 .sd-trigger-count {
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   padding: 2px 7px;
   border-radius: 100px;
   background: #f1f5f9;
@@ -145,7 +145,7 @@
  * and animation — no position/z-index here (set inline by the component).
  */
 .sd-panel {
-  background: white;
+  background: var(--white);
   border-radius: 14px;
   box-shadow:
     0 8px 30px -4px rgba(0, 0, 0, 0.13),
@@ -201,7 +201,7 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   flex-shrink: 0;
   transition: background 0.12s;
 }
@@ -225,14 +225,14 @@
 
 .sd-option-label {
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: #1e293b;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.sd-option.active .sd-option-label { font-weight: 700; }
+.sd-option.active .sd-option-label { font-weight: var(--font-weight-bold); }
 
 .sd-option-desc {
   font-size: 0.72rem;
@@ -245,7 +245,7 @@
 /* Count badge */
 .sd-option-count {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   padding: 3px 8px;
   border-radius: 100px;
   flex-shrink: 0;

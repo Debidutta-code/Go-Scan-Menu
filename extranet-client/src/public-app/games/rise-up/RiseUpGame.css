@@ -33,7 +33,7 @@
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     padding: 10px 20px;
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: #fff;
 }
@@ -50,7 +50,7 @@
 .level-box p {
     margin: 0;
     font-size: 24px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
 .game-overlay {
@@ -82,7 +82,7 @@
 .retry-btn {
     padding: 15px 40px;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     background: #fff;
     color: skyblue;
     border: none;

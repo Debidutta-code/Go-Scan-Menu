@@ -81,7 +81,7 @@
 
 /* ── Stats card skeleton ────────────────────────────────────── */
 .skeleton-stats-card {
-  background: #ffffff;
+  background: var(--white);
   border-right: 1px solid var(--gray-200);
   pointer-events: none;
   opacity: 0.92;

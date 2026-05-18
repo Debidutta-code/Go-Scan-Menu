@@ -4,7 +4,7 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
-  background: #f9fafb;
+  background: var(--bg-secondary);
   min-height: 100vh;
 }
 
@@ -13,9 +13,9 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 32px;
-  background: white;
+  background: var(--white);
   padding: 32px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -39,46 +39,46 @@
   display: inline-block;
   padding: 6px 14px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   border-radius: 16px;
 }
 
 .status-badge.active {
-  background: #c6f6d5;
-  color: #22543d;
+  background: var(--success-100);
+  color: var(--success-800);
 }
 
 .status-badge.inactive {
-  background: #fed7d7;
-  color: #742a2a;
+  background: var(--danger-100);
+  color: var(--danger-800);
 }
 
 .type-badge {
   display: inline-block;
   padding: 6px 14px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: capitalize;
-  background: #edf2f7;
-  color: #2d3748;
+  background: var(--gray-100);
+  color: var(--gray-800);
   border-radius: 16px;
 }
 
 .info-section {
-  background: white;
+  background: var(--white);
   padding: 32px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 24px;
 }
 
 .section-title {
   font-size: 20px;
-  font-weight: 600;
-  color: #2d3748;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-800);
   margin: 0 0 24px 0;
   padding-bottom: 12px;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--gray-200);
 }
 
 .info-grid {
@@ -99,15 +99,15 @@
 
 .info-label {
   font-size: 13px;
-  font-weight: 600;
-  color: #718096;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-500);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .info-value {
   font-size: 16px;
-  color: #2d3748;
+  color: var(--gray-800);
   margin: 0;
   word-break: break-word;
 }
@@ -115,25 +115,25 @@
 .info-value.mono {
   font-family: 'Courier New', monospace;
   font-size: 14px;
-  color: #4a5568;
+  color: var(--gray-600);
 }
 
 .plan-badge {
   display: inline-block;
   padding: 6px 14px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   border-radius: 16px;
 }
 
 .plan-badge.plan-trial {
-  background: #bee3f8;
-  color: #2c5282;
+  background: var(--info-100);
+  color: var(--info-800);
 }
 
 .plan-badge.plan-basic {
-  background: #c6f6d5;
-  color: #22543d;
+  background: var(--success-100);
+  color: var(--success-800);
 }
 
 .plan-badge.plan-premium {
@@ -155,16 +155,16 @@
 .color-box {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
-  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--gray-200);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .theme-image {
   max-width: 200px;
   max-height: 100px;
-  border-radius: 8px;
-  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--gray-200);
   object-fit: contain;
 }
 
@@ -177,13 +177,13 @@
 .error-state {
   padding: 60px 20px;
   text-align: center;
-  background: white;
-  border-radius: 12px;
+  background: var(--white);
+  border-radius: var(--radius-xl);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .error-state {
-  color: #e53e3e;
+  color: var(--danger-600);
 }
 
 .error-state p {
@@ -226,15 +226,15 @@
   display: flex;
   gap: 8px;
   margin-bottom: 24px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--gray-200);
   padding-bottom: 0;
 }
 
 .tab-button {
   padding: 12px 24px;
   font-size: 15px;
-  font-weight: 600;
-  color: #718096;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-500);
   background: none;
   border: none;
   border-bottom: 3px solid transparent;
@@ -243,12 +243,12 @@
 }
 
 .tab-button:hover {
-  color: #2d3748;
+  color: var(--gray-800);
 }
 
 .tab-button.active {
-  color: #4f46e5;
-  border-bottom-color: #4f46e5;
+  color: var(--primary-600);
+  border-bottom-color: var(--primary-600);
 }
 
 /* Branches Management */
@@ -259,9 +259,9 @@
 }
 
 .branch-card-admin {
-  background: #f9fafb;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -269,7 +269,7 @@
 }
 
 .branch-card-admin.is-main {
-  border-color: #4f46e5;
+  border-color: var(--primary-600);
   background: #f5f3ff;
 }
 
@@ -286,10 +286,10 @@
 }
 
 .main-badge {
-  background: #4f46e5;
+  background: var(--primary-600);
   color: white;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   padding: 2px 8px;
   border-radius: 10px;
   text-transform: uppercase;
@@ -297,8 +297,8 @@
 
 .branch-name {
   font-size: 17px;
-  font-weight: 600;
-  color: #1a202c;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-900);
   margin: 0;
 }
 
@@ -312,7 +312,7 @@
   display: flex;
   gap: 8px;
   font-size: 14px;
-  color: #4a5568;
+  color: var(--gray-600);
 }
 
 .branch-card-actions {
@@ -331,16 +331,16 @@
 }
 
 .add-staff-form {
-  background: #f9fafb;
+  background: var(--bg-secondary);
   padding: 24px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   margin-bottom: 24px;
 }
 
 .form-subtitle {
   font-size: 18px;
-  font-weight: 600;
-  color: #2d3748;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-800);
   margin: 0 0 20px 0;
 }
 
@@ -359,45 +359,45 @@
 
 .input-label {
   font-size: 14px;
-  font-weight: 600;
-  color: #374151;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-700);
 }
 
 .role-select {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
   font-size: 15px;
-  color: #111827;
-  background: white;
+  color: var(--text-primary);
+  background: var(--white);
   transition: all 0.2s ease;
   outline: none;
   cursor: pointer;
 }
 
 .role-select:hover {
-  border-color: #9ca3af;
+  border-color: var(--text-tertiary);
 }
 
 .role-select:focus {
-  border-color: #6366f1;
+  border-color: var(--primary-500);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .role-select:disabled {
-  background: #f3f4f6;
+  background: var(--gray-100);
   cursor: not-allowed;
   opacity: 0.6;
 }
 
 .role-select.error {
-  border-color: #ef4444;
+  border-color: var(--danger-500);
 }
 
 .error-message {
   font-size: 13px;
-  color: #ef4444;
+  color: var(--danger-500);
   margin-top: 4px;
 }
 
@@ -413,64 +413,64 @@
 
 .staff-table-container {
   overflow-x: auto;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
 }
 
 .staff-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--white);
 }
 
 .staff-table thead {
-  background: #f9fafb;
-  border-bottom: 2px solid #e2e8f0;
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--gray-200);
 }
 
 .staff-table th {
   padding: 12px 16px;
   text-align: left;
   font-size: 13px;
-  font-weight: 600;
-  color: #6b7280;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .staff-table tbody tr {
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--gray-200);
   transition: background 0.2s ease;
 }
 
 .staff-table tbody tr:hover {
-  background: #f9fafb;
+  background: var(--bg-secondary);
 }
 
 .staff-table td {
   padding: 14px 16px;
   font-size: 14px;
-  color: #2d3748;
+  color: var(--gray-800);
 }
 
 .role-badge {
   display: inline-block;
   padding: 4px 12px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: capitalize;
   background: #e0e7ff;
   color: #3730a3;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
 }
 
 .empty-state {
   padding: 40px 20px;
   text-align: center;
-  color: #6b7280;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px dashed #d1d5db;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--gray-300);
 }
 
 .empty-state p {

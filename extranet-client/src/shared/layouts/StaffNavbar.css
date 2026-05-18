@@ -2,7 +2,7 @@
 
 .staff-navbar {
     height: 70px;
-    background: white;
+    background: var(--white);
     border-bottom: 1px solid var(--sidebar-border);
     display: flex;
     align-items: center;
@@ -22,7 +22,7 @@
 
 .navbar-page-title {
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     color: #0f172a;
     margin-left: 16px;
     white-space: nowrap;
@@ -37,7 +37,7 @@
     cursor: pointer;
     color: #64748b;
     padding: 8px;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     transition: background 0.2s, color 0.2s;
     display: flex;
     align-items: center;
@@ -58,8 +58,8 @@
 .navbar-logo-icon {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary-600), #1d4ed8);
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -71,7 +71,7 @@
 
 .navbar-company-name {
     font-size: 18px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     color: #0f172a;
     display: block;
 }
@@ -88,7 +88,7 @@
     display: flex;
     align-items: center;
     background: #f1f5f9;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     padding: 0 12px;
     height: 40px;
     width: 240px;
@@ -96,7 +96,7 @@
 }
 
 .navbar-search:focus-within {
-    background: white;
+    background: var(--white);
     box-shadow: 0 0 0 2px #e2e8f0;
 }
 
@@ -126,7 +126,7 @@
     cursor: pointer;
     color: #64748b;
     padding: 8px;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     transition: all 0.2s;
     display: flex;
     align-items: center;
@@ -144,7 +144,7 @@
     right: 6px;
     width: 8px;
     height: 8px;
-    background: #ef4444;
+    background: var(--danger-500);
     border-radius: 50%;
     border: 1px solid white;
 }
@@ -158,7 +158,7 @@
     border: none;
     cursor: pointer;
     padding: 4px;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     transition: background 0.2s;
 }
 
@@ -170,12 +170,12 @@
     width: 36px;
     height: 36px;
     background: #eff6ff;
-    color: #2563eb;
+    color: var(--primary-600);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     font-size: 14px;
     border: 2px solid white;
     box-shadow: 0 0 0 1px #e2e8f0;
@@ -195,7 +195,7 @@
 .navbar-user-name {
     display: block;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     color: #0f172a;
 }
 

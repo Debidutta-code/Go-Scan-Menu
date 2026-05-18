@@ -124,7 +124,7 @@
 
 .fd-checkbox-text {
     font-size: 15px;
-    color: #334155;
+    color: var(--gray-700);
     font-weight: 500;
 }
 
@@ -177,7 +177,7 @@
 
 .fd-radio-text {
     font-size: 15px;
-    color: #334155;
+    color: var(--gray-700);
     font-weight: 500;
 }
 

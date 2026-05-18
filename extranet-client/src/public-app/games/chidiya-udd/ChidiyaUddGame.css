@@ -7,7 +7,7 @@
     --sun: #FFD93D;
     --coral: #FF6B6B;
     --teal: #4ECDC4;
-    --white: #ffffff;
+    --white: var(--white);
     --zone-h: 28vh;
 }
 
@@ -134,7 +134,7 @@
 .cu-zone-label {
     font-family: 'Rajdhani', sans-serif;
     font-size: clamp(0.65rem, 2vw, 0.85rem);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.18em;
     color: rgba(255,255,255,0.35);
     text-transform: uppercase;
@@ -201,7 +201,7 @@
 .cu-rule {
     font-family: 'Rajdhani', sans-serif;
     font-size: 0.88rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     letter-spacing: 0.05em;
     padding: 8px 14px;
     border-radius: 10px;
@@ -214,7 +214,7 @@
 .cu-btn {
     font-family: 'Orbitron', monospace;
     font-size: clamp(0.7rem, 2.5vw, 0.85rem);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.15em;
     padding: 13px 36px;
     background: transparent;
@@ -270,7 +270,7 @@
 .cu-waiting-label {
     font-family: 'Baloo 2', cursive;
     font-size: clamp(1rem, 3.5vw, 1.4rem);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     color: rgba(255,255,255,0.75);
     letter-spacing: 0.05em;
 }
@@ -344,7 +344,7 @@
 .cu-item-udd {
     font-family: 'Baloo 2', cursive;
     font-size: clamp(0.9rem, 3.5vw, 1.2rem);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     color: var(--sun);
     letter-spacing: 0.08em;
 }
@@ -425,7 +425,7 @@
 .cu-result-verdict {
     font-family: 'Rajdhani', sans-serif;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     color: rgba(255,255,255,0.7);
     letter-spacing: 0.08em;
 }
@@ -433,7 +433,7 @@
 .cu-result-msg {
     font-family: 'Baloo 2', cursive;
     font-size: clamp(0.85rem, 3vw, 1.1rem);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     color: var(--sun);
     text-align: center;
     letter-spacing: 0.04em;
@@ -476,7 +476,7 @@
 
 .cu-sb-icon {
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 .cu-sb-col--win .cu-sb-icon { color: var(--leaf); }
 .cu-sb-col--lose .cu-sb-icon { color: var(--coral); }

@@ -179,7 +179,7 @@
 }
 
 .status-pill.pending {
-  background: #fef3c7; /* Keeping these specific semantic colors for pills for now, or could add warning-100 */
+  background: var(--warning-50); /* Keeping these specific semantic colors for pills for now, or could add warning-100 */
   color: var(--warning-700);
 }
 

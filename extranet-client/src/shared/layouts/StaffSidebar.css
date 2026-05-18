@@ -3,9 +3,9 @@
 :root {
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
-    --sidebar-bg: #ffffff;
+    --sidebar-bg: var(--white);
     --sidebar-text: #334155;
-    --sidebar-text-active: #2563eb;
+    --sidebar-text-active: var(--primary-600);
     --sidebar-bg-active: #eff6ff;
     --sidebar-border: #e2e8f0;
     --sidebar-hover: #f8fafc;
@@ -58,8 +58,8 @@
 .logo-icon {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary-600), #1d4ed8);
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -71,7 +71,7 @@
 
 .company-name {
     font-size: 18px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     color: #0f172a;
     opacity: 1;
     transition: opacity var(--transition-speed);
@@ -136,7 +136,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     color: var(--sidebar-text);
     text-decoration: none;
     transition: all 0.2s ease;
@@ -164,7 +164,7 @@
 .nav-item.active {
     background-color: var(--sidebar-bg-active);
     color: var(--sidebar-text-active);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
 }
 
 .nav-item.active::before {
@@ -241,9 +241,9 @@
     gap: 8px;
     padding: 10px;
     border: 1px solid #e2e8f0;
-    background: white;
-    border-radius: 8px;
-    color: #ef4444;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    color: var(--danger-500);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -366,7 +366,7 @@
     align-items: center;
     gap: 12px;
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     color: #64748b;
     text-decoration: none;
     transition: all 0.2s ease;
@@ -424,7 +424,7 @@
 /* Parent Active State - subtle to keep hierarchy connected */
 .nav-item.active-parent {
     color: var(--sidebar-text-active);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     background-color: transparent;
 }
 

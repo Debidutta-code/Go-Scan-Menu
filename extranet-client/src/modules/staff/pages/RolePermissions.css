@@ -16,7 +16,7 @@
   justify-content: space-between;
   padding: 16px 24px;
   background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--gray-200);
   flex-shrink: 0;
 }
 
@@ -35,7 +35,7 @@
 
 .rp-subtitle {
   font-size: 0.775rem;
-  color: #9ca3af;
+  color: var(--gray-400);
   margin: 2px 0 0;
 }
 
@@ -54,7 +54,7 @@
 .rp-role-label {
   font-size: 0.775rem;
   font-weight: 500;
-  color: #9ca3af;
+  color: var(--gray-400);
   white-space: nowrap;
 }
 
@@ -80,7 +80,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: var(--warning-500);
   flex-shrink: 0;
 }
 
@@ -121,7 +121,7 @@
 
 .rp-content::-webkit-scrollbar        { width: 6px; }
 .rp-content::-webkit-scrollbar-track  { background: transparent; }
-.rp-content::-webkit-scrollbar-thumb  { background: #e5e7eb; border-radius: 4px; }
+.rp-content::-webkit-scrollbar-thumb  { background: var(--gray-200); border-radius: 4px; }
 .rp-content::-webkit-scrollbar-thumb:hover { background: var(--gray-300); }
 
 /* ── Empty / loading ─────────────────────────────────────────────────────── */
@@ -158,14 +158,14 @@
 .rp-empty-sub {
   margin: 0 0 20px;
   font-size: 0.775rem;
-  color: #9ca3af;
+  color: var(--gray-400);
 }
 
 .rp-spinner {
   display: block;
   width: 24px;
   height: 24px;
-  border: 2.5px solid #e5e7eb;
+  border: 2.5px solid var(--gray-200);
   border-top-color: var(--text-secondary);
   border-radius: 50%;
   animation: rp-spin 0.7s linear infinite;
@@ -207,7 +207,7 @@
 
 /* Dirty card: subtle amber left border */
 .rp-card--dirty {
-  border-left: 3px solid #f59e0b;
+  border-left: 3px solid var(--warning-500);
 }
 
 /* Card header */
@@ -256,14 +256,14 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: var(--warning-500);
   flex-shrink: 0;
   margin-bottom: 1px; /* optical alignment */
 }
 
 .rp-card-desc {
   font-size: 0.7rem;
-  color: #9ca3af;
+  color: var(--gray-400);
   margin: 0;
   line-height: 1.4;
 }
@@ -291,7 +291,7 @@
 }
 
 .rp-count--active {
-  background: #111827;
+  background: var(--gray-900);
   color: #fff;
 }
 
@@ -377,7 +377,7 @@
 
 .rp-perm-label {
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--gray-400);
   cursor: pointer;
   user-select: none;
   transition: color 0.12s;
@@ -391,7 +391,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: var(--warning-500);
   flex-shrink: 0;
   /* sits between label and toggle */
 }
@@ -418,12 +418,12 @@
   width: 34px;
   height: 19px;
   border-radius: 10px;
-  background: #e5e7eb;
+  background: var(--gray-200);
   transition: background 0.2s;
 }
 
 .rp-toggle input:checked ~ .rp-toggle-track {
-  background: #111827;
+  background: var(--gray-900);
 }
 
 .rp-toggle input:disabled ~ .rp-toggle-track {

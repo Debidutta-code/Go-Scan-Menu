@@ -11,7 +11,7 @@
 .add-staff-header {
   padding: 16px 24px;
   background: var(--white);
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--gray-200);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -154,7 +154,7 @@
 .form-select:disabled {
   background: var(--gray-100);
   cursor: not-allowed;
-  color: #9ca3af;
+  color: var(--gray-400);
 }
 
 .form-helper-text {
@@ -197,7 +197,7 @@
 }
 
 .add-staff-content::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: var(--gray-400);
 }
 
 /* Responsive */

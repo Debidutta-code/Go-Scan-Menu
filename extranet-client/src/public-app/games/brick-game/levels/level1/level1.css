@@ -54,14 +54,14 @@ canvas {
 
 .stat-pill .label {
     font-size: 10px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     color: rgba(255, 255, 255, 0.5);
     letter-spacing: 0.05em;
 }
 
 .stat-pill .value {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     font-variant-numeric: tabular-nums;
 }
 
@@ -134,18 +134,18 @@ canvas {
 
 .score-display {
     font-size: 22px !important;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     color: #D1FF47 !important;
     margin-bottom: 20px !important;
 }
 
 .start-btn {
-    background: white;
+    background: var(--white);
     color: black;
     border: none;
     padding: 14px 28px;
-    border-radius: 12px;
-    font-weight: 700;
+    border-radius: var(--radius-xl);
+    font-weight: var(--font-weight-bold);
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;

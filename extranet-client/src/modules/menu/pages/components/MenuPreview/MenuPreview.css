@@ -99,7 +99,7 @@
   padding: 4px 10px;
   background: var(--white);
   border-radius: 8px;
-  color: #059669;
+  color: var(--success-600);
   font-weight: 500;
   margin-right: 8px;
   margin-bottom: 8px;
@@ -160,8 +160,8 @@
 }
 
 .allergen-tag {
-  background: #fef2f2 !important;
-  color: #991b1b !important;
+  background: var(--danger-50) !important;
+  color: var(--danger-700) !important;
   border: 1px solid var(--danger-200) !important;
 }
 

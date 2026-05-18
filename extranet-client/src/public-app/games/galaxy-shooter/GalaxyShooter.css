@@ -47,14 +47,14 @@
 
 .gs-pill-label {
     font-size: 9px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.14em;
     color: rgba(148, 210, 255, 0.55);
 }
 
 .gs-pill-value {
     font-size: 17px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     color: #e0f2fe;
     letter-spacing: 0.04em;
 }
@@ -114,7 +114,7 @@
     letter-spacing: 0.45em;
     color: rgba(56, 189, 248, 0.7);
     margin-bottom: 2px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
 .gs-title {
@@ -123,7 +123,7 @@
     letter-spacing: 0.1em;
     line-height: 1;
     margin: 0;
-    background: linear-gradient(135deg, #ffffff 0%, #7dd3fc 40%, #a855f7 100%);
+    background: linear-gradient(135deg, var(--white) 0%, #7dd3fc 40%, #a855f7 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -169,7 +169,7 @@
     letter-spacing: 0.2em;
     color: rgba(168, 85, 247, 0.7);
     margin: 0 0 18px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
 /* ── Game Over ──────────────────────────────────────────────────────────────── */
@@ -202,7 +202,7 @@
     font-size: 9px;
     letter-spacing: 0.2em;
     color: rgba(148, 163, 184, 0.55);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
 .gs-score-val {
@@ -228,14 +228,14 @@
     width: 100%;
     padding: 14px 0;
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     font-family: inherit;
     font-size: 13px;
     font-weight: 800;
     letter-spacing: 0.18em;
     cursor: pointer;
     transition: all 0.2s ease;
-    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    background: linear-gradient(135deg, var(--info-500), var(--primary-500));
     color: #fff;
     box-shadow: 0 4px 20px rgba(14, 165, 233, 0.35);
 }
@@ -246,7 +246,7 @@
 }
 
 .gs-retry-btn {
-    background: linear-gradient(135deg, #ef4444, #f97316);
+    background: linear-gradient(135deg, var(--danger-500), #f97316);
     box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
 }
 

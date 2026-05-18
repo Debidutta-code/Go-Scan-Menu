@@ -35,7 +35,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 24px 32px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--gray-200);
 }
 
 .modal-title {
@@ -108,7 +108,7 @@
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--gray-200);
 }
 
 .category-header h3 {
@@ -130,9 +130,9 @@
 }
 
 .toggle-all-btn:hover {
-  background-color: #e5e7eb;
+  background-color: var(--gray-200);
   color: var(--text-primary);
-  border-color: #9ca3af;
+  border-color: var(--gray-400);
 }
 
 .permission-items {
@@ -173,7 +173,7 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 20px 32px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--gray-200);
   background: var(--bg-secondary);
 }
 

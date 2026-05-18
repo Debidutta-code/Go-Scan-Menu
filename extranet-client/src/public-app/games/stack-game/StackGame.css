@@ -43,7 +43,7 @@
 .sg-speed-hint {
     font-family: 'Rajdhani', sans-serif;
     font-size: 0.78rem;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.15em;
     color: #ffd32a;
     text-shadow: 0 0 10px rgba(255,211,42,0.5);
@@ -169,7 +169,7 @@
 .sg-btn {
     font-family: 'Orbitron', monospace;
     font-size: clamp(0.7rem, 2.5vw, 0.85rem);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.16em;
     padding: 13px 38px;
     background: transparent;

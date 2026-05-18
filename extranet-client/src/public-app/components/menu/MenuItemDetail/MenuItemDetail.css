@@ -25,7 +25,7 @@
   bottom: 0;
   width: 100%;
   max-width: 480px;
-  background-color: #ffffff;
+  background-color: var(--white);
   z-index: 1001;
   display: flex;
   flex-direction: column;
@@ -107,7 +107,7 @@
 }
 
 .menu-item-details-image-indicator.active {
-  background-color: #ffffff;
+  background-color: var(--white);
 }
 
 .menu-item-details-info {
@@ -125,7 +125,7 @@
 
 .menu-item-details-title {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: #1a202c;
   margin: 0;
   line-height: 1.3;
@@ -142,8 +142,8 @@
   padding: 0.375rem 0.75rem;
   background-color: #edf2f7;
   color: #4a5568;
-  border-radius: 12px;
-  font-weight: 600;
+  border-radius: var(--radius-xl);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
 }
 
@@ -166,7 +166,7 @@
   gap: 0.5rem;
   padding: 0.75rem;
   background-color: #f7fafc;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .menu-item-details-meta-icon {
@@ -182,13 +182,13 @@
 .menu-item-details-allergen-section {
   padding: 1rem;
   background-color: #fff5f5;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border-left: 4px solid #e53e3e;
 }
 
 .menu-item-details-allergen-title {
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: #c53030;
   margin: 0 0 0.5rem 0;
 }
@@ -207,7 +207,7 @@
 
 .menu-item-details-variant-title {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: #1a202c;
   margin: 0;
 }
@@ -225,7 +225,7 @@
   padding: 0.875rem 1rem;
   background-color: #f7fafc;
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -242,18 +242,18 @@
 
 .menu-item-details-variant-option.active .menu-item-details-variant-name,
 .menu-item-details-variant-option.active .menu-item-details-variant-price {
-  color: #ffffff;
+  color: var(--white);
 }
 
 .menu-item-details-variant-name {
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: #2d3748;
 }
 
 .menu-item-details-variant-price {
   font-size: 0.9375rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: #2d3748;
 }
 
@@ -262,7 +262,7 @@
   border-top: 1px solid #e2e8f0;
   display: flex;
   gap: 1rem;
-  background-color: #ffffff;
+  background-color: var(--white);
 }
 
 .menu-item-details-quantity-selector {
@@ -270,7 +270,7 @@
   align-items: center;
   gap: 0.75rem;
   background-color: #f7fafc;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0.5rem;
 }
 
@@ -278,7 +278,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: var(--white);
   border: 1px solid #e2e8f0;
   cursor: pointer;
   display: flex;
@@ -286,7 +286,7 @@
   justify-content: center;
   font-size: 1.125rem;
   color: #2d3748;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   transition: all 0.2s;
 }
 
@@ -297,7 +297,7 @@
 
 .menu-item-details-quantity-value {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: #1a202c;
   min-width: 24px;
   text-align: center;
@@ -307,11 +307,11 @@
   flex: 1;
   padding: 0.875rem 1.5rem;
   background-color: #1a202c;
-  color: #ffffff;
+  color: var(--white);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition: background-color 0.2s;
 }

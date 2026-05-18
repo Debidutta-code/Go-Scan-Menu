@@ -108,7 +108,7 @@
 .ttt-strip-label {
     font-family: 'Rajdhani', sans-serif;
     font-size: clamp(0.6rem, 2vw, 0.82rem);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.2em;
     color: rgba(255,255,255,0.3);
     text-transform: uppercase;
@@ -183,7 +183,7 @@
 .ttt-btn {
     font-family: 'Orbitron', monospace;
     font-size: clamp(0.65rem, 2.2vw, 0.82rem);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.14em;
     padding: 13px 34px;
     background: transparent;
@@ -234,7 +234,7 @@
     gap: 8px;
     font-family: 'Rajdhani', sans-serif;
     font-size: clamp(0.75rem, 2.5vw, 0.95rem);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.15em;
     padding: 7px 20px;
     border-radius: 40px;

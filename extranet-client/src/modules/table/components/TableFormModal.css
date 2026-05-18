@@ -1,18 +1,18 @@
-/* src/modules/table/components/TableFormModal.css */
+/* src/modules/table/components/TableFormModal.css (Updated with global variables) */
 
 /* ─── Tokens ────────────────────────────────────────────────── */
 .tfm-overlay {
-  --tfm-radius: 16px;
-  --tfm-border: #e8edf3;
-  --tfm-surface: #f7f9fc;
-  --tfm-text-primary: #0f172a;
-  --tfm-text-secondary: #64748b;
-  --tfm-text-muted: #94a3b8;
-  --tfm-accent: #4f46e5;
-  --tfm-accent-light: #eef2ff;
-  --tfm-accent-hover: #4338ca;
-  --tfm-danger: #dc2626;
-  --tfm-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.13), 0 4px 16px rgba(0, 0, 0, 0.07);
+  --tfm-radius: var(--radius-2xl);
+  --tfm-border: var(--gray-200);
+  --tfm-surface: var(--gray-50);
+  --tfm-text-primary: var(--text-primary);
+  --tfm-text-secondary: var(--text-secondary);
+  --tfm-text-muted: var(--text-tertiary);
+  --tfm-accent: var(--primary-600);
+  --tfm-accent-light: var(--primary-50);
+  --tfm-accent-hover: var(--primary-700);
+  --tfm-danger: var(--danger-600);
+  --tfm-shadow-lg: var(--shadow-xl);
 }
 
 /* ─── Overlay ───────────────────────────────────────────────── */
@@ -25,7 +25,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-index-modal-backdrop);
   padding: 1.25rem;
   animation: tfm-overlay-in 0.2s ease;
 }
@@ -37,7 +37,7 @@
 
 /* ─── Container ─────────────────────────────────────────────── */
 .tfm-container {
-  background: #ffffff;
+  background: var(--white);
   border-radius: var(--tfm-radius);
   box-shadow: var(--tfm-shadow-lg);
   width: 100%;
@@ -46,7 +46,7 @@
   flex-direction: column;
   overflow: hidden;
   animation: tfm-modal-in 0.25s cubic-bezier(0.34, 1.3, 0.64, 1);
-  border: 1px solid var(--tfm-border);
+  border: var(--border-width-1) solid var(--tfm-border);
 }
 
 @keyframes tfm-modal-in {
@@ -60,8 +60,8 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 1.25rem 1.5rem 1rem;
-  border-bottom: 1px solid var(--tfm-border);
-  background: #ffffff;
+  border-bottom: var(--border-width-1) solid var(--tfm-border);
+  background: var(--white);
 }
 
 .tfm-header-left {
@@ -76,7 +76,7 @@
   background: var(--tfm-accent-light);
   color: var(--tfm-accent);
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.07em;
   text-transform: uppercase;
   padding: 0.18rem 0.55rem;
@@ -85,8 +85,8 @@
 }
 
 .tfm-title {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
   color: var(--tfm-text-primary);
   margin: 0;
   letter-spacing: -0.02em;
@@ -95,8 +95,8 @@
 
 .tfm-close {
   background: var(--tfm-surface);
-  border: 1px solid var(--tfm-border);
-  border-radius: 8px;
+  border: var(--border-width-1) solid var(--tfm-border);
+  border-radius: var(--radius-lg);
   color: var(--tfm-text-secondary);
   cursor: pointer;
   width: 34px;
@@ -109,8 +109,8 @@
 }
 
 .tfm-close:hover {
-  background: #fee2e2;
-  border-color: #fca5a5;
+  background: var(--danger-50);
+  border-color: var(--danger-200);
   color: var(--tfm-danger);
 }
 
@@ -129,12 +129,12 @@
 
 /* Error */
 .tfm-error {
-  background: #fee2e2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
+  background: var(--danger-50);
+  border: var(--border-width-1) solid var(--danger-200);
+  color: var(--danger-700);
   padding: 10px 14px;
-  border-radius: 9px;
-  font-size: 0.83rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
   font-weight: 500;
 }
 
@@ -146,8 +146,8 @@
 }
 
 .tfm-label {
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
   color: var(--tfm-text-secondary);
   letter-spacing: -0.01em;
 }
@@ -155,12 +155,12 @@
 .tfm-select {
   height: 40px;
   padding: 0 36px 0 12px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 9px;
-  font-size: 0.875rem;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--tfm-text-primary);
-  background: #ffffff;
+  background: var(--white);
   cursor: pointer;
   outline: none;
   width: 100%;
@@ -172,7 +172,7 @@
 }
 
 .tfm-select:hover {
-  border-color: #cbd5e1;
+  border-color: var(--gray-300);
 }
 
 .tfm-select:focus {
@@ -186,8 +186,8 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 1rem 1.5rem;
-  border-top: 1px solid var(--tfm-border);
-  background: #ffffff;
+  border-top: var(--border-width-1) solid var(--tfm-border);
+  background: var(--white);
 }
 
 /* ─── Responsive ────────────────────────────────────────────── */

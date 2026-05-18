@@ -12,16 +12,16 @@
   --qr-surface: #f8fafc;
   --qr-surface-2: #f1f5f9;
   --qr-surface-3: #e8edf5;
-  --qr-white: #ffffff;
+  --qr-white: var(--white);
   --qr-text-primary: #0d1117;
-  --qr-text-secondary: #4b5563;
-  --qr-text-muted: #9ca3af;
-  --qr-accent: #2563eb;
+  --qr-text-secondary: var(--gray-600);
+  --qr-text-muted: var(--gray-400);
+  --qr-accent: var(--primary-600);
   --qr-accent-light: #eff6ff;
   --qr-accent-hover: #1d4ed8;
-  --qr-success: #059669;
+  --qr-success: var(--success-600);
   --qr-success-light: #ecfdf5;
-  --qr-danger: #dc2626;
+  --qr-danger: var(--danger-600);
   --qr-shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
   --qr-shadow-sm: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --qr-shadow-md: 0 8px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
@@ -111,7 +111,7 @@
 
 .qr-modal-title {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--qr-text-primary);
   margin: 0;
   letter-spacing: -0.025em;
@@ -184,7 +184,7 @@
 
 .qr-info-group-label {
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--qr-text-muted);
@@ -237,7 +237,7 @@
 .qr-info-row-val {
   font-size: 0.82rem;
   color: var(--qr-text-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -245,7 +245,7 @@
 
 .qr-level-badge {
   background: var(--qr-text-primary);
-  color: #ffffff;
+  color: var(--white);
   font-size: 0.6rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -263,7 +263,7 @@
   padding: 0.18rem 0.6rem;
   border-radius: 100px;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.02em;
 }
 
@@ -325,7 +325,7 @@
   border-radius: var(--qr-radius-xs);
   padding: 0.4rem 0.8rem;
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--qr-text-primary);
   cursor: pointer;
   transition: all 0.15s;
@@ -376,7 +376,7 @@
 }
 
 .qr-color-swatch--bg {
-  border: 1px solid #e5e7eb;
+  border: var(--border-width-1) solid var(--gray-200);
 }
 
 .qr-color-info {
@@ -397,7 +397,7 @@
 .qr-color-hex {
   font-size: 0.8rem;
   color: var(--qr-text-primary);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
@@ -421,7 +421,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, #d1d5db 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--gray-300) 1px, transparent 1px);
   background-size: 20px 20px;
   opacity: 0.35;
   pointer-events: none;
@@ -518,12 +518,12 @@
   justify-content: center;
   gap: 0.5rem;
   background: var(--qr-accent);
-  color: #ffffff;
+  color: var(--white);
   border: none;
   border-radius: var(--qr-radius-sm);
   padding: 0.75rem 1.25rem;
   font-size: 0.84rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
   width: 100%;
   transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
@@ -564,7 +564,7 @@
   border-radius: var(--qr-radius-xs);
   padding: 0.55rem 1.25rem;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--qr-text-secondary);
   cursor: pointer;
   transition: all 0.15s;
@@ -599,12 +599,12 @@
 
 .qr-retry-btn {
   background: var(--qr-accent);
-  color: #ffffff;
+  color: var(--white);
   border: none;
   border-radius: var(--qr-radius-xs);
   padding: 0.5rem 1.25rem;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: background 0.15s;
 }

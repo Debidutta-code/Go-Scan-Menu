@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--gray-200);
   animation: staff-skeleton-pulse 1.5s ease-in-out infinite;
 }
 
@@ -20,7 +20,7 @@
 
 .staff-skeleton-bar {
   height: 16px;
-  background: linear-gradient(90deg, var(--gray-100) 25%, #e5e7eb 50%, var(--gray-100) 75%);
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
   background-size: 200% 100%;
   animation: staff-skeleton-shimmer 1.5s infinite;
   border-radius: 4px;

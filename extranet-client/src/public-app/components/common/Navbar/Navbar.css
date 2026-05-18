@@ -1,5 +1,5 @@
 .pub-nav-container {
-  background-color: #ffffff;
+  background-color: var(--white);
   border-bottom: 1px solid #e2e8f0;
   position: sticky;
   top: 0;
@@ -25,7 +25,7 @@
 .pub-nav-logo {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   object-fit: cover;
 }
 
@@ -36,7 +36,7 @@
 
 .pub-nav-name {
   font-size: 1.125rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: #1a202c;
   margin: 0;
   line-height: 1.2;
@@ -66,7 +66,7 @@
 .pub-nav-table-number {
   font-size: 0.875rem;
   color: #2d3748;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 @media (max-width: 480px) {

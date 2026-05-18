@@ -89,7 +89,7 @@
 .tap-hint {
     font-family: 'Rajdhani', sans-serif;
     font-size: clamp(0.8rem, 2.5vw, 1.1rem);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.25em;
     color: #fff;
     opacity: 0.35;
@@ -177,7 +177,7 @@
 .start-btn, .reset-btn {
     font-family: 'Orbitron', monospace;
     font-size: clamp(0.75rem, 2.5vw, 0.9rem);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.15em;
     padding: 14px 36px;
     background: transparent;

@@ -100,7 +100,7 @@
 .game-subtitle {
     font-family: 'Rajdhani', sans-serif;
     font-size: clamp(0.8rem, 2.5vw, 1rem);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     letter-spacing: 0.15em;
     color: rgba(255, 255, 255, 0.4);
     margin-top: 8px;
@@ -238,7 +238,7 @@
 .reset-btn {
     font-family: 'Orbitron', monospace;
     font-size: clamp(0.7rem, 2.2vw, 0.85rem);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.2em;
     text-transform: uppercase;
     padding: 14px 42px;

@@ -24,7 +24,7 @@
     --o-mono: 'SF Mono', 'Fira Code', 'Courier New', monospace;
 
     /* Status colours */
-    --pending-bg: #fff8ec;
+    --pending-bg: var(--warning-50);
     --pending-fg: var(--warning-700);
     --confirmed-bg: var(--info-50);
     --confirmed-fg: var(--info-700);
@@ -32,8 +32,8 @@
     --preparing-fg: var(--primary-700);
     --ready-bg: var(--success-50);
     --ready-fg: var(--success-700);
-    --served-bg: #ecfeff;
-    --served-fg: #0e7490;
+    --served-bg: var(--info-50);
+    --served-fg: var(--info-700);
     --completed-bg: var(--gray-50);
     --completed-fg: var(--gray-600);
     --cancelled-bg: var(--danger-50);
