@@ -1,82 +1,82 @@
-/* src/pages/dashboard/Dashboard.css */
+/* src/pages/dashboard/Dashboard.css (Updated with global variables) */
 
 .dashboard-container {
   min-height: 100vh;
-  background: #f7fafc;
+  background: var(--bg-secondary);
 }
 
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 24px;
+  padding: var(--spacing-10) var(--spacing-6);
 }
 
 .welcome-card {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-8);
+  box-shadow: var(--shadow-sm);
 }
 
 .welcome-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1a202c;
-  margin: 0 0 12px 0;
+  font-size: var(--text-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-3) 0;
 }
 
 .welcome-text {
-  font-size: 16px;
-  color: #718096;
-  margin: 0 0 32px 0;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-8) 0;
 }
 
 .module-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+  gap: var(--spacing-6);
 }
 
 .module-card {
-  padding: 24px;
-  background: #f7fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  padding: var(--spacing-6);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: var(--border-width-1) solid var(--gray-200);
   text-align: center;
-  transition: all 0.2s;
+  transition: var(--transition-all);
 }
 
 .module-card:hover {
-  border-color: #cbd5e0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: var(--gray-300);
+  box-shadow: var(--shadow-md);
 }
 
 .module-icon {
   font-size: 48px;
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-4);
 }
 
 .module-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #2d3748;
-  margin: 0 0 8px 0;
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-2) 0;
 }
 
 .module-description {
-  font-size: 14px;
-  color: #718096;
-  margin: 0 0 16px 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-4) 0;
 }
 
 .module-button {
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #667eea;
-  background: white;
-  border: 1px solid #667eea;
-  border-radius: 6px;
+  padding: var(--spacing-2) var(--spacing-5);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-500);
+  background: var(--white);
+  border: var(--border-width-1) solid var(--primary-500);
+  border-radius: var(--radius-md);
   cursor: not-allowed;
   opacity: 0.6;
   font-family: inherit;
