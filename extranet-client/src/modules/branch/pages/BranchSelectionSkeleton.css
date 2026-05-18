@@ -1,18 +1,18 @@
 /* src/pages/staff/BranchSelectionSkeleton.css */
 
 .branch-selection-skeleton {
-    padding: 2rem;
+    padding: var(--spacing-8);
     max-width: 1400px;
     margin: 0 auto;
     min-height: 100vh;
-    background-color: #f8f9fa;
+    background-color: var(--gray-50);
 }
 
 .skeleton-shimmer {
-    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
     background-size: 200% 100%;
     animation: branch-skeleton-shimmer 1.5s infinite linear;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
 }
 
 @keyframes branch-skeleton-shimmer {
@@ -29,26 +29,26 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    gap: 1rem;
+    margin-bottom: var(--spacing-8);
+    gap: var(--spacing-4);
 }
 
 .skeleton-header-left {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--spacing-4);
 }
 
 .skeleton-back-btn {
     width: 160px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
 }
 
 .skeleton-title-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--spacing-2);
 }
 
 .skeleton-page-title {
@@ -64,25 +64,25 @@
 .skeleton-header-actions {
     width: 100px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
 }
 
 .skeleton-branches-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
+    gap: var(--spacing-6);
 }
 
 .skeleton-branch-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    box-shadow: var(--shadow-md);
     height: 380px;
     /* Matching average card height */
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: var(--spacing-5);
 }
 
 .skeleton-card-header {
@@ -90,8 +90,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 16px;
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: var(--spacing-4);
 }
 
 .skeleton-branch-name {
@@ -102,13 +102,13 @@
 .skeleton-branch-status {
     width: 80px;
     height: 20px;
-    border-radius: 12px;
+    border-radius: var(--radius-full);
 }
 
 .skeleton-card-info {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--spacing-3);
 }
 
 .skeleton-info-row {
@@ -118,13 +118,13 @@
 
 .skeleton-branch-stats {
     height: 80px;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     margin-top: auto;
 }
 
 .skeleton-card-action {
     height: 44px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
 }
 
 @media (max-width: 768px) {

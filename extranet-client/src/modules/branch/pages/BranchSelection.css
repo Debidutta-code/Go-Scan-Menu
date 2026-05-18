@@ -1,81 +1,81 @@
 /* src/pages/staff/BranchSelection.css */
 
 .branch-selection-container {
-  padding: 2rem;
+  padding: var(--spacing-8);
   max-width: 1400px;
   margin: 0 auto;
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: var(--gray-50);
 }
 
 .branch-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-8);
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--spacing-4);
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--spacing-4);
   flex-wrap: wrap;
 }
 
 .page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1a202c;
+  font-size: var(--text-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--gray-900);
   margin: 0;
 }
 
 .header-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--spacing-3);
   align-items: center;
 }
 
 .loading-state,
 .error-banner,
 .empty-state {
-  padding: 2rem;
+  padding: var(--spacing-8);
   text-align: center;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .error-banner {
-  background-color: #fee;
-  color: #c33;
-  margin-bottom: 1rem;
+  background-color: var(--danger-50);
+  color: var(--danger-600);
+  margin-bottom: var(--spacing-4);
 }
 
 .branches-section {
-  margin-top: 1.5rem;
+  margin-top: var(--spacing-6);
 }
 
 .branches-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
+  gap: var(--spacing-6);
 }
 
 .branch-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-all);
   cursor: pointer;
   border: 2px solid transparent;
 }
 
 .branch-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  border-color: #3182ce;
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-600);
   transform: translateY(-2px);
 }
 
@@ -83,72 +83,72 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--gray-200);
 }
 
 .branch-name {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1a202c;
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-900);
   margin: 0;
 }
 
 .branch-status {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
 }
 
 .branch-status.active {
-  background-color: #c6f6d5;
-  color: #22543d;
+  background-color: var(--success-100);
+  color: var(--success-700);
 }
 
 .branch-status.inactive {
-  background-color: #fed7d7;
-  color: #742a2a;
+  background-color: var(--danger-100);
+  color: var(--danger-700);
 }
 
 .branch-info {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-6);
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f7fafc;
+  padding: var(--spacing-2) 0;
+  border-bottom: 1px solid var(--gray-100);
 }
 
 .info-label {
-  font-weight: 600;
-  color: #718096;
-  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-500);
+  font-size: var(--text-sm);
 }
 
 .info-value {
-  color: #2d3748;
-  font-size: 0.875rem;
+  color: var(--gray-700);
+  font-size: var(--text-sm);
   text-align: right;
 }
 
 .branch-stats {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: #f7fafc;
-  border-radius: 8px;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-4);
+  background-color: var(--gray-50);
+  border-radius: var(--radius-lg);
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--spacing-3);
   flex: 1;
 }
 
@@ -162,18 +162,18 @@
 }
 
 .stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2d3748;
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--gray-700);
   line-height: 1;
 }
 
 .stat-label {
-  font-size: 0.75rem;
-  color: #718096;
+  font-size: var(--text-xs);
+  color: var(--gray-500);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-top: 0.25rem;
+  margin-top: var(--spacing-1);
 }
 
 .branch-action {
@@ -187,7 +187,7 @@
 
 @media (max-width: 768px) {
   .branch-selection-container {
-    padding: 1rem;
+    padding: var(--spacing-4);
   }
 
   .branch-header {
@@ -200,6 +200,6 @@
   }
 
   .page-title {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
   }
 }
