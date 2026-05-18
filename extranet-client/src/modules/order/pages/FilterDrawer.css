@@ -41,7 +41,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--gray-100);
 }
 
 .fd-header-title {
@@ -50,7 +50,7 @@
     gap: 12px;
     font-size: 18px;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .fd-close-btn {
@@ -60,13 +60,13 @@
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    color: #64748b;
+    color: var(--text-secondary);
     transition: all 0.2s;
 }
 
 .fd-close-btn:hover {
-    background: #f8fafc;
-    color: #1e293b;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .fd-body {
@@ -81,7 +81,7 @@
 .fd-section-title {
     font-size: 14px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.025em;
     margin-bottom: 16px;
@@ -108,7 +108,7 @@
 .fd-checkbox-box {
     width: 20px;
     height: 20px;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--gray-200);
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -118,8 +118,8 @@
 }
 
 .fd-checkbox-box--active {
-    background: #3b82f6;
-    border-color: #3b82f6;
+    background: var(--primary-500);
+    border-color: var(--primary-500);
 }
 
 .fd-checkbox-text {
@@ -148,7 +148,7 @@
 .fd-radio-circle {
     width: 20px;
     height: 20px;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--gray-200);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -157,13 +157,13 @@
 }
 
 .fd-radio-circle--active {
-    border-color: #3b82f6;
+    border-color: var(--primary-500);
 }
 
 .fd-radio-dot {
     width: 10px;
     height: 10px;
-    background: #3b82f6;
+    background: var(--primary-500);
     border-radius: 50%;
     opacity: 0;
     transform: scale(0.5);
@@ -183,7 +183,7 @@
 
 .fd-footer {
     padding: 24px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--gray-100);
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
@@ -194,14 +194,14 @@
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
-    color: #64748b;
-    background: #f8fafc;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
     transition: all 0.2s;
 }
 
 .fd-btn-clear:hover {
-    background: #f1f5f9;
-    color: #1e293b;
+    background: var(--gray-100);
+    color: var(--text-primary);
 }
 
 .fd-btn-apply {
@@ -210,13 +210,13 @@
     font-size: 14px;
     font-weight: 600;
     color: white;
-    background: #3b82f6;
+    background: var(--primary-500);
     box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
     transition: all 0.2s;
 }
 
 .fd-btn-apply:hover {
-    background: #2563eb;
+    background: var(--primary-600);
     box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
 }
 
