@@ -110,12 +110,15 @@
 
 .mic-list-row {
   display: grid;
-  grid-template-columns: 52px minmax(140px, 220px) 160px 100px 72px 130px;
+  /* thumb | name+desc | allergens | extras | price | toggle | actions */
+  grid-template-columns: 52px 1fr 120px 160px 96px 64px 130px;
   align-items: center;
   padding: 8px 14px;
   gap: 10px;
   background: var(--white);
   transition: background 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Thumbnail */
@@ -160,13 +163,12 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-/* Name + desc + tags */
+/* Name + desc — takes all free space */
 .mic-list-info {
   display: flex;
   flex-direction: column;
   gap: 1px;
   min-width: 0;
-  max-width: 220px;
 }
 
 .mic-list-name-row {
@@ -182,7 +184,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
 }
 
 .mic-list-desc {
@@ -197,8 +198,16 @@
 .mic-list-cell {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   flex-shrink: 0;
+}
+
+/* Allergens — own column, wraps neatly */
+.mic-cell-allergens {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .mic-cell-extras {
@@ -213,7 +222,7 @@
 }
 
 .mic-cell-avail {
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .mic-cell-actions {
@@ -430,15 +439,15 @@
 
 @media (max-width: 1200px) {
   .mic-list-row {
-    grid-template-columns: 48px minmax(120px, 200px) 140px 90px 72px 120px;
+    grid-template-columns: 48px 1fr 110px 140px 90px 64px 120px;
   }
 }
 
 @media (max-width: 1024px) {
   .mic-list-row {
-    grid-template-columns: 48px minmax(120px, 180px) 84px 72px 110px;
+    grid-template-columns: 48px 1fr 100px 84px 64px 110px;
   }
-  .mic-list-cell.mic-cell-extras {
+  .mic-cell-allergens {
     display: none;
   }
 }
@@ -449,4 +458,5 @@
   }
   .mic-list-thumb { display: none; }
   .mic-cell-avail { display: none; }
+  .mic-cell-extras { display: none; }
 }

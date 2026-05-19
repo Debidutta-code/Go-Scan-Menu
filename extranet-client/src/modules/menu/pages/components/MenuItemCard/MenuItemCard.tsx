@@ -52,7 +52,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
         className={`mic-list-row ${!item.isActive ? 'mic-inactive' : ''}`}
         data-testid={`menu-item-${item._id}`}
       >
-        {/* Thumbnail — dietary icon overlay top-left */}
+        {/* Thumbnail */}
         <div className="mic-list-thumb">
           {thumbnail ? (
             <img src={thumbnail} alt={item.name} className="mic-list-thumb-img" />
@@ -68,7 +68,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           )}
         </div>
 
-        {/* Name + Description + tags */}
+        {/* Name + Description only */}
         <div className="mic-list-info">
           <div className="mic-list-name-row">
             <span className="mic-list-name" data-testid="item-name">
@@ -79,39 +79,32 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           {item.description && (
             <span className="mic-list-desc">{item.description}</span>
           )}
-          <div className="mic-list-tags">
-            {item.spiceLevel && (
+          {item.spiceLevel && (
+            <div className="mic-list-tags">
               <span className="mic-tag mic-tag-spice" title={`Spice: ${SpiceLabels[item.spiceLevel]}`}>
                 {SpiceIcons[item.spiceLevel]} {SpiceLabels[item.spiceLevel]}
               </span>
-            )}
-            {item.allergens?.slice(0, 2).map((a) => (
-              <span key={a} className="mic-tag mic-tag-allergen" title={`Allergen: ${a}`}>
-                ⚠ {a}
-              </span>
-            ))}
-            {(item.allergens?.length ?? 0) > 2 && (
-              <span className="mic-tag mic-tag-allergen">+{item.allergens!.length - 2} more</span>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
+
+        {/* Allergens — own column */}
+        <div className="mic-list-cell mic-cell-allergens">
+          {item.allergens?.map((a) => (
+            <span key={a} className="mic-tag mic-tag-allergen">⚠ {a}</span>
+          ))}
         </div>
 
         {/* Extras */}
         <div className="mic-list-cell mic-cell-extras">
           {variantCount > 0 && (
-            <span className="mic-extra-badge" title={`${variantCount} variant${variantCount !== 1 ? 's' : ''}`}>
-              {variantCount} variant{variantCount !== 1 ? 's' : ''}
-            </span>
+            <span className="mic-extra-badge">{variantCount} variant{variantCount !== 1 ? 's' : ''}</span>
           )}
           {addonCount > 0 && (
-            <span className="mic-extra-badge" title={`${addonCount} add-on${addonCount !== 1 ? 's' : ''}`}>
-              {addonCount} add-on{addonCount !== 1 ? 's' : ''}
-            </span>
+            <span className="mic-extra-badge">{addonCount} add-on{addonCount !== 1 ? 's' : ''}</span>
           )}
           {customCount > 0 && (
-            <span className="mic-extra-badge" title={`${customCount} customisation${customCount !== 1 ? 's' : ''}`}>
-              {customCount} custom
-            </span>
+            <span className="mic-extra-badge">{customCount} custom</span>
           )}
           {item.nutritionTags?.slice(0, 1).map((n) => (
             <span key={n} className="mic-extra-badge mic-extra-badge-nutrition">
