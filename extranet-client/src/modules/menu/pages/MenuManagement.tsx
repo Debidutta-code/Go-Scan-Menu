@@ -11,6 +11,28 @@ import { getCategoryId } from '@/modules/menu/pages/utils/category-helpers';
 import { MenuModal } from './MenuModal';
 import './MenuManagement.css';
 
+type ViewMode = 'list' | 'grid';
+
+const ListViewIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="8" y1="6" x2="21" y2="6" />
+    <line x1="8" y1="12" x2="21" y2="12" />
+    <line x1="8" y1="18" x2="21" y2="18" />
+    <line x1="3" y1="6" x2="3.01" y2="6" />
+    <line x1="3" y1="12" x2="3.01" y2="12" />
+    <line x1="3" y1="18" x2="3.01" y2="18" />
+  </svg>
+);
+
+const GridViewIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7" />
+    <rect x="14" y="3" width="7" height="7" />
+    <rect x="14" y="14" width="7" height="7" />
+    <rect x="3" y="14" width="7" height="7" />
+  </svg>
+);
+
 export const MenuManagement: React.FC = () => {
   const navigate = useNavigate();
   const { staff, token, logout } = useStaffAuth();
@@ -20,6 +42,8 @@ export const MenuManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,7 +54,6 @@ export const MenuManagement: React.FC = () => {
 
   useEffect(() => {
     return () => {
-      // Cleanup timeouts on unmount
       Object.values(debounceRef.current).forEach(clearTimeout);
     };
   }, []);
@@ -83,14 +106,12 @@ export const MenuManagement: React.FC = () => {
 
     const newStatus = !currentStatus;
 
-    // 1. Optimistic Update (Immediate UI response)
     setMenuItems((prev) =>
       prev.map((item) =>
         item._id === itemId ? { ...item, isAvailable: newStatus } : item
       )
     );
 
-    // 2. Debounce API Call
     if (debounceRef.current[itemId]) {
       clearTimeout(debounceRef.current[itemId]);
     }
@@ -108,7 +129,6 @@ export const MenuManagement: React.FC = () => {
           throw new Error('Failed to update availability');
         }
       } catch (err: any) {
-        // Rollback on absolute failure
         setMenuItems((prev) =>
           prev.map((item) =>
             item._id === itemId ? { ...item, isAvailable: currentStatus } : item
@@ -118,14 +138,7 @@ export const MenuManagement: React.FC = () => {
       } finally {
         delete debounceRef.current[itemId];
       }
-    }, 500); // 500ms debounce
-  };
-
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout();
-      navigate('/staff/login');
-    }
+    }, 500);
   };
 
   const handleAddMenuItem = () => {
@@ -147,10 +160,21 @@ export const MenuManagement: React.FC = () => {
     loadData();
   };
 
-  const filteredMenuItems =
-    selectedCategory === 'all'
-      ? menuItems
-      : menuItems.filter((item) => getCategoryId(item.categoryId) === selectedCategory);
+  const filteredMenuItems = menuItems
+    .filter((item) =>
+      selectedCategory === 'all'
+        ? true
+        : getCategoryId(item.categoryId) === selectedCategory
+    )
+    .filter((item) =>
+      searchQuery.trim()
+        ? item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        : true
+    );
+
+  const availableCount = filteredMenuItems.filter((i) => i.isAvailable).length;
+  const unavailableCount = filteredMenuItems.filter((i) => !i.isAvailable).length;
 
   return (
     <div className="menu-management-layout">
@@ -161,7 +185,6 @@ export const MenuManagement: React.FC = () => {
         </h1>
 
         <div className="menu-toolbar-actions">
-          {/* Category Filter */}
           <div className="menu-filter-container">
             <select
               className="menu-filter-select"
@@ -207,8 +230,63 @@ export const MenuManagement: React.FC = () => {
       {/* Main Content */}
       <div className="menu-management-content">
         <div className="menu-list-panel">
-          <div className="panel-header">
-            <h2 className="panel-title">Menu Items ({filteredMenuItems.length})</h2>
+          {/* Sub-toolbar: search, stats, view toggle */}
+          <div className="menu-sub-toolbar">
+            <div className="menu-sub-left">
+              <div className="menu-search-wrap">
+                <svg className="menu-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  className="menu-search-input"
+                  type="text"
+                  placeholder="Search items..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button className="menu-search-clear" onClick={() => setSearchQuery('')}>×</button>
+                )}
+              </div>
+
+              <div className="menu-stats-row">
+                <span className="menu-stat-chip">
+                  <span className="menu-stat-dot menu-stat-dot-total" />
+                  {filteredMenuItems.length} items
+                </span>
+                {availableCount > 0 && (
+                  <span className="menu-stat-chip">
+                    <span className="menu-stat-dot menu-stat-dot-avail" />
+                    {availableCount} available
+                  </span>
+                )}
+                {unavailableCount > 0 && (
+                  <span className="menu-stat-chip">
+                    <span className="menu-stat-dot menu-stat-dot-unavail" />
+                    {unavailableCount} unavailable
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* View Toggle */}
+            <div className="menu-view-toggle">
+              <button
+                className={`menu-view-btn ${viewMode === 'list' ? 'active' : ''}`}
+                onClick={() => setViewMode('list')}
+                title="List view"
+              >
+                <ListViewIcon />
+              </button>
+              <button
+                className={`menu-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="Grid view"
+              >
+                <GridViewIcon />
+              </button>
+            </div>
           </div>
 
           <div className="menu-list-container">
@@ -217,17 +295,50 @@ export const MenuManagement: React.FC = () => {
             ) : filteredMenuItems.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">🍽️</div>
-                <p className="empty-title">No menu items yet</p>
-                <p className="empty-description">
-                  Start by adding items to your menu
+                <p className="empty-title">
+                  {searchQuery ? 'No items match your search' : 'No menu items yet'}
                 </p>
-                <PermissionGuard permission="menu.create" minLevel={RoleLevel.BRANCH_SINGLE}>
-                  <Button variant="primary" onClick={handleAddMenuItem}>
-                    + Add Menu Item
-                  </Button>
-                </PermissionGuard>
+                <p className="empty-description">
+                  {searchQuery
+                    ? 'Try a different search term or clear the filter'
+                    : 'Start by adding items to your menu'}
+                </p>
+                {!searchQuery && (
+                  <PermissionGuard permission="menu.create" minLevel={RoleLevel.BRANCH_SINGLE}>
+                    <Button variant="primary" onClick={handleAddMenuItem}>
+                      + Add Menu Item
+                    </Button>
+                  </PermissionGuard>
+                )}
+              </div>
+            ) : viewMode === 'list' ? (
+              /* ---- LIST VIEW ---- */
+              <div className="mic-list-table">
+                {/* Table header */}
+                <div className="mic-list-header">
+                  <div className="mic-list-header-cell"></div>
+                  <div className="mic-list-header-cell">Item</div>
+                  <div className="mic-list-header-cell">Category</div>
+                  <div className="mic-list-header-cell">Type / Dietary</div>
+                  <div className="mic-list-header-cell">Extras</div>
+                  <div className="mic-list-header-cell">Price</div>
+                  <div className="mic-list-header-cell">Availability</div>
+                  <div className="mic-list-header-cell" style={{ textAlign: 'right' }}>Actions</div>
+                </div>
+                {filteredMenuItems.map((item) => (
+                  <MenuItemCard
+                    key={item._id}
+                    item={item}
+                    categories={categories}
+                    onEdit={handleEditMenuItem}
+                    onDelete={handleDeleteMenuItem}
+                    onToggleAvailability={handleToggleAvailability}
+                    viewMode="list"
+                  />
+                ))}
               </div>
             ) : (
+              /* ---- GRID VIEW ---- */
               <div className="menu-items-grid">
                 {filteredMenuItems.map((item) => (
                   <MenuItemCard
@@ -237,6 +348,7 @@ export const MenuManagement: React.FC = () => {
                     onEdit={handleEditMenuItem}
                     onDelete={handleDeleteMenuItem}
                     onToggleAvailability={handleToggleAvailability}
+                    viewMode="grid"
                   />
                 ))}
               </div>
