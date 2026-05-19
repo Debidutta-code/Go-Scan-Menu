@@ -1,0 +1,166 @@
+/* ============================================
+   MenuItemCardSkeleton — List & Grid Skeletons
+   ============================================ */
+
+/* --- Shimmer animation --- */
+@keyframes mic-shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+
+.mic-skel-pulse {
+  background: linear-gradient(
+    90deg,
+    var(--gray-100) 25%,
+    var(--gray-200) 50%,
+    var(--gray-100) 75%
+  );
+  background-size: 1200px 100%;
+  animation: mic-shimmer 1.6s ease-in-out infinite;
+}
+
+/* --- Shared base block --- */
+.mic-skel-block {
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   LIST ROW SKELETON
+   ============================================ */
+
+.mic-skel-list-row {
+  display: grid;
+  grid-template-columns: 56px 1fr 130px 160px 80px 110px 120px 130px;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 12px;
+  border-bottom: 1px solid var(--gray-100);
+  background: var(--white);
+}
+
+.mic-skel-list-row:last-child {
+  border-bottom: none;
+}
+
+/* Thumbnail */
+.mic-skel-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+/* Name + desc column */
+.mic-skel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mic-skel-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Generic cell */
+.mic-skel-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mic-skel-cell-col {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.mic-skel-cell-end {
+  justify-content: flex-end;
+}
+
+/* Responsive — mirrors MenuItemCard breakpoints */
+@media (max-width: 1200px) {
+  .mic-skel-list-row {
+    grid-template-columns: 48px 1fr 110px 140px 70px 100px 110px 120px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mic-skel-list-row {
+    grid-template-columns: 48px 1fr 100px 130px 100px 120px;
+  }
+  /* Hide extras cell */
+  .mic-skel-list-row > *:nth-child(5) {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .mic-skel-list-row {
+    grid-template-columns: 1fr 90px 100px 110px;
+  }
+  /* Hide thumb & type cell */
+  .mic-skel-thumb,
+  .mic-skel-list-row > *:nth-child(4) {
+    display: none;
+  }
+}
+
+/* ============================================
+   GRID CARD SKELETON
+   ============================================ */
+
+.mic-skel-grid-card {
+  background: var(--white);
+  border-radius: 10px;
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.mic-skel-grid-image {
+  width: 100%;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.mic-skel-grid-body {
+  padding: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mic-skel-grid-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mic-skel-grid-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.mic-skel-grid-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid var(--gray-100);
+  margin-top: auto;
+}

@@ -10,6 +10,7 @@ import { MenuItemCard } from '@/modules/menu/pages/components/MenuItemCard/MenuI
 import { getCategoryId } from '@/modules/menu/pages/utils/category-helpers';
 import { MenuModal } from './MenuModal';
 import './MenuManagement.css';
+import { MenuItemCardSkeleton } from './components/Skeleton/MenuItemCardSkeleton';
 
 type ViewMode = 'list' | 'grid';
 
@@ -290,8 +291,9 @@ export const MenuManagement: React.FC = () => {
           </div>
 
           <div className="menu-list-container">
+            {/* ---- SKELETON (initial load only) ---- */}
             {loading && menuItems.length === 0 ? (
-              <div className="loading-state">Loading menu data...</div>
+              <MenuItemCardSkeleton viewMode={viewMode} count={viewMode === 'grid' ? 8 : 5} />
             ) : filteredMenuItems.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">🍽️</div>
@@ -314,7 +316,6 @@ export const MenuManagement: React.FC = () => {
             ) : viewMode === 'list' ? (
               /* ---- LIST VIEW ---- */
               <div className="mic-list-table">
-                {/* Table header */}
                 <div className="mic-list-header">
                   <div className="mic-list-header-cell"></div>
                   <div className="mic-list-header-cell">Item</div>
