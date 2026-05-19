@@ -2,6 +2,7 @@ import React from 'react';
 import { CategoryId, getCategoryName } from '@/modules/menu/pages/utils/category-helpers';
 import './MenuItemCard.css';
 import { MenuItem, DietaryTypeIcons, DietaryTypeLabels } from '@/shared/types/menu.types';
+import { Button } from '@/shared/components/Button';
 import { Switch } from '@/shared/components/Switch';
 import { PermissionGuard } from '@/shared/components/PermissionGuard';
 import { RoleLevel, StaffRole } from '@/shared/types/role.types';
@@ -35,17 +36,13 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
   const dietaryIcon = item.dietaryType ? DietaryTypeIcons[item.dietaryType] : null;
   const dietaryLabel = item.dietaryType ? DietaryTypeLabels[item.dietaryType] : null;
   const thumbnail = item.images?.[0] || item.image;
-  const isUnavailable = !item.isAvailable;
 
   if (viewMode === 'list') {
     return (
       <div
-        className={`mic-list-row ${isUnavailable ? 'mic-row-unavailable' : ''} ${!item.isActive ? 'mic-row-inactive' : ''}`}
+        className={`mic-list-row ${!item.isActive ? 'mic-inactive' : ''}`}
         data-testid={`menu-item-${item._id}`}
       >
-        {/* Left accent stripe for unavailable */}
-        {isUnavailable && <div className="mic-unavail-stripe" />}
-
         {/* Thumbnail */}
         <div className="mic-list-thumb">
           {thumbnail ? (
@@ -60,13 +57,10 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
         {/* Name + Description */}
         <div className="mic-list-info">
           <div className="mic-list-name-row">
-            <span className="mic-list-name" data-testid="item-name">{item.name}</span>
-            {isUnavailable && (
-              <span className="mic-badge mic-badge-unavailable">Unavailable</span>
-            )}
-            {!item.isActive && (
-              <span className="mic-badge mic-badge-inactive">Inactive</span>
-            )}
+            <span className="mic-list-name" data-testid="item-name">
+              {item.name}
+            </span>
+            {!item.isActive && <span className="mic-badge mic-badge-inactive">Inactive</span>}
           </div>
           {item.description && (
             <span className="mic-list-desc">{item.description}</span>
@@ -78,15 +72,16 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           <span className="mic-badge mic-badge-category">{categoryName}</span>
         </div>
 
-        {/* Dietary type only — no food/drink type chip */}
-        <div className="mic-list-cell mic-cell-dietary">
-          {dietaryIcon ? (
-            <span className="mic-dietary-pill" title={dietaryLabel || ''}>
-              <span className="mic-dietary-icon">{dietaryIcon}</span>
-              <span className="mic-dietary-label">{dietaryLabel}</span>
+        {/* Type + Dietary */}
+        <div className="mic-list-cell mic-cell-type">
+          <span className="mic-type-chip" data-type={item.itemType}>
+            {item.itemType === 'drink' ? '🥤' : '🍽️'}
+            <span>{item.itemType === 'drink' ? 'Drink' : 'Food'}</span>
+          </span>
+          {dietaryIcon && (
+            <span className="mic-dietary-chip" title={dietaryLabel || ''}>
+              {dietaryIcon}
             </span>
-          ) : (
-            <span className="mic-no-dietary">—</span>
           )}
           {item.spiceLevel && (
             <span className="mic-spice-chip" title={`Spice: ${item.spiceLevel}`}>
@@ -98,17 +93,17 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
         {/* Extras count */}
         <div className="mic-list-cell mic-cell-extras">
           {item.variants?.length > 0 && (
-            <span className="mic-mini-badge" title={`${item.variants.length} variant(s)`}>
+            <span className="mic-mini-badge" title="Variants">
               {item.variants.length}V
             </span>
           )}
           {item.addons?.length > 0 && (
-            <span className="mic-mini-badge" title={`${item.addons.length} add-on(s)`}>
+            <span className="mic-mini-badge" title="Add-ons">
               {item.addons.length}A
             </span>
           )}
           {item.customizations?.length > 0 && (
-            <span className="mic-mini-badge" title={`${item.customizations.length} customization(s)`}>
+            <span className="mic-mini-badge" title="Customizations">
               {item.customizations.length}C
             </span>
           )}
@@ -126,7 +121,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           )}
         </div>
 
-        {/* Availability — toggle only, no label text */}
+        {/* Availability */}
         <div className="mic-list-cell mic-cell-avail">
           <PermissionGuard
             requiredRole={[StaffRole.KITCHEN_STAFF]}
@@ -137,7 +132,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
               id={`toggle-${item._id}`}
               checked={item.isAvailable}
               onChange={() => onToggleAvailability(item._id, item.isAvailable)}
-              label=""
+              label={item.isAvailable ? 'Available' : 'Unavailable'}
             />
           </PermissionGuard>
         </div>
@@ -151,7 +146,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
               title="Edit item"
               data-testid="edit-button"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
@@ -165,7 +160,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
               title="Delete item"
               data-testid="delete-button"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                 <path d="M10 11v6M14 11v6" />
@@ -179,29 +174,27 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
     );
   }
 
-  // ---- GRID VIEW ----
+  // Grid view — compact card
   return (
     <div
-      className={`mic-grid-card ${isUnavailable ? 'mic-grid-unavailable' : ''} ${!item.isActive ? 'mic-grid-inactive' : ''}`}
+      className={`mic-grid-card ${!item.isActive ? 'mic-inactive' : ''}`}
       data-testid={`menu-item-${item._id}`}
     >
       <div className="mic-grid-image">
         {thumbnail ? (
-          <img src={thumbnail} alt={item.name} className={`mic-grid-img ${isUnavailable ? 'mic-img-dim' : ''}`} />
+          <img src={thumbnail} alt={item.name} className="mic-grid-img" />
         ) : (
           <div className="mic-grid-img-placeholder">
             {item.itemType === 'drink' ? '🥤' : '🍽️'}
           </div>
         )}
-        {isUnavailable && <div className="mic-grid-unavail-overlay" />}
         <div className="mic-grid-badges-overlay">
           {dietaryIcon && (
             <span className="mic-overlay-badge" title={dietaryLabel || ''}>{dietaryIcon}</span>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
-            {isUnavailable && <span className="mic-overlay-unavailable">Unavailable</span>}
-            {!item.isActive && <span className="mic-overlay-inactive">Inactive</span>}
-          </div>
+          {!item.isActive && (
+            <span className="mic-overlay-inactive">Inactive</span>
+          )}
         </div>
       </div>
 
@@ -228,9 +221,9 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
         <div className="mic-grid-meta">
           <span className="mic-badge mic-badge-category">{categoryName}</span>
-          {dietaryIcon && (
-            <span className="mic-dietary-chip" title={dietaryLabel || ''}>{dietaryIcon}</span>
-          )}
+          <span className="mic-type-chip" data-type={item.itemType}>
+            {item.itemType === 'drink' ? '🥤' : '🍽️'}
+          </span>
           {item.spiceLevel && (
             <span className="mic-spice-chip">{SpiceIcons[item.spiceLevel]}</span>
           )}
@@ -260,7 +253,12 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           </div>
           <div className="mic-grid-actions">
             <PermissionGuard permission="menu.update" minLevel={RoleLevel.BRANCH_SINGLE}>
-              <button className="mic-icon-btn mic-icon-btn-edit" onClick={() => onEdit(item._id)} data-testid="edit-button" title="Edit">
+              <button
+                className="mic-icon-btn mic-icon-btn-edit"
+                onClick={() => onEdit(item._id)}
+                data-testid="edit-button"
+                title="Edit"
+              >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -268,7 +266,12 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
               </button>
             </PermissionGuard>
             <PermissionGuard permission="menu.delete" minLevel={RoleLevel.BRANCH_SINGLE}>
-              <button className="mic-icon-btn mic-icon-btn-delete" onClick={() => onDelete(item._id, item.name)} data-testid="delete-button" title="Delete">
+              <button
+                className="mic-icon-btn mic-icon-btn-delete"
+                onClick={() => onDelete(item._id, item.name)}
+                data-testid="delete-button"
+                title="Delete"
+              >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
