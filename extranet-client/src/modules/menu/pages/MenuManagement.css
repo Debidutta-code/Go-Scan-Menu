@@ -17,7 +17,7 @@
   flex-shrink: 0;
 }
 
-/* ---- Top Toolbar (unchanged structure) ---- */
+/* ---- Top Toolbar ---- */
 .menu-page-toolbar {
   display: flex;
   align-items: center;
@@ -58,7 +58,6 @@
   min-width: 150px;
   transition: border-color var(--transition-normal);
 }
-
 .menu-filter-select:hover { border-color: var(--gray-400); }
 .menu-filter-select:focus {
   border-color: var(--primary-500);
@@ -82,7 +81,7 @@
   width: 100%;
 }
 
-/* ---- Sub-toolbar: search + stats + view toggle ---- */
+/* ---- Sub-toolbar ---- */
 .menu-sub-toolbar {
   display: flex;
   align-items: center;
@@ -130,16 +129,12 @@
   outline: none;
   transition: all 0.15s ease;
 }
-
 .menu-search-input:focus {
   border-color: var(--primary-400);
   background: var(--white);
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
 }
-
-.menu-search-input::placeholder {
-  color: var(--gray-400);
-}
+.menu-search-input::placeholder { color: var(--gray-400); }
 
 .menu-search-clear {
   position: absolute;
@@ -155,10 +150,7 @@
   align-items: center;
   justify-content: center;
 }
-
-.menu-search-clear:hover {
-  color: var(--gray-600);
-}
+.menu-search-clear:hover { color: var(--gray-600); }
 
 /* Stats chips */
 .menu-stats-row {
@@ -188,9 +180,8 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-
-.menu-stat-dot-total { background: var(--gray-400); }
-.menu-stat-dot-avail { background: #22c55e; }
+.menu-stat-dot-total  { background: var(--gray-400); }
+.menu-stat-dot-avail  { background: #22c55e; }
 .menu-stat-dot-unavail { background: #f59e0b; }
 
 /* View toggle */
@@ -218,12 +209,7 @@
   cursor: pointer;
   transition: all 0.15s ease;
 }
-
-.menu-view-btn:hover {
-  background: var(--white);
-  color: var(--gray-700);
-}
-
+.menu-view-btn:hover { background: var(--white); color: var(--gray-700); }
 .menu-view-btn.active {
   background: var(--white);
   color: var(--primary-600);
@@ -235,10 +221,134 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px 24px 24px;
+  padding: 20px 24px 32px;
 }
 
-/* ---- Grid layout (compact) ---- */
+/* ============================================
+   CATEGORY GROUPS
+   ============================================ */
+
+.menu-category-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Each category section */
+.menu-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---- Category Heading ---- */
+.menu-category-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.menu-category-heading-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Priority badge — the #N number */
+.menu-category-priority {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--primary-50);
+  border: 1px solid var(--primary-100);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-600);
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.menu-category-priority-hash {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--primary-400);
+  margin-right: 1px;
+}
+
+.menu-category-priority--none {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+  color: var(--gray-400);
+}
+
+/* Category name */
+.menu-category-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+/* Item count pill */
+.menu-category-count {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* Horizontal rule that fills remaining space */
+.menu-category-heading-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--gray-200);
+}
+
+/* ============================================
+   LIST VIEW — card rows (not a table)
+   ============================================ */
+
+.menu-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Override the old flat-table row to be a standalone card */
+.menu-items-list .mic-list-row {
+  border-radius: 10px;
+  border: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--gray-200); /* override last-child removal */
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.menu-items-list .mic-list-row:hover {
+  border-color: var(--gray-300);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+  transform: translateY(-1px);
+  background: var(--white);
+}
+
+.menu-items-list .mic-list-row:last-child {
+  border-bottom: 1px solid var(--gray-200);
+}
+
+/* ---- Grid layout ---- */
 .menu-items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -289,13 +399,13 @@
 /* ---- Scrollbar ---- */
 .menu-list-container::-webkit-scrollbar { width: 6px; }
 .menu-list-container::-webkit-scrollbar-track { background: transparent; }
-.menu-list-container::-webkit-scrollbar-thumb {
-  background: var(--gray-300);
-  border-radius: 4px;
-}
+.menu-list-container::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
 .menu-list-container::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
 
-/* ---- Responsive ---- */
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
 @media (max-width: 768px) {
   .menu-page-toolbar {
     flex-direction: column;
@@ -332,8 +442,14 @@
   .menu-stats-row { display: none; }
 
   .menu-list-container {
-    padding: 12px 16px 16px;
+    padding: 12px 16px 20px;
   }
+
+  .menu-category-groups { gap: 24px; }
+
+  .menu-category-heading { gap: 10px; }
+
+  .menu-category-name { font-size: 14px; }
 
   .menu-items-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));

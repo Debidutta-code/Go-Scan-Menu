@@ -46,31 +46,23 @@ export const MenuManagement: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMenuItemId, setEditingMenuItemId] = useState<string | null>(null);
 
-  // Per-item debounce control
   const debounceRef = React.useRef<{ [key: string]: any }>({});
 
   useEffect(() => {
-    return () => {
-      Object.values(debounceRef.current).forEach(clearTimeout);
-    };
+    return () => { Object.values(debounceRef.current).forEach(clearTimeout); };
   }, []);
 
   useEffect(() => {
-    if (staff && token) {
-      loadData();
-    }
+    if (staff && token) loadData();
   }, [staff, token]);
 
   const loadData = async () => {
     if (!staff || !token) return;
-
     setLoading(true);
     setError('');
-
     try {
       const data = await MenuAPI.getMenuItems(token, staff.restaurantId);
       setMenuItems(data.items || []);
@@ -84,15 +76,10 @@ export const MenuManagement: React.FC = () => {
 
   const handleDeleteMenuItem = async (itemId: string, itemName: string) => {
     if (!staff || !token) return;
-
     if (!window.confirm(`Are you sure you want to delete "${itemName}"?`)) return;
-
     try {
       const response = await MenuAPI.deleteMenuItem(token, staff.restaurantId._id, itemId);
-      if (response.success) {
-        alert('Menu item deleted successfully');
-        loadData();
-      }
+      if (response.success) { alert('Menu item deleted successfully'); loadData(); }
     } catch (err: any) {
       alert(err.message || 'Failed to delete menu item');
     }
@@ -100,37 +87,15 @@ export const MenuManagement: React.FC = () => {
 
   const handleToggleAvailability = (itemId: string, currentStatus: boolean) => {
     if (!staff || !token) return;
-
     const newStatus = !currentStatus;
-
-    setMenuItems((prev) =>
-      prev.map((item) =>
-        item._id === itemId ? { ...item, isAvailable: newStatus } : item
-      )
-    );
-
-    if (debounceRef.current[itemId]) {
-      clearTimeout(debounceRef.current[itemId]);
-    }
-
+    setMenuItems((prev) => prev.map((item) => item._id === itemId ? { ...item, isAvailable: newStatus } : item));
+    if (debounceRef.current[itemId]) clearTimeout(debounceRef.current[itemId]);
     debounceRef.current[itemId] = setTimeout(async () => {
       try {
-        const response = await MenuAPI.updateAvailability(
-          token,
-          staff.restaurantId._id,
-          itemId,
-          newStatus
-        );
-
-        if (!response.success) {
-          throw new Error('Failed to update availability');
-        }
+        const response = await MenuAPI.updateAvailability(token, staff.restaurantId._id, itemId, newStatus);
+        if (!response.success) throw new Error('Failed to update availability');
       } catch (err: any) {
-        setMenuItems((prev) =>
-          prev.map((item) =>
-            item._id === itemId ? { ...item, isAvailable: currentStatus } : item
-          )
-        );
+        setMenuItems((prev) => prev.map((item) => item._id === itemId ? { ...item, isAvailable: currentStatus } : item));
         alert(err.message || 'Failed to update availability');
       } finally {
         delete debounceRef.current[itemId];
@@ -138,31 +103,14 @@ export const MenuManagement: React.FC = () => {
     }, 500);
   };
 
-  const handleAddMenuItem = () => {
-    setEditingMenuItemId(null);
-    setIsModalOpen(true);
-  };
+  const handleAddMenuItem = () => { setEditingMenuItemId(null); setIsModalOpen(true); };
+  const handleEditMenuItem = (itemId: string) => { setEditingMenuItemId(itemId); setIsModalOpen(true); };
+  const handleModalClose = () => { setIsModalOpen(false); setEditingMenuItemId(null); };
+  const handleModalSuccess = () => { loadData(); };
 
-  const handleEditMenuItem = (itemId: string) => {
-    setEditingMenuItemId(itemId);
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setEditingMenuItemId(null);
-  };
-
-  const handleModalSuccess = () => {
-    loadData();
-  };
-
+  // Filter items
   const filteredMenuItems = menuItems
-    .filter((item) =>
-      selectedCategory === 'all'
-        ? true
-        : getCategoryId(item.categoryId) === selectedCategory
-    )
+    .filter((item) => selectedCategory === 'all' ? true : getCategoryId(item.categoryId) === selectedCategory)
     .filter((item) =>
       searchQuery.trim()
         ? item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -173,49 +121,73 @@ export const MenuManagement: React.FC = () => {
   const availableCount = filteredMenuItems.filter((i) => i.isAvailable).length;
   const unavailableCount = filteredMenuItems.filter((i) => !i.isAvailable).length;
 
+  // Group by category, sorted by displayOrder
+  const sortedCategories = [...categories].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+
+  const groupedItems = sortedCategories
+    .map((cat) => ({
+      category: cat,
+      items: filteredMenuItems.filter((item) => getCategoryId(item.categoryId) === cat._id),
+    }))
+    .filter((group) => group.items.length > 0);
+
+  const categorisedIds = new Set(sortedCategories.map((c) => c._id));
+  const uncategorisedItems = filteredMenuItems.filter(
+    (item) => !categorisedIds.has(getCategoryId(item.categoryId))
+  );
+
+  const renderItems = (items: MenuItem[]) =>
+    viewMode === 'list' ? (
+      <div className="menu-items-list">
+        {items.map((item) => (
+          <MenuItemCard
+            key={item._id}
+            item={item}
+            categories={categories}
+            onEdit={handleEditMenuItem}
+            onDelete={handleDeleteMenuItem}
+            onToggleAvailability={handleToggleAvailability}
+            viewMode="list"
+          />
+        ))}
+      </div>
+    ) : (
+      <div className="menu-items-grid">
+        {items.map((item) => (
+          <MenuItemCard
+            key={item._id}
+            item={item}
+            categories={categories}
+            onEdit={handleEditMenuItem}
+            onDelete={handleDeleteMenuItem}
+            onToggleAvailability={handleToggleAvailability}
+            viewMode="grid"
+          />
+        ))}
+      </div>
+    );
+
   return (
     <div className="menu-management-layout">
-      {/* Page Actions Toolbar */}
+      {/* Top Toolbar */}
       <div className="menu-page-toolbar">
-        <h1 className="menu-page-title" data-testid="menu-management-title">
-          Menu Management
-        </h1>
-
+        <h1 className="menu-page-title" data-testid="menu-management-title">Menu Management</h1>
         <div className="menu-toolbar-actions">
           <div className="menu-filter-container">
-            <select
-              className="menu-filter-select"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              data-testid="category-filter"
-            >
+            <select className="menu-filter-select" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} data-testid="category-filter">
               <option value="all">All Categories</option>
-              {categories.map((category) => (
-                <option key={category._id} value={category._id}>
-                  {category.name}
-                </option>
+              {sortedCategories.map((category) => (
+                <option key={category._id} value={category._id}>{category.name}</option>
               ))}
             </select>
           </div>
-
           <PermissionGuard permission="menu.manageCategories" minLevel={RoleLevel.BRANCH_SINGLE}>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/staff/categories')}
-              data-testid="manage-categories-button"
-              size="sm"
-            >
+            <Button variant="outline" onClick={() => navigate('/staff/categories')} data-testid="manage-categories-button" size="sm">
               Manage Categories
             </Button>
           </PermissionGuard>
-
           <PermissionGuard permission="menu.create" minLevel={RoleLevel.BRANCH_SINGLE}>
-            <Button
-              variant="primary"
-              onClick={handleAddMenuItem}
-              data-testid="add-menu-item-button"
-              size="sm"
-            >
+            <Button variant="primary" onClick={handleAddMenuItem} data-testid="add-menu-item-button" size="sm">
               + Add Item
             </Button>
           </PermissionGuard>
@@ -224,10 +196,9 @@ export const MenuManagement: React.FC = () => {
 
       {error && <div className="error-banner">{error}</div>}
 
-      {/* Main Content */}
       <div className="menu-management-content">
         <div className="menu-list-panel">
-          {/* Sub-toolbar: search, stats, view toggle */}
+          {/* Sub-toolbar */}
           <div className="menu-sub-toolbar">
             <div className="menu-sub-left">
               <div className="menu-search-wrap">
@@ -235,132 +206,79 @@ export const MenuManagement: React.FC = () => {
                   <circle cx="11" cy="11" r="8" />
                   <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
-                <input
-                  className="menu-search-input"
-                  type="text"
-                  placeholder="Search items..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                {searchQuery && (
-                  <button className="menu-search-clear" onClick={() => setSearchQuery('')}>×</button>
-                )}
+                <input className="menu-search-input" type="text" placeholder="Search items..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                {searchQuery && <button className="menu-search-clear" onClick={() => setSearchQuery('')}>×</button>}
               </div>
-
               <div className="menu-stats-row">
-                <span className="menu-stat-chip">
-                  <span className="menu-stat-dot menu-stat-dot-total" />
-                  {filteredMenuItems.length} items
-                </span>
-                {availableCount > 0 && (
-                  <span className="menu-stat-chip">
-                    <span className="menu-stat-dot menu-stat-dot-avail" />
-                    {availableCount} available
-                  </span>
-                )}
-                {unavailableCount > 0 && (
-                  <span className="menu-stat-chip">
-                    <span className="menu-stat-dot menu-stat-dot-unavail" />
-                    {unavailableCount} unavailable
-                  </span>
-                )}
+                <span className="menu-stat-chip"><span className="menu-stat-dot menu-stat-dot-total" />{filteredMenuItems.length} items</span>
+                {availableCount > 0 && <span className="menu-stat-chip"><span className="menu-stat-dot menu-stat-dot-avail" />{availableCount} available</span>}
+                {unavailableCount > 0 && <span className="menu-stat-chip"><span className="menu-stat-dot menu-stat-dot-unavail" />{unavailableCount} unavailable</span>}
               </div>
             </div>
-
-            {/* View Toggle */}
             <div className="menu-view-toggle">
-              <button
-                className={`menu-view-btn ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
-                title="List view"
-              >
-                <ListViewIcon />
-              </button>
-              <button
-                className={`menu-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
-                title="Grid view"
-              >
-                <GridViewIcon />
-              </button>
+              <button className={`menu-view-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')} title="List view"><ListViewIcon /></button>
+              <button className={`menu-view-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')} title="Grid view"><GridViewIcon /></button>
             </div>
           </div>
 
+          {/* Main content */}
           <div className="menu-list-container">
-            {/* ---- SKELETON (initial load only) ---- */}
             {loading && menuItems.length === 0 ? (
               <MenuItemCardSkeleton viewMode={viewMode} count={viewMode === 'grid' ? 8 : 5} />
             ) : filteredMenuItems.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">🍽️</div>
-                <p className="empty-title">
-                  {searchQuery ? 'No items match your search' : 'No menu items yet'}
-                </p>
-                <p className="empty-description">
-                  {searchQuery
-                    ? 'Try a different search term or clear the filter'
-                    : 'Start by adding items to your menu'}
-                </p>
+                <p className="empty-title">{searchQuery ? 'No items match your search' : 'No menu items yet'}</p>
+                <p className="empty-description">{searchQuery ? 'Try a different search term or clear the filter' : 'Start by adding items to your menu'}</p>
                 {!searchQuery && (
                   <PermissionGuard permission="menu.create" minLevel={RoleLevel.BRANCH_SINGLE}>
-                    <Button variant="primary" onClick={handleAddMenuItem}>
-                      + Add Menu Item
-                    </Button>
+                    <Button variant="primary" onClick={handleAddMenuItem}>+ Add Menu Item</Button>
                   </PermissionGuard>
                 )}
               </div>
-            ) : viewMode === 'list' ? (
-              /* ---- LIST VIEW ---- */
-              <div className="mic-list-table">
-                <div className="mic-list-header">
-                  <div className="mic-list-header-cell"></div>
-                  <div className="mic-list-header-cell">Item</div>
-                  <div className="mic-list-header-cell">Category</div>
-                  <div className="mic-list-header-cell">Type / Dietary</div>
-                  <div className="mic-list-header-cell">Extras</div>
-                  <div className="mic-list-header-cell">Price</div>
-                  <div className="mic-list-header-cell">Availability</div>
-                  <div className="mic-list-header-cell" style={{ textAlign: 'right' }}>Actions</div>
-                </div>
-                {filteredMenuItems.map((item) => (
-                  <MenuItemCard
-                    key={item._id}
-                    item={item}
-                    categories={categories}
-                    onEdit={handleEditMenuItem}
-                    onDelete={handleDeleteMenuItem}
-                    onToggleAvailability={handleToggleAvailability}
-                    viewMode="list"
-                  />
-                ))}
-              </div>
             ) : (
-              /* ---- GRID VIEW ---- */
-              <div className="menu-items-grid">
-                {filteredMenuItems.map((item) => (
-                  <MenuItemCard
-                    key={item._id}
-                    item={item}
-                    categories={categories}
-                    onEdit={handleEditMenuItem}
-                    onDelete={handleDeleteMenuItem}
-                    onToggleAvailability={handleToggleAvailability}
-                    viewMode="grid"
-                  />
+              <div className="menu-category-groups">
+                {groupedItems.map(({ category, items }) => (
+                  <section key={category._id} className="menu-category-section">
+                    <div className="menu-category-heading">
+                      <div className="menu-category-heading-left">
+                        <span className="menu-category-priority">
+                          <span className="menu-category-priority-hash">#</span>
+                          {category.displayOrder}
+                        </span>
+                        <h2 className="menu-category-name">{category.name}</h2>
+                        <span className="menu-category-count">
+                          {items.length} item{items.length !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <div className="menu-category-heading-rule" />
+                    </div>
+                    {renderItems(items)}
+                  </section>
                 ))}
+
+                {uncategorisedItems.length > 0 && (
+                  <section className="menu-category-section">
+                    <div className="menu-category-heading">
+                      <div className="menu-category-heading-left">
+                        <span className="menu-category-priority menu-category-priority--none">—</span>
+                        <h2 className="menu-category-name">Uncategorised</h2>
+                        <span className="menu-category-count">
+                          {uncategorisedItems.length} item{uncategorisedItems.length !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <div className="menu-category-heading-rule" />
+                    </div>
+                    {renderItems(uncategorisedItems)}
+                  </section>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Menu Modal */}
-      <MenuModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        menuItemId={editingMenuItemId}
-        onSuccess={handleModalSuccess}
-      />
+      <MenuModal isOpen={isModalOpen} onClose={handleModalClose} menuItemId={editingMenuItemId} onSuccess={handleModalSuccess} />
     </div>
   );
 };
