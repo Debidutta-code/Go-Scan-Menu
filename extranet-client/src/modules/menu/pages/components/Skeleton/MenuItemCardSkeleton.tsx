@@ -58,8 +58,13 @@ const ListRowSkeleton: React.FC = () => (
 
 const GridCardSkeleton: React.FC = () => (
   <div className="mic-skel-grid-card" aria-hidden="true">
-    {/* Image area */}
-    <div className="mic-skel-grid-image mic-skel-pulse" />
+    {/* Image area with overlay placeholder */}
+    <div className="mic-skel-grid-image mic-skel-pulse">
+      {/* Dietary pill top-left, matching mic-overlay-dietary */}
+      <div className="mic-skel-grid-overlay">
+        <div className="mic-skel-block mic-skel-overlay-dietary" style={{ background: 'rgba(255,255,255,0.45)', animation: 'none' }} />
+      </div>
+    </div>
 
     {/* Body */}
     <div className="mic-skel-grid-body">
@@ -72,10 +77,9 @@ const GridCardSkeleton: React.FC = () => (
       {/* Description */}
       <div className="mic-skel-block mic-skel-pulse" style={{ width: '90%', height: 11, marginTop: 2 }} />
 
-      {/* Meta chips */}
+      {/* Spice chip (dietary moved to image overlay) */}
       <div className="mic-skel-grid-meta">
         <div className="mic-skel-block mic-skel-pulse" style={{ width: 70, height: 20, borderRadius: 20 }} />
-        <div className="mic-skel-block mic-skel-pulse" style={{ width: 28, height: 20, borderRadius: 20 }} />
       </div>
 
       {/* Extras */}

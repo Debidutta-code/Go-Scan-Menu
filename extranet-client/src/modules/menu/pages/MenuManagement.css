@@ -231,7 +231,7 @@
 .menu-category-groups {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 16px; /* reduced from 32px */
 }
 
 .menu-category-section {
@@ -415,7 +415,7 @@
 
   .menu-list-container { padding: 12px 16px 20px; }
 
-  .menu-category-groups { gap: 24px; }
+  .menu-category-groups { gap: 12px; }
 
   .menu-items-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));

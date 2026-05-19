@@ -21,7 +21,6 @@
 }
 
 /* ---- Dietary / spice tags ---- */
-/* Small inline pill used under the item name */
 .mic-tag {
   display: inline-flex;
   align-items: center;
@@ -52,7 +51,7 @@
   margin-top: 3px;
 }
 
-/* ---- Extras badges — full words now ---- */
+/* ---- Extras badges ---- */
 .mic-extra-badge {
   display: inline-flex;
   align-items: center;
@@ -95,11 +94,6 @@
    LIST VIEW
    ============================================ */
 
-/*
-  Columns (left → right):
-  thumb | name+desc+tags | extras | price | availability | actions
-  Removed: category column, type/dietary column (dietary now lives under name)
-*/
 .mic-list-row {
   display: grid;
   grid-template-columns: 52px 1fr 180px 100px 90px 130px;
@@ -287,6 +281,7 @@
   background: var(--gray-100);
 }
 
+/* Overlay: dietary top-left, inactive top-right */
 .mic-grid-badges-overlay {
   position: absolute;
   top: 8px;
@@ -298,12 +293,18 @@
   pointer-events: none;
 }
 
-.mic-overlay-badge {
-  font-size: 16px;
+/* Dietary icon pill — sits top-left over image */
+.mic-overlay-dietary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 6px;
-  padding: 2px 6px;
+  padding: 3px 7px;
   backdrop-filter: blur(4px);
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .mic-overlay-inactive {
@@ -317,12 +318,17 @@
   text-transform: uppercase;
 }
 
+/* Spacer so inactive badge still floats right when no dietary icon */
+.mic-overlay-spacer {
+  flex: 1;
+}
+
 .mic-grid-body {
   padding: 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
 }
 
 .mic-grid-top {
@@ -402,7 +408,6 @@
   .mic-list-row {
     grid-template-columns: 48px 1fr 140px 84px 110px;
   }
-  /* Hide extras on mid-size screens */
   .mic-list-cell.mic-cell-extras {
     display: none;
   }

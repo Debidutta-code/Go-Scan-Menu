@@ -186,9 +186,15 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
             {item.itemType === 'drink' ? '🥤' : '🍽️'}
           </div>
         )}
+
+        {/* Overlay: dietary top-left, inactive top-right */}
         <div className="mic-grid-badges-overlay">
-          {dietaryIcon && (
-            <span className="mic-overlay-badge" title={dietaryLabel || ''}>{dietaryIcon}</span>
+          {dietaryIcon ? (
+            <span className="mic-overlay-dietary" title={dietaryLabel || ''}>
+              {dietaryIcon}
+            </span>
+          ) : (
+            <span className="mic-overlay-spacer" />
           )}
           {!item.isActive && (
             <span className="mic-overlay-inactive">Inactive</span>
@@ -217,15 +223,12 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           <p className="mic-grid-desc">{item.description}</p>
         )}
 
-        {/* Dietary + spice */}
-        {(dietaryIcon || item.spiceLevel) && (
+        {/* Spice only — dietary is now in the image overlay */}
+        {item.spiceLevel && (
           <div className="mic-grid-tags">
-            {dietaryIcon && (
-              <span className="mic-tag" title={dietaryLabel || ''}>{dietaryIcon} {dietaryLabel}</span>
-            )}
-            {item.spiceLevel && (
-              <span className="mic-tag mic-tag-spice">{SpiceIcons[item.spiceLevel]} {SpiceLabels[item.spiceLevel]}</span>
-            )}
+            <span className="mic-tag mic-tag-spice">
+              {SpiceIcons[item.spiceLevel]} {SpiceLabels[item.spiceLevel]}
+            </span>
           </div>
         )}
 

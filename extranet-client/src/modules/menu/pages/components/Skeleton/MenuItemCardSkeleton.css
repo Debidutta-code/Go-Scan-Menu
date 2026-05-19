@@ -128,10 +128,31 @@
   flex-direction: column;
 }
 
+/* Image area — position relative so overlay sits on top */
 .mic-skel-grid-image {
   width: 100%;
   height: 120px;
   flex-shrink: 0;
+  position: relative;
+}
+
+/* Overlay row matching mic-grid-badges-overlay */
+.mic-skel-grid-overlay {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+/* Dietary pill placeholder — top-left */
+.mic-skel-overlay-dietary {
+  width: 32px;
+  height: 24px;
+  border-radius: 6px;
 }
 
 .mic-skel-grid-body {
