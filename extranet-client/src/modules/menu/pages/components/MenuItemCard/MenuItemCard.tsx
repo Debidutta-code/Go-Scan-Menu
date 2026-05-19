@@ -132,7 +132,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
               id={`toggle-${item._id}`}
               checked={item.isAvailable}
               onChange={() => onToggleAvailability(item._id, item.isAvailable)}
-              label={item.isAvailable ? 'Available' : 'Unavailable'}
+              // label={item.isAvailable ? 'Available' : 'Unavailable'}
             />
           </PermissionGuard>
         </div>
