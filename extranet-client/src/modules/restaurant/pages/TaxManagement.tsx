@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Plus, Search, Edit, Trash2, Receipt, Info, Globe, Layers, Percent, Hash, Tag } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Receipt, Info, Percent, Hash, Tag } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { TaxService } from '../services/tax.service';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
@@ -32,10 +32,10 @@ export const TaxManagement: React.FC = () => {
     });
 
     const fetchTaxes = async () => {
-        if (!token) return;
+        if (!token || !staff?.restaurantId) return;
         try {
             setLoading(true);
-            const response = await TaxService.getTaxesByRestaurant(token, 'restaurant');
+            const response = await TaxService.getTaxesByRestaurant(token, staff.restaurantId, 'restaurant');
             if (response.success && response.data) {
                 setTaxes(response.data.taxes);
             }
@@ -49,7 +49,7 @@ export const TaxManagement: React.FC = () => {
 
     useEffect(() => {
         fetchTaxes();
-    }, [token]);
+    }, [token, staff?.restaurantId]);
 
     useEffect(() => {
         if (selectedTax) {
@@ -89,8 +89,8 @@ export const TaxManagement: React.FC = () => {
     const handleDelete = async (tax: ITax) => {
         if (window.confirm(`Are you sure you want to delete "${tax.name}"?`)) {
             try {
-                if (!token) return;
-                const response = await TaxService.deleteTax(token, tax._id);
+                if (!token || !staff?.restaurantId) return;
+                const response = await TaxService.deleteTax(token, staff.restaurantId, tax._id);
                 if (response.success) {
                     toast.success('Tax deleted successfully');
                     fetchTaxes();
@@ -103,8 +103,8 @@ export const TaxManagement: React.FC = () => {
 
     const toggleStatus = async (tax: ITax) => {
         try {
-            if (!token) return;
-            const response = await TaxService.updateTaxStatus(token, tax._id, !tax.isActive);
+            if (!token || !staff?.restaurantId) return;
+            const response = await TaxService.updateTaxStatus(token, staff.restaurantId, tax._id, !tax.isActive);
             if (response.success) {
                 toast.success(`Tax ${!tax.isActive ? 'activated' : 'deactivated'} successfully`);
                 fetchTaxes();
@@ -116,15 +116,15 @@ export const TaxManagement: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!token) return;
+        if (!token || !staff?.restaurantId) return;
 
         try {
             setFormLoading(true);
             let response;
             if (selectedTax) {
-                response = await TaxService.updateTax(token, selectedTax._id, formData);
+                response = await TaxService.updateTax(token, staff.restaurantId, selectedTax._id, formData);
             } else {
-                response = await TaxService.createTax(token, formData);
+                response = await TaxService.createTax(token, staff.restaurantId, formData);
             }
 
             if (response.success) {
@@ -371,7 +371,7 @@ export const TaxManagement: React.FC = () => {
                                             options={categoryOptions}
                                             trigger={{
                                                 label: categoryOptions.find(o => o.value === formData.category)?.label || 'Select Category',
-                                                icon: <Layers size={16} />
+                                                icon: <Tag size={16} />
                                             }}
                                             onChange={(val) => setFormData(prev => ({ ...prev, category: val as any }))}
                                         />
