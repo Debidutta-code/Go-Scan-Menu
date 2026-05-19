@@ -171,7 +171,7 @@ export const MenuManagement: React.FC = () => {
     <div className="menu-management-layout">
       {/* Top Toolbar */}
       <div className="menu-page-toolbar">
-        <h1 className="menu-page-title" data-testid="menu-management-title">Menu Management</h1>
+        <h1 className="menu-page-title" data-testid="menu-management-title">Menu Managementsdfasdf</h1>
         <div className="menu-toolbar-actions">
           <div className="menu-filter-container">
             <select className="menu-filter-select" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} data-testid="category-filter">
