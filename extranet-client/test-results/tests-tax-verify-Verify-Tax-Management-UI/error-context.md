@@ -6,8 +6,8 @@
 
 # Test info
 
-- Name: tests/verify.spec.ts >> Verify Super Admin QR Management page
-- Location: tests/verify.spec.ts:3:1
+- Name: tests/tax-verify.spec.ts >> Verify Tax Management UI
+- Location: tests/tax-verify.spec.ts:3:1
 
 # Error details
 

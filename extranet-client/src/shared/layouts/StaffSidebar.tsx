@@ -14,7 +14,8 @@ import {
     UtensilsCrossed,
     FileBarChart,
     ShoppingBag,
-    Store
+    Store,
+    Receipt
 } from 'lucide-react';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { extractId } from '@/shared/utils/id.util';
@@ -149,6 +150,12 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
             icon: <FileBarChart size={20} />,
             path: '/staff/reports',
             permission: isHighLevel || permissions?.reports?.view
+        },
+        {
+            label: 'Tax Management',
+            icon: <Receipt size={20} />,
+            path: '/staff/taxes',
+            permission: isHighLevel || (permissions?.settings as any)?.manageTaxes
         },
         {
             label: 'Settings',
