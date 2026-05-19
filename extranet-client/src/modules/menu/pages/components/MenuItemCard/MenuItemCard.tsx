@@ -2,7 +2,6 @@ import React from 'react';
 import { CategoryId, getCategoryName } from '@/modules/menu/pages/utils/category-helpers';
 import './MenuItemCard.css';
 import { MenuItem, DietaryTypeIcons, DietaryTypeLabels } from '@/shared/types/menu.types';
-import { Button } from '@/shared/components/Button';
 import { Switch } from '@/shared/components/Switch';
 import { PermissionGuard } from '@/shared/components/PermissionGuard';
 import { RoleLevel, StaffRole } from '@/shared/types/role.types';
@@ -23,6 +22,13 @@ const SpiceIcons: Record<string, string> = {
   extra_hot: '🌶️🌶️🌶️🌶️',
 };
 
+const SpiceLabels: Record<string, string> = {
+  mild: 'Mild',
+  medium: 'Medium',
+  hot: 'Hot',
+  extra_hot: 'Extra Hot',
+};
+
 export const MenuItemCard: React.FC<MenuItemCardProps> = ({
   item,
   categories,
@@ -31,11 +37,14 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
   onToggleAvailability,
   viewMode = 'list',
 }) => {
-  const categoryName = getCategoryName(item.categoryId as CategoryId, categories);
   const hasDiscount = item.discountPrice !== undefined && item.discountPrice !== null;
   const dietaryIcon = item.dietaryType ? DietaryTypeIcons[item.dietaryType] : null;
   const dietaryLabel = item.dietaryType ? DietaryTypeLabels[item.dietaryType] : null;
   const thumbnail = item.images?.[0] || item.image;
+
+  const variantCount = item.variants?.length ?? 0;
+  const addonCount = item.addons?.length ?? 0;
+  const customCount = item.customizations?.length ?? 0;
 
   if (viewMode === 'list') {
     return (
@@ -65,46 +74,36 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           {item.description && (
             <span className="mic-list-desc">{item.description}</span>
           )}
+          {/* Dietary + spice inline under name */}
+          <div className="mic-list-tags">
+            {dietaryIcon && (
+              <span className="mic-tag" title={dietaryLabel || ''}>
+                {dietaryIcon} {dietaryLabel}
+              </span>
+            )}
+            {item.spiceLevel && (
+              <span className="mic-tag mic-tag-spice" title={`Spice level: ${SpiceLabels[item.spiceLevel]}`}>
+                {SpiceIcons[item.spiceLevel]} {SpiceLabels[item.spiceLevel]}
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Category */}
-        <div className="mic-list-cell mic-cell-category">
-          <span className="mic-badge mic-badge-category">{categoryName}</span>
-        </div>
-
-        {/* Type + Dietary */}
-        <div className="mic-list-cell mic-cell-type">
-          <span className="mic-type-chip" data-type={item.itemType}>
-            {item.itemType === 'drink' ? '🥤' : '🍽️'}
-            <span>{item.itemType === 'drink' ? 'Drink' : 'Food'}</span>
-          </span>
-          {dietaryIcon && (
-            <span className="mic-dietary-chip" title={dietaryLabel || ''}>
-              {dietaryIcon}
-            </span>
-          )}
-          {item.spiceLevel && (
-            <span className="mic-spice-chip" title={`Spice: ${item.spiceLevel}`}>
-              {SpiceIcons[item.spiceLevel]}
-            </span>
-          )}
-        </div>
-
-        {/* Extras count */}
+        {/* Extras — clear labels */}
         <div className="mic-list-cell mic-cell-extras">
-          {item.variants?.length > 0 && (
-            <span className="mic-mini-badge" title="Variants">
-              {item.variants.length}V
+          {variantCount > 0 && (
+            <span className="mic-extra-badge" title={`${variantCount} variant${variantCount !== 1 ? 's' : ''}`}>
+              {variantCount} variant{variantCount !== 1 ? 's' : ''}
             </span>
           )}
-          {item.addons?.length > 0 && (
-            <span className="mic-mini-badge" title="Add-ons">
-              {item.addons.length}A
+          {addonCount > 0 && (
+            <span className="mic-extra-badge" title={`${addonCount} add-on${addonCount !== 1 ? 's' : ''}`}>
+              {addonCount} add-on{addonCount !== 1 ? 's' : ''}
             </span>
           )}
-          {item.customizations?.length > 0 && (
-            <span className="mic-mini-badge" title="Customizations">
-              {item.customizations.length}C
+          {customCount > 0 && (
+            <span className="mic-extra-badge" title={`${customCount} customisation${customCount !== 1 ? 's' : ''}`}>
+              {customCount} custom
             </span>
           )}
         </div>
@@ -132,7 +131,6 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
               id={`toggle-${item._id}`}
               checked={item.isAvailable}
               onChange={() => onToggleAvailability(item._id, item.isAvailable)}
-              // label={item.isAvailable ? 'Available' : 'Unavailable'}
             />
           </PermissionGuard>
         </div>
@@ -174,7 +172,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
     );
   }
 
-  // Grid view — compact card
+  // Grid view
   return (
     <div
       className={`mic-grid-card ${!item.isActive ? 'mic-inactive' : ''}`}
@@ -219,23 +217,29 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           <p className="mic-grid-desc">{item.description}</p>
         )}
 
-        <div className="mic-grid-meta">
-          <span className="mic-badge mic-badge-category">{categoryName}</span>
-          <span className="mic-type-chip" data-type={item.itemType}>
-            {item.itemType === 'drink' ? '🥤' : '🍽️'}
-          </span>
-          {item.spiceLevel && (
-            <span className="mic-spice-chip">{SpiceIcons[item.spiceLevel]}</span>
-          )}
-        </div>
-
-        {(item.variants?.length > 0 || item.addons?.length > 0 || item.customizations?.length > 0) && (
-          <div className="mic-grid-extras">
-            {item.variants?.length > 0 && (
-              <span className="mic-mini-badge">{item.variants.length} variant{item.variants.length !== 1 ? 's' : ''}</span>
+        {/* Dietary + spice */}
+        {(dietaryIcon || item.spiceLevel) && (
+          <div className="mic-grid-tags">
+            {dietaryIcon && (
+              <span className="mic-tag" title={dietaryLabel || ''}>{dietaryIcon} {dietaryLabel}</span>
             )}
-            {item.addons?.length > 0 && (
-              <span className="mic-mini-badge">{item.addons.length} add-on{item.addons.length !== 1 ? 's' : ''}</span>
+            {item.spiceLevel && (
+              <span className="mic-tag mic-tag-spice">{SpiceIcons[item.spiceLevel]} {SpiceLabels[item.spiceLevel]}</span>
+            )}
+          </div>
+        )}
+
+        {/* Extras */}
+        {(variantCount > 0 || addonCount > 0 || customCount > 0) && (
+          <div className="mic-grid-extras">
+            {variantCount > 0 && (
+              <span className="mic-extra-badge">{variantCount} variant{variantCount !== 1 ? 's' : ''}</span>
+            )}
+            {addonCount > 0 && (
+              <span className="mic-extra-badge">{addonCount} add-on{addonCount !== 1 ? 's' : ''}</span>
+            )}
+            {customCount > 0 && (
+              <span className="mic-extra-badge">{customCount} custom</span>
             )}
           </div>
         )}

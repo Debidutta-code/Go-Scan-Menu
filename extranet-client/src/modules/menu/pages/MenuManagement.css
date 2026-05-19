@@ -234,11 +234,10 @@
   gap: 32px;
 }
 
-/* Each category section */
 .menu-category-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* ---- Category Heading ---- */
@@ -246,6 +245,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  margin-bottom: 2px;
 }
 
 .menu-category-heading-left {
@@ -255,18 +255,17 @@
   flex-shrink: 0;
 }
 
-/* Priority badge — the #N number */
 .menu-category-priority {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 32px;
-  height: 32px;
+  height: 28px;
   padding: 0 8px;
-  border-radius: 8px;
+  border-radius: 7px;
   background: var(--primary-50);
   border: 1px solid var(--primary-100);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--primary-600);
   letter-spacing: -0.01em;
@@ -274,7 +273,7 @@
 }
 
 .menu-category-priority-hash {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   color: var(--primary-400);
   margin-right: 1px;
@@ -286,9 +285,8 @@
   color: var(--gray-400);
 }
 
-/* Category name */
 .menu-category-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -296,7 +294,6 @@
   letter-spacing: -0.01em;
 }
 
-/* Item count pill */
 .menu-category-count {
   display: inline-flex;
   align-items: center;
@@ -310,7 +307,6 @@
   white-space: nowrap;
 }
 
-/* Horizontal rule that fills remaining space */
 .menu-category-heading-rule {
   flex: 1;
   height: 1px;
@@ -318,7 +314,7 @@
 }
 
 /* ============================================
-   LIST VIEW — card rows (not a table)
+   LIST VIEW — individual card rows
    ============================================ */
 
 .menu-items-list {
@@ -327,11 +323,10 @@
   gap: 6px;
 }
 
-/* Override the old flat-table row to be a standalone card */
+/* Each row is its own rounded card */
 .menu-items-list .mic-list-row {
   border-radius: 10px;
   border: 1px solid var(--gray-200);
-  border-bottom: 1px solid var(--gray-200); /* override last-child removal */
   background: var(--white);
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
@@ -342,10 +337,6 @@
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
   transform: translateY(-1px);
   background: var(--white);
-}
-
-.menu-items-list .mic-list-row:last-child {
-  border-bottom: 1px solid var(--gray-200);
 }
 
 /* ---- Grid layout ---- */
@@ -366,25 +357,9 @@
   color: var(--text-secondary);
 }
 
-.empty-icon {
-  font-size: 40px;
-  margin-bottom: 16px;
-  opacity: 0.4;
-}
-
-.empty-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text-primary);
-}
-
-.empty-description {
-  font-size: 14px;
-  margin-bottom: 24px;
-  max-width: 280px;
-  line-height: 1.5;
-}
+.empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.4; }
+.empty-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+.empty-description { font-size: 14px; margin-bottom: 24px; max-width: 280px; line-height: 1.5; }
 
 /* ---- Loading state ---- */
 .loading-state {
@@ -428,10 +403,7 @@
     gap: 10px;
   }
 
-  .menu-sub-left {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+  .menu-sub-left { flex-wrap: wrap; gap: 10px; }
 
   .menu-search-wrap {
     min-width: 0;
@@ -441,15 +413,9 @@
 
   .menu-stats-row { display: none; }
 
-  .menu-list-container {
-    padding: 12px 16px 20px;
-  }
+  .menu-list-container { padding: 12px 16px 20px; }
 
   .menu-category-groups { gap: 24px; }
-
-  .menu-category-heading { gap: 10px; }
-
-  .menu-category-name { font-size: 14px; }
 
   .menu-items-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
