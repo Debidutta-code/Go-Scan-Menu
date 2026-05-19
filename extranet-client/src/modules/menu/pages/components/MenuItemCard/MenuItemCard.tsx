@@ -52,7 +52,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
         className={`mic-list-row ${!item.isActive ? 'mic-inactive' : ''}`}
         data-testid={`menu-item-${item._id}`}
       >
-        {/* Thumbnail */}
+        {/* Thumbnail — dietary icon overlay top-left */}
         <div className="mic-list-thumb">
           {thumbnail ? (
             <img src={thumbnail} alt={item.name} className="mic-list-thumb-img" />
@@ -61,9 +61,14 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
               {item.itemType === 'drink' ? '🥤' : '🍽️'}
             </div>
           )}
+          {dietaryIcon && (
+            <span className="mic-list-thumb-dietary" title={dietaryLabel || ''}>
+              {dietaryIcon}
+            </span>
+          )}
         </div>
 
-        {/* Name + Description */}
+        {/* Name + Description + tags */}
         <div className="mic-list-info">
           <div className="mic-list-name-row">
             <span className="mic-list-name" data-testid="item-name">
@@ -74,22 +79,24 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           {item.description && (
             <span className="mic-list-desc">{item.description}</span>
           )}
-          {/* Dietary + spice inline under name */}
           <div className="mic-list-tags">
-            {dietaryIcon && (
-              <span className="mic-tag" title={dietaryLabel || ''}>
-                {dietaryIcon} {dietaryLabel}
-              </span>
-            )}
             {item.spiceLevel && (
-              <span className="mic-tag mic-tag-spice" title={`Spice level: ${SpiceLabels[item.spiceLevel]}`}>
+              <span className="mic-tag mic-tag-spice" title={`Spice: ${SpiceLabels[item.spiceLevel]}`}>
                 {SpiceIcons[item.spiceLevel]} {SpiceLabels[item.spiceLevel]}
               </span>
+            )}
+            {item.allergens?.slice(0, 2).map((a) => (
+              <span key={a} className="mic-tag mic-tag-allergen" title={`Allergen: ${a}`}>
+                ⚠ {a}
+              </span>
+            ))}
+            {(item.allergens?.length ?? 0) > 2 && (
+              <span className="mic-tag mic-tag-allergen">+{item.allergens!.length - 2} more</span>
             )}
           </div>
         </div>
 
-        {/* Extras — clear labels */}
+        {/* Extras */}
         <div className="mic-list-cell mic-cell-extras">
           {variantCount > 0 && (
             <span className="mic-extra-badge" title={`${variantCount} variant${variantCount !== 1 ? 's' : ''}`}>
@@ -106,6 +113,11 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
               {customCount} custom
             </span>
           )}
+          {item.nutritionTags?.slice(0, 1).map((n) => (
+            <span key={n} className="mic-extra-badge mic-extra-badge-nutrition">
+              {n.replace(/_/g, ' ').toLowerCase()}
+            </span>
+          ))}
         </div>
 
         {/* Price */}
@@ -223,12 +235,20 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
           <p className="mic-grid-desc">{item.description}</p>
         )}
 
-        {/* Spice only — dietary is now in the image overlay */}
-        {item.spiceLevel && (
+        {/* Spice + allergens */}
+        {(item.spiceLevel || (item.allergens?.length ?? 0) > 0) && (
           <div className="mic-grid-tags">
-            <span className="mic-tag mic-tag-spice">
-              {SpiceIcons[item.spiceLevel]} {SpiceLabels[item.spiceLevel]}
-            </span>
+            {item.spiceLevel && (
+              <span className="mic-tag mic-tag-spice">
+                {SpiceIcons[item.spiceLevel]} {SpiceLabels[item.spiceLevel]}
+              </span>
+            )}
+            {item.allergens?.slice(0, 1).map((a) => (
+              <span key={a} className="mic-tag mic-tag-allergen">⚠ {a}</span>
+            ))}
+            {(item.allergens?.length ?? 0) > 1 && (
+              <span className="mic-tag mic-tag-allergen">+{item.allergens!.length - 1} more</span>
+            )}
           </div>
         )}
 
