@@ -179,7 +179,15 @@ export class MenuItemService {
     page: number = 1,
     limit: number = 50
   ) {
-    return this.menuItemRepo.findByRestaurant(restaurantId, filter, page, limit);
+    const [menuData, categories] = await Promise.all([
+      this.menuItemRepo.findByRestaurant(restaurantId, filter, page, limit),
+      this.categoryRepo.findAllForMenu(restaurantId),
+    ]);
+
+    return {
+      ...menuData,
+      categories,
+    };
   }
 
   async getMenuItemsByBranch(
@@ -188,7 +196,17 @@ export class MenuItemService {
     page: number = 1,
     limit: number = 50
   ) {
-    return this.menuItemRepo.findByBranch(branchId, filter, page, limit);
+    const restaurantId = await this.branchRepo.findById(branchId).then((b) => b?.restaurantId.toString());
+
+    const [menuData, categories] = await Promise.all([
+      this.menuItemRepo.findByBranch(branchId, filter, page, limit),
+      restaurantId ? this.categoryRepo.findAllForMenu(restaurantId, branchId) : [],
+    ]);
+
+    return {
+      ...menuData,
+      categories,
+    };
   }
 
   async getAllMenuItemsForMenu(restaurantId: string, branchId?: string) {

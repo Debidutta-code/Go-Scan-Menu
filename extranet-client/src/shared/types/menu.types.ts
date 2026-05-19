@@ -172,6 +172,7 @@ export interface MenuItemListResponse {
   limit: number;
   items: MenuItem[];
   totalPages: number;
+  categories?: Category[];
 }
 
 export interface CategoryListResponse {

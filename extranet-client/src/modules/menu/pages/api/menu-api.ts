@@ -12,9 +12,9 @@ export class MenuAPI {
   static async getMenuItems(token: string, restaurantId: string) {
     const response = await MenuService.getMenuItems(token, restaurantId);
     if (response.success && response.data) {
-      return response.data.items || [];
+      return response.data;
     }
-    return [];
+    return { items: [], categories: [], total: 0, page: 1, limit: 50, totalPages: 0 };
   }
 
   static async getMenuItem(token: string, restaurantId: string, itemId: string) {

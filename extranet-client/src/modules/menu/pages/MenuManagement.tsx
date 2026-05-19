@@ -72,13 +72,9 @@ export const MenuManagement: React.FC = () => {
     setError('');
 
     try {
-      const [categoriesData, menuItemsData] = await Promise.all([
-        MenuAPI.getCategories(token, staff.restaurantId),
-        MenuAPI.getMenuItems(token, staff.restaurantId),
-      ]);
-
-      setCategories(categoriesData);
-      setMenuItems(menuItemsData);
+      const data = await MenuAPI.getMenuItems(token, staff.restaurantId);
+      setMenuItems(data.items || []);
+      setCategories(data.categories || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load menu data');
     } finally {
