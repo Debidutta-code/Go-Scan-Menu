@@ -319,7 +319,7 @@ export const MenuManagement: React.FC = () => {
                   <div className="mic-list-header-cell"></div>
                   <div className="mic-list-header-cell">Item</div>
                   <div className="mic-list-header-cell">Category</div>
-                  <div className="mic-list-header-cell">Type / Dietary</div>
+                  <div className="mic-list-header-cell">Dietary</div>
                   <div className="mic-list-header-cell">Extras</div>
                   <div className="mic-list-header-cell">Price</div>
                   <div className="mic-list-header-cell">Availability</div>
