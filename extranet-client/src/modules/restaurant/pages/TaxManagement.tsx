@@ -1,6 +1,27 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { Plus, Search, Edit, Trash2, Receipt, Info, Percent, Hash, Tag } from 'lucide-react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import {
+    Plus, Search, Edit, Trash2, Info, Percent, Hash, Tag,
+    GripVertical, ChevronRight, ChevronDown, FolderPlus
+} from 'lucide-react';
 import { toast } from 'react-toastify';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 import { TaxService } from '../services/tax.service';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { Button } from '@/shared/components/Button';
@@ -8,6 +29,155 @@ import { InputField } from '@/shared/components/InputField';
 import { SharedDropdown } from '@/shared/components/SharedDropdown/SharedDropdown';
 import { ITax, CreateTaxDTO } from '@/shared/types/tax.types';
 import './TaxManagement.css';
+
+// --- Sortable Item Component ---
+
+interface SortableItemProps {
+    tax: ITax;
+    children_taxes?: ITax[];
+    onEdit: (tax: ITax) => void;
+    onDelete: (tax: ITax) => void;
+    onToggleStatus: (tax: ITax) => void;
+    isExpanded?: boolean;
+    onToggleExpand?: (id: string) => void;
+    level?: number;
+}
+
+const SortableTaxItem: React.FC<SortableItemProps> = ({
+    tax,
+    children_taxes = [],
+    onEdit,
+    onDelete,
+    onToggleStatus,
+    isExpanded,
+    onToggleExpand,
+    level = 0
+}) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: tax._id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 100 : 'auto',
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    const hasChildren = children_taxes.length > 0;
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`tax-item-container level-${level} ${tax.type === 'group' ? 'is-group' : 'is-tax'} ${isDragging ? 'dragging' : ''}`}
+        >
+            <div className="tax-item-main">
+                <div className="drag-handle" {...attributes} {...listeners}>
+                    <GripVertical size={18} />
+                </div>
+
+                <div className="tax-item-content">
+                    {tax.type === 'group' && (
+                        <button
+                            type="button"
+                            className="expand-button"
+                            onClick={() => onToggleExpand?.(tax._id)}
+                        >
+                            {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                        </button>
+                    )}
+
+                    {tax.type === 'tax' && level > 0 && <div className="child-indicator" />}
+
+                    <div className="tax-info">
+                        <div className="tax-name-row">
+                            <span className="tax-name">{tax.name}</span>
+                            {tax.type === 'group' && <span className="group-label">Group</span>}
+                            {tax.description && (
+                                <div className="tax-description-tooltip">
+                                    <Info size={14} className="info-icon" />
+                                    <span className="tooltip-text">{tax.description}</span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="tax-meta">
+                            {tax.type === 'tax' && (
+                                <>
+                                    <span className="meta-item">
+                                        {tax.taxType === 'percentage' ? `${tax.value}%` : tax.value}
+                                    </span>
+                                    <span className="meta-divider">•</span>
+                                    <span className="meta-item">{tax.category.replace('_', ' ')}</span>
+                                </>
+                            )}
+                            {tax.type === 'group' && (
+                                <span className="meta-item">{children_taxes.length} taxes inside</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="tax-item-actions">
+                    <button
+                        type="button"
+                        className={`status-toggle ${tax.isActive ? 'active' : 'inactive'}`}
+                        onClick={() => onToggleStatus(tax)}
+                    >
+                        {tax.isActive ? 'Active' : 'Inactive'}
+                    </button>
+                    <div className="action-buttons">
+                        <button
+                            type="button"
+                            className="icon-button edit"
+                            onClick={() => onEdit(tax)}
+                            title="Edit"
+                        >
+                            <Edit size={16} />
+                        </button>
+                        <button
+                            type="button"
+                            className="icon-button delete"
+                            onClick={() => onDelete(tax)}
+                            title="Delete"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {tax.type === 'group' && isExpanded && hasChildren && (
+                <div className="group-children">
+                    {children_taxes.map(child => (
+                        <div key={child._id} className="child-tax-row">
+                             <div className="child-connector" />
+                             <div className="child-content-wrapper">
+                                <div className="tax-info">
+                                    <span className="tax-name">{child.name}</span>
+                                    <span className="tax-value">
+                                        {child.taxType === 'percentage' ? `${child.value}%` : child.value}
+                                    </span>
+                                </div>
+                                <div className="action-buttons">
+                                    <button type="button" className="icon-button edit" onClick={() => onEdit(child)}><Edit size={14} /></button>
+                                    <button type="button" className="icon-button delete" onClick={() => onDelete(child)}><Trash2 size={14} /></button>
+                                </div>
+                             </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+// --- Main Management Component ---
 
 export const TaxManagement: React.FC = () => {
     const { token, staff } = useStaffAuth();
@@ -17,21 +187,17 @@ export const TaxManagement: React.FC = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedTax, setSelectedTax] = useState<ITax | null>(null);
     const [formLoading, setFormLoading] = useState(false);
+    const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+    const [forceType, setForceType] = useState<'tax' | 'group' | null>(null);
 
-    const [formData, setFormData] = useState<CreateTaxDTO>({
-        name: '',
-        description: '',
-        taxType: 'percentage',
-        value: 0,
-        applicableOn: 'subtotal',
-        scope: 'restaurant',
-        category: 'food_tax',
-        isPartOfGroup: false,
-        groupName: '',
-        displayOrder: 0
-    });
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
-    const fetchTaxes = async () => {
+    const fetchTaxes = useCallback(async () => {
         if (!token || !staff?.restaurantId) return;
         try {
             setLoading(true);
@@ -45,41 +211,51 @@ export const TaxManagement: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [token, staff?.restaurantId]);
 
     useEffect(() => {
         fetchTaxes();
-    }, [token, staff?.restaurantId]);
+    }, [fetchTaxes]);
+
+    const [formData, setFormData] = useState<CreateTaxDTO>({
+        name: '',
+        description: '',
+        type: 'tax',
+        taxType: 'percentage',
+        value: 0,
+        applicableOn: 'subtotal',
+        scope: 'restaurant',
+        category: 'food_tax',
+        parentId: undefined
+    });
 
     useEffect(() => {
         if (selectedTax) {
             setFormData({
                 name: selectedTax.name,
                 description: selectedTax.description || '',
+                type: selectedTax.type,
                 taxType: selectedTax.taxType,
                 value: selectedTax.value,
                 applicableOn: selectedTax.applicableOn,
                 scope: selectedTax.scope,
                 category: selectedTax.category,
-                isPartOfGroup: selectedTax.isPartOfGroup || false,
-                groupName: selectedTax.groupName || '',
-                displayOrder: selectedTax.displayOrder || 0
+                parentId: selectedTax.parentId?._id || selectedTax.parentId || undefined
             });
         } else {
             setFormData({
                 name: '',
                 description: '',
+                type: forceType || 'tax',
                 taxType: 'percentage',
                 value: 0,
                 applicableOn: 'subtotal',
                 scope: 'restaurant',
                 category: 'food_tax',
-                isPartOfGroup: false,
-                groupName: '',
-                displayOrder: taxes.length
+                parentId: undefined
             });
         }
-    }, [selectedTax, isDrawerOpen, taxes.length]);
+    }, [selectedTax, isDrawerOpen, forceType]);
 
     const handleEdit = (tax: ITax) => {
         setSelectedTax(tax);
@@ -128,31 +304,74 @@ export const TaxManagement: React.FC = () => {
             }
 
             if (response.success) {
-                toast.success(selectedTax ? 'Tax updated successfully!' : 'Tax created successfully!');
+                toast.success(selectedTax ? 'Updated successfully!' : 'Created successfully!');
                 setIsDrawerOpen(false);
                 fetchTaxes();
             }
         } catch (error: any) {
-            toast.error(error.message || 'Failed to save tax');
+            toast.error(error.message || 'Failed to save');
         } finally {
             setFormLoading(false);
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'number' ? parseFloat(value) : value
-        }));
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = taxes.findIndex(t => t._id === active.id);
+            const newIndex = taxes.findIndex(t => t._id === over.id);
+
+            const newTaxes = arrayMove(taxes, oldIndex, newIndex);
+            setTaxes(newTaxes);
+
+            try {
+                if (!token || !staff?.restaurantId) return;
+                await TaxService.reorderTaxes(token, staff.restaurantId, newTaxes.map(t => t._id));
+            } catch (error) {
+                console.error('Failed to save order:', error);
+                toast.error('Failed to save new order');
+                fetchTaxes(); // Revert to server state
+            }
+        }
     };
 
-    const filteredTaxes = useMemo(() => {
-        return taxes.filter(tax =>
-            tax.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            tax.groupName?.toLowerCase().includes(searchQuery.toLowerCase())
+    const toggleExpand = (id: string) => {
+        setExpandedGroups(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
+    // --- Data processing for hierarchical view ---
+
+    const { flatTaxes, groupMap } = useMemo(() => {
+        const groups = taxes.filter(t => t.type === 'group');
+        const map: Record<string, ITax[]> = {};
+        groups.forEach(g => {
+            map[g._id] = taxes.filter(t => t.parentId === g._id || t.parentId?._id === g._id);
+        });
+
+        // Top level items are groups and taxes without parents
+        const topLevel = taxes.filter(t => !t.parentId && (!t.parentId?._id));
+
+        return { flatTaxes: topLevel, groupMap: map };
+    }, [taxes]);
+
+    const filteredDisplayTaxes = useMemo(() => {
+        if (!searchQuery) return flatTaxes;
+        return taxes.filter(t =>
+            t.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    }, [taxes, searchQuery]);
+    }, [flatTaxes, taxes, searchQuery]);
+
+    const groupOptions = useMemo(() => {
+        return taxes
+            .filter(t => t.type === 'group' && (!selectedTax || t._id !== selectedTax._id))
+            .map(t => ({ value: t._id, label: t.name }));
+    }, [taxes, selectedTax]);
 
     const taxTypeOptions = [
         { value: 'percentage', label: 'Percentage (%)', icon: <Percent size={16} /> },
@@ -178,7 +397,7 @@ export const TaxManagement: React.FC = () => {
             <div className="tax-page-toolbar">
                 <div className="toolbar-left">
                     <h1 className="tax-page-title">Tax Management</h1>
-                    <p className="tax-page-subtitle">Configure taxes like GST, VAT, and Service Charges</p>
+                    <p className="tax-page-subtitle">Configure and prioritize taxes and tax groups</p>
                 </div>
 
                 <div className="tax-toolbar-actions">
@@ -195,9 +414,23 @@ export const TaxManagement: React.FC = () => {
                     </div>
 
                     <Button
+                        variant="outline"
+                        onClick={() => {
+                            setSelectedTax(null);
+                            setForceType('group');
+                            setIsDrawerOpen(true);
+                        }}
+                        size="sm"
+                    >
+                        <FolderPlus size={18} />
+                        <span className="btn-text">New Group</span>
+                    </Button>
+
+                    <Button
                         variant="primary"
                         onClick={() => {
                             setSelectedTax(null);
+                            setForceType('tax');
                             setIsDrawerOpen(true);
                         }}
                         size="sm"
@@ -212,98 +445,51 @@ export const TaxManagement: React.FC = () => {
             <div className="tax-management-content">
                 <div className="tax-list-panel">
                     <div className="panel-header">
-                        <h2 className="panel-title">Taxes {!loading && `(${filteredTaxes.length})`}</h2>
+                        <h2 className="panel-title">All Taxes & Groups {!loading && `(${taxes.length})`}</h2>
                     </div>
 
                     <div className="tax-list-container">
                         {loading ? (
                             <div className="loading-state">Loading taxes...</div>
-                        ) : filteredTaxes.length === 0 ? (
+                        ) : taxes.length === 0 ? (
                             <div className="empty-state">
-                                    <div className="empty-icon">🧾</div>
-                                <p className="empty-title">No taxes found</p>
+                                <div className="empty-icon">🧾</div>
+                                <p className="empty-title">No taxes configured</p>
                                 <Button variant="outline" onClick={() => setIsDrawerOpen(true)}>
-                                    Add Your First Tax
+                                    Configure Your First Tax
                                 </Button>
                             </div>
                         ) : (
-                            <div className="tax-table-wrapper">
-                                <table className="tax-table" data-testid="tax-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Type</th>
-                                            <th>Value</th>
-                                            <th>Category</th>
-                                            <th>Priority</th>
-                                            <th>Group</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredTaxes.map((tax) => (
-                                            <tr key={tax._id} data-testid={`tax-row-${tax._id}`}>
-                                                <td className="tax-name-cell">
-                                                    <div className="tax-name-info">
-                                                        <span className="name">{tax.name}</span>
-                                                        {tax.description && (
-                                                            <div className="tax-description-tooltip">
-                                                                <Info size={14} className="info-icon" />
-                                                                <span className="tooltip-text">{tax.description}</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className="tax-type">{tax.taxType}</td>
-                                                <td className="tax-value">
-                                                    {tax.taxType === 'percentage' ? `${tax.value}%` : tax.value}
-                                                </td>
-                                                <td className="tax-category">
-                                                    {tax.category.replace('_', ' ')}
-                                                </td>
-                                                <td className="tax-order">{tax.displayOrder}</td>
-                                                <td className="tax-group">
-                                                    {tax.isPartOfGroup ? (
-                                                        <span className="group-badge">{tax.groupName}</span>
-                                                    ) : (
-                                                        <span className="no-group">-</span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    <button
-                                                        className={`status-toggle ${tax.isActive ? 'active' : 'inactive'}`}
-                                                        onClick={() => toggleStatus(tax)}
-                                                    >
-                                                        {tax.isActive ? 'Active' : 'Inactive'}
-                                                    </button>
-                                                </td>
-                                                <td className="action-buttons">
-                                                    <button
-                                                        className="icon-button edit"
-                                                        onClick={() => handleEdit(tax)}
-                                                        title="Edit Tax"
-                                                    >
-                                                        <Edit size={16} />
-                                                    </button>
-                                                    <button
-                                                        className="icon-button delete"
-                                                        onClick={() => handleDelete(tax)}
-                                                        title="Delete Tax"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </td>
-                                            </tr>
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >
+                                <SortableContext
+                                    items={filteredDisplayTaxes.map(t => t._id)}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    <div className="tax-items-list">
+                                        {filteredDisplayTaxes.map(tax => (
+                                            <SortableTaxItem
+                                                key={tax._id}
+                                                tax={tax}
+                                                children_taxes={groupMap[tax._id]}
+                                                onEdit={handleEdit}
+                                                onDelete={handleDelete}
+                                                onToggleStatus={toggleStatus}
+                                                isExpanded={expandedGroups.has(tax._id)}
+                                                onToggleExpand={toggleExpand}
+                                            />
                                         ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    </div>
+                                </SortableContext>
+                            </DndContext>
                         )}
                     </div>
-                    {!loading && filteredTaxes.length > 0 && (
+                    {!loading && taxes.length > 0 && (
                         <div className="tax-count">
-                            Showing {filteredTaxes.length} of {taxes.length} taxes
+                            Total {taxes.length} items configured. Drag to prioritize.
                         </div>
                     )}
                 </div>
@@ -313,136 +499,144 @@ export const TaxManagement: React.FC = () => {
                 <div className="tax-drawer-overlay" onClick={() => setIsDrawerOpen(false)}>
                     <div className="tax-drawer" onClick={e => e.stopPropagation()}>
                         <div className="drawer-header">
-                            <h2>{selectedTax ? 'Edit Tax' : 'Add New Tax'}</h2>
+                            <h2>
+                                {selectedTax ? 'Edit' : 'Create'} {formData.type === 'group' ? 'Tax Group' : 'Tax'}
+                            </h2>
                             <button type="button" className="close-drawer" onClick={() => setIsDrawerOpen(false)}>×</button>
                         </div>
                         <form onSubmit={handleSubmit} className="drawer-body">
                             <div className="form-section">
+                                <h3 className="section-title">Configuration Type</h3>
+                                <div className="form-row">
+                                    <div className="type-toggle-group">
+                                        <button
+                                            type="button"
+                                            className={`type-btn ${formData.type === 'tax' ? 'active' : ''}`}
+                                            onClick={() => setFormData(prev => ({ ...prev, type: 'tax' }))}
+                                            disabled={!!selectedTax}
+                                        >
+                                            Single Tax
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`type-btn ${formData.type === 'group' ? 'active' : ''}`}
+                                            onClick={() => setFormData(prev => ({ ...prev, type: 'group' }))}
+                                            disabled={!!selectedTax}
+                                        >
+                                            Tax Group
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="form-section">
                                 <h3 className="section-title">Basic Information</h3>
                                 <InputField
-                                    label="Tax Name"
+                                    label={formData.type === 'group' ? 'Group Name' : 'Tax Name'}
                                     name="name"
                                     value={formData.name}
-                                    onChange={handleChange}
-                                    placeholder="e.g. CGST, SGST, VAT"
+                                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder={formData.type === 'group' ? 'e.g. GST' : 'e.g. CGST'}
                                     required
                                 />
-                                <div className="form-group">
-                                    <label className="form-label">Description</label>
+                                <div className="form-group" style={{marginTop: '16px'}}>
+                                    <label className="form-label">Description (Optional)</label>
                                     <textarea
                                         name="description"
                                         className="form-textarea"
                                         value={formData.description}
-                                        onChange={handleChange}
-                                        placeholder="Brief description of this tax"
+                                        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                                        placeholder="Brief description"
                                         rows={3}
                                     />
                                 </div>
                             </div>
 
-                            <div className="form-section">
-                                <h3 className="section-title">Tax Configuration</h3>
-                                <div className="form-row">
-                                    <div className="form-group half">
-                                        <label className="form-label">Tax Type</label>
-                                        <SharedDropdown
-                                            variant="compact"
-                                            value={formData.taxType}
-                                            options={taxTypeOptions}
-                                            trigger={{
-                                                label: taxTypeOptions.find(o => o.value === formData.taxType)?.label || 'Select Type',
-                                                icon: <Tag size={16} />
-                                            }}
-                                            onChange={(val) => setFormData(prev => ({ ...prev, taxType: val as any }))}
-                                        />
+                            {formData.type === 'tax' && (
+                                <div className="form-section">
+                                    <h3 className="section-title">Tax Details</h3>
+                                    <div className="form-row">
+                                        <div className="form-group half">
+                                            <label className="form-label">Tax Type</label>
+                                            <SharedDropdown
+                                                variant="compact"
+                                                value={formData.taxType!}
+                                                options={taxTypeOptions}
+                                                trigger={{
+                                                    label: taxTypeOptions.find(o => o.value === formData.taxType)?.label || 'Select Type',
+                                                    icon: <Tag size={16} />
+                                                }}
+                                                onChange={(val) => setFormData(prev => ({ ...prev, taxType: val as any }))}
+                                            />
+                                        </div>
+                                        <div className="form-group half">
+                                            <InputField
+                                                label={formData.taxType === 'percentage' ? 'Percentage (%)' : 'Fixed Amount'}
+                                                name="value"
+                                                type="number"
+                                                value={formData.value!}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, value: parseFloat(e.target.value) }))}
+                                                placeholder="0.00"
+                                                required
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="form-group half">
-                                        <InputField
-                                            label={formData.taxType === 'percentage' ? 'Percentage (%)' : 'Fixed Amount'}
-                                            name="value"
-                                            type="number"
-                                            value={formData.value}
-                                            onChange={handleChange}
-                                            placeholder="0.00"
-                                            required
-                                        />
-                                    </div>
-                                </div>
 
-                                <div className="form-row">
-                                    <div className="form-group half">
-                                        <label className="form-label">Category</label>
-                                        <SharedDropdown
-                                            variant="compact"
-                                            value={formData.category}
-                                            options={categoryOptions}
-                                            trigger={{
-                                                label: categoryOptions.find(o => o.value === formData.category)?.label || 'Select Category',
-                                                icon: <Tag size={16} />
-                                            }}
-                                            onChange={(val) => setFormData(prev => ({ ...prev, category: val as any }))}
-                                        />
+                                    <div className="form-row">
+                                        <div className="form-group half">
+                                            <label className="form-label">Category</label>
+                                            <SharedDropdown
+                                                variant="compact"
+                                                value={formData.category}
+                                                options={categoryOptions}
+                                                trigger={{
+                                                    label: categoryOptions.find(o => o.value === formData.category)?.label || 'Select Category',
+                                                    icon: <Tag size={16} />
+                                                }}
+                                                onChange={(val) => setFormData(prev => ({ ...prev, category: val as any }))}
+                                            />
+                                        </div>
+                                        <div className="form-group half">
+                                            <label className="form-label">Applicable On</label>
+                                            <SharedDropdown
+                                                variant="compact"
+                                                value={formData.applicableOn!}
+                                                options={applicableOnOptions}
+                                                trigger={{
+                                                    label: applicableOnOptions.find(o => o.value === formData.applicableOn)?.label || 'Select Basis',
+                                                    icon: <Info size={16} />
+                                                }}
+                                                onChange={(val) => setFormData(prev => ({ ...prev, applicableOn: val as any }))}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="form-group half">
-                                        <label className="form-label">Applicable On</label>
-                                        <SharedDropdown
-                                            variant="compact"
-                                            value={formData.applicableOn}
-                                            options={applicableOnOptions}
-                                            trigger={{
-                                                label: applicableOnOptions.find(o => o.value === formData.applicableOn)?.label || 'Select Basis',
-                                                icon: <Info size={16} />
-                                            }}
-                                            onChange={(val) => setFormData(prev => ({ ...prev, applicableOn: val as any }))}
-                                        />
-                                    </div>
-                                </div>
 
-                                <div className="form-row">
-                                    <div className="form-group half">
-                                        <InputField
-                                            name="displayOrder"
-                                            label="Priority (Display Order)"
-                                            type="number"
-                                            value={formData.displayOrder}
-                                            onChange={handleChange}
-                                            placeholder="0"
-                                        />
+                                    <div className="form-section" style={{marginTop: '24px'}}>
+                                        <h3 className="section-title">Grouping</h3>
+                                        <div className="form-group">
+                                            <label className="form-label">Add to Group (Optional)</label>
+                                            <SharedDropdown
+                                                variant="compact"
+                                                value={formData.parentId || ''}
+                                                options={[{ value: '', label: 'No Group' }, ...groupOptions]}
+                                                trigger={{
+                                                    label: groupOptions.find(o => o.value === formData.parentId)?.label || 'No Group',
+                                                    icon: <FolderPlus size={16} />
+                                                }}
+                                                onChange={(val) => setFormData(prev => ({ ...prev, parentId: val || undefined }))}
+                                            />
+                                            <p className="field-hint">Select a group if this tax belongs to one (e.g. GST)</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div className="form-section">
-                                <h3 className="section-title">Grouping (Optional)</h3>
-                                <div className="checkbox-group">
-                                    <input
-                                        type="checkbox"
-                                        id="isPartOfGroup"
-                                        checked={formData.isPartOfGroup}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, isPartOfGroup: e.target.checked }))}
-                                    />
-                                    <label htmlFor="isPartOfGroup">
-                                        Is part of a tax group? (e.g. GST)
-                                    </label>
-                                </div>
-                                {formData.isPartOfGroup && (
-                                    <InputField
-                                        label="Group Name"
-                                        name="groupName"
-                                        value={formData.groupName}
-                                        onChange={handleChange}
-                                        placeholder="e.g. GST"
-                                        required={formData.isPartOfGroup}
-                                    />
-                                )}
-                            </div>
+                            )}
 
                             <div className="drawer-footer">
                                 <Button variant="outline" onClick={() => setIsDrawerOpen(false)} type="button" disabled={formLoading}>
                                     Cancel
                                 </Button>
                                 <Button variant="primary" type="submit" loading={formLoading}>
-                                    {selectedTax ? 'Update Tax' : 'Create Tax'}
+                                    {selectedTax ? 'Update' : 'Create'} {formData.type === 'group' ? 'Group' : 'Tax'}
                                 </Button>
                             </div>
                         </form>

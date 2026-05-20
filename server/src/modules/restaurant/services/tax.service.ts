@@ -38,6 +38,17 @@ export class TaxService {
       }
     }
 
+    // If parentId provided, verify it exists and is a group
+    if (data.parentId) {
+      const parent = await this.taxRepo.findById(data.parentId);
+      if (!parent || !parent.isActive) {
+        throw new AppError('Parent tax group not found', 404);
+      }
+      if (parent.type !== 'group') {
+        throw new AppError('Parent must be a tax group', 400);
+      }
+    }
+
     // Get next display order if not provided
     let displayOrder = data.displayOrder;
     if (displayOrder === undefined) {
@@ -50,11 +61,13 @@ export class TaxService {
       branchId: data.branchId ? new Types.ObjectId(data.branchId) : undefined,
       name: data.name,
       description: data.description,
+      type: data.type || 'tax',
       taxType: data.taxType,
       value: data.value,
       applicableOn: data.applicableOn,
       scope: data.scope,
       category: data.category,
+      parentId: data.parentId ? new Types.ObjectId(data.parentId) : undefined,
       conditions: data.conditions
         ? {
             ...data.conditions,
@@ -89,7 +102,7 @@ export class TaxService {
     scope: 'restaurant' | 'branch' = 'restaurant',
     category?: string,
     page: number = 1,
-    limit: number = 50
+    limit: number = 100
   ) {
     return this.taxRepo.findByRestaurant(restaurantId, scope, category, page, limit);
   }
@@ -98,7 +111,7 @@ export class TaxService {
     branchId: string,
     category?: string,
     page: number = 1,
-    limit: number = 50
+    limit: number = 100
   ) {
     return this.taxRepo.findByBranch(branchId, category, page, limit);
   }
@@ -164,6 +177,12 @@ export class TaxService {
     if (data.branchId) {
       updateData.branchId = new Types.ObjectId(data.branchId);
     }
+    if (data.parentId) {
+      updateData.parentId = new Types.ObjectId(data.parentId);
+    } else if (data.parentId === null) {
+      updateData.parentId = null;
+    }
+
     if (data.conditions) {
       updateData.conditions = { ...data.conditions };
       if (data.conditions.specificItems) {
@@ -184,6 +203,15 @@ export class TaxService {
     }
 
     return updatedTax;
+  }
+
+  async reorderTaxes(restaurantId: string, taxIds: string[]): Promise<void> {
+    const orderMap = taxIds.map((id, index) => ({
+      id,
+      displayOrder: index,
+    }));
+
+    await this.taxRepo.bulkUpdateOrder(orderMap);
   }
 
   async updateTaxStatus(id: string, restaurantId: string, isActive: boolean): Promise<ITax> {

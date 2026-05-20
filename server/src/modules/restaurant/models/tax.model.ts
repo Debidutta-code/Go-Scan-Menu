@@ -1,5 +1,5 @@
 // src/models/Tax.model.ts
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 import { ITax } from '@/types/tax.types';
 
@@ -25,14 +25,17 @@ const taxSchema = new Schema<ITax>(
       type: String,
       trim: true,
     },
+    type: {
+      type: String,
+      enum: ['tax', 'group'],
+      default: 'tax',
+    },
     taxType: {
       type: String,
       enum: ['percentage', 'fixed'],
-      default: 'percentage',
     },
     value: {
       type: Number,
-      required: true,
       min: 0,
     },
     applicableOn: {
@@ -78,6 +81,11 @@ const taxSchema = new Schema<ITax>(
         },
       ],
     },
+    parentId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Tax',
+    },
+    // Keep for backward compatibility during transition if needed
     isPartOfGroup: {
       type: Boolean,
       default: false,
@@ -104,5 +112,6 @@ const taxSchema = new Schema<ITax>(
 taxSchema.index({ restaurantId: 1, scope: 1, isActive: 1 });
 taxSchema.index({ branchId: 1, isActive: 1 });
 taxSchema.index({ restaurantId: 1, category: 1 });
+taxSchema.index({ parentId: 1 });
 
 export const Tax = mongoose.model<ITax>('Tax', taxSchema);
