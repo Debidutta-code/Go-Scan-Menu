@@ -190,6 +190,7 @@ export const TaxManagement: React.FC = () => {
                             className="tax-search-input"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
+                            data-testid="tax-search-input"
                         />
                     </div>
 
@@ -200,6 +201,7 @@ export const TaxManagement: React.FC = () => {
                             setIsDrawerOpen(true);
                         }}
                         size="sm"
+                        data-testid="add-tax-button"
                     >
                         <Plus size={18} />
                         <span className="btn-text">Add Tax</span>
@@ -218,7 +220,7 @@ export const TaxManagement: React.FC = () => {
                             <div className="loading-state">Loading taxes...</div>
                         ) : filteredTaxes.length === 0 ? (
                             <div className="empty-state">
-                                <div className="empty-icon"><Receipt size={48} /></div>
+                                    <div className="empty-icon">🧾</div>
                                 <p className="empty-title">No taxes found</p>
                                 <Button variant="outline" onClick={() => setIsDrawerOpen(true)}>
                                     Add Your First Tax
@@ -226,7 +228,7 @@ export const TaxManagement: React.FC = () => {
                             </div>
                         ) : (
                             <div className="tax-table-wrapper">
-                                <table className="tax-table">
+                                <table className="tax-table" data-testid="tax-table">
                                     <thead>
                                         <tr>
                                             <th>Name</th>
@@ -241,7 +243,7 @@ export const TaxManagement: React.FC = () => {
                                     </thead>
                                     <tbody>
                                         {filteredTaxes.map((tax) => (
-                                            <tr key={tax._id}>
+                                            <tr key={tax._id} data-testid={`tax-row-${tax._id}`}>
                                                 <td className="tax-name-cell">
                                                     <div className="tax-name-info">
                                                         <span className="name">{tax.name}</span>
@@ -299,6 +301,11 @@ export const TaxManagement: React.FC = () => {
                             </div>
                         )}
                     </div>
+                    {!loading && filteredTaxes.length > 0 && (
+                        <div className="tax-count">
+                            Showing {filteredTaxes.length} of {taxes.length} taxes
+                        </div>
+                    )}
                 </div>
             </div>
 
