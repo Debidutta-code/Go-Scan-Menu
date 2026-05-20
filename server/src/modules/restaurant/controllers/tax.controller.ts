@@ -127,4 +127,22 @@ export class TaxController {
       data: tax,
     });
   });
+
+  reorderTaxes = catchAsync(async (req: Request, res: Response) => {
+    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    const { taxIds } = req.body;
+
+    if (!taxIds || !Array.isArray(taxIds)) {
+      sendResponse(res, 400, {
+        message: 'taxIds array is required',
+      });
+      return;
+    }
+
+    await this.taxService.reorderTaxes(restaurantId!, taxIds);
+
+    sendResponse(res, 200, {
+      message: 'Taxes reordered successfully',
+    });
+  });
 }

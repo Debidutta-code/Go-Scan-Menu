@@ -6,9 +6,10 @@ export interface ITax extends Document {
   branchId?: Types.ObjectId;
   name: string;
   description?: string;
-  taxType: 'percentage' | 'fixed';
-  value: number;
-  applicableOn: 'subtotal' | 'item_total' | 'after_other_taxes';
+  type: 'tax' | 'group';
+  taxType?: 'percentage' | 'fixed';
+  value?: number;
+  applicableOn?: 'subtotal' | 'item_total' | 'after_other_taxes';
   scope: 'restaurant' | 'branch';
   category: 'food_tax' | 'service_tax' | 'room_tax' | 'luxury_tax' | 'other';
   conditions?: {
@@ -18,8 +19,9 @@ export interface ITax extends Document {
     specificItems?: Types.ObjectId[];
     specificCategories?: Types.ObjectId[];
   };
-  isPartOfGroup?: boolean;
-  groupName?: string;
+  isPartOfGroup?: boolean; // Deprecated in favor of parentId
+  groupName?: string; // Deprecated in favor of parentId
+  parentId?: Types.ObjectId;
   isActive: boolean;
   displayOrder: number;
   createdAt: Date;
@@ -29,9 +31,10 @@ export interface ITax extends Document {
 export interface CreateTaxDTO {
   name: string;
   description?: string;
-  taxType: 'percentage' | 'fixed';
-  value: number;
-  applicableOn: 'subtotal' | 'item_total' | 'after_other_taxes';
+  type?: 'tax' | 'group';
+  taxType?: 'percentage' | 'fixed';
+  value?: number;
+  applicableOn?: 'subtotal' | 'item_total' | 'after_other_taxes';
   scope: 'restaurant' | 'branch';
   branchId?: string;
   category: 'food_tax' | 'service_tax' | 'room_tax' | 'luxury_tax' | 'other';
@@ -44,7 +47,12 @@ export interface CreateTaxDTO {
   };
   isPartOfGroup?: boolean;
   groupName?: string;
+  parentId?: string;
   displayOrder?: number;
 }
 
 export interface UpdateTaxDTO extends Partial<CreateTaxDTO> {}
+
+export interface ReorderTaxDTO {
+  taxIds: string[];
+}

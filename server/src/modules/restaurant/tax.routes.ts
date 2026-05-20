@@ -54,4 +54,7 @@ router.patch(
 // Delete tax
 router.delete('/:id', ...canManageTaxes, taxController.deleteTax);
 
+// Reorder taxes
+router.patch('/reorder', ...canManageTaxes, taxController.reorderTaxes);
+
 export default router;

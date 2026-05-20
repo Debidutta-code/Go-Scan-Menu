@@ -8,12 +8,14 @@ export const createTaxSchema = z.object({
     .object({
       name: z.string().min(1, 'Name is required'),
       description: z.string().optional(),
-      taxType: z.enum(['percentage', 'fixed']),
-      value: z.number().min(0, 'Value must be generally positive'),
-      applicableOn: z.enum(['subtotal', 'item_total', 'after_other_taxes']),
-      scope: z.enum(['restaurant', 'branch']),
+      type: z.enum(['tax', 'group']).default('tax'),
+      taxType: z.enum(['percentage', 'fixed']).optional(),
+      value: z.number().min(0, 'Value must be generally positive').optional(),
+      applicableOn: z.enum(['subtotal', 'item_total', 'after_other_taxes']).optional(),
+      scope: z.enum(['restaurant', 'branch']).default('restaurant'),
       branchId: z.string().regex(objectIdRegex, 'Invalid Branch ID format').optional(),
-      category: z.enum(['food_tax', 'service_tax', 'room_tax', 'luxury_tax', 'other']),
+      category: z.enum(['food_tax', 'service_tax', 'room_tax', 'luxury_tax', 'other']).default('food_tax'),
+      parentId: z.string().regex(objectIdRegex, 'Invalid Parent ID format').optional(),
       conditions: z
         .object({
           orderType: z.array(z.enum(['dine-in', 'takeaway'])).optional(),
@@ -27,8 +29,6 @@ export const createTaxSchema = z.object({
             .optional(),
         })
         .optional(),
-      isPartOfGroup: z.boolean().optional(),
-      groupName: z.string().optional(),
       displayOrder: z.number().optional(),
     })
     .refine(
@@ -42,6 +42,30 @@ export const createTaxSchema = z.object({
         message: 'Branch ID is required when scope is branch',
         path: ['branchId'],
       }
+    )
+    .refine(
+      (data) => {
+        if (data.type === 'tax' && data.taxType === undefined) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message: 'taxType is required for tax',
+        path: ['taxType'],
+      }
+    )
+    .refine(
+      (data) => {
+        if (data.type === 'tax' && data.value === undefined) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message: 'value is required for tax',
+        path: ['value'],
+      }
     ),
 });
 
@@ -49,12 +73,14 @@ export const updateTaxSchema = z.object({
   body: z.object({
     name: z.string().min(1).optional(),
     description: z.string().optional(),
+    type: z.enum(['tax', 'group']).optional(),
     taxType: z.enum(['percentage', 'fixed']).optional(),
     value: z.number().min(0).optional(),
     applicableOn: z.enum(['subtotal', 'item_total', 'after_other_taxes']).optional(),
     scope: z.enum(['restaurant', 'branch']).optional(),
     branchId: z.string().regex(objectIdRegex, 'Invalid Branch ID format').optional(),
     category: z.enum(['food_tax', 'service_tax', 'room_tax', 'luxury_tax', 'other']).optional(),
+    parentId: z.string().regex(objectIdRegex, 'Invalid Parent ID format').nullable().optional(),
     conditions: z
       .object({
         orderType: z.array(z.enum(['dine-in', 'takeaway'])).optional(),
@@ -64,8 +90,6 @@ export const updateTaxSchema = z.object({
         specificCategories: z.array(z.string().regex(objectIdRegex)).optional(),
       })
       .optional(),
-    isPartOfGroup: z.boolean().optional(),
-    groupName: z.string().optional(),
     displayOrder: z.number().optional(),
   }),
 });

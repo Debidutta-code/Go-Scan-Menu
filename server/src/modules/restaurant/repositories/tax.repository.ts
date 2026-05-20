@@ -12,6 +12,7 @@ export class TaxRepository {
     return Tax.findById(id)
       .populate('restaurantId')
       .populate('branchId')
+      .populate('parentId')
       .populate('conditions.specificItems')
       .populate('conditions.specificCategories');
   }
@@ -21,7 +22,7 @@ export class TaxRepository {
     scope: 'restaurant' | 'branch' = 'restaurant',
     category?: string,
     page: number = 1,
-    limit: number = 50
+    limit: number = 100 // Increased default for reordering view
   ) {
     const skip = (page - 1) * limit;
     const query: any = { restaurantId, scope, isActive: true };
@@ -33,11 +34,12 @@ export class TaxRepository {
     const [taxes, total] = await Promise.all([
       Tax.find(query)
         .populate('branchId')
+        .populate('parentId')
         .populate('conditions.specificItems')
         .populate('conditions.specificCategories')
         .skip(skip)
         .limit(limit)
-        .sort({ displayOrder: 1, name: 1 }),
+        .sort({ displayOrder: 1, createdAt: 1 }),
       Tax.countDocuments(query),
     ]);
 
@@ -52,7 +54,7 @@ export class TaxRepository {
     };
   }
 
-  async findByBranch(branchId: string, category?: string, page: number = 1, limit: number = 50) {
+  async findByBranch(branchId: string, category?: string, page: number = 1, limit: number = 100) {
     const skip = (page - 1) * limit;
     const query: any = { branchId, scope: 'branch', isActive: true };
 
@@ -64,11 +66,12 @@ export class TaxRepository {
       Tax.find(query)
         .populate('restaurantId')
         .populate('branchId')
+        .populate('parentId')
         .populate('conditions.specificItems')
         .populate('conditions.specificCategories')
         .skip(skip)
         .limit(limit)
-        .sort({ displayOrder: 1, name: 1 }),
+        .sort({ displayOrder: 1, createdAt: 1 }),
       Tax.countDocuments(query),
     ]);
 
@@ -104,6 +107,7 @@ export class TaxRepository {
     return Tax.findByIdAndUpdate(id, data, { new: true })
       .populate('restaurantId')
       .populate('branchId')
+      .populate('parentId')
       .populate('conditions.specificItems')
       .populate('conditions.specificCategories');
   }
@@ -113,11 +117,22 @@ export class TaxRepository {
   }
 
   async softDelete(id: string): Promise<ITax | null> {
+    // If it's a group, also deactivate children? Or just let them be "orphaned"?
+    // Usually better to just let them be orphaned or warn in service
     return Tax.findByIdAndUpdate(id, { isActive: false }, { new: true });
   }
 
-  async hardDelete(id: string): Promise<ITax | null> {
-    return Tax.findByIdAndDelete(id);
+  async bulkUpdateOrder(orderMap: { id: string; displayOrder: number }[]): Promise<void> {
+    const bulkOps = orderMap.map((item) => ({
+      updateOne: {
+        filter: { _id: new Types.ObjectId(item.id) },
+        update: { displayOrder: item.displayOrder },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await Tax.bulkWrite(bulkOps);
+    }
   }
 
   async countByRestaurant(restaurantId: string, scope?: 'restaurant' | 'branch'): Promise<number> {
@@ -126,10 +141,6 @@ export class TaxRepository {
     return Tax.countDocuments(query);
   }
 
-  /**
-   * Find taxes by their IDs and verify they're active
-   * Used when branch has configured specific taxes
-   */
   async findByIds(taxIds: string[]): Promise<ITax[]> {
     return Tax.find({
       _id: { $in: taxIds },
