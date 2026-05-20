@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Plus, Search, Edit, Trash2, Receipt, Info, Percent, Hash, Tag } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { TaxService } from '../services/tax.service';
+import { TaxService } from '../../services/tax.service';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { Button } from '@/shared/components/Button';
 import { InputField } from '@/shared/components/InputField';
@@ -220,7 +220,7 @@ export const TaxManagement: React.FC = () => {
                             <div className="loading-state">Loading taxes...</div>
                         ) : filteredTaxes.length === 0 ? (
                             <div className="empty-state">
-                                    <div className="empty-icon">🧾</div>
+                                <div className="empty-icon">🧾</div>
                                 <p className="empty-title">No taxes found</p>
                                 <Button variant="outline" onClick={() => setIsDrawerOpen(true)}>
                                     Add Your First Tax
