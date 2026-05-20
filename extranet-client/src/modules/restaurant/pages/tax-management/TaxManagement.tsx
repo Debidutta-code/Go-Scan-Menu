@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Plus, Search, Edit, Trash2, Receipt, Info, Percent, Hash, Tag } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Info, Percent, Hash, Tag, ChevronRight, Layers } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { TaxService } from '../../services/tax.service';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
@@ -9,6 +9,14 @@ import { SharedDropdown } from '@/shared/components/SharedDropdown/SharedDropdow
 import { ITax, CreateTaxDTO } from '@/shared/types/tax.types';
 import './TaxManagement.css';
 
+const CATEGORY_META: Record<string, { label: string; color: string; bg: string }> = {
+    food_tax:    { label: 'Food Tax',       color: '#16a34a', bg: '#f0fdf4' },
+    service_tax: { label: 'Service Charge', color: '#0284c7', bg: '#f0f9ff' },
+    room_tax:    { label: 'Room Tax',       color: '#9333ea', bg: '#faf5ff' },
+    luxury_tax:  { label: 'Luxury Tax',     color: '#b45309', bg: '#fffbeb' },
+    other:       { label: 'Other',          color: '#475569', bg: '#f1f5f9' },
+};
+
 export const TaxManagement: React.FC = () => {
     const { token, staff } = useStaffAuth();
     const [taxes, setTaxes] = useState<ITax[]>([]);
@@ -17,6 +25,7 @@ export const TaxManagement: React.FC = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedTax, setSelectedTax] = useState<ITax | null>(null);
     const [formLoading, setFormLoading] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const [formData, setFormData] = useState<CreateTaxDTO>({
         name: '',
@@ -28,7 +37,7 @@ export const TaxManagement: React.FC = () => {
         category: 'food_tax',
         isPartOfGroup: false,
         groupName: '',
-        displayOrder: 0
+        displayOrder: 0,
     });
 
     const fetchTaxes = async () => {
@@ -36,20 +45,15 @@ export const TaxManagement: React.FC = () => {
         try {
             setLoading(true);
             const response = await TaxService.getTaxesByRestaurant(token, staff.restaurantId, 'restaurant');
-            if (response.success && response.data) {
-                setTaxes(response.data.taxes);
-            }
-        } catch (error) {
-            console.error('Failed to fetch taxes:', error);
+            if (response.success && response.data) setTaxes(response.data.taxes);
+        } catch {
             toast.error('Failed to load taxes');
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchTaxes();
-    }, [token, staff?.restaurantId]);
+    useEffect(() => { fetchTaxes(); }, [token, staff?.restaurantId]);
 
     useEffect(() => {
         if (selectedTax) {
@@ -63,41 +67,30 @@ export const TaxManagement: React.FC = () => {
                 category: selectedTax.category,
                 isPartOfGroup: selectedTax.isPartOfGroup || false,
                 groupName: selectedTax.groupName || '',
-                displayOrder: selectedTax.displayOrder || 0
+                displayOrder: selectedTax.displayOrder || 0,
             });
         } else {
             setFormData({
-                name: '',
-                description: '',
-                taxType: 'percentage',
-                value: 0,
-                applicableOn: 'subtotal',
-                scope: 'restaurant',
-                category: 'food_tax',
-                isPartOfGroup: false,
-                groupName: '',
-                displayOrder: taxes.length
+                name: '', description: '', taxType: 'percentage', value: 0,
+                applicableOn: 'subtotal', scope: 'restaurant', category: 'food_tax',
+                isPartOfGroup: false, groupName: '', displayOrder: taxes.length,
             });
         }
     }, [selectedTax, isDrawerOpen, taxes.length]);
 
-    const handleEdit = (tax: ITax) => {
-        setSelectedTax(tax);
-        setIsDrawerOpen(true);
-    };
+    const handleEdit = (tax: ITax) => { setSelectedTax(tax); setIsDrawerOpen(true); };
 
     const handleDelete = async (tax: ITax) => {
-        if (window.confirm(`Are you sure you want to delete "${tax.name}"?`)) {
-            try {
-                if (!token || !staff?.restaurantId) return;
-                const response = await TaxService.deleteTax(token, staff.restaurantId, tax._id);
-                if (response.success) {
-                    toast.success('Tax deleted successfully');
-                    fetchTaxes();
-                }
-            } catch (error: any) {
-                toast.error(error.message || 'Failed to delete tax');
-            }
+        if (!window.confirm(`Delete "${tax.name}"?`)) return;
+        try {
+            if (!token || !staff?.restaurantId) return;
+            setDeletingId(tax._id);
+            const response = await TaxService.deleteTax(token, staff.restaurantId, tax._id);
+            if (response.success) { toast.success('Tax deleted'); fetchTaxes(); }
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to delete tax');
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -106,7 +99,7 @@ export const TaxManagement: React.FC = () => {
             if (!token || !staff?.restaurantId) return;
             const response = await TaxService.updateTaxStatus(token, staff.restaurantId, tax._id, !tax.isActive);
             if (response.success) {
-                toast.success(`Tax ${!tax.isActive ? 'activated' : 'deactivated'} successfully`);
+                toast.success(`Tax ${!tax.isActive ? 'activated' : 'deactivated'}`);
                 fetchTaxes();
             }
         } catch (error: any) {
@@ -117,18 +110,13 @@ export const TaxManagement: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!token || !staff?.restaurantId) return;
-
         try {
             setFormLoading(true);
-            let response;
-            if (selectedTax) {
-                response = await TaxService.updateTax(token, staff.restaurantId, selectedTax._id, formData);
-            } else {
-                response = await TaxService.createTax(token, staff.restaurantId, formData);
-            }
-
+            const response = selectedTax
+                ? await TaxService.updateTax(token, staff.restaurantId, selectedTax._id, formData)
+                : await TaxService.createTax(token, staff.restaurantId, formData);
             if (response.success) {
-                toast.success(selectedTax ? 'Tax updated successfully!' : 'Tax created successfully!');
+                toast.success(selectedTax ? 'Tax updated!' : 'Tax created!');
                 setIsDrawerOpen(false);
                 fetchTaxes();
             }
@@ -141,312 +129,440 @@ export const TaxManagement: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'number' ? parseFloat(value) : value
-        }));
+        setFormData(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) : value }));
     };
 
-    const filteredTaxes = useMemo(() => {
-        return taxes.filter(tax =>
-            tax.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            tax.groupName?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    }, [taxes, searchQuery]);
+    const filteredTaxes = useMemo(() =>
+        taxes.filter(t =>
+            t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            t.groupName?.toLowerCase().includes(searchQuery.toLowerCase())
+        ), [taxes, searchQuery]);
 
     const taxTypeOptions = [
-        { value: 'percentage', label: 'Percentage (%)', icon: <Percent size={16} /> },
-        { value: 'fixed', label: 'Fixed Amount', icon: <Hash size={16} /> }
+        { value: 'percentage', label: 'Percentage (%)', icon: <Percent size={14} /> },
+        { value: 'fixed',      label: 'Fixed Amount',   icon: <Hash size={14} /> },
     ];
-
     const categoryOptions = [
-        { value: 'food_tax', label: 'Food Tax' },
+        { value: 'food_tax',    label: 'Food Tax' },
         { value: 'service_tax', label: 'Service Charge' },
-        { value: 'room_tax', label: 'Room Tax' },
-        { value: 'luxury_tax', label: 'Luxury Tax' },
-        { value: 'other', label: 'Other' }
+        { value: 'room_tax',    label: 'Room Tax' },
+        { value: 'luxury_tax',  label: 'Luxury Tax' },
+        { value: 'other',       label: 'Other' },
     ];
-
     const applicableOnOptions = [
-        { value: 'subtotal', label: 'Subtotal' },
-        { value: 'item_total', label: 'Item Total' },
-        { value: 'after_other_taxes', label: 'After Other Taxes' }
+        { value: 'subtotal',          label: 'Subtotal' },
+        { value: 'item_total',        label: 'Item Total' },
+        { value: 'after_other_taxes', label: 'After Other Taxes' },
     ];
 
     return (
-        <div className="tax-management-layout" data-testid="tax-management-page">
-            <div className="tax-page-toolbar">
-                <div className="toolbar-left">
-                    <h1 className="tax-page-title">Tax Management</h1>
-                    <p className="tax-page-subtitle">Configure taxes like GST, VAT, and Service Charges</p>
-                </div>
+        <div className="tm-root" data-testid="tax-management-page">
 
-                <div className="tax-toolbar-actions">
-                    <div className="tax-search-container">
-                        <Search size={18} className="search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Search taxes..."
-                            className="tax-search-input"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            data-testid="tax-search-input"
-                        />
-                    </div>
-
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            setSelectedTax(null);
-                            setIsDrawerOpen(true);
-                        }}
-                        size="sm"
-                        data-testid="add-tax-button"
-                    >
-                        <Plus size={18} />
-                        <span className="btn-text">Add Tax</span>
-                    </Button>
+            {/* ── Toolbar ─────────────────────────────── */}
+            <div className="tm-toolbar">
+                <div className="tm-search-wrap">
+                    <Search size={15} className="tm-search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Search taxes or groups…"
+                        className="tm-search"
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        data-testid="tax-search-input"
+                    />
                 </div>
+                <button
+                    className="tm-add-btn"
+                    onClick={() => { setSelectedTax(null); setIsDrawerOpen(true); }}
+                    data-testid="add-tax-button"
+                >
+                    <Plus size={16} />
+                    <span>New Tax</span>
+                </button>
             </div>
 
-            <div className="tax-management-content">
-                <div className="tax-list-panel">
-                    <div className="panel-header">
-                        <h2 className="panel-title">Taxes {!loading && `(${filteredTaxes.length})`}</h2>
+            {/* ── Stats strip ─────────────────────────── */}
+            {!loading && taxes.length > 0 && (
+                <div className="tm-stats">
+                    <div className="tm-stat">
+                        <span className="tm-stat-val">{taxes.length}</span>
+                        <span className="tm-stat-lbl">Total</span>
                     </div>
+                    <div className="tm-stat-divider" />
+                    <div className="tm-stat">
+                        <span className="tm-stat-val" style={{ color: '#16a34a' }}>
+                            {taxes.filter(t => t.isActive).length}
+                        </span>
+                        <span className="tm-stat-lbl">Active</span>
+                    </div>
+                    <div className="tm-stat-divider" />
+                    <div className="tm-stat">
+                        <span className="tm-stat-val" style={{ color: '#9333ea' }}>
+                            {[...new Set(taxes.filter(t => t.groupName).map(t => t.groupName))].length}
+                        </span>
+                        <span className="tm-stat-lbl">Groups</span>
+                    </div>
+                </div>
+            )}
 
-                    <div className="tax-list-container">
-                        {loading ? (
-                            <div className="loading-state">Loading taxes...</div>
-                        ) : filteredTaxes.length === 0 ? (
-                            <div className="empty-state">
-                                <div className="empty-icon">🧾</div>
-                                <p className="empty-title">No taxes found</p>
-                                <Button variant="outline" onClick={() => setIsDrawerOpen(true)}>
-                                    Add Your First Tax
-                                </Button>
-                            </div>
-                        ) : (
-                            <div className="tax-table-wrapper">
-                                <table className="tax-table" data-testid="tax-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Type</th>
-                                            <th>Value</th>
-                                            <th>Category</th>
-                                            <th>Priority</th>
-                                            <th>Group</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredTaxes.map((tax) => (
-                                            <tr key={tax._id} data-testid={`tax-row-${tax._id}`}>
-                                                <td className="tax-name-cell">
-                                                    <div className="tax-name-info">
-                                                        <span className="name">{tax.name}</span>
+            {/* ── Table ───────────────────────────────── */}
+            <div className="tm-body">
+                {loading ? (
+                    <div className="tm-skeleton-wrap">
+                        {[...Array(5)].map((_, i) => (
+                            <div className="tm-skeleton-row" key={i} style={{ animationDelay: `${i * 80}ms` }} />
+                        ))}
+                    </div>
+                ) : filteredTaxes.length === 0 ? (
+                    <div className="tm-empty">
+                        <div className="tm-empty-icon">🧾</div>
+                        <p className="tm-empty-title">No taxes configured</p>
+                        <p className="tm-empty-sub">Add your first tax rule to get started</p>
+                        <button className="tm-empty-btn" onClick={() => setIsDrawerOpen(true)}>
+                            <Plus size={15} /> Add Tax
+                        </button>
+                    </div>
+                ) : (
+                    <div className="tm-table-wrap">
+                        <table className="tm-table" data-testid="tax-table">
+                            <thead>
+                                <tr>
+                                    <th>Tax Name</th>
+                                    <th>Value</th>
+                                    <th>Category</th>
+                                    <th>Applies On</th>
+                                    <th>Order</th>
+                                    <th>Group</th>
+                                    <th>Status</th>
+                                    <th />
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredTaxes.map((tax, idx) => {
+                                    const cat = CATEGORY_META[tax.category] ?? CATEGORY_META.other;
+                                    return (
+                                        <tr
+                                            key={tax._id}
+                                            className={deletingId === tax._id ? 'tm-row-deleting' : ''}
+                                            style={{ animationDelay: `${idx * 40}ms` }}
+                                            data-testid={`tax-row-${tax._id}`}
+                                        >
+                                            {/* Name */}
+                                            <td>
+                                                <div className="tm-name-cell">
+                                                    <div className="tm-name-icon">
+                                                        {tax.taxType === 'percentage'
+                                                            ? <Percent size={13} />
+                                                            : <Hash size={13} />}
+                                                    </div>
+                                                    <div>
+                                                        <span className="tm-name">{tax.name}</span>
                                                         {tax.description && (
-                                                            <div className="tax-description-tooltip">
-                                                                <Info size={14} className="info-icon" />
-                                                                <span className="tooltip-text">{tax.description}</span>
-                                                            </div>
+                                                            <span className="tm-desc">{tax.description}</span>
                                                         )}
                                                     </div>
-                                                </td>
-                                                <td className="tax-type">{tax.taxType}</td>
-                                                <td className="tax-value">
-                                                    {tax.taxType === 'percentage' ? `${tax.value}%` : tax.value}
-                                                </td>
-                                                <td className="tax-category">
-                                                    {tax.category.replace('_', ' ')}
-                                                </td>
-                                                <td className="tax-order">{tax.displayOrder}</td>
-                                                <td className="tax-group">
-                                                    {tax.isPartOfGroup ? (
-                                                        <span className="group-badge">{tax.groupName}</span>
-                                                    ) : (
-                                                        <span className="no-group">-</span>
-                                                    )}
-                                                </td>
-                                                <td>
+                                                </div>
+                                            </td>
+
+                                            {/* Value */}
+                                            <td>
+                                                <span className="tm-value">
+                                                    {tax.taxType === 'percentage' ? `${tax.value}%` : `₹${tax.value}`}
+                                                </span>
+                                            </td>
+
+                                            {/* Category */}
+                                            <td>
+                                                <span
+                                                    className="tm-cat-badge"
+                                                    style={{ color: cat.color, background: cat.bg }}
+                                                >
+                                                    {cat.label}
+                                                </span>
+                                            </td>
+
+                                            {/* Applies on */}
+                                            <td>
+                                                <span className="tm-applies">
+                                                    {applicableOnOptions.find(o => o.value === tax.applicableOn)?.label ?? tax.applicableOn}
+                                                </span>
+                                            </td>
+
+                                            {/* Order */}
+                                            <td>
+                                                <span className="tm-order">{tax.displayOrder}</span>
+                                            </td>
+
+                                            {/* Group */}
+                                            <td>
+                                                {tax.isPartOfGroup && tax.groupName ? (
+                                                    <span className="tm-group-badge">
+                                                        <Layers size={11} />
+                                                        {tax.groupName}
+                                                    </span>
+                                                ) : (
+                                                    <span className="tm-no-group">—</span>
+                                                )}
+                                            </td>
+
+                                            {/* Status */}
+                                            <td>
+                                                <button
+                                                    className={`tm-status ${tax.isActive ? 'tm-status--on' : 'tm-status--off'}`}
+                                                    onClick={() => toggleStatus(tax)}
+                                                    title={tax.isActive ? 'Click to deactivate' : 'Click to activate'}
+                                                >
+                                                    <span className="tm-status-dot" />
+                                                    {tax.isActive ? 'Active' : 'Inactive'}
+                                                </button>
+                                            </td>
+
+                                            {/* Actions */}
+                                            <td>
+                                                <div className="tm-actions">
                                                     <button
-                                                        className={`status-toggle ${tax.isActive ? 'active' : 'inactive'}`}
-                                                        onClick={() => toggleStatus(tax)}
-                                                    >
-                                                        {tax.isActive ? 'Active' : 'Inactive'}
-                                                    </button>
-                                                </td>
-                                                <td className="action-buttons">
-                                                    <button
-                                                        className="icon-button edit"
+                                                        className="tm-icon-btn tm-icon-btn--edit"
                                                         onClick={() => handleEdit(tax)}
-                                                        title="Edit Tax"
+                                                        title="Edit"
                                                     >
-                                                        <Edit size={16} />
+                                                        <Edit size={14} />
                                                     </button>
                                                     <button
-                                                        className="icon-button delete"
+                                                        className="tm-icon-btn tm-icon-btn--del"
                                                         onClick={() => handleDelete(tax)}
-                                                        title="Delete Tax"
+                                                        title="Delete"
                                                     >
-                                                        <Trash2 size={16} />
+                                                        <Trash2 size={14} />
                                                     </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     </div>
-                    {!loading && filteredTaxes.length > 0 && (
-                        <div className="tax-count">
-                            Showing {filteredTaxes.length} of {taxes.length} taxes
-                        </div>
-                    )}
-                </div>
+                )}
             </div>
 
+            {/* ── Footer count ────────────────────────── */}
+            {!loading && filteredTaxes.length > 0 && (
+                <div className="tm-footer">
+                    Showing <strong>{filteredTaxes.length}</strong> of <strong>{taxes.length}</strong> taxes
+                </div>
+            )}
+
+            {/* ── Drawer ──────────────────────────────── */}
             {isDrawerOpen && (
-                <div className="tax-drawer-overlay" onClick={() => setIsDrawerOpen(false)}>
-                    <div className="tax-drawer" onClick={e => e.stopPropagation()}>
-                        <div className="drawer-header">
-                            <h2>{selectedTax ? 'Edit Tax' : 'Add New Tax'}</h2>
-                            <button type="button" className="close-drawer" onClick={() => setIsDrawerOpen(false)}>×</button>
+                <div className="tm-overlay" onClick={() => setIsDrawerOpen(false)}>
+                    <aside className="tm-drawer" onClick={e => e.stopPropagation()}>
+
+                        {/* Drawer header */}
+                        <div className="tm-drawer-header">
+                            <div>
+                                <p className="tm-drawer-eyebrow">{selectedTax ? 'Edit rule' : 'New rule'}</p>
+                                <h2 className="tm-drawer-title">
+                                    {selectedTax ? selectedTax.name : 'Configure Tax'}
+                                </h2>
+                            </div>
+                            <button className="tm-drawer-close" onClick={() => setIsDrawerOpen(false)}>
+                                ✕
+                            </button>
                         </div>
-                        <form onSubmit={handleSubmit} className="drawer-body">
-                            <div className="form-section">
-                                <h3 className="section-title">Basic Information</h3>
-                                <InputField
-                                    label="Tax Name"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    placeholder="e.g. CGST, SGST, VAT"
-                                    required
-                                />
-                                <div className="form-group">
-                                    <label className="form-label">Description</label>
-                                    <textarea
-                                        name="description"
-                                        className="form-textarea"
-                                        value={formData.description}
+
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="tm-drawer-body">
+
+                            {/* Section: Identity */}
+                            <fieldset className="tm-fieldset">
+                                <legend className="tm-legend">
+                                    <span className="tm-legend-num">01</span> Identity
+                                </legend>
+
+                                <div className="tm-field">
+                                    <label className="tm-label">Tax Name <span className="tm-req">*</span></label>
+                                    <input
+                                        name="name"
+                                        className="tm-input"
+                                        value={formData.name}
                                         onChange={handleChange}
-                                        placeholder="Brief description of this tax"
-                                        rows={3}
+                                        placeholder="e.g. CGST, SGST, VAT"
+                                        required
                                     />
                                 </div>
-                            </div>
 
-                            <div className="form-section">
-                                <h3 className="section-title">Tax Configuration</h3>
-                                <div className="form-row">
-                                    <div className="form-group half">
-                                        <label className="form-label">Tax Type</label>
-                                        <SharedDropdown
-                                            variant="compact"
-                                            value={formData.taxType}
-                                            options={taxTypeOptions}
-                                            trigger={{
-                                                label: taxTypeOptions.find(o => o.value === formData.taxType)?.label || 'Select Type',
-                                                icon: <Tag size={16} />
-                                            }}
-                                            onChange={(val) => setFormData(prev => ({ ...prev, taxType: val as any }))}
-                                        />
-                                    </div>
-                                    <div className="form-group half">
-                                        <InputField
-                                            label={formData.taxType === 'percentage' ? 'Percentage (%)' : 'Fixed Amount'}
-                                            name="value"
-                                            type="number"
-                                            value={formData.value}
-                                            onChange={handleChange}
-                                            placeholder="0.00"
-                                            required
-                                        />
+                                <div className="tm-field">
+                                    <label className="tm-label">Description</label>
+                                    <textarea
+                                        name="description"
+                                        className="tm-textarea"
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                        placeholder="Optional – brief description of this tax"
+                                        rows={2}
+                                    />
+                                </div>
+                            </fieldset>
+
+                            {/* Section: Calculation */}
+                            <fieldset className="tm-fieldset">
+                                <legend className="tm-legend">
+                                    <span className="tm-legend-num">02</span> Calculation
+                                </legend>
+
+                                <div className="tm-row">
+                                    <div className="tm-field">
+                                        <label className="tm-label">Type</label>
+                                        <div className="tm-segmented">
+                                            {taxTypeOptions.map(opt => (
+                                                <button
+                                                    key={opt.value}
+                                                    type="button"
+                                                    className={`tm-seg-btn ${formData.taxType === opt.value ? 'tm-seg-btn--active' : ''}`}
+                                                    onClick={() => setFormData(p => ({ ...p, taxType: opt.value as any }))}
+                                                >
+                                                    {opt.icon}
+                                                    {opt.label}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="form-row">
-                                    <div className="form-group half">
-                                        <label className="form-label">Category</label>
-                                        <SharedDropdown
-                                            variant="compact"
-                                            value={formData.category}
-                                            options={categoryOptions}
-                                            trigger={{
-                                                label: categoryOptions.find(o => o.value === formData.category)?.label || 'Select Category',
-                                                icon: <Tag size={16} />
-                                            }}
-                                            onChange={(val) => setFormData(prev => ({ ...prev, category: val as any }))}
-                                        />
+                                <div className="tm-row">
+                                    <div className="tm-field tm-field--half">
+                                        <label className="tm-label">
+                                            {formData.taxType === 'percentage' ? 'Rate (%)' : 'Amount (₹)'}
+                                            <span className="tm-req"> *</span>
+                                        </label>
+                                        <div className="tm-input-affixed">
+                                            <span className="tm-affix">
+                                                {formData.taxType === 'percentage' ? '%' : '₹'}
+                                            </span>
+                                            <input
+                                                name="value"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                className="tm-input tm-input--affixed"
+                                                value={formData.value}
+                                                onChange={handleChange}
+                                                placeholder="0.00"
+                                                required
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="form-group half">
-                                        <label className="form-label">Applicable On</label>
-                                        <SharedDropdown
-                                            variant="compact"
-                                            value={formData.applicableOn}
-                                            options={applicableOnOptions}
-                                            trigger={{
-                                                label: applicableOnOptions.find(o => o.value === formData.applicableOn)?.label || 'Select Basis',
-                                                icon: <Info size={16} />
-                                            }}
-                                            onChange={(val) => setFormData(prev => ({ ...prev, applicableOn: val as any }))}
-                                        />
-                                    </div>
-                                </div>
 
-                                <div className="form-row">
-                                    <div className="form-group half">
-                                        <InputField
+                                    <div className="tm-field tm-field--half">
+                                        <label className="tm-label">Priority Order</label>
+                                        <input
                                             name="displayOrder"
-                                            label="Priority (Display Order)"
                                             type="number"
+                                            min="0"
+                                            className="tm-input"
                                             value={formData.displayOrder}
                                             onChange={handleChange}
                                             placeholder="0"
                                         />
                                     </div>
                                 </div>
-                            </div>
+                            </fieldset>
 
-                            <div className="form-section">
-                                <h3 className="section-title">Grouping (Optional)</h3>
-                                <div className="checkbox-group">
-                                    <input
-                                        type="checkbox"
-                                        id="isPartOfGroup"
-                                        checked={formData.isPartOfGroup}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, isPartOfGroup: e.target.checked }))}
-                                    />
-                                    <label htmlFor="isPartOfGroup">
-                                        Is part of a tax group? (e.g. GST)
-                                    </label>
+                            {/* Section: Scope */}
+                            <fieldset className="tm-fieldset">
+                                <legend className="tm-legend">
+                                    <span className="tm-legend-num">03</span> Scope & Category
+                                </legend>
+
+                                <div className="tm-row">
+                                    <div className="tm-field tm-field--half">
+                                        <label className="tm-label">Category</label>
+                                        <select
+                                            name="category"
+                                            className="tm-select"
+                                            value={formData.category}
+                                            onChange={e => setFormData(p => ({ ...p, category: e.target.value as any }))}
+                                        >
+                                            {categoryOptions.map(o => (
+                                                <option key={o.value} value={o.value}>{o.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="tm-field tm-field--half">
+                                        <label className="tm-label">Applies On</label>
+                                        <select
+                                            name="applicableOn"
+                                            className="tm-select"
+                                            value={formData.applicableOn}
+                                            onChange={e => setFormData(p => ({ ...p, applicableOn: e.target.value as any }))}
+                                        >
+                                            {applicableOnOptions.map(o => (
+                                                <option key={o.value} value={o.value}>{o.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
-                                {formData.isPartOfGroup && (
-                                    <InputField
-                                        label="Group Name"
-                                        name="groupName"
-                                        value={formData.groupName}
-                                        onChange={handleChange}
-                                        placeholder="e.g. GST"
-                                        required={formData.isPartOfGroup}
-                                    />
-                                )}
-                            </div>
+                            </fieldset>
 
-                            <div className="drawer-footer">
-                                <Button variant="outline" onClick={() => setIsDrawerOpen(false)} type="button" disabled={formLoading}>
+                            {/* Section: Grouping */}
+                            <fieldset className="tm-fieldset">
+                                <legend className="tm-legend">
+                                    <span className="tm-legend-num">04</span> Grouping
+                                    <span className="tm-legend-hint">optional</span>
+                                </legend>
+
+                                <label className="tm-toggle-row">
+                                    <div className="tm-toggle-info">
+                                        <span className="tm-toggle-title">Part of a tax group</span>
+                                        <span className="tm-toggle-sub">e.g. CGST + SGST under "GST"</span>
+                                    </div>
+                                    <div
+                                        className={`tm-toggle ${formData.isPartOfGroup ? 'tm-toggle--on' : ''}`}
+                                        onClick={() => setFormData(p => ({ ...p, isPartOfGroup: !p.isPartOfGroup }))}
+                                    >
+                                        <div className="tm-toggle-thumb" />
+                                    </div>
+                                </label>
+
+                                {formData.isPartOfGroup && (
+                                    <div className="tm-field tm-field--animate">
+                                        <label className="tm-label">Group Name <span className="tm-req">*</span></label>
+                                        <input
+                                            name="groupName"
+                                            className="tm-input"
+                                            value={formData.groupName}
+                                            onChange={handleChange}
+                                            placeholder="e.g. GST"
+                                            required={formData.isPartOfGroup}
+                                        />
+                                    </div>
+                                )}
+                            </fieldset>
+
+                            {/* Footer */}
+                            <div className="tm-drawer-footer">
+                                <button
+                                    type="button"
+                                    className="tm-btn-cancel"
+                                    onClick={() => setIsDrawerOpen(false)}
+                                    disabled={formLoading}
+                                >
                                     Cancel
-                                </Button>
-                                <Button variant="primary" type="submit" loading={formLoading}>
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="tm-btn-submit"
+                                    disabled={formLoading}
+                                >
+                                    {formLoading
+                                        ? <span className="tm-spinner" />
+                                        : <ChevronRight size={16} />}
                                     {selectedTax ? 'Update Tax' : 'Create Tax'}
-                                </Button>
+                                </button>
                             </div>
                         </form>
-                    </div>
+                    </aside>
                 </div>
             )}
         </div>
