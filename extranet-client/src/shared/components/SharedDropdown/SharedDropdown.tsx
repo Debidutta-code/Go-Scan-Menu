@@ -209,6 +209,7 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
     >
       {/* Trigger */}
       <button
+        type="button"
         className={`sd-trigger ${open ? 'open' : ''} ${disabled ? 'disabled' : ''}`}
         onClick={handleToggle}
         data-testid={testId}
@@ -267,6 +268,7 @@ export const SharedDropdown: React.FC<SharedDropdownProps> = ({
             const isActive = opt.value === value;
             return (
               <button
+                type="button"
                 key={opt.value}
                 role="option"
                 aria-selected={isActive}

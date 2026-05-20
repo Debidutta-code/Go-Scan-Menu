@@ -5,6 +5,7 @@ import { BranchRepository } from '../repositories/branch.repository';
 import { ITax } from '../models/tax.model';
 import { AppError } from '@/utils/AppError';
 import { Types } from 'mongoose';
+import { ParamsUtil } from '@/utils/params.util';
 import { CreateTaxDTO, UpdateTaxDTO } from '@/types/tax.types';
 
 export class TaxService {
@@ -155,7 +156,7 @@ export class TaxService {
       throw new AppError('Tax not found', 404);
     }
 
-    if (tax.restaurantId.toString() !== restaurantId) {
+    if (ParamsUtil.extractId(tax.restaurantId) !== restaurantId) {
       throw new AppError('Tax does not belong to this restaurant', 403);
     }
 
@@ -191,7 +192,7 @@ export class TaxService {
       throw new AppError('Tax not found', 404);
     }
 
-    if (tax.restaurantId.toString() !== restaurantId) {
+    if (ParamsUtil.extractId(tax.restaurantId) !== restaurantId) {
       throw new AppError('Tax does not belong to this restaurant', 403);
     }
 
@@ -209,7 +210,7 @@ export class TaxService {
       throw new AppError('Tax not found', 404);
     }
 
-    if (tax.restaurantId.toString() !== restaurantId) {
+    if (ParamsUtil.extractId(tax.restaurantId) !== restaurantId) {
       throw new AppError('Tax does not belong to this restaurant', 403);
     }
 

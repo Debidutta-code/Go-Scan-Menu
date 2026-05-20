@@ -307,7 +307,7 @@ export const TaxManagement: React.FC = () => {
                     <div className="tax-drawer" onClick={e => e.stopPropagation()}>
                         <div className="drawer-header">
                             <h2>{selectedTax ? 'Edit Tax' : 'Add New Tax'}</h2>
-                            <button className="close-drawer" onClick={() => setIsDrawerOpen(false)}>×</button>
+                            <button type="button" className="close-drawer" onClick={() => setIsDrawerOpen(false)}>×</button>
                         </div>
                         <form onSubmit={handleSubmit} className="drawer-body">
                             <div className="form-section">
@@ -414,7 +414,9 @@ export const TaxManagement: React.FC = () => {
                                         checked={formData.isPartOfGroup}
                                         onChange={(e) => setFormData(prev => ({ ...prev, isPartOfGroup: e.target.checked }))}
                                     />
-                                    <label htmlFor="isPartOfGroup">Is part of a tax group? (e.g. GST)</label>
+                                    <label htmlFor="isPartOfGroup">
+                                        Is part of a tax group? (e.g. GST)
+                                    </label>
                                 </div>
                                 {formData.isPartOfGroup && (
                                     <InputField
