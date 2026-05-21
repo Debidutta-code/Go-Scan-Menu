@@ -68,6 +68,7 @@
 
 .branch-selector-toggle {
   display: inline-flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--spacing-2);
   padding: 0 var(--spacing-3);

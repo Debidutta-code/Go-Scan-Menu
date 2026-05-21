@@ -15,7 +15,8 @@ export class ApiLogController {
       if (method) query.method = method;
       if (statusCode) query.statusCode = parseInt(statusCode as string);
       if (search) {
-        query.url = { $regex: search, $options: 'i' };
+        const escapedSearch = (search as string).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        query.url = { $regex: escapedSearch, $options: 'i' };
       }
 
       const logs = await ApiLog.find(query)

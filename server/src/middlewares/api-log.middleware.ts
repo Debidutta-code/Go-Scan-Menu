@@ -1,14 +1,29 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApiLog } from '@/modules/analytics/models/api-log.model';
 
-const sensitiveFields = ['password', 'token', 'accessToken', 'refreshToken', 'oldPassword', 'newPassword'];
+const sensitiveFields = [
+  'password',
+  'token',
+  'accessToken',
+  'refreshToken',
+  'oldPassword',
+  'newPassword',
+  'authorization',
+  'cookie',
+  'set-cookie'
+];
 
 const maskSensitiveData = (data: any): any => {
   if (!data || typeof data !== 'object') return data;
 
+  if (Array.isArray(data)) {
+    return data.map(item => maskSensitiveData(item));
+  }
+
   const maskedData = { ...data };
   for (const key of Object.keys(maskedData)) {
-    if (sensitiveFields.includes(key)) {
+    const lowerKey = key.toLowerCase();
+    if (sensitiveFields.some(field => lowerKey.includes(field))) {
       maskedData[key] = '********';
     } else if (typeof maskedData[key] === 'object') {
       maskedData[key] = maskSensitiveData(maskedData[key]);
@@ -18,6 +33,12 @@ const maskSensitiveData = (data: any): any => {
 };
 
 export const apiLogMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  // Don't log health check or logs endpoint itself to avoid bloat/infinite loops
+  const excludedPaths = ['/health', '/superadmin/logs', '/api/v1/health'];
+  if (excludedPaths.some(path => req.originalUrl.includes(path))) {
+    return next();
+  }
+
   const start = Date.now();
 
   // Capture the original send method to intercept response body
@@ -31,11 +52,6 @@ export const apiLogMiddleware = async (req: Request, res: Response, next: NextFu
 
   res.on('finish', async () => {
     const duration = Date.now() - start;
-
-    // Don't log the logs endpoint itself to avoid infinite loops/bloat
-    if (req.originalUrl.includes('/superadmin/logs')) {
-      return;
-    }
 
     try {
       let parsedResBody = responseBody;
