@@ -483,6 +483,10 @@ export const TaxManagement: React.FC = () => {
         { value: 'after_other_taxes', label: 'After Other Taxes' },
     ];
 
+    const totalCombinedPct = taxes
+        .filter(t => t.type === 'tax' && t.taxType === 'percentage' && t.isActive)
+        .reduce((s, t) => s + (t.value || 0), 0);
+
     return (
         <div className="tax-management-layout" data-testid="tax-management-page">
 
@@ -640,6 +644,7 @@ export const TaxManagement: React.FC = () => {
                             <button type="button" className="close-drawer" onClick={() => setIsDrawerOpen(false)}>×</button>
                         </div>
 
+
                         <form onSubmit={handleSubmit} className="drawer-body">
 
                             {/* Type Toggle */}
@@ -768,6 +773,8 @@ export const TaxManagement: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            )}
 
                                     {/* Grouping */}
                                     <div className="form-section">
@@ -801,13 +808,13 @@ export const TaxManagement: React.FC = () => {
                                         The group acts as a combined label (e.g. GST = CGST + SGST).
                                     </p>
                                 </div>
-                            )}
+                            </div>
 
                             <div className="drawer-footer">
                                 <Button variant="outline" onClick={() => setIsDrawerOpen(false)} type="button" disabled={formLoading}>
                                     Cancel
                                 </Button>
-                                <Button variant="primary" type="submit" loading={formLoading}>
+                                <Button variant="primary" type="submit" loading={formLoading} rounded>
                                     {selectedTax ? 'Update' : 'Create'} {formData.type === 'group' ? 'Group' : 'Tax'}
                                 </Button>
                             </div>

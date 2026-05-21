@@ -5,10 +5,12 @@
   font-weight: var(--font-weight-semibold);
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
-  border: none;
+  border: 1px solid transparent;
   white-space: nowrap;
+  gap: var(--spacing-2);
+  outline: none;
 }
 
 .btn-sm {
@@ -18,13 +20,13 @@
 }
 
 .btn-md {
-  height: 44px;
+  height: 42px;
   padding: 0 20px;
   font-size: 1rem;
 }
 
 .btn-lg {
-  height: 52px;
+  height: 50px;
   padding: 0 24px;
   font-size: 1.125rem;
 }
@@ -33,26 +35,45 @@
   width: 100%;
 }
 
+.btn-rounded {
+  border-radius: var(--radius-full);
+}
+
+/* Primary - matching Table Management style and high quality */
 .btn-primary {
   color: white;
-  background: var(--primary-500);
+  background: var(--primary-600);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-primary:hover:not(:disabled):not(.loading) {
-  background: var(--primary-600);
+  background: var(--primary-700);
   transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
+.btn-primary:active:not(:disabled):not(.loading) {
+  transform: translateY(0);
+  background: var(--primary-800);
+}
+
+/* Secondary - matching design in images */
 .btn-secondary {
-  color: var(--gray-900);
-  background: var(--gray-100);
-  border: 1px solid var(--gray-200);
+  color: var(--primary-600);
+  background: var(--primary-50);
+  border: 1.5px solid var(--primary-200);
 }
 
 .btn-secondary:hover:not(:disabled):not(.loading) {
-  background: var(--gray-200);
-  border-color: var(--gray-300);
+  background: var(--primary-100);
+  border-color: var(--primary-300);
+  color: var(--primary-700);
   transform: translateY(-1px);
+}
+
+.btn-secondary:active:not(:disabled):not(.loading) {
+  transform: translateY(0);
+  background: var(--primary-200);
 }
 
 .btn-outline {
@@ -90,32 +111,40 @@
   opacity: 0.7;
 }
 
-.btn:disabled,
-.btn.loading {
+.btn:disabled:not(.loading) {
   cursor: not-allowed;
-  opacity: 0.65;
+  opacity: 0.5;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .btn-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.btn-icon-left {
-  margin-right: var(--spacing-2);
-}
-
-.btn-icon-right {
-  margin-left: var(--spacing-2);
+  flex-shrink: 0;
 }
 
 .btn-text {
   display: inline-block;
+  line-height: 1;
 }
 
 .btn-loading-content {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
 }

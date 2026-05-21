@@ -2,7 +2,7 @@ import express from 'express';
 import apiV1Routes from '@/routes';
 import { requestLogger, corsMiddleware } from '@/config';
 import { AppError } from '@/utils';
-import { globalErrorHandler } from '@/middlewares';
+import { globalErrorHandler, apiLogMiddleware } from '@/middlewares';
 
 const app = express();
 
@@ -16,6 +16,9 @@ app.use(express.json());
 
 // Log incoming requests
 app.use(requestLogger);
+
+// API Request/Response Logger (for DB storage)
+app.use(apiLogMiddleware);
 
 /* ===================== ROUTES ===================== */
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { StaffLayout } from '@/shared/layouts/StaffLayout';
+import { SuperAdminLayout } from '@/shared/layouts/SuperAdminLayout';
 import { ProtectedAdminRoute, ProtectedStaffRoute } from '@/modules/auth/guards';
 
 import { authRoutes } from '@/modules/auth/routes';
@@ -24,7 +25,7 @@ export const AppRouter = () => {
             ))}
 
             {/* Admin Protected Routes */}
-            <Route element={<ProtectedAdminRoute><Outlet /></ProtectedAdminRoute>}>
+            <Route element={<ProtectedAdminRoute><SuperAdminLayout /></ProtectedAdminRoute>}>
                 {[...dashboardRoutes.filter(r => r.path === '/dashboard'), ...restaurantRoutes].map((route) => (
                     <Route key={route.path} path={route.path} element={route.element} />
                 ))}
