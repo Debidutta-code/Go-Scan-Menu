@@ -9,9 +9,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
   iconPlacement?: 'left' | 'right';
-  rounded?: boolean;
   children: React.ReactNode;
 }
 
@@ -23,9 +21,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       fullWidth = false,
       loading = false,
       icon,
-      rightIcon,
       iconPlacement = 'left',
-      rounded = false,
       disabled,
       className = '',
       children,
@@ -35,38 +31,35 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const isDisabled = disabled || loading;
 
+    const classes = [
+      'shared-btn',
+      `shared-btn-${variant}`,
+      `shared-btn-${size}`,
+      fullWidth ? 'shared-btn-full-width' : '',
+      loading ? 'shared-btn-loading' : '',
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
     return (
       <button
         ref={ref}
         type="button"
-        className={`
-          btn
-          btn-${variant}
-          btn-${size}
-          ${fullWidth ? 'full-width' : ''}
-          ${loading ? 'loading' : ''}
-          ${rounded ? 'btn-rounded' : ''}
-          ${className}
-        `.trim()}
+        className={classes}
         disabled={isDisabled}
         {...props}
       >
         {loading ? (
-          <span className="btn-loading-content">
-            <span className="btn-spinner"></span>
-            Loading...
-          </span>
+          <span className="shared-btn-spinner">Loading…</span>
         ) : (
           <>
             {icon && iconPlacement === 'left' && (
-              <span className="btn-icon btn-icon-left">{icon}</span>
+              <span className="shared-btn-icon">{icon}</span>
             )}
-            <span className="btn-text">{children}</span>
+            {children}
             {icon && iconPlacement === 'right' && (
-              <span className="btn-icon btn-icon-right">{icon}</span>
-            )}
-            {rightIcon && (
-              <span className="btn-icon btn-icon-right-extra">{rightIcon}</span>
+              <span className="shared-btn-icon">{icon}</span>
             )}
           </>
         )}

@@ -483,14 +483,10 @@ export const TaxManagement: React.FC = () => {
         { value: 'after_other_taxes', label: 'After Other Taxes' },
     ];
 
-    const totalCombinedPct = taxes
-        .filter(t => t.type === 'tax' && t.taxType === 'percentage' && t.isActive)
-        .reduce((s, t) => s + (t.value || 0), 0);
-
     return (
         <div className="tax-management-layout" data-testid="tax-management-page">
 
-            {/* ─── Toolbar (unchanged) ─── */}
+            {/* ─── Toolbar ─── */}
             <div className="tax-page-toolbar">
                 <div className="toolbar-left">
                     <h1 className="tax-page-title">Tax Management</h1>
@@ -644,7 +640,6 @@ export const TaxManagement: React.FC = () => {
                             <button type="button" className="close-drawer" onClick={() => setIsDrawerOpen(false)}>×</button>
                         </div>
 
-
                         <form onSubmit={handleSubmit} className="drawer-body">
 
                             {/* Type Toggle */}
@@ -717,6 +712,8 @@ export const TaxManagement: React.FC = () => {
 
                                     <div className="form-section">
                                         <h3 className="section-title">Tax Details</h3>
+
+                                        {/* Row 1: Tax Type + Rate */}
                                         <div className="form-row">
                                             <div className="form-group half">
                                                 <label className="form-label">Tax Type</label>
@@ -744,6 +741,7 @@ export const TaxManagement: React.FC = () => {
                                             </div>
                                         </div>
 
+                                        {/* Row 2: Category + Applicable On */}
                                         <div className="form-row">
                                             <div className="form-group half">
                                                 <label className="form-label">Category</label>
@@ -773,8 +771,6 @@ export const TaxManagement: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
 
                                     {/* Grouping */}
                                     <div className="form-section">
@@ -808,13 +804,13 @@ export const TaxManagement: React.FC = () => {
                                         The group acts as a combined label (e.g. GST = CGST + SGST).
                                     </p>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="drawer-footer">
                                 <Button variant="outline" onClick={() => setIsDrawerOpen(false)} type="button" disabled={formLoading}>
                                     Cancel
                                 </Button>
-                                <Button variant="primary" type="submit" loading={formLoading} rounded>
+                                <Button variant="primary" type="submit" loading={formLoading}>
                                     {selectedTax ? 'Update' : 'Create'} {formData.type === 'group' ? 'Group' : 'Tax'}
                                 </Button>
                             </div>
