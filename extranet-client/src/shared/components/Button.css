@@ -39,7 +39,7 @@
   border-radius: var(--radius-full);
 }
 
-/* Primary - matching Table Management style */
+/* Primary - matching Table Management style and high quality */
 .btn-primary {
   color: white;
   background: var(--primary-600);
