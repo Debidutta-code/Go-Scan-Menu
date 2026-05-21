@@ -13,6 +13,34 @@ export interface IApiLog extends Document {
   duration: number;
   userId?: string;
   userEmail?: string;
+  device?: {
+    deviceType?: string;
+    deviceVendor?: string;
+    deviceModel?: string;
+    browserName?: string;
+    browserVersion?: string;
+    osName?: string;
+    osVersion?: string;
+  };
+  network?: {
+    ipAddress?: string;
+    requestMethod?: string;
+    endpoint?: string;
+    host?: string;
+    protocol?: string;
+  };
+  location?: {
+    country?: string;
+    countryCode?: string;
+    state?: string;
+    city?: string;
+    postalCode?: string;
+    timezone?: string;
+    latitude?: number;
+    longitude?: number;
+    isp?: string;
+    organization?: string;
+  };
   timestamp: Date;
 }
 
@@ -30,6 +58,34 @@ const apiLogSchema = new Schema<IApiLog>(
     duration: { type: Number },
     userId: { type: String },
     userEmail: { type: String },
+    device: {
+      deviceType: String,
+      deviceVendor: String,
+      deviceModel: String,
+      browserName: String,
+      browserVersion: String,
+      osName: String,
+      osVersion: String,
+    },
+    network: {
+      ipAddress: String,
+      requestMethod: String,
+      endpoint: String,
+      host: String,
+      protocol: String,
+    },
+    location: {
+      country: String,
+      countryCode: String,
+      state: String,
+      city: String,
+      postalCode: String,
+      timezone: String,
+      latitude: Number,
+      longitude: Number,
+      isp: String,
+      organization: String,
+    },
     timestamp: { type: Date, default: Date.now },
   },
   {

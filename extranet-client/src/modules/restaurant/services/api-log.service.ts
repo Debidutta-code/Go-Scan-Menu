@@ -15,6 +15,34 @@ export interface ApiLog {
   duration: number;
   userId?: string;
   userEmail?: string;
+  device?: {
+    deviceType?: string;
+    deviceVendor?: string;
+    deviceModel?: string;
+    browserName?: string;
+    browserVersion?: string;
+    osName?: string;
+    osVersion?: string;
+  };
+  network?: {
+    ipAddress?: string;
+    requestMethod?: string;
+    endpoint?: string;
+    host?: string;
+    protocol?: string;
+  };
+  location?: {
+    country?: string;
+    countryCode?: string;
+    state?: string;
+    city?: string;
+    postalCode?: string;
+    timezone?: string;
+    latitude?: number;
+    longitude?: number;
+    isp?: string;
+    organization?: string;
+  };
   timestamp: string;
 }
 
