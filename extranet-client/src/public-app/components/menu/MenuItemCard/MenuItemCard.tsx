@@ -32,14 +32,19 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
   const handleMinusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     // If it's a simple item and it's in the cart, reduce its quantity
-    if (cartItems.length === 1 && !hasVariants) {
+    const hasOptions =
+      hasVariants ||
+      (item.addons && item.addons.length > 0) ||
+      (item.customizations && item.customizations.length > 0);
+
+    if (cartItems.length === 1 && !hasOptions) {
       if (cartItems[0].quantity > 1) {
         updateQuantity(cartItems[0]._id, -1);
       } else {
         removeItem(cartItems[0]._id);
       }
-    } else if (hasVariants || cartItems.length > 1) {
-      // For items with variants or multiple cart entries, open the detail view
+    } else if (hasOptions || cartItems.length > 1) {
+      // For items with options or multiple cart entries, open the detail view
       onItemClick(item);
     }
   };

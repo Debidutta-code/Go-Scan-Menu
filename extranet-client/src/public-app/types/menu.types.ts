@@ -38,6 +38,7 @@ export interface Addon {
 export interface Customization {
   name: string;
   options: string[];
+  isRequired: boolean;
   id: string;
   _id: string;
 }

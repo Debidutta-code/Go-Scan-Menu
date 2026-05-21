@@ -29,15 +29,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const totalItems = useMemo(() => cart.reduce((acc, item) => acc + item.quantity, 0), [cart]);
     const totalAmount = useMemo(() => cart.reduce((acc, item) => acc + item.totalPrice * item.quantity, 0), [cart]);
 
-    const addItem = (item: MenuItem, variant?: Variant, addons: Addon[] = [], quantity: number = 1) => {
+    const addItem = (
+        item: MenuItem,
+        variant?: Variant,
+        addons: Addon[] = [],
+        quantity: number = 1,
+        customizations: { name: string; value: string }[] = []
+    ) => {
         setCart((prevCart) => {
-            // Create a unique ID based on item, variant, and addons
+            // Create a unique ID based on item, variant, addons, and customizations
             const addonIds = addons.map(a => a._id).sort().join(',');
-            const cartItemId = `${item._id}-${variant?._id || 'default'}-${addonIds}`;
+            const customizationStr = customizations
+                .map(c => `${c.name}:${c.value}`)
+                .sort()
+                .join('|');
+            const cartItemId = `${item._id}-${variant?._id || 'default'}-${addonIds}-${customizationStr}`;
 
             const existingItemIndex = prevCart.findIndex((i) => i._id === cartItemId);
 
-            const itemPrice = variant ? variant.price : item.price;
+            const itemPrice = variant ? variant.price : (item.discountPrice || item.price);
             const addonsPrice = addons.reduce((acc, a) => acc + a.price, 0);
             const unitTotalPrice = itemPrice + addonsPrice;
 
@@ -56,6 +66,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 menuItem: item,
                 variant,
                 addons,
+                customizations,
                 quantity,
                 totalPrice: unitTotalPrice,
             };

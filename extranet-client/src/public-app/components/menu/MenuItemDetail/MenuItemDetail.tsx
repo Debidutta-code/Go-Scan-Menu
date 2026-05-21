@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MenuItem, Variant } from '@/public-app/types/menu.types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { MenuItem, Variant, Addon } from '@/public-app/types/menu.types';
 import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '@/public-app/utils/formatters';
 import './MenuItemDetail.css';
 
@@ -7,28 +7,77 @@ interface MenuItemDetailProps {
   item: MenuItem;
   currency: string;
   isOpen: boolean;
+  mode?: 'view' | 'customize';
   onClose: () => void;
-  onAddToCart: (item: MenuItem, variant?: Variant, addons?: any[], quantity?: number) => void;
+  onAddToCart: (
+    item: MenuItem,
+    variant?: Variant,
+    addons?: Addon[],
+    quantity?: number,
+    customizations?: { name: string; value: string }[]
+  ) => void;
 }
 
 export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
   item,
   currency,
   isOpen,
+  mode = 'view',
   onClose,
   onAddToCart,
 }) => {
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
     item.variants?.find((v) => v.isDefault) || item.variants?.[0]
   );
+  const [selectedAddons, setSelectedAddons] = useState<Addon[]>([]);
+  const [selectedCustomizations, setSelectedCustomizations] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Reset state when item or mode changes
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedVariant(item.variants?.find((v) => v.isDefault) || item.variants?.[0]);
+      setSelectedAddons([]);
+      setSelectedCustomizations({});
+      setQuantity(1);
+      setCurrentImageIndex(0);
+    }
+  }, [item._id, isOpen, mode]);
 
   const images =
     item.images && item.images.length > 0 ? item.images : item.image ? [item.image] : [];
 
+  const handleAddonToggle = (addon: Addon) => {
+    setSelectedAddons((prev) =>
+      prev.find((a) => a._id === addon._id)
+        ? prev.filter((a) => a._id !== addon._id)
+        : [...prev, addon]
+    );
+  };
+
+  const handleCustomizationChange = (name: string, value: string) => {
+    setSelectedCustomizations((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const isAddDisabled = useMemo(() => {
+    if (!item.isAvailable) return true;
+    if (!item.customizations) return false;
+
+    return item.customizations.some(
+      (c) => c.isRequired && !selectedCustomizations[c.name]
+    );
+  }, [item.isAvailable, item.customizations, selectedCustomizations]);
+
   const handleAddToCart = () => {
-    onAddToCart(item, selectedVariant, [], quantity);
+    const customizationsArray = Object.entries(selectedCustomizations).map(([name, value]) => ({
+      name,
+      value,
+    }));
+    onAddToCart(item, selectedVariant, selectedAddons, quantity, customizationsArray);
     onClose();
   };
 
@@ -36,24 +85,28 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
   const decrementQuantity = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
 
   const getCurrentPrice = () => {
-    if (selectedVariant) return selectedVariant.price;
-    return item.discountPrice || item.price;
+    let basePrice = selectedVariant ? selectedVariant.price : (item.discountPrice || item.price);
+    const addonsPrice = selectedAddons.reduce((acc, a) => acc + a.price, 0);
+    return basePrice + addonsPrice;
   };
 
   if (!isOpen) return null;
 
+  const isCustomizeMode = mode === 'customize';
+
   return (
     <>
       <div className="menu-item-details-overlay" onClick={onClose}></div>
-      <div className={`menu-item-details-drawer ${isOpen ? 'open' : ''}`}>
+      <div className={`menu-item-details-drawer ${isOpen ? 'open' : ''} ${isCustomizeMode ? 'customize-mode' : ''}`}>
         <div className="menu-item-details-header">
           <button className="menu-item-details-close-btn" onClick={onClose} aria-label="Close">
             ✕
           </button>
+          {isCustomizeMode && <h2 className="menu-item-details-header-title">Customize Item</h2>}
         </div>
 
         <div className="menu-item-details-content">
-          {images.length > 0 && (
+          {!isCustomizeMode && images.length > 0 && (
             <div className="menu-item-details-image-section">
               <img
                 src={images[currentImageIndex]}
@@ -86,7 +139,7 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
                   </span>
                 )}
               </div>
-              {item.tags && item.tags.length > 0 && (
+              {!isCustomizeMode && item.tags && item.tags.length > 0 && (
                 <div className="menu-item-details-tags">
                   {item.tags.map((tag, idx) => (
                     <span key={idx} className="menu-item-details-tag">
@@ -97,38 +150,40 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
               )}
             </div>
 
-            {item.description && (
+            {!isCustomizeMode && item.description && (
               <p className="menu-item-details-description">{item.description}</p>
             )}
 
-            <div className="menu-item-details-meta-grid">
-              {item.preparationTime && (
-                <div className="menu-item-details-meta-item">
-                  <span className="menu-item-details-meta-icon">⏱️</span>
-                  <span className="menu-item-details-meta-text">
-                    {item.preparationTime} min
-                  </span>
-                </div>
-              )}
-              {item.calories && (
-                <div className="menu-item-details-meta-item">
-                  <span className="menu-item-details-meta-icon">🔥</span>
-                  <span className="menu-item-details-meta-text">{item.calories} cal</span>
-                </div>
-              )}
-              {item.spiceLevel && (
-                <div className="menu-item-details-meta-item">
-                  <span className="menu-item-details-meta-icon">
-                    {getSpiceLevelEmoji(item.spiceLevel)}
-                  </span>
-                  <span className="menu-item-details-meta-text">
-                    {item.spiceLevel.charAt(0).toUpperCase() + item.spiceLevel.slice(1)}
-                  </span>
-                </div>
-              )}
-            </div>
+            {!isCustomizeMode && (
+              <div className="menu-item-details-meta-grid">
+                {item.preparationTime && (
+                  <div className="menu-item-details-meta-item">
+                    <span className="menu-item-details-meta-icon">⏱️</span>
+                    <span className="menu-item-details-meta-text">
+                      {item.preparationTime} min
+                    </span>
+                  </div>
+                )}
+                {item.calories && (
+                  <div className="menu-item-details-meta-item">
+                    <span className="menu-item-details-meta-icon">🔥</span>
+                    <span className="menu-item-details-meta-text">{item.calories} cal</span>
+                  </div>
+                )}
+                {item.spiceLevel && (
+                  <div className="menu-item-details-meta-item">
+                    <span className="menu-item-details-meta-icon">
+                      {getSpiceLevelEmoji(item.spiceLevel)}
+                    </span>
+                    <span className="menu-item-details-meta-text">
+                      {item.spiceLevel.charAt(0).toUpperCase() + item.spiceLevel.slice(1)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
 
-            {item.allergens && item.allergens.length > 0 && (
+            {!isCustomizeMode && item.allergens && item.allergens.length > 0 && (
               <div className="menu-item-details-allergen-section">
                 <h3 className="menu-item-details-allergen-title">⚠️ Allergen Information</h3>
                 <p className="menu-item-details-allergen-text">
@@ -137,9 +192,12 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
               </div>
             )}
 
+            {/* Variants */}
             {item.variants && item.variants.length > 0 && (
-              <div className="menu-item-details-variant-section">
-                <h3 className="menu-item-details-variant-title">Choose Size</h3>
+              <div className="menu-item-details-section">
+                <h3 className="menu-item-details-section-title">
+                  Select Size <span className="required-badge">Required</span>
+                </h3>
                 <div className="menu-item-details-variant-options">
                   {item.variants.map((variant) => (
                     <button
@@ -153,6 +211,58 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
                         {formatPrice(variant.price, currency)}
                       </span>
                     </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Customizations */}
+            {item.customizations && item.customizations.length > 0 && (
+              <div className="menu-item-details-customizations-list">
+                {item.customizations.map((customization) => (
+                  <div key={customization._id} className="menu-item-details-section">
+                    <h3 className="menu-item-details-section-title">
+                      {customization.name}
+                      {customization.isRequired && <span className="required-badge">Required</span>}
+                    </h3>
+                    <div className="menu-item-details-customization-options">
+                      {customization.options.map((option) => (
+                        <label key={option} className="menu-item-details-customization-option">
+                          <input
+                            type="radio"
+                            name={customization.name}
+                            value={option}
+                            checked={selectedCustomizations[customization.name] === option}
+                            onChange={() => handleCustomizationChange(customization.name, option)}
+                          />
+                          <span className="custom-radio"></span>
+                          <span className="option-name">{option}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Addons */}
+            {item.addons && item.addons.length > 0 && (
+              <div className="menu-item-details-section">
+                <h3 className="menu-item-details-section-title">Add-ons</h3>
+                <div className="menu-item-details-addons-list">
+                  {item.addons.map((addon) => (
+                    <label key={addon._id} className="menu-item-details-addon-item">
+                      <div className="addon-info">
+                        <input
+                          type="checkbox"
+                          checked={!!selectedAddons.find((a) => a._id === addon._id)}
+                          onChange={() => handleAddonToggle(addon)}
+                        />
+                        <span className="custom-checkbox"></span>
+                        <span className="addon-name">{addon.name}</span>
+                      </div>
+                      <span className="addon-price">+{formatPrice(addon.price, currency)}</span>
+                    </label>
                   ))}
                 </div>
               </div>
@@ -182,7 +292,7 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
           <button
             className="menu-item-details-add-to-cart-btn"
             onClick={handleAddToCart}
-            disabled={!item.isAvailable}
+            disabled={isAddDisabled}
           >
             {item.isAvailable ? (
               <>Add to Cart • {formatPrice(getCurrentPrice() * quantity, currency)}</>

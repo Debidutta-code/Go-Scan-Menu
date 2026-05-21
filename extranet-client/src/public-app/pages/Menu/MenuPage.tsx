@@ -14,6 +14,7 @@ export const MenuPage: React.FC = () => {
   const { menuData } = usePublicApp();
   const { addItem } = useCart();
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [drawerMode, setDrawerMode] = useState<'view' | 'customize'>('view');
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES_ID);
 
   const categoryIds = useMemo(
@@ -33,20 +34,33 @@ export const MenuPage: React.FC = () => {
   }, [scrollSpyCategory]);
 
   const handleItemClick = (item: MenuItem) => {
+    setDrawerMode('view');
     setSelectedItem(item);
   };
 
   const handleAddClick = (item: MenuItem) => {
-    // If it has variants, we should open the detail view instead of adding directly
-    if (item.variants && item.variants.length > 0) {
+    // If it has variants, addons, or customizations, we should open the detail view in customize mode
+    const hasOptions =
+      (item.variants && item.variants.length > 0) ||
+      (item.addons && item.addons.length > 0) ||
+      (item.customizations && item.customizations.length > 0);
+
+    if (hasOptions) {
+      setDrawerMode('customize');
       setSelectedItem(item);
     } else {
       addItem(item);
     }
   };
 
-  const handleAddToCart = (item: MenuItem, variant?: Variant, addons: Addon[] = [], quantity: number = 1) => {
-    addItem(item, variant, addons, quantity);
+  const handleAddToCart = (
+    item: MenuItem,
+    variant?: Variant,
+    addons: Addon[] = [],
+    quantity: number = 1,
+    customizations: { name: string; value: string }[] = []
+  ) => {
+    addItem(item, variant, addons, quantity, customizations);
     setSelectedItem(null);
   };
 
@@ -79,6 +93,7 @@ export const MenuPage: React.FC = () => {
           item={selectedItem}
           currency={menuData.branch.settings.currency}
           isOpen={!!selectedItem}
+          mode={drawerMode}
           onClose={() => setSelectedItem(null)}
           onAddToCart={handleAddToCart}
         />
