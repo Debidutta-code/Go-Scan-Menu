@@ -10,6 +10,7 @@ export interface ApiLog {
   body: any;
   ip: string;
   statusCode: number;
+  responseHeaders?: Record<string, any>;
   responseBody: any;
   duration: number;
   userId?: string;

@@ -8,6 +8,7 @@ export interface IApiLog extends Document {
   body: any;
   ip: string;
   statusCode: number;
+  responseHeaders?: Record<string, any>;
   responseBody: any;
   duration: number;
   userId?: string;
@@ -24,6 +25,7 @@ const apiLogSchema = new Schema<IApiLog>(
     body: { type: Schema.Types.Mixed },
     ip: { type: String },
     statusCode: { type: Number },
+    responseHeaders: { type: Object },
     responseBody: { type: Schema.Types.Mixed },
     duration: { type: Number },
     userId: { type: String },

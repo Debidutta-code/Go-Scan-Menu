@@ -54,7 +54,7 @@ export const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
       path: '/qr-management',
     },
     {
-      label: 'API Logs',
+      label: 'Request Logs',
       icon: <Terminal size={20} />,
       path: '/api-logs',
     },

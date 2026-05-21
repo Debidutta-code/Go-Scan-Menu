@@ -71,6 +71,7 @@ export const apiLogMiddleware = async (req: Request, res: Response, next: NextFu
         body: maskSensitiveData(req.body),
         ip: req.ip || req.socket.remoteAddress,
         statusCode: res.statusCode,
+        responseHeaders: maskSensitiveData(res.getHeaders()),
         responseBody: maskSensitiveData(parsedResBody),
         duration,
         userId: req.user?.id,

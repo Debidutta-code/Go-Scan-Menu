@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Search, Eye, Clock, Hash, Globe, User } from 'lucide-react';
+import { Search, Eye, Clock, Hash, Globe, User, Shield, Info } from 'lucide-react';
 import { useAuth } from '@/modules/auth/contexts/AuthContext';
 import { ApiLogService, ApiLog } from '../services/api-log.service';
 import { Button } from '@/shared/components/Button';
@@ -15,6 +15,7 @@ export const ApiLogs: React.FC = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [selectedLog, setSelectedLog] = useState<ApiLog | null>(null);
+    const [activeTab, setActiveTab] = useState<'request' | 'response'>('request');
 
     const fetchLogs = useCallback(async () => {
         if (!token) return;
@@ -50,12 +51,21 @@ export const ApiLogs: React.FC = () => {
         fetchLogs();
     };
 
+    const JsonViewer = ({ data, title }: { data: any, title?: string }) => (
+        <div className="json-section">
+            {title && <h3>{title}</h3>}
+            <pre className="custom-scrollbar">
+                {data ? JSON.stringify(data, null, 2) : '// No data available'}
+            </pre>
+        </div>
+    );
+
     return (
         <div className="api-logs-container">
             <div className="logs-header">
                 <div className="header-left">
-                    <h1 className="page-title">System API Logs</h1>
-                    <p className="page-subtitle">Monitor all incoming API requests and responses</p>
+                    <h1 className="page-title">Request Logs</h1>
+                    <p className="page-subtitle">Monitor all incoming API requests and responses in real-time</p>
                 </div>
                 <div className="header-actions">
                     <form onSubmit={handleSearch} className="search-form">
@@ -78,31 +88,37 @@ export const ApiLogs: React.FC = () => {
             </div>
 
             <div className="logs-content">
-                <div className="logs-table-wrapper">
+                <div className="logs-table-wrapper custom-scrollbar">
                     <table className="logs-table">
                         <thead>
                             <tr>
                                 <th>Method</th>
                                 <th>Status</th>
                                 <th>Endpoint</th>
-                                <th>User</th>
+                                <th>User Context</th>
                                 <th>Duration</th>
-                                <th>Timestamp</th>
-                                <th>Action</th>
+                                <th>Time</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} className="text-center py-8">Loading logs...</td>
+                                    <td colSpan={7} className="text-center py-12">
+                                        <div className="loading-spinner"></div>
+                                        <p className="mt-2 text-gray-500">Fetching logs...</p>
+                                    </td>
                                 </tr>
                             ) : logs.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="text-center py-8">No logs found</td>
+                                    <td colSpan={7} className="text-center py-12">
+                                        <div className="no-data-icon"><Info size={40} /></div>
+                                        <p className="mt-2 text-gray-500">No logs found for the given criteria</p>
+                                    </td>
                                 </tr>
                             ) : (
                                 logs.map((log) => (
-                                    <tr key={log._id}>
+                                    <tr key={log._id} onClick={() => { setSelectedLog(log); setActiveTab('request'); }} className="clickable-row">
                                         <td>
                                             <span className={`method-badge method-${log.method.toLowerCase()}`}>
                                                 {log.method}
@@ -114,12 +130,12 @@ export const ApiLogs: React.FC = () => {
                                             </span>
                                         </td>
                                         <td className="endpoint-cell" title={log.url}>
-                                            {log.url}
+                                            <span className="url-text">{log.url}</span>
                                         </td>
                                         <td>
                                             <div className="user-cell">
                                                 <span className="user-email">{log.userEmail || 'Anonymous'}</span>
-                                                {log.ip && <span className="user-ip">{log.ip}</span>}
+                                                <span className="user-ip">{log.ip || '0.0.0.0'}</span>
                                             </div>
                                         </td>
                                         <td>
@@ -135,8 +151,11 @@ export const ApiLogs: React.FC = () => {
                                         <td>
                                             <button
                                                 className="view-btn"
-                                                onClick={() => setSelectedLog(log)}
-                                                title="View Details"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedLog(log);
+                                                    setActiveTab('request');
+                                                }}
                                             >
                                                 <Eye size={18} />
                                             </button>
@@ -175,63 +194,99 @@ export const ApiLogs: React.FC = () => {
                 <div className="log-detail-overlay" onClick={() => setSelectedLog(null)}>
                     <div className="log-detail-modal" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Request Details</h2>
+                            <div className="modal-header-info">
+                                <span className={`method-badge method-${selectedLog.method.toLowerCase()}`}>
+                                    {selectedLog.method}
+                                </span>
+                                <span className={`status-badge ${getStatusClass(selectedLog.statusCode)}`}>
+                                    {selectedLog.statusCode}
+                                </span>
+                                <h2 className="modal-title">Request Details</h2>
+                            </div>
                             <button className="close-btn" onClick={() => setSelectedLog(null)}>×</button>
                         </div>
-                        <div className="modal-body">
-                            <div className="detail-grid">
-                                <div className="detail-item">
-                                    <label><Globe size={14} /> URL</label>
-                                    <div className="value">{selectedLog.url}</div>
-                                </div>
-                                <div className="detail-grid-row">
-                                    <div className="detail-item">
-                                        <label><Hash size={14} /> Method</label>
-                                        <div className="value">{selectedLog.method}</div>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label><Hash size={14} /> Status</label>
-                                        <div className="value">
-                                            <span className={`status-badge ${getStatusClass(selectedLog.statusCode)}`}>
-                                                {selectedLog.statusCode}
-                                            </span>
+
+                        <div className="modal-tabs">
+                            <button
+                                className={`tab-btn ${activeTab === 'request' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('request')}
+                            >
+                                Request
+                            </button>
+                            <button
+                                className={`tab-btn ${activeTab === 'response' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('response')}
+                            >
+                                Response
+                            </button>
+                        </div>
+
+                        <div className="modal-body custom-scrollbar">
+                            {activeTab === 'request' ? (
+                                <div className="tab-content">
+                                    <div className="info-grid">
+                                        <div className="info-card">
+                                            <label><Globe size={14} /> Full URL</label>
+                                            <div className="value url-value">{selectedLog.url}</div>
+                                        </div>
+                                        <div className="info-row">
+                                            <div className="info-card">
+                                                <label><User size={14} /> User Context</label>
+                                                <div className="value">
+                                                    {selectedLog.userEmail || 'Anonymous'}
+                                                    {selectedLog.userId && <span className="id-tag">ID: {selectedLog.userId}</span>}
+                                                </div>
+                                            </div>
+                                            <div className="info-card">
+                                                <label><Shield size={14} /> Source IP</label>
+                                                <div className="value">{selectedLog.ip || 'Unknown'}</div>
+                                            </div>
+                                            <div className="info-card">
+                                                <label><Clock size={14} /> Request Time</label>
+                                                <div className="value">{format(new Date(selectedLog.timestamp), 'PPpp')}</div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="detail-item">
-                                        <label><Clock size={14} /> Duration</label>
-                                        <div className="value">{selectedLog.duration}ms</div>
-                                    </div>
-                                </div>
-                                <div className="detail-item">
-                                    <label><User size={14} /> User Context</label>
-                                    <div className="value">
-                                        Email: {selectedLog.userEmail || 'N/A'}<br/>
-                                        ID: {selectedLog.userId || 'N/A'}<br/>
-                                        IP: {selectedLog.ip || 'N/A'}
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div className="json-sections">
-                                <div className="json-section">
-                                    <h3>Request Body</h3>
-                                    <pre>{JSON.stringify(selectedLog.body, null, 2)}</pre>
-                                </div>
-                                <div className="json-section">
-                                    <h3>Response Body</h3>
-                                    <pre>{JSON.stringify(selectedLog.responseBody, null, 2)}</pre>
-                                </div>
-                                <div className="json-section">
-                                    <h3>Request Headers</h3>
-                                    <pre>{JSON.stringify(selectedLog.headers, null, 2)}</pre>
-                                </div>
-                                {selectedLog.query && Object.keys(selectedLog.query).length > 0 && (
-                                    <div className="json-section">
-                                        <h3>Query Parameters</h3>
-                                        <pre>{JSON.stringify(selectedLog.query, null, 2)}</pre>
+                                    <div className="json-container">
+                                        <JsonViewer title="Headers" data={selectedLog.headers} />
+                                        {selectedLog.query && Object.keys(selectedLog.query).length > 0 && (
+                                            <JsonViewer title="Query Parameters" data={selectedLog.query} />
+                                        )}
+                                        <JsonViewer title="Body" data={selectedLog.body} />
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            ) : (
+                                <div className="tab-content">
+                                    <div className="info-grid">
+                                        <div className="info-row">
+                                            <div className="info-card">
+                                                <label><Hash size={14} /> Status Code</label>
+                                                <div className="value">
+                                                    <span className={`status-badge ${getStatusClass(selectedLog.statusCode)}`}>
+                                                        {selectedLog.statusCode}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="info-card">
+                                                <label><Clock size={14} /> Duration</label>
+                                                <div className="value">{selectedLog.duration}ms</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="json-container">
+                                        <JsonViewer title="Response Headers" data={selectedLog.responseHeaders} />
+                                        <JsonViewer title="Response Body" data={selectedLog.responseBody} />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="modal-footer">
+                            <Button variant="secondary" size="sm" onClick={() => setSelectedLog(null)}>
+                                Close
+                            </Button>
                         </div>
                     </div>
                 </div>
