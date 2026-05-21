@@ -3,7 +3,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/modules/auth/contexts/AuthContext';
-import { Header } from '@/shared/layouts/Header';
 import './Dashboard.css';
 
 export const Dashboard: React.FC = () => {
@@ -17,9 +16,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <Header />
-
-      <main className="main-content">
+      <div className="main-content">
         <div className="welcome-card">
           <h1 className="welcome-title">Welcome back, Super Admin!</h1>
           <p className="welcome-text">
@@ -92,7 +89,7 @@ export const Dashboard: React.FC = () => {
             </p>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

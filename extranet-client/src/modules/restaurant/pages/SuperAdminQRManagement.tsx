@@ -16,7 +16,6 @@ import {
   TEMPLATE_CATEGORIES,
 } from '@/shared/config/qrTemplates.config';
 import { QRTemplateRenderer } from '@/modules/table/components/QRTemplateRenderer';
-import { Header } from '@/shared/layouts/Header';
 import { toast } from 'react-toastify';
 import './QRManagement.css';
 
@@ -326,8 +325,6 @@ export const SuperAdminQRManagement: React.FC = () => {
 
   return (
     <div className="sadmin-qr-management-container">
-      <Header />
-
       <div className="qr-management-layout">
         <div className="qr-page-toolbar">
           <div className="toolbar-left">
