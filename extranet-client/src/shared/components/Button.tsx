@@ -52,7 +52,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading ? (
-          <span className="btn-loading-content">Loading...</span>
+          <span className="btn-loading-content">
+            <span className="btn-spinner"></span>
+            Loading...
+          </span>
         ) : (
           <>
             {icon && iconPlacement === 'left' && (

@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
     Plus, Search, Edit, Trash2, Info, Percent, Hash, Tag,
-    GripVertical, ChevronRight, ChevronDown, FolderPlus
+    GripVertical, ChevronRight, ChevronDown, FolderPlus,
+    Receipt, Layers, ShieldCheck
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import {
@@ -176,6 +177,29 @@ const SortableTaxItem: React.FC<SortableItemProps> = ({
         </div>
     );
 };
+
+// --- Stat Card Component ---
+
+interface StatCardProps {
+    icon: React.ReactNode;
+    label: string;
+    value: string | number;
+    sub?: string;
+    accent?: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ icon, label, value, sub, accent }) => (
+    <div className="stat-card">
+        <div className="stat-icon" style={{ background: accent ? `${accent}18` : undefined, color: accent }}>
+            {icon}
+        </div>
+        <div className="stat-body">
+            <p className="stat-label">{label}</p>
+            <p className="stat-value">{value}</p>
+            {sub && <p className="stat-sub">{sub}</p>}
+        </div>
+    </div>
+);
 
 // --- Main Management Component ---
 
@@ -392,6 +416,10 @@ export const TaxManagement: React.FC = () => {
         { value: 'after_other_taxes', label: 'After Other Taxes' }
     ];
 
+    const totalCombinedPct = taxes
+        .filter(t => t.type === 'tax' && t.taxType === 'percentage' && t.isActive)
+        .reduce((s, t) => s + (t.value || 0), 0);
+
     return (
         <div className="tax-management-layout" data-testid="tax-management-page">
             <div className="tax-page-toolbar">
@@ -428,7 +456,6 @@ export const TaxManagement: React.FC = () => {
                         }}
                         size="sm"
                         icon={<FolderPlus size={18} />}
-                        className="toolbar-btn"
                     >
                         New Group
                     </Button>
@@ -444,7 +471,6 @@ export const TaxManagement: React.FC = () => {
                         icon={<Plus size={18} />}
                         rightIcon={<ChevronDown size={14} />}
                         rounded
-                        className="toolbar-btn"
                         data-testid="add-tax-button"
                     >
                         Add Tax
@@ -453,6 +479,40 @@ export const TaxManagement: React.FC = () => {
             </div>
 
             <div className="tax-management-content">
+                {/* ── Stat Cards ── */}
+                {!loading && taxes.length > 0 && (
+                    <div className="stats-row">
+                        <StatCard
+                            icon={<Receipt size={18} />}
+                            label="Total Taxes"
+                            value={taxes.filter(t => t.type === 'tax').length}
+                            sub={`${taxes.filter(t => t.isActive && t.type === 'tax').length} active`}
+                            accent="#6366f1"
+                        />
+                        <StatCard
+                            icon={<Layers size={18} />}
+                            label="Tax Groups"
+                            value={taxes.filter(t => t.type === 'group').length}
+                            sub="Grouped configurations"
+                            accent="#0ea5e9"
+                        />
+                        <StatCard
+                            icon={<Percent size={18} />}
+                            label="Combined Rate"
+                            value={`${totalCombinedPct}%`}
+                            sub="Active % taxes total"
+                            accent="#10b981"
+                        />
+                        <StatCard
+                            icon={<ShieldCheck size={18} />}
+                            label="Scope"
+                            value="Restaurant"
+                            sub="Applied restaurant-wide"
+                            accent="#f59e0b"
+                        />
+                    </div>
+                )}
+
                 <div className="tax-list-panel">
                     <div className="panel-header">
                         <h2 className="panel-title">All Taxes & Groups {!loading && `(${taxes.length})`}</h2>
