@@ -1,13 +1,15 @@
 import React, { ButtonHTMLAttributes } from 'react';
 import './Button.css';
 
-export type ButtonVariant = 'primary' | 'outline' | 'ghost' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   loading?: boolean;
+  icon?: React.ReactNode;
+  iconPlacement?: 'left' | 'right';
   children: React.ReactNode;
 }
 
@@ -18,6 +20,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size = 'md',
       fullWidth = false,
       loading = false,
+      icon,
+      iconPlacement = 'left',
       disabled,
       className = '',
       children,
@@ -42,7 +46,19 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={isDisabled}
         {...props}
       >
-        {loading ? 'Signing in...' : children}
+        {loading ? (
+          <span className="btn-loading-content">Loading...</span>
+        ) : (
+          <>
+            {icon && iconPlacement === 'left' && (
+              <span className="btn-icon btn-icon-left">{icon}</span>
+            )}
+            <span className="btn-text">{children}</span>
+            {icon && iconPlacement === 'right' && (
+              <span className="btn-icon btn-icon-right">{icon}</span>
+            )}
+          </>
+        )}
       </button>
     );
   }

@@ -414,16 +414,16 @@ export const TaxManagement: React.FC = () => {
                     </div>
 
                     <Button
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => {
                             setSelectedTax(null);
                             setForceType('group');
                             setIsDrawerOpen(true);
                         }}
                         size="sm"
+                        icon={<FolderPlus size={18} />}
                     >
-                        <FolderPlus size={18} />
-                        <span className="btn-text">New Group</span>
+                        New Group
                     </Button>
 
                     <Button
@@ -434,10 +434,10 @@ export const TaxManagement: React.FC = () => {
                             setIsDrawerOpen(true);
                         }}
                         size="sm"
+                        icon={<Plus size={18} />}
                         data-testid="add-tax-button"
                     >
-                        <Plus size={18} />
-                        <span className="btn-text">Add Tax</span>
+                        Add Tax
                     </Button>
                 </div>
             </div>

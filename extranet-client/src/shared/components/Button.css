@@ -43,6 +43,18 @@
   transform: translateY(-1px);
 }
 
+.btn-secondary {
+  color: var(--gray-900);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+}
+
+.btn-secondary:hover:not(:disabled):not(.loading) {
+  background: var(--gray-200);
+  border-color: var(--gray-300);
+  transform: translateY(-1px);
+}
+
 .btn-outline {
   color: var(--primary-500);
   background: transparent;
@@ -82,4 +94,28 @@
 .btn.loading {
   cursor: not-allowed;
   opacity: 0.65;
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon-left {
+  margin-right: var(--spacing-2);
+}
+
+.btn-icon-right {
+  margin-left: var(--spacing-2);
+}
+
+.btn-text {
+  display: inline-block;
+}
+
+.btn-loading-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
 }
