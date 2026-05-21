@@ -6,12 +6,24 @@ import { staffRoutes, roleRoutes, staffTypePermissionRoutes } from '@/modules/st
 import { categoryRoutes, menuItemRoutes, publicMenuRoutes } from '@/modules/menu';
 import { orderRoutes } from '@/modules/order';
 import { tableRoutes } from '@/modules/table';
+import { ApiLogController } from '@/modules/analytics/api-log.controller';
+import { AuthMiddleware } from '@/modules/staff';
+import { StaffRole } from '@/types/role.types';
 import healthRoutes from './health.route';
 
 const router = Router();
+const apiLogController = new ApiLogController();
 
 router.use('/health', healthRoutes);
 router.use('/superadmin/auth', authRoutes);
+
+// Admin Logs
+router.get(
+  '/superadmin/logs',
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorizeRoles(StaffRole.SUPER_ADMIN),
+  apiLogController.getLogs
+);
 router.use('/restaurants', restaurantRoutes);
 router.use('/staff', staffRoutes);
 router.use('/roles', roleRoutes);

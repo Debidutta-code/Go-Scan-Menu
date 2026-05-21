@@ -6,21 +6,22 @@ import { extractId } from '@/shared/utils/id.util';
 import { Branch, BranchListResponse } from '@/shared/types/table.types';
 
 export class BranchService {
-  private static getHeaders() {
-    const token = localStorage.getItem('staff_token');
+  private static getHeaders(customToken?: string) {
+    const token = customToken || localStorage.getItem('staff_token');
     return {
       Authorization: `Bearer ${token}`,
     };
   }
 
   static async getAllBranches(
-    restaurantId: any
+    restaurantId: any,
+    token?: string
   ): Promise<ApiResponse<Branch[]>> {
     try {
       const rId = extractId(restaurantId);
       const response = await axiosInstance.get(
         `/restaurants/${rId}/branches?limit=1000`,
-        { headers: this.getHeaders() }
+        { headers: this.getHeaders(token) }
       );
 
       return response.data;
@@ -33,13 +34,14 @@ export class BranchService {
   static async getBranches(
     restaurantId: any,
     page: number = 1,
-    limit: number = 100
+    limit: number = 100,
+    token?: string
   ): Promise<ApiResponse<BranchListResponse>> {
     try {
       const rId = extractId(restaurantId);
       const response = await axiosInstance.get(
         `/restaurants/${rId}/branches?page=${page}&limit=${limit}`,
-        { headers: this.getHeaders() }
+        { headers: this.getHeaders(token) }
       );
 
       return response.data;
@@ -51,14 +53,15 @@ export class BranchService {
 
   static async getBranch(
     restaurantId: any,
-    branchId: any
+    branchId: any,
+    token?: string
   ): Promise<ApiResponse<Branch>> {
     try {
       const rId = extractId(restaurantId);
       const bId = extractId(branchId);
       const response = await axiosInstance.get(
         `/restaurants/${rId}/branches/${bId}`,
-        { headers: this.getHeaders() }
+        { headers: this.getHeaders(token) }
       );
 
       return response.data;
@@ -70,14 +73,15 @@ export class BranchService {
 
   static async createBranch(
     restaurantId: any,
-    data: any
+    data: any,
+    token?: string
   ): Promise<ApiResponse<Branch>> {
     try {
       const rId = extractId(restaurantId);
       const response = await axiosInstance.post(
         `/restaurants/${rId}/branches`,
         data,
-        { headers: this.getHeaders() }
+        { headers: this.getHeaders(token) }
       );
 
       return response.data;
@@ -90,7 +94,8 @@ export class BranchService {
   static async updateBranch(
     restaurantId: any,
     branchId: any,
-    data: any
+    data: any,
+    token?: string
   ): Promise<ApiResponse<Branch>> {
     try {
       const rId = extractId(restaurantId);
@@ -98,7 +103,7 @@ export class BranchService {
       const response = await axiosInstance.put(
         `/restaurants/${rId}/branches/${bId}`,
         data,
-        { headers: this.getHeaders() }
+        { headers: this.getHeaders(token) }
       );
 
       return response.data;
@@ -110,14 +115,15 @@ export class BranchService {
 
   static async deleteBranch(
     restaurantId: any,
-    branchId: any
+    branchId: any,
+    token?: string
   ): Promise<ApiResponse<void>> {
     try {
       const rId = extractId(restaurantId);
       const bId = extractId(branchId);
       const response = await axiosInstance.delete(
         `/restaurants/${rId}/branches/${bId}`,
-        { headers: this.getHeaders() }
+        { headers: this.getHeaders(token) }
       );
 
       return response.data;
