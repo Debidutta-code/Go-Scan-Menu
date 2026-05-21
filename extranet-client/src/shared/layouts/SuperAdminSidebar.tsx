@@ -8,7 +8,8 @@ import {
   BarChart,
   LogOut,
   ChevronLeft,
-  Menu
+  Menu,
+  Terminal
 } from 'lucide-react';
 import { useAuth } from '@/modules/auth/contexts/AuthContext';
 import './SuperAdminSidebar.css';
@@ -51,6 +52,11 @@ export const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
       label: 'QR Management',
       icon: <QrCode size={20} />,
       path: '/qr-management',
+    },
+    {
+      label: 'API Logs',
+      icon: <Terminal size={20} />,
+      path: '/api-logs',
     },
     {
       label: 'Staff Management',
