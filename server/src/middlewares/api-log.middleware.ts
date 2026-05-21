@@ -42,19 +42,6 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 const fetchLocationData = async (ip: string) => {
   if (!ip || ip === '::1' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('::ffff:127.0.0.1')) {
-    if (process.env.NODE_ENV === 'development') {
-      return {
-        country: 'Local Development',
-        countryCode: 'LD',
-        state: 'Local State',
-        city: 'Local City',
-        timezone: 'UTC',
-        latitude: 0,
-        longitude: 0,
-        isp: 'Localhost',
-        organization: 'Development',
-      };
-    }
     return null;
   }
 
@@ -68,15 +55,13 @@ const fetchLocationData = async (ip: string) => {
     const geo = geoip.lookup(ip);
     if (geo) {
       const locationData = {
-        country: geo.country, // Note: This is country code in geoip-lite
+        country: geo.country,
         countryCode: geo.country,
         state: geo.region,
         city: geo.city,
         timezone: geo.timezone,
         latitude: geo.ll[0],
         longitude: geo.ll[1],
-        isp: 'Offline Database',
-        organization: 'Offline Database',
       };
       locationCache.set(ip, { data: locationData, timestamp: Date.now() });
       return locationData;
@@ -166,7 +151,7 @@ export const apiLogMiddleware = async (req: Request, res: Response, next: NextFu
         userId: req.user?.id,
         userEmail: req.user?.email,
         device: {
-          deviceType: device.type || 'desktop',
+          deviceType: device.type,
           deviceVendor: device.vendor,
           deviceModel: device.model,
           browserName: browser.name,
