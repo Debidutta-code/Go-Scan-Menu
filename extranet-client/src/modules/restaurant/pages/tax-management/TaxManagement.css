@@ -8,11 +8,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    height: 100%;
-    background: var(--bg-secondary);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
 }
 
 /* ── Toolbar ── */
@@ -292,7 +287,6 @@
 .children-header { padding: 8px 0 6px; font-size: 0.7rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; }
 
 .child-tax-row {
-.child-tax-row {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -357,6 +351,8 @@
     background: rgba(0,0,0,0.4);
     display: flex;
     justify-content: flex-end;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
 }
 
 .tax-drawer {

@@ -486,7 +486,7 @@ export const TaxManagement: React.FC = () => {
     return (
         <div className="tax-management-layout" data-testid="tax-management-page">
 
-            {/* ─── Toolbar (unchanged) ─── */}
+            {/* ─── Toolbar ─── */}
             <div className="tax-page-toolbar">
                 <div className="toolbar-left">
                     <h1 className="tax-page-title">Tax Management</h1>
@@ -640,7 +640,6 @@ export const TaxManagement: React.FC = () => {
                             <button type="button" className="close-drawer" onClick={() => setIsDrawerOpen(false)}>×</button>
                         </div>
 
-
                         <form onSubmit={handleSubmit} className="drawer-body">
 
                             {/* Type Toggle */}
@@ -713,6 +712,8 @@ export const TaxManagement: React.FC = () => {
 
                                     <div className="form-section">
                                         <h3 className="section-title">Tax Details</h3>
+
+                                        {/* Row 1: Tax Type + Rate */}
                                         <div className="form-row">
                                             <div className="form-group half">
                                                 <label className="form-label">Tax Type</label>
@@ -740,6 +741,7 @@ export const TaxManagement: React.FC = () => {
                                             </div>
                                         </div>
 
+                                        {/* Row 2: Category + Applicable On */}
                                         <div className="form-row">
                                             <div className="form-group half">
                                                 <label className="form-label">Category</label>
