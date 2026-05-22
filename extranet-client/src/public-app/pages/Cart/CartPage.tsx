@@ -49,8 +49,10 @@ export const CartPage: React.FC = () => {
       items: cart.map(item => ({
         menuItemId: item.menuItem._id,
         quantity: item.quantity,
-        variantName: item.variant?.name,
-        addons: item.addons.map(a => ({ name: a.name, price: a.price })),
+        modifierGroups: item.selectedModifiers.map(mg => ({
+            groupId: mg.groupId,
+            options: mg.options.map(o => ({ optionId: o.optionId, name: o.name, price: o.price }))
+        }))
       }))
     };
 
@@ -127,11 +129,13 @@ export const CartPage: React.FC = () => {
                     )}
                     <h4 className="cart-item-name">{item.menuItem.name}</h4>
                   </div>
-                  {(item.variant || item.addons.length > 0) && (
+                  {item.selectedModifiers.length > 0 && (
                     <div className="cart-item-details">
-                      {item.variant && <span>{item.variant.name}</span>}
-                      {item.addons.map((addon: any) => (
-                        <span key={addon._id}>, {addon.name}</span>
+                      {item.selectedModifiers.map((mg, gIdx) => (
+                        <span key={mg.groupId}>
+                          {gIdx > 0 ? ', ' : ''}
+                          {mg.options.map(o => o.name).join(', ')}
+                        </span>
                       ))}
                     </div>
                   )}

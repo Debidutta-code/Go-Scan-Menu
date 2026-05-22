@@ -4,6 +4,7 @@ import { TableRepository } from '../../table/repositories/table.repository';
 import { CategoryRepository } from '../repositories/category.repository';
 import { MenuItemRepository } from '../repositories/menu-item.repository';
 import { AppError } from '@/utils/AppError';
+import mongoose from 'mongoose';
 
 export class PublicMenuService {
   private restaurantRepo: RestaurantRepository;
@@ -167,17 +168,74 @@ export class PublicMenuService {
    * Returns structured data ready for frontend display
    */
   private async getGroupedMenu(restaurantId: string, branchId: string) {
-    // Get all categories for this branch (restaurant-wide + branch-specific)
+    // Get all categories for this branch
     const categories = await this.categoryRepo.findAllForMenu(restaurantId, branchId);
 
-    // Get all menu items for this branch (with branch pricing applied)
-    const items = await this.menuItemRepo.findAllForMenu(restaurantId, branchId);
+    // Get all menu items for this branch
+    const rawItems = await this.menuItemRepo.findAllForMenu(restaurantId, branchId);
 
-    // Group items by category
+    // Optimization: Bulk fetch all referenced modifier groups and options to avoid N+1
+    const groupIds = new Set<string>();
+    rawItems.forEach((item: any) => {
+        item.modifierGroups?.forEach((mg: any) => groupIds.add(mg.groupId.toString()));
+    });
+
+    const ModifierGroup = mongoose.model('ModifierGroup');
+    const ModifierOption = mongoose.model('ModifierOption');
+
+    const allGroups = await ModifierGroup.find({ _id: { $in: Array.from(groupIds) } }).populate('options').lean() as any[];
+    const groupsMap = new Map(allGroups.map(g => [g._id.toString(), g]));
+
+    // Group items by category and transform
     const menuByCategory = categories.map((category: any) => {
-      const categoryItems = items.filter(
-        (item: any) => item.categoryId._id.toString() === category._id.toString()
-      );
+      const categoryItems = rawItems
+        .filter((item: any) => item.categoryId._id.toString() === category._id.toString())
+        .map((item: any) => {
+            // Process modifiers for this item
+            const populatedModifierGroups = (item.modifierGroups || []).map((mg: any) => {
+                const globalGroup = groupsMap.get(mg.groupId.toString());
+                if (!globalGroup) return null;
+
+                const options = (globalGroup.options as any[]).map((opt: any) => {
+                    const override = mg.overrides.find((o: any) => o.optionId.toString() === opt._id.toString());
+                    return {
+                        ...opt,
+                        price: override && override.price !== undefined ? override.price : opt.price,
+                        isAvailable: override && override.isAvailable !== undefined ? override.isAvailable : opt.isAvailable
+                    };
+                });
+
+                return {
+                    ...globalGroup,
+                    options,
+                    isRequired: mg.isRequired !== undefined ? mg.isRequired : globalGroup.isRequired,
+                    isMultiSelect: mg.isMultiSelect !== undefined ? mg.isMultiSelect : globalGroup.isMultiSelect,
+                    minSelections: mg.minSelections !== undefined ? mg.minSelections : globalGroup.minSelections,
+                    maxSelections: mg.maxSelections !== undefined ? mg.maxSelections : globalGroup.maxSelections,
+                    displayOrder: mg.displayOrder
+                };
+            }).filter(Boolean);
+
+            return {
+                id: item._id,
+                _id: item._id,
+                name: item.name,
+                description: item.description,
+                image: item.image,
+                images: item.images,
+                price: item.price,
+                discountPrice: item.discountPrice,
+                preparationTime: item.preparationTime,
+                calories: item.calories,
+                spiceLevel: item.spiceLevel,
+                tags: item.tags,
+                allergens: item.allergens,
+                modifierGroups: populatedModifierGroups,
+                isAvailable: item.isAvailable,
+                availableQuantity: item.availableQuantity,
+                dietaryType: item.dietaryType,
+            };
+        });
 
       return {
         id: category._id,
@@ -186,37 +244,10 @@ export class PublicMenuService {
         description: category.description,
         image: category.image,
         displayOrder: category.displayOrder,
-        items: categoryItems.map((item: any) => ({
-          id: item._id,
-          _id: item._id,
-          name: item.name,
-          description: item.description,
-          image: item.image,
-          images: item.images,
-          price: item.price,
-          discountPrice: item.discountPrice,
-          preparationTime: item.preparationTime,
-          calories: item.calories,
-          spiceLevel: item.spiceLevel,
-          tags: item.tags,
-          allergens: item.allergens,
-          variants: item.variants,
-          addons: item.addons,
-          customizations: item.customizations.map((c: any) => ({
-            name: c.name,
-            options: c.options,
-            isRequired: c.isRequired,
-            _id: c._id,
-            id: c._id,
-          })),
-          isAvailable: item.isAvailable,
-          availableQuantity: item.availableQuantity,
-          dietaryType: item.dietaryType,
-        })),
+        items: categoryItems,
       };
     });
 
-    // Filter out empty categories (categories with no available items)
     return menuByCategory.filter((cat) => cat.items.length > 0);
   }
 }

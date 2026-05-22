@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { MenuItem, Variant, Addon } from '@/public-app/types/menu.types';
+import { MenuItem, ModifierGroup, ModifierOption } from '@/public-app/types/menu.types';
 import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '@/public-app/utils/formatters';
 import './MenuItemDetail.css';
 
@@ -11,10 +11,16 @@ interface MenuItemDetailProps {
   onClose: () => void;
   onAddToCart: (
     item: MenuItem,
-    variant?: Variant,
-    addons?: Addon[],
-    quantity?: number,
-    customizations?: { name: string; value: string }[]
+    quantity: number,
+    selectedModifiers: Array<{
+      groupId: string;
+      groupName: string;
+      options: Array<{
+        optionId: string;
+        name: string;
+        price: number;
+      }>;
+    }>
   ) => void;
 }
 
@@ -26,20 +32,14 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
   onClose,
   onAddToCart,
 }) => {
-  const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
-    item.variants?.find((v) => v.isDefault) || item.variants?.[0]
-  );
-  const [selectedAddons, setSelectedAddons] = useState<Addon[]>([]);
-  const [selectedCustomizations, setSelectedCustomizations] = useState<Record<string, string>>({});
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, ModifierOption[]>>({});
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Reset state when item or mode changes
   useEffect(() => {
     if (isOpen) {
-      setSelectedVariant(item.variants?.find((v) => v.isDefault) || item.variants?.[0]);
-      setSelectedAddons([]);
-      setSelectedCustomizations({});
+      setSelectedOptions({});
       setQuantity(1);
       setCurrentImageIndex(0);
     }
@@ -48,36 +48,59 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
   const images =
     item.images && item.images.length > 0 ? item.images : item.image ? [item.image] : [];
 
-  const handleAddonToggle = (addon: Addon) => {
-    setSelectedAddons((prev) =>
-      prev.find((a) => a._id === addon._id)
-        ? prev.filter((a) => a._id !== addon._id)
-        : [...prev, addon]
-    );
-  };
+  const handleOptionToggle = (group: ModifierGroup, option: ModifierOption) => {
+    setSelectedOptions((prev) => {
+      const currentGroupOptions = prev[group._id] || [];
+      const isSelected = currentGroupOptions.find((o) => o._id === option._id);
 
-  const handleCustomizationChange = (name: string, value: string) => {
-    setSelectedCustomizations((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+      let newGroupOptions: ModifierOption[];
+
+      if (group.isMultiSelect) {
+        if (isSelected) {
+          newGroupOptions = currentGroupOptions.filter((o) => o._id !== option._id);
+        } else {
+          if (currentGroupOptions.length < group.maxSelections) {
+            newGroupOptions = [...currentGroupOptions, option];
+          } else {
+            // If at max, we could either do nothing or replace one.
+            // Let's do nothing for strict enforcement.
+            return prev;
+          }
+        }
+      } else {
+        // Single select (radio behavior)
+        newGroupOptions = [option];
+      }
+
+      return {
+        ...prev,
+        [group._id]: newGroupOptions,
+      };
+    });
   };
 
   const isAddDisabled = useMemo(() => {
     if (!item.isAvailable) return true;
-    if (!item.customizations) return false;
+    if (!item.modifierGroups) return false;
 
-    return item.customizations.some(
-      (c) => c.isRequired && !selectedCustomizations[c.name]
-    );
-  }, [item.isAvailable, item.customizations, selectedCustomizations]);
+    return item.modifierGroups.some((group) => {
+      const selections = selectedOptions[group._id] || [];
+      return group.isRequired && selections.length < (group.minSelections || 1);
+    });
+  }, [item.isAvailable, item.modifierGroups, selectedOptions]);
 
   const handleAddToCart = () => {
-    const customizationsArray = Object.entries(selectedCustomizations).map(([name, value]) => ({
-      name,
-      value,
-    }));
-    onAddToCart(item, selectedVariant, selectedAddons, quantity, customizationsArray);
+    const selectedModifiers = (item.modifierGroups || []).map((group) => ({
+      groupId: group._id,
+      groupName: group.name,
+      options: (selectedOptions[group._id] || []).map((opt) => ({
+        optionId: opt._id,
+        name: opt.name,
+        price: opt.price,
+      })),
+    })).filter(g => g.options.length > 0);
+
+    onAddToCart(item, quantity, selectedModifiers);
     onClose();
   };
 
@@ -85,9 +108,13 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
   const decrementQuantity = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
 
   const getCurrentPrice = () => {
-    let basePrice = selectedVariant ? selectedVariant.price : (item.discountPrice || item.price);
-    const addonsPrice = selectedAddons.reduce((acc, a) => acc + a.price, 0);
-    return basePrice + addonsPrice;
+    let price = item.discountPrice || item.price;
+    Object.values(selectedOptions).forEach((options) => {
+      options.forEach((opt) => {
+        price += opt.price;
+      });
+    });
+    return price;
   };
 
   if (!isOpen) return null;
@@ -108,24 +135,7 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
         <div className="menu-item-details-content">
           {!isCustomizeMode && images.length > 0 && (
             <div className="menu-item-details-image-section">
-              <img
-                src={images[currentImageIndex]}
-                alt={item.name}
-                className="menu-item-details-image"
-              />
-              {images.length > 1 && (
-                <div className="menu-item-details-image-indicators">
-                  {images.map((_, index) => (
-                    <button
-                      key={index}
-                      className={`menu-item-details-image-indicator ${index === currentImageIndex ? 'active' : ''
-                        }`}
-                      onClick={() => setCurrentImageIndex(index)}
-                      aria-label={`View image ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
+              <img src={images[currentImageIndex]} alt={item.name} className="menu-item-details-image" />
             </div>
           )}
 
@@ -139,154 +149,52 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
                   </span>
                 )}
               </div>
-              {!isCustomizeMode && item.tags && item.tags.length > 0 && (
-                <div className="menu-item-details-tags">
-                  {item.tags.map((tag, idx) => (
-                    <span key={idx} className="menu-item-details-tag">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {!isCustomizeMode && item.description && (
-              <p className="menu-item-details-description">{item.description}</p>
-            )}
+            {!isCustomizeMode && item.description && <p className="menu-item-details-description">{item.description}</p>}
 
-            {!isCustomizeMode && (
-              <div className="menu-item-details-meta-grid">
-                {item.preparationTime && (
-                  <div className="menu-item-details-meta-item">
-                    <span className="menu-item-details-meta-icon">⏱️</span>
-                    <span className="menu-item-details-meta-text">
-                      {item.preparationTime} min
-                    </span>
-                  </div>
-                )}
-                {item.calories && (
-                  <div className="menu-item-details-meta-item">
-                    <span className="menu-item-details-meta-icon">🔥</span>
-                    <span className="menu-item-details-meta-text">{item.calories} cal</span>
-                  </div>
-                )}
-                {item.spiceLevel && (
-                  <div className="menu-item-details-meta-item">
-                    <span className="menu-item-details-meta-icon">
-                      {getSpiceLevelEmoji(item.spiceLevel)}
-                    </span>
-                    <span className="menu-item-details-meta-text">
-                      {item.spiceLevel.charAt(0).toUpperCase() + item.spiceLevel.slice(1)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {!isCustomizeMode && item.allergens && item.allergens.length > 0 && (
-              <div className="menu-item-details-allergen-section">
-                <h3 className="menu-item-details-allergen-title">⚠️ Allergen Information</h3>
-                <p className="menu-item-details-allergen-text">
-                  {item.allergens.join(', ')}
-                </p>
-              </div>
-            )}
-
-            {/* Variants */}
-            {item.variants && item.variants.length > 0 && (
-              <div className="menu-item-details-section">
+            {/* Render Modifier Groups */}
+            {(item.modifierGroups || []).map((group) => (
+              <div key={group._id} className="menu-item-details-section">
                 <h3 className="menu-item-details-section-title">
-                  Select Size <span className="required-badge">Required</span>
+                  {group.name}
+                  {group.isRequired && <span className="required-badge">Required</span>}
                 </h3>
-                <div className="menu-item-details-variant-options">
-                  {item.variants.map((variant) => (
-                    <button
-                      key={variant._id}
-                      className={`menu-item-details-variant-option ${selectedVariant?._id === variant._id ? 'active' : ''
-                        }`}
-                      onClick={() => setSelectedVariant(variant)}
-                    >
-                      <span className="menu-item-details-variant-name">{variant.name}</span>
-                      <span className="menu-item-details-variant-price">
-                        {formatPrice(variant.price, currency)}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+                {group.description && <p className="field-help-text">{group.description}</p>}
 
-            {/* Customizations */}
-            {item.customizations && item.customizations.length > 0 && (
-              <div className="menu-item-details-customizations-list">
-                {item.customizations.map((customization) => (
-                  <div key={customization._id} className="menu-item-details-section">
-                    <h3 className="menu-item-details-section-title">
-                      {customization.name}
-                      {customization.isRequired && <span className="required-badge">Required</span>}
-                    </h3>
-                    <div className="menu-item-details-customization-options">
-                      {customization.options.map((option) => (
-                        <label key={option} className="menu-item-details-customization-option">
+                <div className="modifier-options-list">
+                  {group.options.map((option) => {
+                    const isSelected = !!(selectedOptions[group._id] || []).find((o) => o._id === option._id);
+                    return (
+                      <label key={option._id} className={`menu-item-details-addon-item ${!option.isAvailable ? 'disabled' : ''}`}>
+                        <div className="addon-info">
                           <input
-                            type="radio"
-                            name={customization.name}
-                            value={option}
-                            checked={selectedCustomizations[customization.name] === option}
-                            onChange={() => handleCustomizationChange(customization.name, option)}
+                            type={group.isMultiSelect ? "checkbox" : "radio"}
+                            name={group._id}
+                            checked={isSelected}
+                            disabled={!option.isAvailable}
+                            onChange={() => handleOptionToggle(group, option)}
                           />
-                          <span className="custom-radio"></span>
-                          <span className="option-name">{option}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Addons */}
-            {item.addons && item.addons.length > 0 && (
-              <div className="menu-item-details-section">
-                <h3 className="menu-item-details-section-title">Add-ons</h3>
-                <div className="menu-item-details-addons-list">
-                  {item.addons.map((addon) => (
-                    <label key={addon._id} className="menu-item-details-addon-item">
-                      <div className="addon-info">
-                        <input
-                          type="checkbox"
-                          checked={!!selectedAddons.find((a) => a._id === addon._id)}
-                          onChange={() => handleAddonToggle(addon)}
-                        />
-                        <span className="custom-checkbox"></span>
-                        <span className="addon-name">{addon.name}</span>
-                      </div>
-                      <span className="addon-price">+{formatPrice(addon.price, currency)}</span>
-                    </label>
-                  ))}
+                          <span className={group.isMultiSelect ? "custom-checkbox" : "custom-radio"}></span>
+                          <span className="addon-name">{option.name}</span>
+                        </div>
+                        <span className="addon-price">
+                          {option.price > 0 ? `+${formatPrice(option.price, currency)}` : 'Free'}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
-            )}
+            ))}
           </div>
         </div>
 
         <div className="menu-item-details-footer">
           <div className="menu-item-details-quantity-selector">
-            <button
-              className="menu-item-details-quantity-btn"
-              onClick={decrementQuantity}
-              aria-label="Decrease quantity"
-            >
-              −
-            </button>
+            <button className="menu-item-details-quantity-btn" onClick={decrementQuantity}>−</button>
             <span className="menu-item-details-quantity-value">{quantity}</span>
-            <button
-              className="menu-item-details-quantity-btn"
-              onClick={incrementQuantity}
-              aria-label="Increase quantity"
-            >
-              +
-            </button>
+            <button className="menu-item-details-quantity-btn" onClick={incrementQuantity}>+</button>
           </div>
 
           <button

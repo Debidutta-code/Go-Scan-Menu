@@ -1,0 +1,80 @@
+.modifier-management-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.modifier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.modifier-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.modifier-section {
+  margin-bottom: 3rem;
+}
+
+.modifier-section h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--primary-100);
+  padding-bottom: 0.5rem;
+}
+
+.modifier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.modifier-card {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.modifier-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.modifier-card h3 {
+  margin-bottom: 0.5rem;
+  color: var(--primary-700);
+}
+
+.modifier-card p {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.modifier-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.modifier-stats span {
+  font-size: 0.75rem;
+  background: var(--primary-50);
+  color: var(--primary-600);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.modifier-price {
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  font-size: 1.125rem !important;
+}

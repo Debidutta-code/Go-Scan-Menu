@@ -22,7 +22,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
   // Find the total quantity of this item in the cart
   const cartItems = cart.filter(i => i.menuItem._id === item._id);
   const totalQuantity = cartItems.reduce((acc, i) => acc + i.quantity, 0);
-  const hasVariants = item.variants && item.variants.length > 0;
+  const hasOptions = item.modifierGroups && item.modifierGroups.length > 0;
 
   const handleAddClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -32,11 +32,6 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
   const handleMinusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     // If it's a simple item and it's in the cart, reduce its quantity
-    const hasOptions =
-      hasVariants ||
-      (item.addons && item.addons.length > 0) ||
-      (item.customizations && item.customizations.length > 0);
-
     if (cartItems.length === 1 && !hasOptions) {
       if (cartItems[0].quantity > 1) {
         updateQuantity(cartItems[0]._id, -1);
@@ -127,7 +122,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
           {item.isAvailable && (
             <div className="menu-item-card-actions">
-              {(!hasVariants && totalQuantity > 0) ? (
+              {(!hasOptions && totalQuantity > 0) ? (
                 <div className="menu-item-card-quantity-control">
                   <button
                     className="menu-item-card-quantity-btn-minus"

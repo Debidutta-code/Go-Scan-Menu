@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { authRoutes } from '@/modules/auth';
 import { restaurantRoutes, branchRoutes, taxRoutes, qrConfigRoutes } from '@/modules/restaurant';
 import { staffRoutes, roleRoutes, staffTypePermissionRoutes } from '@/modules/staff';
-import { categoryRoutes, menuItemRoutes, publicMenuRoutes } from '@/modules/menu';
+import { categoryRoutes, menuItemRoutes, publicMenuRoutes, modifierRoutes } from '@/modules/menu';
 import { orderRoutes } from '@/modules/order';
 import { tableRoutes } from '@/modules/table';
 import { ApiLogController } from '@/modules/analytics/api-log.controller';
@@ -41,6 +41,9 @@ router.use('/restaurants/:restaurantId/categories', categoryRoutes);
 
 // Menu Item Management (nested under restaurants)
 router.use('/restaurants/:restaurantId/menu-items', menuItemRoutes);
+
+// Modifier Management (nested under restaurants)
+router.use('/restaurants/:restaurantId/modifiers', modifierRoutes);
 
 // Tax Management
 router.use('/restaurants/:restaurantId/taxes', taxRoutes);

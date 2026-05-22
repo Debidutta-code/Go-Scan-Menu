@@ -24,6 +24,14 @@ export interface IOrder extends Document {
       name: string;
       price: number;
     }>;
+    modifierGroups: Array<{
+      groupId: Types.ObjectId;
+      options: Array<{
+        optionId: Types.ObjectId;
+        name: string;
+        price: number;
+      }>;
+    }>;
     customizations: Array<{
       name: string;
       value: string;
@@ -159,6 +167,24 @@ const orderSchema = new Schema<IOrder>(
               required: true,
               min: 0,
             },
+          },
+        ],
+        modifierGroups: [
+          {
+            groupId: {
+              type: Schema.Types.ObjectId,
+              ref: 'ModifierGroup',
+            },
+            options: [
+              {
+                optionId: {
+                  type: Schema.Types.ObjectId,
+                  ref: 'ModifierOption',
+                },
+                name: String,
+                price: Number,
+              },
+            ],
           },
         ],
         customizations: [

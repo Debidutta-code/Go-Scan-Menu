@@ -31,25 +31,36 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const addItem = (
         item: MenuItem,
-        variant?: Variant,
-        addons: Addon[] = [],
         quantity: number = 1,
-        customizations: { name: string; value: string }[] = []
+        selectedModifiers: Array<{
+            groupId: string;
+            groupName: string;
+            options: Array<{
+                optionId: string;
+                name: string;
+                price: number;
+            }>;
+        }> = []
     ) => {
         setCart((prevCart) => {
-            // Create a unique ID based on item, variant, addons, and customizations
-            const addonIds = addons.map(a => a._id).sort().join(',');
-            const customizationStr = customizations
-                .map(c => `${c.name}:${c.value}`)
+            // Create a unique ID based on item and selected options
+            const modifierStr = selectedModifiers
+                .map(mg => {
+                    const optIds = mg.options.map(o => o.optionId).sort().join(',');
+                    return `${mg.groupId}:${optIds}`;
+                })
                 .sort()
                 .join('|');
-            const cartItemId = `${item._id}-${variant?._id || 'default'}-${addonIds}-${customizationStr}`;
+
+            const cartItemId = `${item._id}-${modifierStr}`;
 
             const existingItemIndex = prevCart.findIndex((i) => i._id === cartItemId);
 
-            const itemPrice = variant ? variant.price : (item.discountPrice || item.price);
-            const addonsPrice = addons.reduce((acc, a) => acc + a.price, 0);
-            const unitTotalPrice = itemPrice + addonsPrice;
+            const itemPrice = (item.discountPrice || item.price);
+            const modifiersPrice = selectedModifiers.reduce((acc, mg) =>
+                acc + mg.options.reduce((sum, o) => sum + o.price, 0), 0
+            );
+            const unitTotalPrice = itemPrice + modifiersPrice;
 
             if (existingItemIndex > -1) {
                 const newCart = [...prevCart];
@@ -64,9 +75,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 id: cartItemId,
                 _id: cartItemId,
                 menuItem: item,
-                variant,
-                addons,
-                customizations,
+                selectedModifiers,
                 quantity,
                 totalPrice: unitTotalPrice,
             };

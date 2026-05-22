@@ -65,6 +65,7 @@ export class MenuItemService {
       variants?: IMenuItem['variants'];
       addons?: IMenuItem['addons'];
       customizations?: IMenuItem['customizations'];
+      modifierGroups?: IMenuItem['modifierGroups'];
       isAvailable?: boolean;
       availableQuantity?: number;
       displayOrder?: number;
@@ -151,6 +152,7 @@ export class MenuItemService {
       variants: data.variants || [],
       addons: data.addons || [],
       customizations: data.customizations || [],
+      modifierGroups: data.modifierGroups || [],
       isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
       availableQuantity: data.availableQuantity,
       isActive: true,

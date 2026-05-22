@@ -77,6 +77,23 @@ export interface IMenuItem extends Document {
   drinkTemperature?: DrinkTemperature;
   drinkAlcoholContent?: DrinkAlcoholContent;
   drinkCaffeineContent?: DrinkCaffeineContent;
+
+  // NEW: Refactored Modifiers
+  modifierGroups: Array<{
+    groupId: Types.ObjectId;
+    overrides: Array<{
+      optionId: Types.ObjectId;
+      price?: number; // Custom price for this item
+      isAvailable?: boolean;
+    }>;
+    isRequired?: boolean; // Override group default
+    isMultiSelect?: boolean; // Override group default
+    minSelections?: number; // Override group default
+    maxSelections?: number; // Override group default
+    displayOrder: number;
+  }>;
+
+  // LEGACY (for backward compatibility if needed, but we should migrate)
   variants: Array<{
     name: string;
     price: number;
@@ -91,6 +108,7 @@ export interface IMenuItem extends Document {
     options: string[];
     isRequired: boolean;
   }>;
+
   isAvailable: boolean;
   availableQuantity?: number;
   isActive: boolean;
@@ -222,6 +240,44 @@ const menuItemSchema = new Schema<IMenuItem>(
       type: String,
       enum: Object.values(DrinkCaffeineContent),
     },
+
+    // NEW: Modifier Groups
+    modifierGroups: [
+      {
+        groupId: {
+          type: Schema.Types.ObjectId,
+          ref: 'ModifierGroup',
+          required: true,
+        },
+        overrides: [
+          {
+            optionId: {
+              type: Schema.Types.ObjectId,
+              ref: 'ModifierOption',
+              required: true,
+            },
+            price: {
+              type: Number,
+              min: 0,
+            },
+            isAvailable: {
+              type: Boolean,
+              default: true,
+            },
+          },
+        ],
+        isRequired: Boolean,
+        isMultiSelect: Boolean,
+        minSelections: Number,
+        maxSelections: Number,
+        displayOrder: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
+
+    // LEGACY
     variants: [
       {
         name: {

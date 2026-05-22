@@ -15,6 +15,7 @@ export interface MenuItem {
   variants?: Variant[];
   addons?: Addon[];
   customizations?: Customization[];
+  modifierGroups?: ModifierGroup[];
   isAvailable: boolean;
   availableQuantity?: number;
   dietaryType?: 'VEG' | 'NON_VEG' | 'EGG' | 'JAIN' | 'VEGAN' | 'GLUTEN_FREE';
@@ -26,6 +27,27 @@ export interface Variant {
   isDefault: boolean;
   id: string;
   _id: string;
+}
+
+export interface ModifierOption {
+  _id: string;
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  isAvailable: boolean;
+}
+
+export interface ModifierGroup {
+  _id: string;
+  id: string;
+  name: string;
+  description?: string;
+  minSelections: number;
+  maxSelections: number;
+  isRequired: boolean;
+  isMultiSelect: boolean;
+  options: ModifierOption[];
 }
 
 export interface Addon {

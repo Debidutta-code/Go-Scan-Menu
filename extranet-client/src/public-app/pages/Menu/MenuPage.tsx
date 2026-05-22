@@ -39,28 +39,23 @@ export const MenuPage: React.FC = () => {
   };
 
   const handleAddClick = (item: MenuItem) => {
-    // If it has variants, addons, or customizations, we should open the detail view in customize mode
-    const hasOptions =
-      (item.variants && item.variants.length > 0) ||
-      (item.addons && item.addons.length > 0) ||
-      (item.customizations && item.customizations.length > 0);
+    // If it has modifier groups, we should open the detail view in customize mode
+    const hasOptions = (item.modifierGroups && item.modifierGroups.length > 0);
 
     if (hasOptions) {
       setDrawerMode('customize');
       setSelectedItem(item);
     } else {
-      addItem(item);
+      addItem(item, 1, []);
     }
   };
 
   const handleAddToCart = (
     item: MenuItem,
-    variant?: Variant,
-    addons: Addon[] = [],
-    quantity: number = 1,
-    customizations: { name: string; value: string }[] = []
+    quantity: number,
+    selectedModifiers: any[]
   ) => {
-    addItem(item, variant, addons, quantity, customizations);
+    addItem(item, quantity, selectedModifiers);
     setSelectedItem(null);
   };
 

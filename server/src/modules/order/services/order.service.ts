@@ -1,5 +1,6 @@
 // src/services/order.service.ts
 import { OrderRepository } from '../repositories/order.repository';
+import mongoose from 'mongoose';
 import { RestaurantRepository } from '../../restaurant/repositories/restaurant.repository';
 import { BranchRepository } from '../../restaurant/repositories/branch.repository';
 import { TableRepository } from '../../table/repositories/table.repository';
@@ -84,7 +85,7 @@ export class OrderService {
 
       // Process order items
       const processedItems = await Promise.all(
-        data.items.map(async (item) => {
+        data.items.map(async (item: any) => {
           if (item.quantity <= 0) {
             throw new AppError('Item quantity must be greater than 0', 400);
           }
@@ -101,50 +102,52 @@ export class OrderService {
             );
           }
 
-          if (
-            menuItem.availableQuantity !== undefined &&
-            menuItem.availableQuantity !== null &&
-            menuItem.availableQuantity < item.quantity
-          ) {
-            throw new AppError(
-              `Insufficient stock for ${menuItem.name}. Available: ${menuItem.availableQuantity}`,
-              400
-            );
+          let itemPrice = menuItem.discountPrice ?? menuItem.price;
+          const selectedModifiers = item.modifierGroups || [];
+          let modifiersTotal = 0;
+
+          // Validate and calculate price for new modifier system
+          if (selectedModifiers.length > 0 && menuItem.modifierGroups) {
+            for (const smg of selectedModifiers) {
+                const menuItemGrp = menuItem.modifierGroups.find((mg: any) => mg.groupId.toString() === smg.groupId);
+                if (!menuItemGrp) {
+                    throw new AppError(`Modifier group ${smg.groupId} not found for item ${menuItem.name}`, 400);
+                }
+
+                // Check options
+                for (const opt of smg.options) {
+                    const override = menuItemGrp.overrides.find((o: any) => o.optionId.toString() === opt.optionId);
+
+                    // We need to fetch the global option to get default price if no override
+                    const ModifierOption = (this as any).optionRepo || (mongoose as any).model('ModifierOption');
+                    const globalOpt = await ModifierOption.findById(opt.optionId);
+
+                    if (!globalOpt) {
+                        throw new AppError(`Option ${opt.optionId} not found`, 400);
+                    }
+
+                    const price = (override && override.price !== undefined) ? override.price : globalOpt.price;
+                    if (price !== opt.price) {
+                        throw new AppError(`Price mismatch for option ${opt.name}. Expected ${price}, got ${opt.price}`, 400);
+                    }
+                    modifiersTotal += price;
+                }
+            }
           }
 
-          let itemPrice = menuItem.discountPrice ?? menuItem.price;
+          // Legacy support for variants/addons
           let variant = undefined;
-
           if (item.variantName && menuItem.variants?.length > 0) {
             const selectedVariant = menuItem.variants.find((v: any) => v.name === item.variantName);
-            if (!selectedVariant) {
-              throw new AppError(
-                `Variant "${item.variantName}" not found for item ${menuItem.name}`,
-                400
-              );
+            if (selectedVariant) {
+                itemPrice = selectedVariant.price;
+                variant = { name: selectedVariant.name, price: selectedVariant.price };
             }
-            itemPrice = selectedVariant.price;
-            variant = { name: selectedVariant.name, price: selectedVariant.price };
           }
 
           const addons = item.addons || [];
-          if (addons.length > 0 && menuItem.addons) {
-            for (const addon of addons) {
-              const validAddon = menuItem.addons.find((a: any) => a.name === addon.name);
-              if (!validAddon) {
-                throw new AppError(
-                  `Addon "${addon.name}" not found for item ${menuItem.name}`,
-                  400
-                );
-              }
-              if (validAddon.price !== addon.price) {
-                throw new AppError(`Invalid price for addon "${addon.name}"`, 400);
-              }
-            }
-          }
-
-          const addonsTotal = addons.reduce((sum, addon) => sum + (addon.price || 0), 0);
-          const itemTotal = (itemPrice + addonsTotal) * item.quantity;
+          const addonsTotal = addons.reduce((sum: number, addon: any) => sum + (addon.price || 0), 0);
+          const itemTotal = (itemPrice + addonsTotal + modifiersTotal) * item.quantity;
 
           return {
             menuItemId: new Types.ObjectId(item.menuItemId),
@@ -154,6 +157,7 @@ export class OrderService {
             price: itemPrice,
             variant,
             addons,
+            modifierGroups: selectedModifiers,
             customizations: item.customizations || [],
             specialInstructions: item.specialInstructions,
             itemTotal,

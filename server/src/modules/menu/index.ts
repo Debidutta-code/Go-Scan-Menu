@@ -16,3 +16,4 @@ export * from './models/menu-item.model';
 export { default as categoryRoutes } from './category.routes';
 export { default as menuItemRoutes } from './menu-item.routes';
 export { default as publicMenuRoutes } from './public-menu.routes';
+export { default as modifierRoutes } from './modifier.routes';

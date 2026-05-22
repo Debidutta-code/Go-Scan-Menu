@@ -92,6 +92,19 @@ export interface MenuItem {
     options: string[];
     isRequired: boolean;
   }>;
+  modifierGroups: Array<{
+    groupId: string;
+    overrides: Array<{
+      optionId: string;
+      price?: number;
+      isAvailable?: boolean;
+    }>;
+    isRequired?: boolean;
+    isMultiSelect?: boolean;
+    minSelections?: number;
+    maxSelections?: number;
+    displayOrder: number;
+  }>;
   isAvailable: boolean;
   availableQuantity?: number;
   isActive: boolean;
@@ -148,6 +161,19 @@ export interface CreateMenuItemPayload {
     name: string;
     options: string[];
     isRequired: boolean;
+  }>;
+  modifierGroups?: Array<{
+    groupId: string;
+    overrides: Array<{
+      optionId: string;
+      price?: number;
+      isAvailable?: boolean;
+    }>;
+    isRequired?: boolean;
+    isMultiSelect?: boolean;
+    minSelections?: number;
+    maxSelections?: number;
+    displayOrder: number;
   }>;
   isAvailable?: boolean;
   availableQuantity?: number;
@@ -299,4 +325,27 @@ export interface MenuData {
 export interface MenuResponse {
   success: boolean;
   data: MenuData;
+}
+
+export interface ModifierOption {
+  _id: string;
+  restaurantId: string;
+  name: string;
+  description?: string;
+  price: number;
+  isAvailable: boolean;
+  isActive: boolean;
+}
+
+export interface ModifierGroup {
+  _id: string;
+  restaurantId: string;
+  name: string;
+  description?: string;
+  minSelections: number;
+  maxSelections: number;
+  isRequired: boolean;
+  isMultiSelect: boolean;
+  options: ModifierOption[] | string[];
+  isActive: boolean;
 }
