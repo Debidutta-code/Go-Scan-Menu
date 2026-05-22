@@ -6,6 +6,7 @@ import { OrdersPage } from '@/public-app/pages/Orders/OrdersPage';
 import { CartPage } from '@/public-app/pages/Cart/CartPage';
 import { PaymentPage } from '@/public-app/pages/Payment/PaymentPage';
 import { GamesPage } from '@/public-app/pages/Games/GamesPage';
+import { FeedbackPage } from '@/public-app/pages/Feedback/FeedbackPage';
 import { renderGameRoutes } from './gameRoutes';
 
 export const renderPublicMenuRoutes = () => [
@@ -17,6 +18,7 @@ export const renderPublicMenuRoutes = () => [
         <Route path="cart" element={<CartPage />} />
         <Route path="payment" element={<PaymentPage />} />
         <Route path="games" element={<GamesPage />} />
+        <Route path="feedback" element={<FeedbackPage />} />
         {renderGameRoutes()}
     </Route>,
 
@@ -27,6 +29,7 @@ export const renderPublicMenuRoutes = () => [
         <Route path="cart" element={<CartPage />} />
         <Route path="payment" element={<PaymentPage />} />
         <Route path="games" element={<GamesPage />} />
+        <Route path="feedback" element={<FeedbackPage />} />
         {renderGameRoutes()}
     </Route>
 ];
