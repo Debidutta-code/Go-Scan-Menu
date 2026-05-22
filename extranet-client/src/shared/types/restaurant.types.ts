@@ -34,6 +34,9 @@ export interface Restaurant {
     serviceChargePercentage: number;
     allowBranchOverride: boolean;
   };
+  googlePlaceId?: string;
+  googleReviewRedirects?: number;
+  googleReviewEnabled?: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

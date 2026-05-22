@@ -7,6 +7,8 @@ export interface RestaurantInfo {
   name: string;
   type: 'single' | 'chain';
   slug: string;
+  googlePlaceId?: string;
+  googleReviewEnabled?: boolean;
 }
 
 export interface Staff {

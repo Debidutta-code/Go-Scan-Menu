@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePublicApp } from '@/public-app/contexts/PublicAppContext';
-import { Clock, ShoppingBag, Loader2 } from 'lucide-react';
+import { Clock, ShoppingBag, Loader2, Star } from 'lucide-react';
 import { PublicOrderService } from '@/public-app/services/public-order.service';
+import { FeedbackForm } from '@/public-app/components/common/FeedbackForm/FeedbackForm';
 import './OrdersPage.css';
 
 export const OrdersPage: React.FC = () => {
@@ -10,6 +11,7 @@ export const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -84,12 +86,38 @@ export const OrdersPage: React.FC = () => {
 
   return (
     <div className="orders-page-wrapper">
-      <div className="orders-header" style={{ padding: '20px', background: '#fff', borderBottom: '1px solid #f1f5f9', position: 'sticky', top: 0, zIndex: 10 }}>
-        <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>My Orders</h2>
-        <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>Table {menuData.table?.tableNumber}</p>
+      <div className="orders-header" style={{ padding: '20px', background: '#fff', borderBottom: '1px solid #f1f5f9', position: 'sticky', top: 0, zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>My Orders</h2>
+          <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>Table {menuData.table?.tableNumber}</p>
+        </div>
+        <button
+          onClick={() => setShowFeedback(!showFeedback)}
+          style={{
+            background: '#fef3c7',
+            color: '#d97706',
+            border: 'none',
+            padding: '8px 12px',
+            borderRadius: '12px',
+            fontSize: '12px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <Star size={14} fill="currentColor" />
+          Rate Us
+        </button>
       </div>
 
       <div className="orders-list" style={{ padding: '16px' }}>
+        {showFeedback && (
+          <div style={{ marginBottom: '20px', border: '1px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>
+            <FeedbackForm onSuccess={() => setTimeout(() => setShowFeedback(false), 5000)} />
+          </div>
+        )}
+
         {error && (
           <div style={{ color: '#ef4444', background: '#fef2f2', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
             {error}

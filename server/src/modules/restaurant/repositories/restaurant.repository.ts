@@ -82,4 +82,19 @@ export class RestaurantRepository {
   async decrementBranchCount(id: string): Promise<void> {
     await Restaurant.findByIdAndUpdate(id, { $inc: { 'subscription.currentBranches': -1 } });
   }
+
+  async updateGoogleSettings(
+    id: string,
+    data: { googlePlaceId?: string; googleReviewEnabled?: boolean }
+  ): Promise<IRestaurant | null> {
+    return Restaurant.findByIdAndUpdate(id, { $set: data }, { new: true });
+  }
+
+  async incrementGoogleRedirects(id: string): Promise<IRestaurant | null> {
+    return Restaurant.findByIdAndUpdate(
+      id,
+      { $inc: { googleReviewRedirects: 1 } },
+      { new: true }
+    );
+  }
 }

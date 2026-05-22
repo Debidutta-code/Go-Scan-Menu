@@ -1,7 +1,7 @@
 // src/routes/index.ts
 import { Router } from 'express';
 import { authRoutes } from '@/modules/auth';
-import { restaurantRoutes, branchRoutes, taxRoutes, qrConfigRoutes } from '@/modules/restaurant';
+import { restaurantRoutes, branchRoutes, taxRoutes, qrConfigRoutes, feedbackRoutes } from '@/modules/restaurant';
 import { staffRoutes, roleRoutes, staffTypePermissionRoutes } from '@/modules/staff';
 import { categoryRoutes, menuItemRoutes, publicMenuRoutes, modifierRoutes } from '@/modules/menu';
 import { orderRoutes } from '@/modules/order';
@@ -53,6 +53,9 @@ router.use('/restaurants/:restaurantId/orders', orderRoutes);
 
 // QR Config Management (nested under restaurants)
 router.use('/restaurants/:restaurantId/qr-config', qrConfigRoutes);
+
+// Feedback Management
+router.use('/restaurants/:restaurantId/feedback', feedbackRoutes);
 
 // Register public routes (no auth required)
 router.use('/public', publicMenuRoutes);

@@ -89,6 +89,8 @@ export interface Restaurant {
   slug: string;
   theme?: RestaurantTheme;
   logo?: string;
+  googlePlaceId?: string;
+  googleReviewEnabled?: boolean;
 }
 
 export interface Address {

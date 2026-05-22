@@ -40,6 +40,9 @@ export interface IRestaurant extends Document {
     centralizedMenu: boolean;
     allowBranchSpecificItems: boolean;
   };
+  googlePlaceId?: string;
+  googleReviewRedirects: number;
+  googleReviewEnabled: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -169,6 +172,18 @@ const restaurantSchema = new Schema<IRestaurant>(
         type: Boolean,
         default: false,
       },
+    },
+    googlePlaceId: {
+      type: String,
+      default: '',
+    },
+    googleReviewRedirects: {
+      type: Number,
+      default: 0,
+    },
+    googleReviewEnabled: {
+      type: Boolean,
+      default: false,
     },
     isActive: {
       type: Boolean,
