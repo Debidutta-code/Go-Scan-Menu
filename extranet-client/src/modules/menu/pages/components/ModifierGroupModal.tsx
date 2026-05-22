@@ -78,24 +78,6 @@ export const ModifierGroupModal: React.FC<ModifierGroupModalProps> = ({
           <InputField label="Group Name (e.g. Toppings)" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
           <InputField label="Description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
 
-          <div className="form-row">
-            <label className="checkbox-label-inline">
-                <input type="checkbox" checked={formData.isRequired} onChange={(e) => setFormData({...formData, isRequired: e.target.checked})} />
-                <span>Required</span>
-            </label>
-            <label className="checkbox-label-inline">
-                <input type="checkbox" checked={formData.isMultiSelect} onChange={(e) => setFormData({...formData, isMultiSelect: e.target.checked})} />
-                <span>Multi-select</span>
-            </label>
-          </div>
-
-          {formData.isMultiSelect && (
-            <div className="form-row">
-                <InputField label="Min" type="number" value={formData.minSelections.toString()} onChange={(e) => setFormData({...formData, minSelections: parseInt(e.target.value)})} />
-                <InputField label="Max" type="number" value={formData.maxSelections.toString()} onChange={(e) => setFormData({...formData, maxSelections: parseInt(e.target.value)})} />
-            </div>
-          )}
-
           <div className="options-selection-list" style={{ marginTop: '15px', maxHeight: '200px', overflowY: 'auto' }}>
             <label className="form-label">Include Options:</label>
             {options.map(opt => (
