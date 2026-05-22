@@ -68,6 +68,8 @@ export class PublicMenuService {
         name: restaurant.name,
         slug: restaurant.slug,
         theme: restaurant.theme,
+        googlePlaceId: restaurant.googlePlaceId,
+        googleReviewEnabled: restaurant.googleReviewEnabled,
       },
       branch: {
         id: branch._id,
@@ -125,6 +127,8 @@ export class PublicMenuService {
         name: restaurant.name,
         slug: restaurant.slug,
         theme: restaurant.theme,
+        googlePlaceId: restaurant.googlePlaceId,
+        googleReviewEnabled: restaurant.googleReviewEnabled,
       },
       branch: {
         id: branch._id,
