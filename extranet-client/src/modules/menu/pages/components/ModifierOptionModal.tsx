@@ -61,12 +61,17 @@ export const ModifierOptionModal: React.FC<ModifierOptionModalProps> = ({
       <div className="modal-content">
         <h2>{initialData ? 'Edit Option' : 'Add New Option'}</h2>
         <form onSubmit={handleSubmit}>
-          <InputField label="Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
-          <InputField label="Description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
-          <InputField label="Default Price" type="number" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required step="0.01" />
+          <InputField label="Option Name (e.g. Small, Extra Cheese)" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
+          <InputField label="Description (Optional)" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
+          <div className="form-group">
+            <InputField label="Default Price" type="number" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required step="0.01" />
+            <p className="field-help-text" style={{ marginTop: '-8px', marginBottom: '12px' }}>
+              Set a default price for this option. You can override it for specific menu items later.
+            </p>
+          </div>
           <label className="checkbox-label-inline">
             <input type="checkbox" checked={formData.isAvailable} onChange={(e) => setFormData({...formData, isAvailable: e.target.checked})} />
-            <span>Available</span>
+            <span>Global Availability</span>
           </label>
           <div className="form-actions" style={{ marginTop: '20px' }}>
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>

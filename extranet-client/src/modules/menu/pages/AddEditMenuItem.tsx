@@ -379,19 +379,79 @@ export const AddEditMenuItem: React.FC = () => {
                     return (
                         <div key={mg.groupId} className="modifier-group-edit-card">
                             <div className="modifier-group-header"><h4>{globalGroup.name}</h4><Button variant="ghost" onClick={() => removeModifierGroup(groupIndex)}>Remove</Button></div>
-                            <div className="modifier-group-settings">
-                                <label className="checkbox-label-inline"><input type="checkbox" checked={mg.isRequired} onChange={(e) => updateModifierGroupOverride(groupIndex, 'isRequired', e.target.checked)} /><span>Required</span></label>
-                                <label className="checkbox-label-inline"><input type="checkbox" checked={mg.isMultiSelect} onChange={(e) => updateModifierGroupOverride(groupIndex, 'isMultiSelect', e.target.checked)} /><span>Multi-select</span></label>
+                            <div className="modifier-group-settings" style={{ borderBottom: '1px solid var(--gray-100)', paddingBottom: '12px', marginBottom: '12px' }}>
+                                <div style={{ display: 'flex', gap: '20px' }}>
+                                    <label className="checkbox-label-inline">
+                                        <input
+                                            type="checkbox"
+                                            checked={mg.isRequired}
+                                            onChange={(e) => {
+                                                const checked = e.target.checked;
+                                                updateModifierGroupOverride(groupIndex, 'isRequired', checked);
+                                                if (checked && mg.minSelections === 0) updateModifierGroupOverride(groupIndex, 'minSelections', 1);
+                                            }}
+                                        />
+                                        <span>Required Selection</span>
+                                    </label>
+                                    <label className="checkbox-label-inline">
+                                        <input type="checkbox" checked={mg.isMultiSelect} onChange={(e) => updateModifierGroupOverride(groupIndex, 'isMultiSelect', e.target.checked)} />
+                                        <span>Allow Multi-select</span>
+                                    </label>
+                                </div>
+
+                                {mg.isMultiSelect && (
+                                    <div style={{ display: 'flex', gap: '12px', marginTop: '12px', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span style={{ fontSize: '12px', color: 'var(--gray-600)' }}>Min:</span>
+                                            <input
+                                                type="number"
+                                                className="form-input small"
+                                                value={mg.minSelections || 0}
+                                                onChange={(e) => {
+                                                    const val = parseInt(e.target.value) || 0;
+                                                    updateModifierGroupOverride(groupIndex, 'minSelections', val);
+                                                    if (val > 0) updateModifierGroupOverride(groupIndex, 'isRequired', true);
+                                                    else updateModifierGroupOverride(groupIndex, 'isRequired', false);
+                                                }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span style={{ fontSize: '12px', color: 'var(--gray-600)' }}>Max:</span>
+                                            <input
+                                                type="number"
+                                                className="form-input small"
+                                                value={mg.maxSelections || 1}
+                                                onChange={(e) => updateModifierGroupOverride(groupIndex, 'maxSelections', parseInt(e.target.value) || 1)}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="option-overrides-list">
                                 {(globalGroup.options as ModifierOption[]).map(option => {
                                     const override = mg.overrides.find((o: any) => o.optionId === option._id);
                                     return (
                                         <div key={option._id} className="option-override-row">
-                                            <span className="option-name">{option.name} (${option.price})</span>
+                                            <div className="option-name-info">
+                                                <span className="option-name">{option.name}</span>
+                                                <span className="global-price-badge">Global: ${option.price.toFixed(2)}</span>
+                                            </div>
                                             <div className="override-inputs">
-                                                <input type="number" placeholder="Custom Price" value={override?.price || ''} onChange={(e) => updateOptionOverride(groupIndex, option._id, 'price', e.target.value)} className="form-input small" step="0.01" />
-                                                <label className="switch"><input type="checkbox" checked={override?.isAvailable !== undefined ? override.isAvailable : option.isAvailable} onChange={(e) => updateOptionOverride(groupIndex, option._id, 'isAvailable', e.target.checked)} /><span className="slider round"></span></label>
+                                                <div className="price-override-wrap">
+                                                    <span className="input-prefix">$</span>
+                                                    <input
+                                                        type="number"
+                                                        placeholder={option.price.toString()}
+                                                        value={override?.price || ''}
+                                                        onChange={(e) => updateOptionOverride(groupIndex, option._id, 'price', e.target.value)}
+                                                        className="form-input small override-input"
+                                                        step="0.01"
+                                                    />
+                                                </div>
+                                                <label className="switch" title="Available for this item">
+                                                    <input type="checkbox" checked={override?.isAvailable !== undefined ? override.isAvailable : option.isAvailable} onChange={(e) => updateOptionOverride(groupIndex, option._id, 'isAvailable', e.target.checked)} />
+                                                    <span className="slider round"></span>
+                                                </label>
                                             </div>
                                         </div>
                                     );

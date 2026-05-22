@@ -237,6 +237,42 @@
   border-bottom: 1px dashed var(--gray-100);
 }
 
+.option-name-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.global-price-badge {
+  font-size: 11px;
+  color: var(--gray-400);
+  font-weight: 500;
+}
+
+.price-override-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  padding: 0 8px;
+}
+
+.price-override-wrap .input-prefix {
+  font-size: 12px;
+  color: var(--gray-400);
+  font-weight: 600;
+}
+
+.price-override-wrap .override-input {
+  border: none !important;
+  box-shadow: none !important;
+  width: 70px !important;
+  min-width: 70px !important;
+  padding: 6px 4px !important;
+  font-size: 13px !important;
+}
+
 .override-inputs {
   display: flex;
   align-items: center;
