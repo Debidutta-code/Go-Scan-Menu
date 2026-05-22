@@ -81,13 +81,27 @@ export const ReviewsAndRatings: React.FC = () => {
     }
   };
 
+  const { updateCurrentStaff } = useStaffAuth();
+
   const handleSaveGoogleSettings = async () => {
     setSavingSettings(true);
     try {
-      await FeedbackService.updateGoogleSettings(restaurantId, {
+      const updatedRestaurant = await FeedbackService.updateGoogleSettings(restaurantId, {
         googlePlaceId,
         googleReviewEnabled: googleEnabled,
       });
+
+      // Update local staff context so changes persist on refresh
+      if (staff && staff.restaurant) {
+          updateCurrentStaff({
+              restaurant: {
+                  ...staff.restaurant,
+                  googlePlaceId: updatedRestaurant.googlePlaceId,
+                  googleReviewEnabled: updatedRestaurant.googleReviewEnabled,
+              }
+          });
+      }
+
       alert('Settings updated successfully');
     } catch (error) {
       alert('Failed to update settings');

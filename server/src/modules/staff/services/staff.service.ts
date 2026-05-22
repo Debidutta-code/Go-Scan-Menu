@@ -67,6 +67,8 @@ export class StaffService {
         name: restaurantDoc.name,
         type: restaurantDoc.type,
         slug: restaurantDoc.slug,
+        googlePlaceId: restaurantDoc.googlePlaceId,
+        googleReviewEnabled: restaurantDoc.googleReviewEnabled,
       };
     } else if (staff.restaurantId) {
       const restaurant = await this.restaurantRepo.findById(staff.restaurantId.toString());
@@ -77,6 +79,8 @@ export class StaffService {
           name: restaurant.name,
           type: restaurant.type,
           slug: restaurant.slug,
+          googlePlaceId: restaurant.googlePlaceId,
+          googleReviewEnabled: restaurant.googleReviewEnabled,
         };
       }
     }

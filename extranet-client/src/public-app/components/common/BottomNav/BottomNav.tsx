@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Star } from 'lucide-react';
 import './BottomNav.css';
 
 interface BottomNavProps {
@@ -56,6 +57,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       icon: '💳',
       path: `${getBasePath()}/payment`,
     },
+    {
+      id: 'feedback',
+      label: 'Rate',
+      icon: <Star size={20} />,
+      path: `${getBasePath()}/feedback`,
+    },
   ];
 
   const isActive = (path: string) => {
@@ -71,7 +78,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             className={`bottom-nav-item ${isActive(item.path) ? 'active' : ''}`}
             onClick={() => navigate(item.path)}
           >
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
               <span className="bottom-nav-icon">{item.icon}</span>
               {item.badge && item.badge > 0 && (
                 <span className="bottom-nav-cart-badge">{item.badge}</span>
