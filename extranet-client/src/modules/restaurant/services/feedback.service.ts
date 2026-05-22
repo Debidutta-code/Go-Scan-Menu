@@ -25,8 +25,17 @@ export interface Feedback {
 }
 
 export class FeedbackService {
+  static getHeaders() {
+    const token = localStorage.getItem('staff_token');
+    return {
+      Authorization: `Bearer ${token}`,
+    };
+  }
+
   static async getAnalytics(restaurantId: string): Promise<FeedbackAnalytics> {
-    const response = await axiosInstance.get(`/restaurants/${restaurantId}/feedback/analytics`);
+    const response = await axiosInstance.get(`/restaurants/${restaurantId}/feedback/analytics`, {
+      headers: this.getHeaders(),
+    });
     return response.data.data;
   }
 
@@ -34,7 +43,10 @@ export class FeedbackService {
     restaurantId: string,
     params: { type?: string; period?: string; page?: number; limit?: number }
   ): Promise<{ feedbacks: Feedback[]; pagination: any }> {
-    const response = await axiosInstance.get(`/restaurants/${restaurantId}/feedback`, { params });
+    const response = await axiosInstance.get(`/restaurants/${restaurantId}/feedback`, {
+      params,
+      headers: this.getHeaders(),
+    });
     return response.data.data;
   }
 
@@ -42,7 +54,13 @@ export class FeedbackService {
     restaurantId: string,
     data: { googlePlaceId?: string; googleReviewEnabled?: boolean }
   ): Promise<any> {
-    const response = await axiosInstance.patch(`/restaurants/${restaurantId}/feedback/google-settings`, data);
+    const response = await axiosInstance.patch(
+      `/restaurants/${restaurantId}/feedback/google-settings`,
+      data,
+      {
+        headers: this.getHeaders(),
+      }
+    );
     return response.data.data;
   }
 
