@@ -33,6 +33,9 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
   onAddToCart,
 }) => {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, ModifierOption[]>>({});
+  const [selectedVariant, setSelectedVariant] = useState<string>('');
+  const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [selectedCustomizations, setSelectedCustomizations] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -40,6 +43,10 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
   useEffect(() => {
     if (isOpen) {
       setSelectedOptions({});
+      const defaultVariant = item.variants?.find(v => v.isDefault)?._id || item.variants?.[0]?._id || '';
+      setSelectedVariant(defaultVariant);
+      setSelectedAddons([]);
+      setSelectedCustomizations({});
       setQuantity(1);
       setCurrentImageIndex(0);
     }
@@ -81,16 +88,23 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
 
   const isAddDisabled = useMemo(() => {
     if (!item.isAvailable) return true;
-    if (!item.modifierGroups) return false;
 
-    return item.modifierGroups.some((group) => {
+    const modifierDisabled = (item.modifierGroups || []).some((group) => {
       const selections = selectedOptions[group._id] || [];
       return group.isRequired && selections.length < (group.minSelections || 1);
     });
-  }, [item.isAvailable, item.modifierGroups, selectedOptions]);
+
+    const customizationDisabled = (item.customizations || []).some(cust => {
+      return cust.isRequired && !selectedCustomizations[cust._id];
+    });
+
+    const variantDisabled = (item.variants || []).length > 0 && !selectedVariant;
+
+    return modifierDisabled || customizationDisabled || variantDisabled;
+  }, [item.isAvailable, item.modifierGroups, item.customizations, item.variants, selectedOptions, selectedCustomizations, selectedVariant]);
 
   const handleAddToCart = () => {
-    const selectedModifiers = (item.modifierGroups || []).map((group) => ({
+    const modifiers = (item.modifierGroups || []).map((group) => ({
       groupId: group._id,
       groupName: group.name,
       options: (selectedOptions[group._id] || []).map((opt) => ({
@@ -100,7 +114,46 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
       })),
     })).filter(g => g.options.length > 0);
 
-    onAddToCart(item, quantity, selectedModifiers);
+    // Merge legacy options into modifiers format for consistency if needed,
+    // but the current addItem in CartContext seems to handle any[] for selectedModifiers.
+    // Let's create a combined structure.
+
+    const legacyModifiers: any[] = [];
+
+    if (selectedVariant) {
+        const variant = item.variants?.find(v => v._id === selectedVariant);
+        if (variant) {
+            legacyModifiers.push({
+                groupId: 'variant',
+                groupName: 'Variant',
+                options: [{ optionId: variant._id, name: variant.name, price: variant.price }]
+            });
+        }
+    }
+
+    selectedAddons.forEach(addonId => {
+        const addon = item.addons?.find(a => a._id === addonId);
+        if (addon) {
+            legacyModifiers.push({
+                groupId: 'addon',
+                groupName: 'Addon',
+                options: [{ optionId: addon._id, name: addon.name, price: addon.price }]
+            });
+        }
+    });
+
+    Object.entries(selectedCustomizations).forEach(([custId, option]) => {
+        const cust = item.customizations?.find(c => c._id === custId);
+        if (cust) {
+            legacyModifiers.push({
+                groupId: cust._id,
+                groupName: cust.name,
+                options: [{ optionId: option, name: option, price: 0 }]
+            });
+        }
+    });
+
+    onAddToCart(item, quantity, [...modifiers, ...legacyModifiers]);
     onClose();
   };
 
@@ -109,11 +162,27 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
 
   const getCurrentPrice = () => {
     let price = item.discountPrice || item.price;
+
+    // Add variant price (if exists, usually base price is variant 0, but let's check)
+    // If variants exist, base price might be overridden by variant price
+    if (item.variants && item.variants.length > 0) {
+        const variant = item.variants.find(v => v._id === selectedVariant);
+        if (variant) price = variant.price;
+    }
+
+    // Add modifier prices
     Object.values(selectedOptions).forEach((options) => {
       options.forEach((opt) => {
         price += opt.price;
       });
     });
+
+    // Add addon prices
+    selectedAddons.forEach(addonId => {
+        const addon = item.addons?.find(a => a._id === addonId);
+        if (addon) price += addon.price;
+    });
+
     return price;
   };
 
@@ -153,6 +222,33 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
 
             {!isCustomizeMode && item.description && <p className="menu-item-details-description">{item.description}</p>}
 
+            {/* Render Variants */}
+            {(item.variants || []).length > 0 && (
+              <div className="menu-item-details-section">
+                <h3 className="menu-item-details-section-title">
+                  Select Variant
+                  <span className="required-badge">Required</span>
+                </h3>
+                <div className="modifier-options-list">
+                  {item.variants?.map((variant) => (
+                    <label key={variant._id} className="menu-item-details-addon-item">
+                      <div className="addon-info">
+                        <input
+                          type="radio"
+                          name="variant"
+                          checked={selectedVariant === variant._id}
+                          onChange={() => setSelectedVariant(variant._id)}
+                        />
+                        <span className="custom-radio"></span>
+                        <span className="addon-name">{variant.name}</span>
+                      </div>
+                      <span className="addon-price">{formatPrice(variant.price, currency)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Render Modifier Groups */}
             {(item.modifierGroups || []).map((group) => (
               <div key={group._id} className="menu-item-details-section">
@@ -184,6 +280,61 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
                       </label>
                     );
                   })}
+                </div>
+              </div>
+            ))}
+
+            {/* Render Addons */}
+            {(item.addons || []).length > 0 && (
+              <div className="menu-item-details-section">
+                <h3 className="menu-item-details-section-title">Add-ons</h3>
+                <div className="modifier-options-list">
+                  {item.addons?.map((addon) => (
+                    <label key={addon._id} className="menu-item-details-addon-item">
+                      <div className="addon-info">
+                        <input
+                          type="checkbox"
+                          checked={selectedAddons.includes(addon._id)}
+                          onChange={() => {
+                            setSelectedAddons(prev =>
+                              prev.includes(addon._id)
+                                ? prev.filter(id => id !== addon._id)
+                                : [...prev, addon._id]
+                            );
+                          }}
+                        />
+                        <span className="custom-checkbox"></span>
+                        <span className="addon-name">{addon.name}</span>
+                      </div>
+                      <span className="addon-price">+{formatPrice(addon.price, currency)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Render Customizations */}
+            {(item.customizations || []).map((cust) => (
+              <div key={cust._id} className="menu-item-details-section">
+                <h3 className="menu-item-details-section-title">
+                  {cust.name}
+                  {cust.isRequired && <span className="required-badge">Required</span>}
+                </h3>
+                <div className="modifier-options-list">
+                  {cust.options.map((option) => (
+                    <label key={option} className="menu-item-details-addon-item">
+                      <div className="addon-info">
+                        <input
+                          type="radio"
+                          name={cust._id}
+                          checked={selectedCustomizations[cust._id] === option}
+                          onChange={() => setSelectedCustomizations(prev => ({ ...prev, [cust._id]: option }))}
+                        />
+                        <span className="custom-radio"></span>
+                        <span className="addon-name">{option}</span>
+                      </div>
+                    </label>
+                  ))}
                 </div>
               </div>
             ))}

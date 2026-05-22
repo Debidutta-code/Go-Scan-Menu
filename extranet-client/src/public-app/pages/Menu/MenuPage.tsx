@@ -39,8 +39,12 @@ export const MenuPage: React.FC = () => {
   };
 
   const handleAddClick = (item: MenuItem) => {
-    // If it has modifier groups, we should open the detail view in customize mode
-    const hasOptions = (item.modifierGroups && item.modifierGroups.length > 0);
+    // If it has modifier groups or legacy options, we should open the detail view in customize mode
+    const hasOptions =
+      (item.modifierGroups && item.modifierGroups.length > 0) ||
+      (item.variants && item.variants.length > 0) ||
+      (item.addons && item.addons.length > 0) ||
+      (item.customizations && item.customizations.length > 0);
 
     if (hasOptions) {
       setDrawerMode('customize');
