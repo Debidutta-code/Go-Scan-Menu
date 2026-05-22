@@ -21,7 +21,10 @@ import {
 import { InputField } from '@/shared/components/InputField';
 import { Button } from '@/shared/components/Button';
 import { MenuPreview } from '@/modules/menu/pages/components/MenuPreview/MenuPreview';
-import { Switch } from '@/shared/components/Switch';
+import { ModifierService } from '../services/modifier.service';
+import { ModifierGroupModal } from './components/ModifierGroupModal';
+import { ModifierOptionModal } from './components/ModifierOptionModal';
+import { ModifierGroup as ModifierGroupType, ModifierOption as ModifierOptionType } from '@/shared/types/menu.types';
 import './MenuModal.css';
 
 interface MenuModalProps {
@@ -70,6 +73,13 @@ export const MenuModal: React.FC<MenuModalProps> = ({
     const [variants, setVariants] = useState<Array<{ name: string; price: string; isDefault: boolean }>>([]);
     const [addons, setAddons] = useState<Array<{ name: string; price: string }>>([]);
     const [customizations, setCustomizations] = useState<Array<{ name: string; options: string; isRequired: boolean }>>([]);
+
+    // Modern Modifiers
+    const [globalModifierGroups, setGlobalModifierGroups] = useState<ModifierGroupType[]>([]);
+    const [globalOptions, setGlobalOptions] = useState<ModifierOptionType[]>([]);
+    const [selectedModifierGroups, setSelectedModifierGroups] = useState<any[]>([]);
+    const [groupModalOpen, setGroupModalOpen] = useState(false);
+    const [optionModalOpen, setOptionModalOpen] = useState(false);
 
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [loading, setLoading] = useState(false);
@@ -121,8 +131,15 @@ export const MenuModal: React.FC<MenuModalProps> = ({
 
         setLoadingData(true);
         try {
-            const categoriesData = await MenuAPI.getCategories(token, staff.restaurantId);
+            const [categoriesData, modifierGroupsData, optionsData] = await Promise.all([
+                MenuAPI.getCategories(token, staff.restaurantId),
+                ModifierService.getGroups(token, staff.restaurantId),
+                ModifierService.getOptions(token, staff.restaurantId)
+            ]);
+
             setCategories(categoriesData);
+            setGlobalModifierGroups(modifierGroupsData.data || []);
+            setGlobalOptions(optionsData.data || []);
 
             if (isEditMode && menuItemId) {
                 const item = await MenuAPI.getMenuItem(token, staff.restaurantId, menuItemId);
@@ -179,6 +196,17 @@ export const MenuModal: React.FC<MenuModalProps> = ({
                             name: c.name,
                             options: c.options.join(', '),
                             isRequired: c.isRequired
+                        })));
+                    }
+
+                    if (item.modifierGroups && item.modifierGroups.length > 0) {
+                        setSelectedModifierGroups(item.modifierGroups.map((mg: any) => ({
+                            groupId: mg.groupId,
+                            isRequired: mg.isRequired,
+                            isMultiSelect: mg.isMultiSelect,
+                            minSelections: mg.minSelections,
+                            maxSelections: mg.maxSelections,
+                            overrides: mg.overrides || []
                         })));
                     }
                 }
@@ -285,6 +313,57 @@ export const MenuModal: React.FC<MenuModalProps> = ({
         setCustomizations(customizations.filter((_, i) => i !== index));
     };
 
+    // Modifier Helpers
+    const handleSaveInlineOption = async (data: Partial<ModifierOptionType>) => {
+        const res = await ModifierService.createOption(token!, staff!.restaurantId, data);
+        if (res.success && res.data) {
+            setGlobalOptions(prev => [...prev, res.data as ModifierOptionType]);
+        }
+    };
+
+    const handleSaveInlineGroup = async (data: Partial<ModifierGroupType>) => {
+        const res = await ModifierService.createGroup(token!, staff!.restaurantId, data);
+        if (res.success && res.data) {
+            setGlobalModifierGroups(prev => [...prev, res.data as ModifierGroupType]);
+            addModifierGroup(res.data._id);
+        }
+    };
+
+    const addModifierGroup = (groupId: string) => {
+        if (selectedModifierGroups.find(g => g.groupId === groupId)) return;
+        const globalGroup = globalModifierGroups.find(g => g._id === groupId);
+        if (!globalGroup) return;
+        setSelectedModifierGroups(prev => [...prev, {
+            groupId,
+            isRequired: globalGroup.isRequired,
+            isMultiSelect: globalGroup.isMultiSelect,
+            minSelections: globalGroup.minSelections,
+            maxSelections: globalGroup.maxSelections,
+            overrides: []
+        }]);
+    };
+
+    const updateModifierGroupOverride = (groupIndex: number, field: string, value: any) => {
+        const updated = [...selectedModifierGroups];
+        updated[groupIndex] = { ...updated[groupIndex], [field]: value };
+        setSelectedModifierGroups(updated);
+    };
+
+    const updateOptionOverride = (groupIndex: number, optionId: string, field: 'price' | 'isAvailable', value: any) => {
+        const updatedGroups = [...selectedModifierGroups];
+        const group = updatedGroups[groupIndex];
+        let overrides = [...(group.overrides || [])];
+        const existingIndex = overrides.findIndex(o => o.optionId === optionId);
+        if (existingIndex > -1) {
+            if (value === '' || value === undefined) overrides = overrides.filter(o => o.optionId !== optionId);
+            else overrides[existingIndex] = { ...overrides[existingIndex], [field]: value };
+        } else {
+            if (value !== '' && value !== undefined) overrides.push({ optionId, [field]: value });
+        }
+        updatedGroups[groupIndex] = { ...group, overrides };
+        setSelectedModifierGroups(updatedGroups);
+    };
+
     const validate = () => {
         const newErrors = validateMenuItem(formData);
         setErrors(newErrors);
@@ -337,6 +416,11 @@ export const MenuModal: React.FC<MenuModalProps> = ({
                     options: c.options.split(',').map((o) => o.trim()).filter(Boolean),
                     isRequired: c.isRequired
                 })),
+                modifierGroups: selectedModifierGroups.map((mg, index) => ({
+                    ...mg,
+                    displayOrder: index,
+                    overrides: mg.overrides.map((o: any) => ({ ...o, price: o.price ? parseFloat(o.price) : undefined }))
+                }))
             };
 
             if (isEditMode && menuItemId) {
@@ -886,6 +970,59 @@ export const MenuModal: React.FC<MenuModalProps> = ({
                                     ))}
                                 </div>
 
+                                {/* Modern Modifiers Section */}
+                                <div className="form-section">
+                                    <div className="section-header">
+                                        <h3 className="section-title">Modifiers (Global Groups)</h3>
+                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                            <select
+                                                className="form-select"
+                                                style={{ width: 'auto' }}
+                                                onChange={(e) => { if (e.target.value) { addModifierGroup(e.target.value); e.target.value = ''; } }}
+                                            >
+                                                <option value="">Link Group...</option>
+                                                {globalModifierGroups.filter(g => !selectedModifierGroups.find(sg => sg.groupId === g._id)).map(g => (
+                                                    <option key={g._id} value={g._id}>{g.name}</option>
+                                                ))}
+                                            </select>
+                                            <Button type="button" variant="outline" size="sm" onClick={() => setGroupModalOpen(true)}>+ Group</Button>
+                                            <Button type="button" variant="outline" size="sm" onClick={() => setOptionModalOpen(true)}>+ Option</Button>
+                                        </div>
+                                    </div>
+                                    <div className="linked-modifier-groups">
+                                        {selectedModifierGroups.map((mg, groupIndex) => {
+                                            const globalGroup = globalModifierGroups.find(g => g._id === mg.groupId);
+                                            if (!globalGroup) return null;
+                                            return (
+                                                <div key={mg.groupId} className="modifier-group-edit-card">
+                                                    <div className="modifier-group-header">
+                                                        <h4>{globalGroup.name}</h4>
+                                                        <Button variant="ghost" size="sm" onClick={() => setSelectedModifierGroups(prev => prev.filter((_, i) => i !== groupIndex))}>Remove</Button>
+                                                    </div>
+                                                    <div className="modifier-group-settings">
+                                                        <label className="checkbox-label-inline"><input type="checkbox" checked={mg.isRequired} onChange={(e) => updateModifierGroupOverride(groupIndex, 'isRequired', e.target.checked)} /><span>Required</span></label>
+                                                        <label className="checkbox-label-inline"><input type="checkbox" checked={mg.isMultiSelect} onChange={(e) => updateModifierGroupOverride(groupIndex, 'isMultiSelect', e.target.checked)} /><span>Multi-select</span></label>
+                                                    </div>
+                                                    <div className="option-overrides-list">
+                                                        {(globalGroup.options as any[]).map(option => {
+                                                            const override = mg.overrides.find((o: any) => o.optionId === option._id);
+                                                            return (
+                                                                <div key={option._id} className="option-override-row">
+                                                                    <span className="option-name">{option.name}</span>
+                                                                    <div className="override-inputs">
+                                                                        <input type="number" placeholder="Price" value={override?.price || ''} onChange={(e) => updateOptionOverride(groupIndex, option._id, 'price', e.target.value)} className="form-input small" step="0.01" />
+                                                                        <label className="switch"><input type="checkbox" checked={override?.isAvailable !== undefined ? override.isAvailable : option.isAvailable} onChange={(e) => updateOptionOverride(groupIndex, option._id, 'isAvailable', e.target.checked)} /><span className="slider round"></span></label>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
                                 <div className="form-group">
                                     <label className="form-label">Scope</label>
                                     <select
@@ -976,6 +1113,9 @@ export const MenuModal: React.FC<MenuModalProps> = ({
                         </div>
                     </div>
                 )}
+
+                <ModifierOptionModal isOpen={optionModalOpen} onClose={() => setOptionModalOpen(false)} onSave={handleSaveInlineOption} />
+                <ModifierGroupModal isOpen={groupModalOpen} onClose={() => setGroupModalOpen(false)} onSave={handleSaveInlineGroup} options={globalOptions} />
             </div>
         </div>
     );

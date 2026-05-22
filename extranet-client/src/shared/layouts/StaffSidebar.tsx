@@ -109,6 +109,11 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
                     label: 'Menu Items',
                     path: '/staff/menu',
                     permission: isHighLevel || permissions?.menu?.view
+                },
+                {
+                    label: 'Modifiers',
+                    path: '/staff/modifiers',
+                    permission: isHighLevel || permissions?.menu?.view
                 }
             ]
         },

@@ -186,6 +186,11 @@ export const MenuManagement: React.FC = () => {
               Manage Categories
             </Button>
           </PermissionGuard>
+          <PermissionGuard permission="menu.view" minLevel={RoleLevel.BRANCH_SINGLE}>
+            <Button variant="outline" onClick={() => navigate('/staff/modifiers')} data-testid="manage-modifiers-button" size="sm">
+              Manage Modifiers
+            </Button>
+          </PermissionGuard>
           <PermissionGuard permission="menu.create" minLevel={RoleLevel.BRANCH_SINGLE}>
             <Button variant="primary" onClick={handleAddMenuItem} data-testid="add-menu-item-button" size="sm">
               + Add Item
