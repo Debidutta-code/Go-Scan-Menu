@@ -12,10 +12,6 @@ const taxSchema = new Schema<ITax>(
       ref: 'Restaurant',
       required: true,
     },
-    branchId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Branch',
-    },
     name: {
       type: String,
       required: true,
@@ -42,11 +38,6 @@ const taxSchema = new Schema<ITax>(
       type: String,
       enum: ['subtotal', 'item_total', 'after_other_taxes'],
       default: 'subtotal',
-    },
-    scope: {
-      type: String,
-      enum: ['restaurant', 'branch'],
-      default: 'restaurant',
     },
     category: {
       type: String,
@@ -109,8 +100,7 @@ const taxSchema = new Schema<ITax>(
 );
 
 // Indexes
-taxSchema.index({ restaurantId: 1, scope: 1, isActive: 1 });
-taxSchema.index({ branchId: 1, isActive: 1 });
+taxSchema.index({ restaurantId: 1, isActive: 1 });
 taxSchema.index({ restaurantId: 1, category: 1 });
 taxSchema.index({ parentId: 1 });
 

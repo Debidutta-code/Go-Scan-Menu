@@ -18,26 +18,18 @@ import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import './StaffDashboard.css';
 
 const DUMMY_STATS = [
-  { label: 'Today\'s Orders', value: '24', trend: '+12%', trendUp: true, icon: ShoppingBag },
-  { label: 'Today\'s Revenue', value: '$1,250', trend: '+8.5%', trendUp: true, icon: DollarSign },
-  { label: 'Avg. Order Value', value: '$52.10', trend: '-2%', trendUp: false, icon: TrendingUp },
-  { label: 'Active Customers', value: '18', trend: '+4', trendUp: true, icon: Users },
-];
-
-const DUMMY_ORDERS = [
-  { id: '#ORD-7291', customer: 'John Doe', items: 3, total: '$45.00', status: 'completed', time: '10 mins ago' },
-  { id: '#ORD-7290', customer: 'Sarah Smith', items: 1, total: '$12.50', status: 'pending', time: '15 mins ago' },
-  { id: '#ORD-7289', customer: 'Michael Chen', items: 5, total: '$89.00', status: 'completed', time: '25 mins ago' },
-  { id: '#ORD-7288', customer: 'Emma Wilson', items: 2, total: '$34.00', status: 'cancelled', time: '45 mins ago' },
-  { id: '#ORD-7287', customer: 'James Brown', items: 4, total: '$62.00', status: 'completed', time: '1 hour ago' },
+  { label: 'Total Categories', value: '8', trend: 'Menu', trendUp: true, icon: ShoppingBag },
+  { label: 'Total Items', value: '42', trend: 'Active', trendUp: true, icon: DollarSign },
+  { label: 'Table Count', value: '15', trend: 'QR Active', trendUp: true, icon: TrendingUp },
+  { label: 'Team Members', value: '6', trend: 'Staff', trendUp: true, icon: Users },
 ];
 
 const POPULAR_ITEMS = [
-  { rank: 1, name: 'Margherita Pizza', category: 'Main Course', sales: 42 },
-  { rank: 2, name: 'Truffle Pasta', category: 'Main Course', sales: 38 },
-  { rank: 3, name: 'Caesar Salad', category: 'Starters', sales: 31 },
-  { rank: 4, name: 'Iced Caramel Latte', category: 'Beverages', sales: 28 },
-  { rank: 5, name: 'Chocolate Lava Cake', category: 'Desserts', sales: 25 },
+  { rank: 1, name: 'Margherita Pizza', category: 'Main Course', views: 420 },
+  { rank: 2, name: 'Truffle Pasta', category: 'Main Course', views: 385 },
+  { rank: 3, name: 'Caesar Salad', category: 'Starters', views: 312 },
+  { rank: 4, name: 'Iced Caramel Latte', category: 'Beverages', views: 289 },
+  { rank: 5, name: 'Chocolate Lava Cake', category: 'Desserts', views: 254 },
 ];
 
 export const StaffDashboard: React.FC = () => {
@@ -86,47 +78,11 @@ export const StaffDashboard: React.FC = () => {
         {/* Interactive Center Grid */}
         <div className="dashboard-interactive-grid">
 
-          {/* Recent Orders Panel */}
-          <div className="dashboard-panel">
-            <div className="panel-header">
-              <h3 className="panel-title">Recent Orders</h3>
-              <button className="select-all-button">View All</button>
-            </div>
-            <div className="panel-content">
-              <table className="dashboard-table">
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {DUMMY_ORDERS.map(order => (
-                    <tr key={order.id}>
-                      <td style={{ fontWeight: 600 }}>{order.id}</td>
-                      <td>{order.customer}</td>
-                      <td>{order.total}</td>
-                      <td>
-                        <span className={`status-pill ${order.status}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td style={{ color: '#6b7280' }}>{order.time}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           {/* Popular Items Panel */}
           <div className="dashboard-panel">
             <div className="panel-header">
-              <h3 className="panel-title">Most Popular</h3>
-              <button className="select-all-button">Full Report</button>
+              <h3 className="panel-title">Most Viewed Items</h3>
+              <button className="select-all-button" onClick={() => navigate('/staff/menu')}>Manage Menu</button>
             </div>
             <div className="panel-content popular-list">
               {POPULAR_ITEMS.map(item => (
@@ -139,7 +95,7 @@ export const StaffDashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="item-sales" style={{ fontWeight: 600 }}>
-                    {item.sales} sold
+                    {item.views} views
                   </div>
                 </div>
               ))}
@@ -167,10 +123,6 @@ export const StaffDashboard: React.FC = () => {
               <span className="action-label">Team Members</span>
             </div>
 
-            <div className="quick-action-button" onClick={() => navigate('/staff/permissions')}>
-              <div className="action-icon-circle"><Lock size={20} /></div>
-              <span className="action-label">Access Control</span>
-            </div>
 
             <div className="quick-action-button">
               <div className="action-icon-circle"><Settings size={20} /></div>
