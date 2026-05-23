@@ -2,21 +2,21 @@ import { useState, useEffect } from 'react';
 import { MenuData } from '@/public-app/types/menu.types';
 import { menuApi } from '../api/menuApi';
 
-export const useMenu = (restaurantSlug: string, branchCode: string, qrCode?: string) => {
+export const useMenu = (restaurantSlug: string) => {
   const [menuData, setMenuData] = useState<MenuData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     loadMenu();
-  }, [restaurantSlug, branchCode, qrCode]);
+  }, [restaurantSlug]);
 
   const loadMenu = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const response = await menuApi.getMenu(restaurantSlug, branchCode, qrCode);
+      const response = await menuApi.getMenu(restaurantSlug);
 
       if (response.success && response.data) {
         setMenuData(response.data);

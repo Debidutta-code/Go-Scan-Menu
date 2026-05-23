@@ -1,12 +1,7 @@
-// src/contexts/StaffAuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StaffService } from '@/modules/staff/services/staff.service'; // Your staff service
 import { Staff } from '@/shared/types/staff.types';
 
-// ── Global auth-expiry event ──────────────────────────────────────────────────
-// Any page/service can call triggerStaffAuthExpiry() to force a logout when
-// it receives a 401 / "Authentication failed" response from the server.
 export const STAFF_AUTH_EXPIRED_EVENT = 'staff:auth-expired';
 
 export const triggerStaffAuthExpiry = () => {
@@ -32,11 +27,8 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ── Global auth-expiry listener ─────────────────────────────────────────────
-  // Fires when any page or service detects a 401 / expired-token response.
   useEffect(() => {
     const handleAuthExpired = () => {
-      console.warn('[StaffAuth] Token expired — logging out and redirecting to login.');
       localStorage.removeItem('staff_token');
       localStorage.removeItem('staff_data');
       setToken(null);
@@ -48,7 +40,6 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
     return () => window.removeEventListener(STAFF_AUTH_EXPIRED_EVENT, handleAuthExpired);
   }, [navigate]);
 
-  // Load stored token and staff on mount
   useEffect(() => {
     const loadStoredAuth = () => {
       const storedToken = localStorage.getItem('staff_token');
@@ -60,7 +51,6 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
           setToken(storedToken);
           setStaff(parsedStaff);
         } catch (err) {
-          console.error('Failed to parse stored staff data');
           localStorage.removeItem('staff_token');
           localStorage.removeItem('staff_data');
         }
@@ -72,26 +62,7 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      const response = await StaffService.login(email, password);
-
-      if (!response.success || !response.data?.staff || !response.data?.token) {
-        throw new Error('Login failed');
-      }
-
-      const { staff, token } = response.data;
-
-      // Store in localStorage
-      localStorage.setItem('staff_token', token);
-      localStorage.setItem('staff_data', JSON.stringify(staff));
-
-      // Update state
-      setToken(token);
-      setStaff(staff);
-    } catch (err: any) {
-      console.error('Login error:', err);
-      throw new Error(err.message || 'Invalid credentials');
-    }
+    throw new Error('Login not implemented');
   };
 
   const logout = () => {
@@ -108,26 +79,7 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
     localStorage.setItem('staff_data', JSON.stringify(updatedStaff));
   };
 
-  const refreshAuth = async () => {
-    const storedToken = localStorage.getItem('staff_token');
-    if (!storedToken) return;
-
-    try {
-      const response = await StaffService.getCurrentUser(storedToken);
-      if (response.success && response.data) {
-        const newDataStr = JSON.stringify(response.data);
-        const oldDataStr = localStorage.getItem('staff_data');
-
-        if (newDataStr !== oldDataStr) {
-          setStaff(response.data);
-          localStorage.setItem('staff_data', newDataStr);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to refresh staff data:', err);
-      // If 401, the interceptor or event listener should handle logout
-    }
-  };
+  const refreshAuth = async () => {};
 
   const value: StaffAuthContextType = {
     staff,
@@ -143,7 +95,6 @@ export const StaffAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
   return <StaffAuthContext.Provider value={value}>{children}</StaffAuthContext.Provider>;
 };
 
-// Custom hook
 export const useStaffAuth = (): StaffAuthContextType => {
   const context = useContext(StaffAuthContext);
   if (context === undefined) {

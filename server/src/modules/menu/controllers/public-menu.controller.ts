@@ -10,21 +10,12 @@ export class PublicMenuController {
   }
 
   /**
-   * Get complete menu for a specific table (QR code scan)
-   * Returns: restaurant theme, branch info, table, menu grouped by categories
+   * Get complete menu for a restaurant
    */
-  getMenuByQrCode = catchAsync(async (req: Request, res: Response) => {
+  getMenuBySlug = catchAsync(async (req: Request, res: Response) => {
     const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
-    const branchCode = ParamsUtil.getString(req.params.branchCode);
-    const qrCode = ParamsUtil.getString(req.params.qrCode);
 
-    console.log('Received params:', { restaurantSlug, branchCode, qrCode });
-
-    const menuData = await this.menuService.getCompleteMenuByQrCode(
-      restaurantSlug,
-      branchCode,
-      qrCode
-    );
+    const menuData = await this.menuService.getMenuBySlug(restaurantSlug);
 
     sendResponse(res, 200, {
       message: 'Menu retrieved successfully',
@@ -33,23 +24,7 @@ export class PublicMenuController {
   });
 
   /**
-   * Get menu for a branch (without specific table)
-   * Useful for takeaway/delivery or browsing without sitting
-   */
-  getMenuByBranch = catchAsync(async (req: Request, res: Response) => {
-    const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
-    const branchCode = ParamsUtil.getString(req.params.branchCode);
-
-    const menuData = await this.menuService.getCompleteMenuByBranch(restaurantSlug, branchCode);
-
-    sendResponse(res, 200, {
-      message: 'Menu retrieved successfully',
-      data: menuData,
-    });
-  });
-
-  /**
-   * Get restaurant info (for landing pages, etc.)
+   * Get restaurant info
    */
   getRestaurantInfo = catchAsync(async (req: Request, res: Response) => {
     const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);

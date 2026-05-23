@@ -1,4 +1,3 @@
-// src/controllers/staff.controller.ts
 import { Request, Response } from 'express';
 import { StaffService } from '../services/staff.service';
 import { catchAsync, sendResponse, ParamsUtil } from '@/utils';
@@ -10,115 +9,26 @@ export class StaffController {
     this.staffService = new StaffService();
   }
 
-  login = catchAsync(async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-    const result = await this.staffService.login(email, password);
-    sendResponse(res, 200, {
-      message: 'Login successful',
-      data: result,
-    });
-  });
-
   createStaff = catchAsync(async (req: Request, res: Response) => {
     const staff = await this.staffService.createStaff(req.body);
-    sendResponse(res, 201, {
-      message: 'Staff created successfully',
-      data: staff,
-    });
+    sendResponse(res, 201, { message: 'Staff created', data: staff });
   });
 
   getStaff = catchAsync(async (req: Request, res: Response) => {
-    const staff = await this.staffService.getStaff(ParamsUtil.getString(req.params.id));
-    sendResponse(res, 200, {
-      message: 'Staff retrieved successfully',
-      data: staff,
-    });
-  });
-
-  getStaffByRestaurant = catchAsync(async (req: Request, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const filter = req.query.filter ? JSON.parse(req.query.filter as string) : {};
-
-    const result = await this.staffService.getStaffByRestaurant(
-      ParamsUtil.getString(req.params.restaurantId),
-      filter,
-      page,
-      limit
-    );
-    sendResponse(res, 200, {
-      message: 'Staff retrieved successfully',
-      data: result,
-    });
-  });
-
-  getStaffByBranch = catchAsync(async (req: Request, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-
-    const result = await this.staffService.getStaffByBranch(
-      ParamsUtil.getString(req.params.branchId),
-      page,
-      limit
-    );
-    sendResponse(res, 200, {
-      message: 'Staff retrieved successfully',
-      data: result,
-    });
+    const id = ParamsUtil.getString(req.params.id);
+    const staff = await this.staffService.getStaffById(id);
+    sendResponse(res, 200, { message: 'Staff retrieved', data: staff });
   });
 
   updateStaff = catchAsync(async (req: Request, res: Response) => {
-    const staff = await this.staffService.updateStaff(
-      ParamsUtil.getString(req.params.id),
-      req.body
-    );
-    sendResponse(res, 200, {
-      message: 'Staff updated successfully',
-      data: staff,
-    });
-  });
-
-  updateStaffRole = catchAsync(async (req: Request, res: Response) => {
-    const { roleId } = req.body;
-    const staff = await this.staffService.updateStaffRole(
-      ParamsUtil.getString(req.params.id),
-      roleId
-    );
-    sendResponse(res, 200, {
-      message: 'Staff role updated successfully',
-      data: staff,
-    });
+    const id = ParamsUtil.getString(req.params.id);
+    const staff = await this.staffService.updateStaff(id, req.body);
+    sendResponse(res, 200, { message: 'Staff updated', data: staff });
   });
 
   deleteStaff = catchAsync(async (req: Request, res: Response) => {
-    const staff = await this.staffService.deleteStaff(ParamsUtil.getString(req.params.id));
-    sendResponse(res, 200, {
-      message: 'Staff deleted successfully',
-      data: staff,
-    });
-  });
-
-  getCurrentUser = catchAsync(async (req: Request, res: Response) => {
-    const staff = await this.staffService.getProfile(req.user!.id);
-    sendResponse(res, 200, {
-      message: 'Current user retrieved successfully',
-      data: staff,
-    });
-  });
-
-  updateProfile = catchAsync(async (req: Request, res: Response) => {
-    const staff = await this.staffService.updateProfile(req.user!.id, req.body);
-    sendResponse(res, 200, {
-      message: 'Profile updated successfully',
-      data: staff,
-    });
-  });
-
-  changePassword = catchAsync(async (req: Request, res: Response) => {
-    const { currentPassword, newPassword } = req.body;
-    await this.staffService.changePassword(req.user!.id, currentPassword, newPassword);
-    sendResponse(res, 200, {
-      message: 'Password changed successfully',
-    });
+    const id = ParamsUtil.getString(req.params.id);
+    await this.staffService.deleteStaff(id);
+    sendResponse(res, 204, { message: 'Staff deleted' });
   });
 }

@@ -8,7 +8,6 @@ import { PermissionGuard } from '@/shared/components/PermissionGuard';
 import { RoleLevel } from '@/shared/types/role.types';
 import { MenuItemCard } from '@/modules/menu/pages/components/MenuItemCard/MenuItemCard';
 import { getCategoryId } from '@/modules/menu/pages/utils/category-helpers';
-import { MenuModal } from './MenuModal';
 import './MenuManagement.css';
 import { MenuItemCardSkeleton } from './components/Skeleton/MenuItemCardSkeleton';
 
@@ -36,7 +35,7 @@ const GridViewIcon = () => (
 
 export const MenuManagement: React.FC = () => {
   const navigate = useNavigate();
-  const { staff, token, logout } = useStaffAuth();
+  const { staff, token } = useStaffAuth();
 
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -45,9 +44,6 @@ export const MenuManagement: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchQuery, setSearchQuery] = useState('');
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingMenuItemId, setEditingMenuItemId] = useState<string | null>(null);
 
   const debounceRef = React.useRef<{ [key: string]: any }>({});
 
@@ -103,10 +99,8 @@ export const MenuManagement: React.FC = () => {
     }, 500);
   };
 
-  const handleAddMenuItem = () => { setEditingMenuItemId(null); setIsModalOpen(true); };
-  const handleEditMenuItem = (itemId: string) => { setEditingMenuItemId(itemId); setIsModalOpen(true); };
-  const handleModalClose = () => { setIsModalOpen(false); setEditingMenuItemId(null); };
-  const handleModalSuccess = () => { loadData(); };
+  const handleAddMenuItem = () => { navigate('/staff/menu/add'); };
+  const handleEditMenuItem = (itemId: string) => { navigate(`/staff/menu/edit/${itemId}`); };
 
   // Filter items
   const filteredMenuItems = menuItems
@@ -184,11 +178,6 @@ export const MenuManagement: React.FC = () => {
           <PermissionGuard permission="menu.manageCategories" minLevel={RoleLevel.BRANCH_SINGLE}>
             <Button variant="outline" onClick={() => navigate('/staff/categories')} data-testid="manage-categories-button" size="sm">
               Manage Categories
-            </Button>
-          </PermissionGuard>
-          <PermissionGuard permission="menu.view" minLevel={RoleLevel.BRANCH_SINGLE}>
-            <Button variant="outline" onClick={() => navigate('/staff/modifiers')} data-testid="manage-modifiers-button" size="sm">
-              Manage Modifiers
             </Button>
           </PermissionGuard>
           <PermissionGuard permission="menu.create" minLevel={RoleLevel.BRANCH_SINGLE}>
@@ -282,8 +271,6 @@ export const MenuManagement: React.FC = () => {
           </div>
         </div>
       </div>
-
-      <MenuModal isOpen={isModalOpen} onClose={handleModalClose} menuItemId={editingMenuItemId} onSuccess={handleModalSuccess} />
     </div>
   );
 };

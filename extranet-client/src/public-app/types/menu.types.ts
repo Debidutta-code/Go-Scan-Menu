@@ -11,58 +11,8 @@ export interface MenuItem {
   calories?: number;
   spiceLevel?: string;
   tags?: string[];
-  allergens?: string[];
-  variants?: Variant[];
-  addons?: Addon[];
-  customizations?: Customization[];
-  modifierGroups?: ModifierGroup[];
   isAvailable: boolean;
-  availableQuantity?: number;
   dietaryType?: 'VEG' | 'NON_VEG' | 'EGG' | 'JAIN' | 'VEGAN' | 'GLUTEN_FREE';
-}
-
-export interface Variant {
-  name: string;
-  price: number;
-  isDefault: boolean;
-  id: string;
-  _id: string;
-}
-
-export interface ModifierOption {
-  _id: string;
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  isAvailable: boolean;
-}
-
-export interface ModifierGroup {
-  _id: string;
-  id: string;
-  name: string;
-  description?: string;
-  minSelections: number;
-  maxSelections: number;
-  isRequired: boolean;
-  isMultiSelect: boolean;
-  options: ModifierOption[];
-}
-
-export interface Addon {
-  name: string;
-  price: number;
-  id: string;
-  _id: string;
-}
-
-export interface Customization {
-  name: string;
-  options: string[];
-  isRequired: boolean;
-  id: string;
-  _id: string;
 }
 
 export interface Category {
@@ -89,52 +39,11 @@ export interface Restaurant {
   slug: string;
   theme?: RestaurantTheme;
   logo?: string;
-  googlePlaceId?: string;
-  googleReviewEnabled?: boolean;
-}
-
-export interface Address {
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-}
-
-export interface BranchSettings {
-  currency: string;
-  minOrderAmount: number;
-  deliveryAvailable: boolean;
-  takeawayAvailable: boolean;
-}
-
-export interface Branch {
-  id: string;
-  _id: string;
-  name: string;
-  code: string;
-  address?: Address;
-  phone?: string;
-  settings: BranchSettings;
-}
-
-export interface Table {
-  id: string;
-  _id: string;
-  tableNumber: string;
-  capacity: number;
-  location: string;
-  status: string;
+  currency?: string;
 }
 
 export interface MenuData {
   restaurant: Restaurant;
-  branch: Branch;
-  table?: Table;
   menu: Category[];
 }
 

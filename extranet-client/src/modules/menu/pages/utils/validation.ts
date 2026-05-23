@@ -6,9 +6,11 @@ export interface MenuItemFormData {
   name: string;
   categoryId: string;
   price: string;
-  discountPrice: string;
+  discountPrice?: string;
   itemType: 'food' | 'drink';
   dietaryType: string;
+  isAvailable: boolean;
+  isActive: boolean;
 }
 
 export const validateMenuItem = (formData: MenuItemFormData): ValidationErrors => {
@@ -24,14 +26,6 @@ export const validateMenuItem = (formData: MenuItemFormData): ValidationErrors =
 
   if (!formData.price || isNaN(parseFloat(formData.price)) || parseFloat(formData.price) <= 0) {
     newErrors.price = 'Please enter a valid price';
-  }
-
-  if (formData.discountPrice && (isNaN(parseFloat(formData.discountPrice)) || parseFloat(formData.discountPrice) < 0)) {
-    newErrors.discountPrice = 'Please enter a valid discount price';
-  }
-
-  if (formData.discountPrice && parseFloat(formData.discountPrice) >= parseFloat(formData.price)) {
-    newErrors.discountPrice = 'Discount price must be less than regular price';
   }
 
   if (formData.itemType === 'food' && !formData.dietaryType) {

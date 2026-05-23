@@ -4,8 +4,6 @@ import { MenuData } from '@/public-app/types/menu.types';
 interface PublicAppContextType {
   menuData: MenuData;
   restaurantSlug: string;
-  branchCode: string;
-  qrCode?: string;
 }
 
 const PublicAppContext = createContext<PublicAppContextType | null>(null);

@@ -1,6 +1,4 @@
-// src/repositories/restaurant.repository.ts
 import { Restaurant, IRestaurant } from '../models/restaurant.model';
-import { Types } from 'mongoose';
 
 export class RestaurantRepository {
   async create(data: Partial<IRestaurant>): Promise<IRestaurant> {
@@ -10,15 +8,14 @@ export class RestaurantRepository {
 
   async findById(id: string): Promise<IRestaurant | null> {
     return Restaurant.findById(id);
-    // .populate('defaultSettings.defaultTaxIds');
   }
 
   async findBySlug(slug: string): Promise<IRestaurant | null> {
-    return Restaurant.findOne({ slug }).populate('defaultSettings.defaultTaxIds');
+    return Restaurant.findOne({ slug });
   }
 
   async findByOwnerId(ownerId: string): Promise<IRestaurant | null> {
-    return Restaurant.findOne({ ownerId }).populate('defaultSettings.defaultTaxIds');
+    return Restaurant.findOne({ ownerId });
   }
 
   async findByOwnerEmail(email: string): Promise<IRestaurant | null> {
@@ -29,7 +26,6 @@ export class RestaurantRepository {
     const skip = (page - 1) * limit;
     const [restaurants, total] = await Promise.all([
       Restaurant.find(filter)
-        .populate('defaultSettings.defaultTaxIds')
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
@@ -48,9 +44,7 @@ export class RestaurantRepository {
   }
 
   async update(id: string, data: Partial<IRestaurant>): Promise<IRestaurant | null> {
-    return Restaurant.findByIdAndUpdate(id, data, { new: true }).populate(
-      'defaultSettings.defaultTaxIds'
-    );
+    return Restaurant.findByIdAndUpdate(id, data, { new: true });
   }
 
   async updateTheme(id: string, theme: Partial<IRestaurant['theme']>): Promise<IRestaurant | null> {

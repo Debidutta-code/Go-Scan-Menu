@@ -1,161 +1,41 @@
-// src/controllers/category.controller.ts
 import { Request, Response } from 'express';
-import { CategoryService } from '../services/category.service';
-import { catchAsync, ParamsUtil, sendResponse } from '@/utils';
+import { CategoryRepository } from '../repositories/category.repository';
+import { catchAsync, sendResponse, ParamsUtil } from '@/utils';
 
 export class CategoryController {
-  private categoryService: CategoryService;
+  private categoryRepo: CategoryRepository;
 
   constructor() {
-    this.categoryService = new CategoryService();
+    this.categoryRepo = new CategoryRepository();
   }
 
   createCategory = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId);
+    const category = await this.categoryRepo.create({ ...req.body, restaurantId });
+    sendResponse(res, 201, { message: 'Category created', data: category });
+  });
 
-    if (!restaurantId) {
-      sendResponse(res, 400, {
-        message: 'Restaurant ID is required',
-      });
-      return;
-    }
-
-    const category = await this.categoryService.createCategory(restaurantId, req.body);
-
-    sendResponse(res, 201, {
-      message: 'Category created successfully',
-      data: category,
-    });
+  getCategories = catchAsync(async (req: Request, res: Response) => {
+    const restaurantId = ParamsUtil.getString(req.params.restaurantId);
+    const categories = await this.categoryRepo.findAll(restaurantId);
+    sendResponse(res, 200, { message: 'Categories retrieved', data: categories });
   });
 
   getCategory = catchAsync(async (req: Request, res: Response) => {
-    const category = await this.categoryService.getCategory(req.params.id);
-
-    sendResponse(res, 200, {
-      message: 'Category retrieved successfully',
-      data: category,
-    });
-  });
-
-  getCategoriesByRestaurant = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const scope = (req.query.scope as 'restaurant' | 'branch') || 'restaurant';
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
-
-    const result = await this.categoryService.getCategoriesByRestaurant(
-      restaurantId!,
-      scope,
-      page,
-      limit
-    );
-
-    sendResponse(res, 200, {
-      message: 'Categories retrieved successfully',
-      data: result,
-    });
-  });
-
-  getCategoriesByBranch = catchAsync(async (req: Request, res: Response) => {
-    const branchId = ParamsUtil.getString(req.params.branchId);
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
-
-    const result = await this.categoryService.getCategoriesByBranch(branchId, page, limit);
-
-    sendResponse(res, 200, {
-      message: 'Categories retrieved successfully',
-      data: result,
-    });
-  });
-
-  getAllCategoriesForMenu = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const branchId = req.query.branchId as string | undefined;
-
-    const categories = await this.categoryService.getAllCategoriesForMenu(restaurantId!, branchId);
-
-    sendResponse(res, 200, {
-      message: 'Categories retrieved successfully',
-      data: categories,
-    });
+    const id = ParamsUtil.getString(req.params.id);
+    const category = await this.categoryRepo.findById(id);
+    sendResponse(res, 200, { message: 'Category retrieved', data: category });
   });
 
   updateCategory = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-
-    const category = await this.categoryService.updateCategory(
-      req.params.id,
-      restaurantId!,
-      req.body
-    );
-
-    sendResponse(res, 200, {
-      message: 'Category updated successfully',
-      data: category,
-    });
+    const id = ParamsUtil.getString(req.params.id);
+    const category = await this.categoryRepo.update(id, req.body);
+    sendResponse(res, 200, { message: 'Category updated', data: category });
   });
 
-  updateDisplayOrder = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const { displayOrder } = req.body;
-
-    if (displayOrder === undefined) {
-      sendResponse(res, 400, {
-        message: 'Display order is required',
-      });
-      return;
-    }
-
-    const category = await this.categoryService.updateDisplayOrder(
-      req.params.id,
-      restaurantId!,
-      displayOrder
-    );
-
-    sendResponse(res, 200, {
-      message: 'Display order updated successfully',
-      data: category,
-    });
-  });
-
-  // PUBLIC ENDPOINTS (No authentication required)
-
-  getPublicCategories = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId;
-    const branchId = req.query.branchId as string | undefined;
-
-    if (!restaurantId) {
-      sendResponse(res, 400, {
-        message: 'Restaurant ID is required',
-      });
-      return;
-    }
-
-    const categories = await this.categoryService.getAllCategoriesForMenu(restaurantId, branchId);
-
-    sendResponse(res, 200, {
-      message: 'Categories retrieved successfully',
-      data: { categories },
-    });
-  });
-
-  getPublicCategoryCount = catchAsync(async (req: Request, res: Response) => {
-    const restaurantId = req.params.restaurantId;
-    const scope = (req.query.scope as 'restaurant' | 'branch') || 'restaurant';
-
-    if (!restaurantId) {
-      sendResponse(res, 400, {
-        message: 'Restaurant ID is required',
-      });
-      return;
-    }
-
-    const count = await this.categoryService.getCategoryCount(restaurantId, scope);
-
-    sendResponse(res, 200, {
-      message: 'Category count retrieved successfully',
-      data: { count },
-    });
+  deleteCategory = catchAsync(async (req: Request, res: Response) => {
+    const id = ParamsUtil.getString(req.params.id);
+    await this.categoryRepo.delete(id);
+    sendResponse(res, 204, { message: 'Category deleted' });
   });
 }

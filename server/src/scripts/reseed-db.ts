@@ -11,10 +11,8 @@ import { SuperAdmin } from '../modules/auth/auth.model';
 import { Role } from '../modules/staff/models/role.model';
 import { Staff } from '../modules/staff/models/staff.model';
 import { Restaurant } from '../modules/restaurant/models/restaurant.model';
-import { Branch } from '../modules/restaurant/models/branch.model';
 import { Category } from '../modules/menu/models/category.model';
 import { MenuItem, DietaryType } from '../modules/menu/models/menu-item.model';
-import { Table } from '../modules/table/models/table.model';
 import { StaffRole, RoleLevel, AccessScope } from '../types/role.types';
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/restaurant-extranet';
@@ -32,10 +30,8 @@ async function reseed() {
       Role.deleteMany({}),
       Staff.deleteMany({}),
       Restaurant.deleteMany({}),
-      Branch.deleteMany({}),
       Category.deleteMany({}),
       MenuItem.deleteMany({}),
-      Table.deleteMany({}),
     ]);
     console.log('✅ Database cleaned');
 
@@ -86,60 +82,6 @@ async function reseed() {
         isSystemRole: true,
         permissions: fullPerms,
       },
-      {
-        name: StaffRole.BRANCH_MANAGER,
-        displayName: 'Branch Manager',
-        description: 'Manages multiple branches',
-        level: RoleLevel.BRANCH_MULTI,
-        accessScope: AccessScope.BRANCH_MULTI,
-        isSystemRole: true,
-        permissions: fullPerms,
-      },
-      {
-        name: StaffRole.MANAGER,
-        displayName: 'Store Manager',
-        description: 'Manages a single branch',
-        level: RoleLevel.BRANCH_SINGLE,
-        accessScope: AccessScope.BRANCH_SINGLE,
-        isSystemRole: true,
-        permissions: fullPerms,
-      },
-      {
-        name: StaffRole.WAITER,
-        displayName: 'Waiter',
-        description: 'Operational staff for orders',
-        level: RoleLevel.OPERATIONAL,
-        accessScope: AccessScope.BRANCH_SINGLE,
-        isSystemRole: true,
-        permissions: {
-          ...fullPerms,
-          staff: { ...fullPerms.staff, manageRoles: false, delete: false },
-        },
-      },
-      {
-        name: StaffRole.KITCHEN_STAFF,
-        displayName: 'Kitchen Staff',
-        description: 'Staff responsible for preparing orders',
-        level: RoleLevel.OPERATIONAL,
-        accessScope: AccessScope.BRANCH_SINGLE,
-        isSystemRole: true,
-        permissions: {
-          ...fullPerms,
-          staff: { ...fullPerms.staff, manageRoles: false, delete: false },
-        },
-      },
-      {
-        name: StaffRole.CASHIER,
-        displayName: 'Cashier',
-        description: 'Staff responsible for payments',
-        level: RoleLevel.OPERATIONAL,
-        accessScope: AccessScope.BRANCH_SINGLE,
-        isSystemRole: true,
-        permissions: {
-          ...fullPerms,
-          staff: { ...fullPerms.staff, manageRoles: false, delete: false },
-        },
-      },
     ];
 
     for (const roleData of rolesToSeed) {
@@ -169,11 +111,9 @@ async function reseed() {
     async function createRestaurantData(
       name: string,
       slug: string,
-      type: 'single' | 'branch-wise' | 'chain',
       ownerEmail: string,
-      maxBranches: number
     ) {
-      console.log(`🏪 Creating Restaurant: ${name} (${type})`);
+      console.log(`🏪 Creating Restaurant: ${name}`);
       const startDate = new Date();
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + 30);
@@ -181,7 +121,7 @@ async function reseed() {
       const restaurant = await Restaurant.create({
         name,
         slug,
-        type,
+        type: 'single',
         owner: { name: `${name} Owner`, email: ownerEmail, phone: '1234567890', password },
         isActive: true,
         subscription: {
@@ -189,7 +129,7 @@ async function reseed() {
           startDate,
           endDate,
           isActive: true,
-          maxBranches,
+          maxBranches: 1,
           currentBranches: 1,
         },
         theme: {
@@ -206,54 +146,15 @@ async function reseed() {
         },
       });
 
-      console.log(`🏢 Creating Main Branch for ${name}`);
-      const branch = await Branch.create({
-        restaurantId: restaurant._id,
-        name: `${name} - Main`,
-        code: `${slug.substring(0, 2).toUpperCase()}01`,
-        isMain: true,
-        email: `branch@${slug}.com`,
-        phone: '0987654321',
-        address: {
-          street: 'Main Street',
-          city: 'City',
-          state: 'State',
-          zipCode: '00000',
-          country: 'Country',
-          coordinates: { latitude: 0, longitude: 0 },
-        },
-        isActive: true,
-        settings: {
-          currency: 'USD',
-          taxIds: [],
-          serviceChargePercentage: 0,
-          acceptOrders: true,
-          operatingHours: [
-            { day: 'monday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'tuesday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'wednesday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'thursday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'friday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'saturday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'sunday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-          ],
-          minOrderAmount: 0,
-          deliveryAvailable: false,
-          takeawayAvailable: true,
-        },
-      });
-
       console.log(`👔 Creating Owner Staff for ${name}`);
       const ownerStaff = await Staff.create({
         restaurantId: restaurant._id,
-        branchId: branch._id,
         roleId: ownerRole?._id,
         name: `${name} Owner`,
         email: ownerEmail,
         phone: '1234567890',
         password,
         isActive: true,
-        allowedBranchIds: [branch._id],
       });
 
       await Restaurant.findByIdAndUpdate(restaurant._id, { ownerId: ownerStaff._id });
@@ -264,7 +165,6 @@ async function reseed() {
         name: 'General',
         displayOrder: 1,
         isActive: true,
-        scope: 'restaurant',
       });
 
       await MenuItem.create({
@@ -276,86 +176,13 @@ async function reseed() {
         dietaryType: DietaryType.VEG,
         isActive: true,
         isAvailable: true,
-        scope: 'restaurant',
       });
 
-      // Add a table
-      await Table.create({
-        restaurantId: restaurant._id,
-        branchId: branch._id,
-        tableNumber: 'T1',
-        qrCode: `QR-${slug}-T1`,
-        capacity: 4,
-        status: 'available',
-        isActive: true,
-      });
-
-      // Create extra staff for testing (Manager and Waiter)
-      const managerRole = await Role.findOne({ name: StaffRole.MANAGER });
-      const waiterRole = await Role.findOne({ name: StaffRole.WAITER });
-
-      console.log(`👨‍🍳 Creating Manager Staff for ${name}`);
-      await Staff.create({
-        restaurantId: restaurant._id,
-        branchId: branch._id,
-        roleId: managerRole?._id,
-        name: `${name} Manager`,
-        email: `manager@${slug}.com`,
-        phone: '1112223333',
-        password,
-        isActive: true,
-        allowedBranchIds: [branch._id],
-      });
-
-      console.log(`🤵 Creating Waiter Staff for ${name}`);
-      await Staff.create({
-        restaurantId: restaurant._id,
-        branchId: branch._id,
-        roleId: waiterRole?._id,
-        name: `${name} Waiter`,
-        email: `waiter@${slug}.com`,
-        phone: '4445556666',
-        password,
-        isActive: true,
-        allowedBranchIds: [branch._id],
-      });
-
-      return { restaurant, branch };
+      return { restaurant };
     }
 
-    // Create one of each type
-    await createRestaurantData('Single Cafe', 'single-cafe', 'single', 'single@gmail.com', 1);
-    await createRestaurantData('Pizza Local', 'pizza-local', 'branch-wise', 'branch@gmail.com', 5);
-    const { restaurant: chainRest } = await createRestaurantData('Burger Heaven', 'burger-heaven', 'chain', 'owner@gmail.com', 10);
-
-    console.log(`🏢 Creating Secondary Branch for Burger Heaven`);
-    await Branch.create({
-      restaurantId: chainRest._id,
-      name: `Burger Heaven - Second Outlet`,
-      code: `BH02`,
-      isMain: false,
-      email: `branch2@burger-heaven.com`,
-      phone: '1231231234',
-      address: {
-        street: 'Second Street',
-        city: 'City',
-        state: 'State',
-        zipCode: '00000',
-        country: 'Country',
-        coordinates: { latitude: 0, longitude: 0 },
-      },
-      isActive: true,
-      settings: {
-        currency: 'USD',
-        taxIds: [],
-        serviceChargePercentage: 0,
-        acceptOrders: true,
-        operatingHours: [],
-        minOrderAmount: 0,
-        deliveryAvailable: false,
-        takeawayAvailable: true,
-      },
-    });
+    // Create one
+    await createRestaurantData('Single Cafe', 'single-cafe', 'single@gmail.com');
 
     console.log('✨ Seeding completed successfully!');
     process.exit(0);
