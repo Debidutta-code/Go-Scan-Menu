@@ -3,6 +3,7 @@ import { TableRepository } from '../../table/repositories/table.repository';
 import { CategoryRepository } from '../repositories/category.repository';
 import { MenuItemRepository } from '../repositories/menu-item.repository';
 import { AppError } from '@/utils/AppError';
+import { ParamsUtil } from '@/utils';
 import mongoose from 'mongoose';
 
 export class PublicMenuService {
@@ -36,7 +37,10 @@ export class PublicMenuService {
     }
 
     // Verify table belongs to this restaurant
-    if (table.restaurantId.toString() !== restaurant._id.toString()) {
+    const tableRestaurantId = ParamsUtil.extractId(table.restaurantId);
+    const actualRestaurantId = ParamsUtil.extractId(restaurant._id);
+
+    if (tableRestaurantId !== actualRestaurantId) {
       throw new AppError('QR code does not belong to this restaurant', 400);
     }
 
