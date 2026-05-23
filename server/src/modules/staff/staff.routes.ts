@@ -22,7 +22,6 @@ router.get(
   staffController.getStaffByRestaurant
 );
 
-router.get('/branch/:branchId', AuthMiddleware.authenticate, staffController.getStaffByBranch);
 
 router.put('/:id', AuthMiddleware.authenticate, staffController.updateStaff);
 

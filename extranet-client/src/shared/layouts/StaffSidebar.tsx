@@ -62,10 +62,6 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
     const roleLevel = staff?.roleLevel || (staff?.roleId && typeof staff.roleId === 'object' ? (staff.roleId as any).level : 5);
     const isHighLevel = roleLevel <= 2 || staff?.staffType === 'owner' || staff?.staffType === 'super_admin' || staff?.roleName === 'owner' || staff?.roleName === 'super_admin';
 
-    // Check restaurant type for multi-outlet management
-    const restaurantType = staff?.restaurant?.type;
-    const isMultiOutlet = (restaurantType as string) === 'chain' || (restaurantType as string) === 'branch-wise';
-
     const handleLogout = () => {
         if (window.confirm('Are you sure you want to logout?')) {
             logout();
@@ -124,32 +120,10 @@ export const StaffSidebar: React.FC<StaffSidebarProps> = ({
             permission: isHighLevel || permissions?.staff?.view
         },
         {
-            label: 'Role Permissions',
-            icon: <Shield size={20} />,
-            path: '/staff/permissions',
-            permission: isHighLevel || permissions?.staff?.manageRoles
-        },
-        {
             label: 'Tables & QR',
             icon: <Armchair size={20} />,
-            path: staff?.branchId
-                ? `/staff/tables/${extractId(staff.branchId)}`
-                : (staff?.allowedBranchIds?.length === 1)
-                    ? `/staff/tables/${extractId(staff.allowedBranchIds[0])}`
-                    : '/staff/tables',
+            path: '/staff/tables',
             permission: isHighLevel || permissions?.tables?.view
-        },
-        {
-            label: 'Outlet Management',
-            icon: <Store size={20} />,
-            path: '/staff/branch-settings',
-            permission: isMultiOutlet && (isHighLevel || permissions?.settings?.updateRestaurant || permissions?.settings?.updateBranch)
-        },
-        {
-            label: 'Orders',
-            icon: <ShoppingBag size={20} />,
-            path: '/staff/orders',
-            permission: isHighLevel || permissions?.orders?.view
         },
         {
             label: 'Reviews & Ratings',

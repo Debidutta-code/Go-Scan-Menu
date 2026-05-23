@@ -6,9 +6,7 @@ import { useAuth } from '@/modules/auth/contexts/AuthContext';
 import { RestaurantService } from '@/modules/restaurant/services/restaurant.service';
 import { StaffService } from '@/modules/staff/services/staff.service';
 import { Restaurant } from '@/shared/types/restaurant.types';
-import { Branch } from '@/shared/types/table.types';
 import { Staff, CreateStaffPayload } from '@/shared/types/staff.types';
-import { BranchService } from '@/modules/branch/services/branch.service';
 import { Button } from '@/shared/components/Button';
 import { InputField } from '@/shared/components/InputField';
 import { extractId } from '@/shared/utils/id.util';
@@ -24,25 +22,7 @@ export const ViewRestaurant: React.FC = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'info' | 'branches' | 'staff'>('info');
-
-  // Branch management state
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [branchLoading, setBranchLoading] = useState(false);
-  const [showAddBranchForm, setShowAddBranchForm] = useState(false);
-  const [branchFormData, setBranchFormData] = useState({
-    name: '',
-    code: '',
-    email: '',
-    phone: '',
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      country: '',
-    },
-  });
+  const [activeTab, setActiveTab] = useState<'info' | 'staff'>('info');
 
   // Staff management state
   const [staffList, setStaffList] = useState<Staff[]>([]);
@@ -66,7 +46,6 @@ export const ViewRestaurant: React.FC = () => {
   useEffect(() => {
     if (id && token) {
       loadRestaurant();
-      loadBranches();
       loadStaff();
     }
   }, [id, token]);
@@ -92,64 +71,6 @@ export const ViewRestaurant: React.FC = () => {
     }
   };
 
-  const loadBranches = async () => {
-    if (!id || !token) return;
-
-    setBranchLoading(true);
-
-    try {
-      const response = await BranchService.getBranches(id);
-
-      if (response.success && response.data) {
-        setBranches(response.data.branches || []);
-      }
-    } catch (err: any) {
-      console.error('Failed to load branches:', err.message);
-    } finally {
-      setBranchLoading(false);
-    }
-  };
-
-  const handleAddBranch = async () => {
-    if (!id || !token) return;
-
-    if (!branchFormData.name || !branchFormData.code || !branchFormData.email || !branchFormData.phone) {
-      toast.warning('Please fill in all required branch details');
-      return;
-    }
-
-    setBranchLoading(true);
-
-    try {
-      const response = await BranchService.createBranch(id, branchFormData);
-
-      if (response.success) {
-        toast.success('Branch added successfully!');
-        setShowAddBranchForm(false);
-        setBranchFormData({
-          name: '',
-          code: '',
-          email: '',
-          phone: '',
-          address: {
-            street: '',
-            city: '',
-            state: '',
-            zipCode: '',
-            country: '',
-          },
-        });
-        loadBranches();
-        loadRestaurant(); // To update branch count
-      } else {
-        toast.error(response.message || 'Failed to add branch');
-      }
-    } catch (err: any) {
-      toast.error(err.message || 'An error occurred while adding branch');
-    } finally {
-      setBranchLoading(false);
-    }
-  };
 
   const loadStaff = async () => {
     if (!id || !token) return;
@@ -346,12 +267,6 @@ export const ViewRestaurant: React.FC = () => {
           General Info
         </button>
         <button
-          className={`tab-button ${activeTab === 'branches' ? 'active' : ''}`}
-          onClick={() => setActiveTab('branches')}
-        >
-          Branches ({restaurant.subscription.currentBranches})
-        </button>
-        <button
           className={`tab-button ${activeTab === 'staff' ? 'active' : ''}`}
           onClick={() => setActiveTab('staff')}
         >
@@ -435,12 +350,6 @@ export const ViewRestaurant: React.FC = () => {
           <div className="info-item">
             <label className="info-label">End Date</label>
             <p className="info-value">{formatDate(restaurant.subscription.endDate)}</p>
-          </div>
-          <div className="info-item">
-            <label className="info-label">Branches Used</label>
-            <p className="info-value">
-              {restaurant.subscription.currentBranches} / {restaurant.subscription.maxBranches}
-            </p>
           </div>
         </div>
       </div>
@@ -526,142 +435,12 @@ export const ViewRestaurant: React.FC = () => {
             <label className="info-label">Service Charge</label>
             <p className="info-value">{restaurant.defaultSettings.serviceChargePercentage}%</p>
           </div>
-          <div className="info-item">
-            <label className="info-label">Allow Branch Override</label>
-            <p className="info-value">
-              {restaurant.defaultSettings.allowBranchOverride ? 'Yes' : 'No'}
-            </p>
-          </div>
         </div>
       </div>
 
         </>
       )}
 
-      {activeTab === 'branches' && (
-        <div className="info-section">
-          <div className="section-header">
-            <h2 className="section-title">Branch Management</h2>
-            {restaurant.type !== 'single' && (
-              <Button
-                variant="primary"
-                onClick={() => setShowAddBranchForm(!showAddBranchForm)}
-                disabled={restaurant.subscription.currentBranches >= restaurant.subscription.maxBranches}
-              >
-                {showAddBranchForm ? 'Cancel' : '+ Add Sub-branch'}
-              </Button>
-            )}
-          </div>
-
-          {showAddBranchForm && (
-            <div className="add-staff-form">
-              <h3 className="form-subtitle">Add New Sub-branch</h3>
-              <div className="staff-form-grid">
-                <InputField
-                  label="Branch Name"
-                  value={branchFormData.name}
-                  onChange={(e) => setBranchFormData({ ...branchFormData, name: e.target.value })}
-                  placeholder="e.g. Downtown Branch"
-                />
-                <InputField
-                  label="Branch Code"
-                  value={branchFormData.code}
-                  onChange={(e) => setBranchFormData({ ...branchFormData, code: e.target.value.toUpperCase() })}
-                  placeholder="e.g. DT01"
-                />
-                <InputField
-                  label="Email"
-                  type="email"
-                  value={branchFormData.email}
-                  onChange={(e) => setBranchFormData({ ...branchFormData, email: e.target.value })}
-                />
-                <InputField
-                  label="Phone"
-                  value={branchFormData.phone}
-                  onChange={(e) => setBranchFormData({ ...branchFormData, phone: e.target.value })}
-                />
-              </div>
-              <div className="staff-form-grid">
-                <InputField
-                  label="Street"
-                  value={branchFormData.address.street}
-                  onChange={(e) => setBranchFormData({
-                    ...branchFormData,
-                    address: { ...branchFormData.address, street: e.target.value }
-                  })}
-                />
-                <InputField
-                  label="City"
-                  value={branchFormData.address.city}
-                  onChange={(e) => setBranchFormData({
-                    ...branchFormData,
-                    address: { ...branchFormData.address, city: e.target.value }
-                  })}
-                />
-                <InputField
-                  label="State"
-                  value={branchFormData.address.state}
-                  onChange={(e) => setBranchFormData({
-                    ...branchFormData,
-                    address: { ...branchFormData.address, state: e.target.value }
-                  })}
-                />
-                <InputField
-                  label="Zip Code"
-                  value={branchFormData.address.zipCode}
-                  onChange={(e) => setBranchFormData({
-                    ...branchFormData,
-                    address: { ...branchFormData.address, zipCode: e.target.value }
-                  })}
-                />
-              </div>
-              <div className="form-actions">
-                <Button variant="primary" onClick={handleAddBranch} loading={branchLoading}>
-                  Create Branch
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="branch-list-grid">
-            {branches.map((branch) => (
-              <div key={branch._id} className={`branch-card-admin ${branch.isMain ? 'is-main' : ''}`}>
-                <div className="branch-card-header">
-                  <div className="branch-name-group">
-                    <h3 className="branch-name">{branch.name}</h3>
-                    {branch.isMain && <span className="main-badge">Main</span>}
-                  </div>
-                  <span className={`status-badge ${branch.isActive ? 'active' : 'inactive'}`}>
-                    {branch.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-
-                <div className="branch-info-rows">
-                  <div className="info-row">
-                    <strong>Code:</strong> {branch.code}
-                  </div>
-                  <div className="info-row">
-                    <strong>Email:</strong> {branch.email}
-                  </div>
-                  <div className="info-row">
-                    <strong>Phone:</strong> {branch.phone}
-                  </div>
-                  <div className="info-row">
-                    <strong>Address:</strong> {typeof branch.address === 'string' ? branch.address :
-                      `${branch.address.street}, ${branch.address.city}`}
-                  </div>
-                </div>
-
-                <div className="branch-card-actions">
-                  <Button variant="outline" size="sm" onClick={() => navigate(`/staff/tables/${extractId(branch._id)}`)}>
-                    View Tables
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {activeTab === 'staff' && (
         <>

@@ -1,6 +1,5 @@
 // src/services/table.service.ts
 import { TableRepository } from '../repositories/table.repository';
-import { BranchRepository } from '../../restaurant/repositories/branch.repository';
 import { ITable } from '../models/table.model';
 import { AppError } from '@/utils/AppError';
 import { ParamsUtil } from '@/utils';
@@ -10,42 +9,38 @@ import { RestaurantRepository } from '../../restaurant/repositories/restaurant.r
 
 export class TableService {
   private tableRepo: TableRepository;
-  private branchRepo: BranchRepository;
   private restaurantRepo: RestaurantRepository;
 
   constructor() {
     this.tableRepo = new TableRepository();
-    this.branchRepo = new BranchRepository();
     this.restaurantRepo = new RestaurantRepository();
   }
 
   async createTable(
     restaurantId: string,
-    branchId: string,
     data: {
       tableNumber: string;
       capacity: number;
       location?: ITable['location'];
     }
   ) {
-    // Check if branch exists
-    const branch = await this.branchRepo.findByIdAndRestaurant(branchId, restaurantId);
-    if (!branch || !branch.isActive) {
-      throw new AppError('Branch not found or inactive', 404);
+    // Check if restaurant exists
+    const restaurant = await this.restaurantRepo.findById(restaurantId);
+    if (!restaurant || !restaurant.isActive) {
+      throw new AppError('Restaurant not found or inactive', 404);
     }
 
-    // Check if table number already exists in this branch
-    const existingTable = await this.tableRepo.findByTableNumber(branchId, data.tableNumber);
+    // Check if table number already exists in this restaurant
+    const existingTable = await this.tableRepo.findByTableNumber(restaurantId, data.tableNumber);
     if (existingTable) {
-      throw new AppError('Table number already exists in this branch', 400);
+      throw new AppError('Table number already exists', 400);
     }
 
     // Generate unique QR code
-    const qrCode = `${restaurantId}-${branchId}-${nanoid(10)}`;
+    const qrCode = `${restaurantId}-${nanoid(10)}`;
 
     const tableData: Partial<ITable> = {
       restaurantId: new Types.ObjectId(restaurantId),
-      branchId: new Types.ObjectId(branchId),
       tableNumber: data.tableNumber,
       qrCode,
       capacity: data.capacity,
@@ -60,7 +55,6 @@ export class TableService {
 
   async createBulkTables(
     restaurantId: string,
-    branchId: string,
     data: {
       prefix?: string;
       startNumber: number;
@@ -69,10 +63,10 @@ export class TableService {
       location?: ITable['location'];
     }
   ) {
-    // Check if branch exists
-    const branch = await this.branchRepo.findByIdAndRestaurant(branchId, restaurantId);
-    if (!branch || !branch.isActive) {
-      throw new AppError('Branch not found or inactive', 404);
+    // Check if restaurant exists
+    const restaurant = await this.restaurantRepo.findById(restaurantId);
+    if (!restaurant || !restaurant.isActive) {
+      throw new AppError('Restaurant not found or inactive', 404);
     }
 
     const tablesToCreate: Partial<ITable>[] = [];
@@ -81,17 +75,16 @@ export class TableService {
     for (let i = data.startNumber; i <= data.endNumber; i++) {
       const tableNumber = `${prefix}${i}`;
 
-      // Check if table number already exists in this branch
-      const existingTable = await this.tableRepo.findByTableNumber(branchId, tableNumber);
+      // Check if table number already exists in this restaurant
+      const existingTable = await this.tableRepo.findByTableNumber(restaurantId, tableNumber);
       if (existingTable) {
-        throw new AppError(`Table number ${tableNumber} already exists in this branch`, 400);
+        throw new AppError(`Table number ${tableNumber} already exists`, 400);
       }
 
       tablesToCreate.push({
         restaurantId: new Types.ObjectId(restaurantId),
-        branchId: new Types.ObjectId(branchId),
         tableNumber,
-        qrCode: `${restaurantId}-${branchId}-${nanoid(10)}`,
+        qrCode: `${restaurantId}-${nanoid(10)}`,
         capacity: data.capacity,
         location: data.location || 'indoor',
         status: 'available',
@@ -119,17 +112,6 @@ export class TableService {
     return table;
   }
 
-  async getTablesByBranch(branchId: string, page: number = 1, limit: number = 10, filter?: any) {
-    const [tablesData, branch] = await Promise.all([
-      this.tableRepo.findByBranch(branchId, filter, page, limit),
-      this.branchRepo.findById(branchId),
-    ]);
-
-    return {
-      ...tablesData,
-      branch,
-    };
-  }
 
   async getTablesByRestaurant(
     restaurantId: string,
@@ -157,11 +139,11 @@ export class TableService {
     // If updating table number, check uniqueness
     if (data.tableNumber && data.tableNumber !== table.tableNumber) {
       const existingTable = await this.tableRepo.findByTableNumber(
-        ParamsUtil.extractId(table.branchId),
+        tableRestaurantId,
         data.tableNumber
       );
       if (existingTable) {
-        throw new AppError('Table number already exists in this branch', 400);
+        throw new AppError('Table number already exists', 400);
       }
     }
 
@@ -223,7 +205,7 @@ export class TableService {
       throw new AppError('Table does not belong to this restaurant', 403);
     }
 
-    const newQrCode = `${providedRestaurantId}-${ParamsUtil.extractId(table.branchId)}-${nanoid(10)}`;
+    const newQrCode = `${providedRestaurantId}-${nanoid(10)}`;
 
     const updatedTable = await this.tableRepo.update(id, { qrCode: newQrCode });
     if (!updatedTable) {
@@ -251,12 +233,6 @@ export class TableService {
       throw new AppError('Table does not belong to this restaurant', 403);
     }
 
-    // Get branch to get branch code
-    const branch = await this.branchRepo.findById(ParamsUtil.extractId(table.branchId));
-    if (!branch) {
-      throw new AppError('Branch not found', 404);
-    }
-
     // Get restaurant to get slug
     const restaurant = await this.restaurantRepo.findById(providedRestaurantId);
     if (!restaurant) {
@@ -265,7 +241,7 @@ export class TableService {
 
     // Construct the URL that will be encoded in QR code
     // Frontend will parse this URL to call the API
-    const qrUrl = `${process.env.CLIENT_URL || process.env.FRONTEND_URL || 'http://localhost:4015'}/menu/${restaurant.slug}/${branch.code}/${table.qrCode}`;
+    const qrUrl = `${process.env.CLIENT_URL || process.env.FRONTEND_URL || 'http://localhost:4015'}/menu/${restaurant.slug}/${table.qrCode}`;
 
     return qrUrl;
   }

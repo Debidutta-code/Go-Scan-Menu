@@ -11,9 +11,7 @@ export interface AuthUser {
   role: StaffRole;
   roleId?: string;
   restaurantId?: string;
-  branchId?: string;
   accessScope?: AccessScope;
-  allowedBranchIds?: string[];
   permissions: RolePermissions;
 }
 

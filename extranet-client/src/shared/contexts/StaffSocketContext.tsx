@@ -37,15 +37,6 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
 
-    // Resolve the best branchId we can for authentication.
-    // Owners may have multiple branches — we still connect; the server will
-    // join them to all relevant rooms after receiving the token.
-    const branchId: string | undefined =
-        staff?.branchId ||
-        (staff?.allowedBranchIds && staff.allowedBranchIds.length > 0
-            ? staff.allowedBranchIds[0]
-            : undefined);
-
     // Keep a ref to the latest authenticate function so event handlers always
     // call the most up-to-date version without needing to be re-registered.
     const authenticateRef = useRef<(() => void) | null>(null);
@@ -57,18 +48,9 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
         console.log('🔌 StaffSocketContext: Managing connection for', staff?._id);
 
         const authenticate = () => {
-            const rawBranchIds: any[] = [...(staff?.allowedBranchIds || [])];
-            if (staff?.branchId) {
-                rawBranchIds.push(staff.branchId);
-            }
-
-            // Deduplicate and ensure they are all strings
-            const branchIds = [...new Set(rawBranchIds.map(id => extractId(id)).filter(id => !!id))];
-
-            // Always authenticate — even without branchIds so the server can
-            // join the restaurant room (important for owners / managers).
-            console.log('🔑 Emitting socket:authenticate-staff, branchIds:', branchIds);
-            sock.emit('socket:authenticate-staff', { token, branchIds });
+            // Always authenticate so the server can join the restaurant room.
+            console.log('🔑 Emitting socket:authenticate-staff');
+            sock.emit('socket:authenticate-staff', { token });
         };
 
         // Keep ref fresh so the connect handler below always calls latest
@@ -134,7 +116,7 @@ export const StaffSocketProvider: React.FC<{ children: ReactNode }> = ({ childre
             sock.off('disconnect', handleDisconnect);
             sock.off('connect_error', handleConnectError);
         };
-    }, [isAuthenticated, token, staff?._id, staff?.branchId, staff?.allowedBranchIds]);
+    }, [isAuthenticated, token, staff?._id]);
 
     // Disconnect when the provider unmounts (staff logs out)
     useEffect(() => {

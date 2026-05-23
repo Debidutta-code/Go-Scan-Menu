@@ -5,8 +5,6 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { useAuth } from '@/modules/auth/contexts/AuthContext';
 import { QRConfigService, QRConfig } from '@/modules/table/services/qrconfig.service';
 import { RestaurantService } from '@/modules/restaurant/services/restaurant.service';
-import { BranchService } from '@/modules/branch/services/branch.service';
-import { Branch } from '@/shared/types/table.types';
 import { Restaurant } from '@/shared/types/restaurant.types';
 import { Button } from '@/shared/components/Button';
 import { QR_STYLES, getQRStylesArray } from '@/shared/config/qrStyles.config';
@@ -24,8 +22,6 @@ export const SuperAdminQRManagement: React.FC = () => {
   const { token } = useAuth();
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>('');
 
   const [loading, setLoading] = useState(false);
@@ -61,7 +57,7 @@ export const SuperAdminQRManagement: React.FC = () => {
   const maxLogoSize = qrSize * (logoScale / 100);
 
   // Dummy QR URL for preview
-  const dummyQrUrl = `${window.location.origin}/menu/restaurant/branch/table-1`;
+  const dummyQrUrl = `${window.location.origin}/menu/restaurant/table-1`;
 
   useEffect(() => {
     if (token) {
@@ -78,27 +74,6 @@ export const SuperAdminQRManagement: React.FC = () => {
       }
     } catch (err: any) {
       toast.error('Failed to load restaurants');
-    }
-  };
-
-  const loadBranches = async (restaurantId: string) => {
-    if (!token || !restaurantId) return;
-    try {
-      const response = await BranchService.getBranches(restaurantId, 1, 100, token);
-      if (response.success && response.data) {
-        setBranches(response.data.branches || []);
-        if (response.data.branches?.length > 0) {
-          // Auto-select first branch if none selected or if switching restaurants
-          const firstBranchId = response.data.branches[0]._id;
-          setSelectedBranchId(firstBranchId);
-          loadQRConfig(restaurantId);
-        } else {
-            setSelectedBranchId('');
-            setBranches([]);
-        }
-      }
-    } catch (err: any) {
-      toast.error('Failed to load branches');
     }
   };
 
@@ -154,19 +129,10 @@ export const SuperAdminQRManagement: React.FC = () => {
     const rId = e.target.value;
     setSelectedRestaurantId(rId);
     if (rId) {
-      loadBranches(rId);
+      loadQRConfig(rId);
     } else {
-      setBranches([]);
-      setSelectedBranchId('');
       resetLocalConfig();
     }
-  };
-
-  const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedBranchId(e.target.value);
-    // Since config is at restaurant level, we don't strictly need to reload
-    // unless we decide to support per-branch config later.
-    // For now, it just confirms the selection.
   };
 
   // Apply preset style when selected (simple mode)
@@ -313,7 +279,6 @@ export const SuperAdminQRManagement: React.FC = () => {
     _id: 'preview',
     tableNumber: '1',
     restaurantId: selectedRestaurantId || 'preview-rid',
-    branchId: selectedBranchId || 'preview-bid',
     qrCode: 'preview-qr-code',
     capacity: 4,
     location: 'indoor' as const,
@@ -341,17 +306,6 @@ export const SuperAdminQRManagement: React.FC = () => {
                     ))}
                 </select>
 
-                <select
-                    className="admin-select"
-                    value={selectedBranchId}
-                    onChange={handleBranchChange}
-                    disabled={!selectedRestaurantId}
-                >
-                    <option value="">Select Branch (Outlet)</option>
-                    {branches.map(b => (
-                        <option key={b._id} value={b._id}>{b.name} {b.isMain ? '(Main)' : ''}</option>
-                    ))}
-                </select>
             </div>
           </div>
 
@@ -375,7 +329,7 @@ export const SuperAdminQRManagement: React.FC = () => {
         <div className={`qr-management-content ${!selectedRestaurantId ? 'dimmed' : ''}`}>
           {!selectedRestaurantId && (
               <div className="selection-overlay">
-                  <h3>Please select a restaurant and branch to configure QR codes</h3>
+                  <h3>Please select a restaurant to configure QR codes</h3>
               </div>
           )}
 

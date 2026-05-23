@@ -21,16 +21,12 @@ export class TableService {
   static async getTables(
     token: string,
     restaurantId: any,
-    branchIdOrObject?: any,
     page: number = 1,
     limit: number = 100
   ): Promise<ApiResponse<TableListResponse>> {
     try {
       const rId = extractId(restaurantId);
-      const bId = extractId(branchIdOrObject);
-      const endpoint = bId
-        ? `/restaurants/${rId}/tables/branch/${bId}?page=${page}&limit=${limit}`
-        : `/restaurants/${rId}/tables?page=${page}&limit=${limit}`;
+      const endpoint = `/restaurants/${rId}/tables?page=${page}&limit=${limit}`;
 
       const response = await axiosInstance.get(endpoint, {
         headers: this.getHeaders(token),
@@ -46,15 +42,13 @@ export class TableService {
   static async createTable(
     token: string,
     restaurantId: any,
-    branchIdOrObject: any,
     payload: CreateTablePayload
   ): Promise<ApiResponse<Table>> {
     try {
       const rId = extractId(restaurantId);
-      const bId = extractId(branchIdOrObject);
       const response = await axiosInstance.post(
         `/restaurants/${rId}/tables`,
-        { ...payload, branchId: bId },
+        payload,
         { headers: this.getHeaders(token) }
       );
 
@@ -68,16 +62,14 @@ export class TableService {
   static async createBulkTables(
     token: string,
     restaurantId: any,
-    branchId: string,
     payload: BulkCreateTablePayload
   ): Promise<ApiResponse<{ tables: Table[]; created: number }>> {
     try {
       const rId = extractId(restaurantId);
-      const bId = extractId(branchId);
 
       const response = await axiosInstance.post(
         `/restaurants/${rId}/tables/bulk`,
-        { ...payload, branchId: bId },
+        payload,
         { headers: this.getHeaders(token) }
       );
 

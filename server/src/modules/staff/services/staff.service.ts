@@ -54,9 +54,7 @@ export class StaffService {
     // We normalize all IDs here to ensure they are plain strings
     const staffIdStr = ParamsUtil.extractId(staff._id);
     const restaurantIdStr = ParamsUtil.extractId(staff.restaurantId);
-    const branchIdStr = ParamsUtil.extractId(staff.branchId);
     const roleIdStr = ParamsUtil.extractId(staff.roleId);
-    const allowedBranchIdsStr = (staff.allowedBranchIds || []).map(id => ParamsUtil.extractId(id));
 
     // Resolve Restaurant Info
     let restaurantInfo = null;
@@ -96,8 +94,6 @@ export class StaffService {
       isActive: staff.isActive,
       preferences: staff.preferences,
       restaurantId: restaurantIdStr,
-      branchId: branchIdStr,
-      allowedBranchIds: allowedBranchIdsStr,
 
       // KEY AUTH FIELDS (Top Level)
       roleName: roleName,
@@ -142,8 +138,6 @@ export class StaffService {
       role: enrichedStaff.roleName as StaffRole,
       roleId: enrichedStaff.roleId.id,
       restaurantId: enrichedStaff.restaurantId,
-      branchId: enrichedStaff.branchId,
-      allowedBranchIds: enrichedStaff.allowedBranchIds,
       permissions: enrichedStaff.permissions,
     });
 
@@ -199,14 +193,6 @@ export class StaffService {
     };
   }
 
-  async getStaffByBranch(branchId: string, page: number, limit: number) {
-    const result = await this.staffRepo.findByBranch(branchId, page, limit);
-    const enrichedStaff = await Promise.all(result.staff.map((s) => this.enrichStaff(s)));
-    return {
-      ...result,
-      staff: enrichedStaff,
-    };
-  }
 
   async updateStaff(id: string, data: Partial<IStaff>) {
     if (data.password) {

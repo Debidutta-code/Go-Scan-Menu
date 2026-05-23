@@ -3,7 +3,6 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface ITable extends Document {
   restaurantId: Types.ObjectId;
-  branchId: Types.ObjectId;
   tableNumber: string;
   qrCode: string;
   capacity: number;
@@ -19,11 +18,6 @@ const tableSchema = new Schema<ITable>(
     restaurantId: {
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
-      required: true,
-    },
-    branchId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Branch',
       required: true,
     },
     tableNumber: {
@@ -63,7 +57,7 @@ const tableSchema = new Schema<ITable>(
 );
 
 // Indexes
-tableSchema.index({ branchId: 1, tableNumber: 1 }, { unique: true });
+tableSchema.index({ restaurantId: 1, tableNumber: 1 }, { unique: true });
 tableSchema.index({ qrCode: 1 }, { unique: true });
 
 export const Table = mongoose.model<ITable>('Table', tableSchema);

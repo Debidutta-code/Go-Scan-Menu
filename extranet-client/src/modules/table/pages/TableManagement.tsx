@@ -3,8 +3,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStaffAuth } from '@/modules/auth/contexts/StaffAuthContext';
 import { TableService } from '@/modules/table/services/table.service';
-import { BranchService } from '@/modules/branch/services/branch.service';
-import { Table, Branch } from '@/shared/types/table.types';
+import { Table } from '@/shared/types/table.types';
 import { Button } from '@/shared/components/Button';
 import { extractId } from '@/shared/utils/id.util';
 import { PermissionGuard } from '@/shared/components/PermissionGuard';
@@ -114,13 +113,10 @@ const STATUS_CHANGE_OPTIONS: DropdownOption[] = [
 
 export const TableManagement: React.FC = () => {
   const navigate  = useNavigate();
-  const { branchId } = useParams<{ branchId: string }>();
   const { staff, token } = useStaffAuth();
 
   // ── Data ──────────────────────────────────────────────────
   const [tables,   setTables]   = useState<Table[]>([]);
-  const [branch,   setBranch]   = useState<Branch | null>(null);
-  const [branches, setBranches] = useState<Branch[]>([]);
 
   // ── Independent loading states ────────────────────────────
   // `loading`       → table content skeleton (blocks main panel only)
@@ -156,14 +152,7 @@ export const TableManagement: React.FC = () => {
 
   // ── Effects ───────────────────────────────────────────────
   useEffect(() => {
-    if (staff && token && branchId) loadData();
-  }, [staff, token, branchId]);
-
-  useEffect(() => {
-    if (staff && token) {
-      const t = staff?.restaurant?.type as string;
-      if (t === 'chain' || t === 'branch-wise') loadBranches();
-    }
+    if (staff && token) loadData();
   }, [staff, token]);
 
   useEffect(() => {
@@ -181,60 +170,20 @@ export const TableManagement: React.FC = () => {
   }, []);
 
   // ── Loaders ───────────────────────────────────────────────
-  /**
-   * Loads the branch list independently.
-   * Uses its own `branchLoading` flag — does NOT touch `loading`,
-   * so the main skeleton is never triggered by this call.
-   */
-  const loadBranches = async () => {
-    if (!staff || !token || !staff.restaurantId) return;
-    setBranchLoading(true);
-    try {
-      const response = await BranchService.getAllBranches(staff.restaurantId);
-      let data: any[] = [];
-      if (response.success && response.data) {
-        data = Array.isArray(response.data)
-          ? response.data
-          : Array.isArray((response.data as any).branches)
-            ? (response.data as any).branches
-            : [];
-      }
-      if (data.length > 0) {
-        const highLevel =
-          (staff.roleLevel && staff.roleLevel <= 2) ||
-          staff.staffType === 'owner' ||
-          staff.staffType === 'super_admin' ||
-          staff.roleName?.toLowerCase() === 'owner';
-
-        setBranches(
-          !highLevel && staff.allowedBranchIds?.length
-            ? data.filter((b: any) => staff.allowedBranchIds.includes(extractId(b)))
-            : data
-        );
-      }
-    } catch (err) {
-      console.error('Failed to load branches', err);
-    } finally {
-      setBranchLoading(false);
-    }
-  };
-
   /** Loads table data — this IS the one that shows the main skeleton. */
   const loadData = async () => {
-    if (!staff || !token || !branchId) { setLoading(false); return; }
+    if (!staff || !token) { setLoading(false); return; }
     setLoading(true);
     setError('');
     try {
       const res = await TableService.getTables(
         token,
         extractId(staff.restaurantId),
-        extractId(branchId),
         1,
         1000
       );
       if (res.success && res.data) {
         setTables(res.data.tables || []);
-        if (res.data.branch) setBranch(res.data.branch);
       }
     } catch (err: any) {
       setError(err?.message || 'Failed to load table data');
@@ -272,12 +221,6 @@ export const TableManagement: React.FC = () => {
   const handleShowQR = (t: Table) => { setSelectedTable(t); setQrModalOpen(true); setHoveredTable(null); };
   const handleEdit   = (t: Table) => { setSelectedTable(t); setEditModalOpen(true); setHoveredTable(null); };
 
-  const handleBranchSelect = (bId: string) => {
-    setIsBranchDropdownOpen(false);
-    setBranchSearchTerm('');
-    navigate(`/staff/tables/${bId}`);
-  };
-
   const handleMouseEnterCube = (e: React.MouseEvent, table: Table) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -309,14 +252,6 @@ export const TableManagement: React.FC = () => {
     [tables, selectedStatus]
   );
 
-  const filteredBranches = useMemo(() => {
-    if (!branchSearchTerm.trim()) return branches;
-    const term = branchSearchTerm.toLowerCase();
-    return branches.filter(
-      (b) => b.name.toLowerCase().includes(term) || b.code.toLowerCase().includes(term)
-    );
-  }, [branches, branchSearchTerm]);
-
   const groupedTables = useMemo(() => {
     const grouped: Record<string, Table[]> = {};
     filteredTables.forEach((t) => {
@@ -332,8 +267,6 @@ export const TableManagement: React.FC = () => {
     return grouped;
   }, [filteredTables]);
 
-  const restaurantType = staff?.restaurant?.type as string;
-  const isMultiOutlet  = restaurantType === 'chain' || restaurantType === 'branch-wise';
   const canManageTables = () => !!(staff?.permissions?.tables?.create || staff?.staffType === 'owner');
 
 
@@ -349,69 +282,6 @@ export const TableManagement: React.FC = () => {
             Table Management
           </h1>
 
-          {/* Single-outlet inline name */}
-          {!isMultiOutlet && branch && (
-            <span className="single-branch-display"> — {branch.name}</span>
-          )}
-
-          {/* Branch selector — has its OWN loader (branch-btn-skeleton),
-              never blocks or triggers the main table skeleton */}
-          {isMultiOutlet && (
-            <div className="branch-selector-container" ref={branchDropdownRef}>
-              {branchLoading ? (
-                <div className="branch-btn-skeleton" aria-label="Loading branches…" />
-              ) : (
-                <>
-                  <button
-                    className={`branch-selector-toggle ${isBranchDropdownOpen ? 'active' : ''}`}
-                    onClick={() => setIsBranchDropdownOpen((o) => !o)}
-                  >
-                    <span className="current-branch-name">
-                      {branch?.name || 'Select Branch'}
-                    </span>
-                    <ChevronDown
-                      size={14}
-                      className={`chevron-icon ${isBranchDropdownOpen ? 'rotate' : ''}`}
-                    />
-                  </button>
-
-                  {isBranchDropdownOpen && (
-                    <div className="branch-selector-dropdown">
-                      <div className="dropdown-search-wrapper">
-                        <input
-                          type="text"
-                          className="dropdown-search-input"
-                          placeholder="Search outlets…"
-                          value={branchSearchTerm}
-                          onChange={(e) => setBranchSearchTerm(e.target.value)}
-                          autoFocus
-                        />
-                      </div>
-                      <div className="branch-options-list">
-                        {filteredBranches.length > 0 ? (
-                          filteredBranches.map((b) => (
-                            <div
-                              key={b._id}
-                              className={`branch-option-item ${b._id === branchId ? 'selected' : ''}`}
-                              onClick={() => handleBranchSelect(b._id)}
-                            >
-                              <div className="branch-option-info">
-                                <span className="branch-option-name">{b.name}</span>
-                                <span className="branch-option-code">{b.code}</span>
-                              </div>
-                              {b.isMain && <span className="main-branch-badge">Main</span>}
-                            </div>
-                          ))
-                        ) : (
-                          <div className="no-branches-found">No outlets found</div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
 
           {/* ── Status filter — SharedDropdown (toolbar variant) ── */}
           <SharedDropdown
@@ -633,17 +503,15 @@ export const TableManagement: React.FC = () => {
           onClose={() => { setQrModalOpen(false); setSelectedTable(null); }}
         />
       )}
-      {createModalOpen && branchId && (
+      {createModalOpen && (
         <TableFormModal
           mode="create"
-          branchId={branchId}
           onClose={() => setCreateModalOpen(false)}
           onSuccess={() => { setCreateModalOpen(false); loadData(); }}
         />
       )}
-      {bulkCreateModalOpen && branchId && (
+      {bulkCreateModalOpen && (
         <BulkCreateTableModal
-          branchId={branchId}
           onClose={() => setBulkCreateModalOpen(false)}
           onSuccess={() => { setBulkCreateModalOpen(false); loadData(); }}
         />

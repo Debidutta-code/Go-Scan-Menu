@@ -34,8 +34,6 @@ router.get('/', taxController.getTaxesByRestaurant);
 // 6950eacd17e23a7a41696359 sgst
 // CGST 6950ea1117e23a7a41696356
 
-// Get all taxes by branch
-router.get('/branch/:branchId', taxController.getTaxesByBranch);
 
 // Get single tax
 router.get('/:id', taxController.getTax);

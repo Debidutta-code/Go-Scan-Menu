@@ -1,7 +1,6 @@
 // src/services/tax.service.ts
 import { TaxRepository } from '../repositories/tax.repository';
 import { RestaurantRepository } from '../repositories/restaurant.repository';
-import { BranchRepository } from '../repositories/branch.repository';
 import { ITax } from '../models/tax.model';
 import { AppError } from '@/utils/AppError';
 import { Types } from 'mongoose';
@@ -11,12 +10,10 @@ import { CreateTaxDTO, UpdateTaxDTO } from '@/types/tax.types';
 export class TaxService {
   private taxRepo: TaxRepository;
   private restaurantRepo: RestaurantRepository;
-  private branchRepo: BranchRepository;
 
   constructor() {
     this.taxRepo = new TaxRepository();
     this.restaurantRepo = new RestaurantRepository();
-    this.branchRepo = new BranchRepository();
   }
 
   async createTax(restaurantId: string, data: CreateTaxDTO) {
@@ -24,18 +21,6 @@ export class TaxService {
     const restaurant = await this.restaurantRepo.findById(restaurantId);
     if (!restaurant || !restaurant.isActive) {
       throw new AppError('Restaurant not found or inactive', 404);
-    }
-
-    // If scope is branch, verify branch exists
-    if (data.scope === 'branch') {
-      if (!data.branchId) {
-        throw new AppError('Branch ID is required for branch-specific taxes', 400);
-      }
-
-      const branch = await this.branchRepo.findByIdAndRestaurant(data.branchId, restaurantId);
-      if (!branch || !branch.isActive) {
-        throw new AppError('Branch not found or inactive', 404);
-      }
     }
 
     // If parentId provided, verify it exists and is a group
@@ -52,20 +37,18 @@ export class TaxService {
     // Get next display order if not provided
     let displayOrder = data.displayOrder;
     if (displayOrder === undefined) {
-      const count = await this.taxRepo.countByRestaurant(restaurantId, data.scope);
+      const count = await this.taxRepo.countByRestaurant(restaurantId);
       displayOrder = count;
     }
 
     const taxData: Partial<ITax> = {
       restaurantId: new Types.ObjectId(restaurantId),
-      branchId: data.branchId ? new Types.ObjectId(data.branchId) : undefined,
       name: data.name,
       description: data.description,
       type: data.type || 'tax',
       taxType: data.taxType,
       value: data.value,
       applicableOn: data.applicableOn,
-      scope: data.scope,
       category: data.category,
       parentId: data.parentId ? new Types.ObjectId(data.parentId) : undefined,
       conditions: data.conditions
@@ -99,31 +82,20 @@ export class TaxService {
 
   async getTaxesByRestaurant(
     restaurantId: string,
-    scope: 'restaurant' | 'branch' = 'restaurant',
     category?: string,
     page: number = 1,
     limit: number = 100
   ) {
-    return this.taxRepo.findByRestaurant(restaurantId, scope, category, page, limit);
-  }
-
-  async getTaxesByBranch(
-    branchId: string,
-    category?: string,
-    page: number = 1,
-    limit: number = 100
-  ) {
-    return this.taxRepo.findByBranch(branchId, category, page, limit);
+    return this.taxRepo.findByRestaurant(restaurantId, category, page, limit);
   }
 
   async getApplicableTaxes(
     restaurantId: string,
-    branchId?: string,
     orderType?: 'dine-in' | 'takeaway',
     orderAmount?: number
   ) {
-    // Get restaurant-wide and branch-specific taxes
-    const taxes = await this.taxRepo.findApplicableTaxes(restaurantId, branchId);
+    // Get applicable taxes
+    const taxes = await this.taxRepo.findApplicableTaxes(restaurantId);
 
     // Filter based on conditions
     const applicableTaxes = taxes.filter((tax) => {
@@ -174,9 +146,6 @@ export class TaxService {
     }
 
     const updateData: Record<string, any> = { ...data };
-    if (data.branchId) {
-      updateData.branchId = new Types.ObjectId(data.branchId);
-    }
     if (data.parentId) {
       updateData.parentId = new Types.ObjectId(data.parentId);
     } else if (data.parentId === null) {

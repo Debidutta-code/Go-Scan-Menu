@@ -7,13 +7,11 @@ import { InputField } from '@/shared/components/InputField';
 import './QRCodeModal.css';
 
 interface CreateTableModalProps {
-  branchId: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export const CreateTableModal: React.FC<CreateTableModalProps> = ({
-  branchId,
   onClose,
   onSuccess,
 }) => {
@@ -48,7 +46,6 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
       const response = await TableService.createTable(
         token,
         staff.restaurantId,
-        branchId,
         formData
       );
 

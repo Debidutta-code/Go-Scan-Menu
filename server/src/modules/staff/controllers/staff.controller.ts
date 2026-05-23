@@ -52,20 +52,6 @@ export class StaffController {
     });
   });
 
-  getStaffByBranch = catchAsync(async (req: Request, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-
-    const result = await this.staffService.getStaffByBranch(
-      ParamsUtil.getString(req.params.branchId),
-      page,
-      limit
-    );
-    sendResponse(res, 200, {
-      message: 'Staff retrieved successfully',
-      data: result,
-    });
-  });
 
   updateStaff = catchAsync(async (req: Request, res: Response) => {
     const staff = await this.staffService.updateStaff(

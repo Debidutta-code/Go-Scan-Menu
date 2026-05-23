@@ -11,18 +11,14 @@ export class PublicMenuController {
 
   /**
    * Get complete menu for a specific table (QR code scan)
-   * Returns: restaurant theme, branch info, table, menu grouped by categories
+   * Returns: restaurant theme, table, menu grouped by categories
    */
   getMenuByQrCode = catchAsync(async (req: Request, res: Response) => {
     const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
-    const branchCode = ParamsUtil.getString(req.params.branchCode);
     const qrCode = ParamsUtil.getString(req.params.qrCode);
-
-    console.log('Received params:', { restaurantSlug, branchCode, qrCode });
 
     const menuData = await this.menuService.getCompleteMenuByQrCode(
       restaurantSlug,
-      branchCode,
       qrCode
     );
 
@@ -33,14 +29,13 @@ export class PublicMenuController {
   });
 
   /**
-   * Get menu for a branch (without specific table)
+   * Get menu (without specific table)
    * Useful for takeaway/delivery or browsing without sitting
    */
   getMenuByBranch = catchAsync(async (req: Request, res: Response) => {
     const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
-    const branchCode = ParamsUtil.getString(req.params.branchCode);
 
-    const menuData = await this.menuService.getCompleteMenuByBranch(restaurantSlug, branchCode);
+    const menuData = await this.menuService.getCompleteMenuByBranch(restaurantSlug);
 
     sendResponse(res, 200, {
       message: 'Menu retrieved successfully',

@@ -1,10 +1,9 @@
 // src/routes/index.ts
 import { Router } from 'express';
 import { authRoutes } from '@/modules/auth';
-import { restaurantRoutes, branchRoutes, taxRoutes, qrConfigRoutes, feedbackRoutes } from '@/modules/restaurant';
-import { staffRoutes, roleRoutes, staffTypePermissionRoutes } from '@/modules/staff';
+import { restaurantRoutes, taxRoutes, qrConfigRoutes, feedbackRoutes } from '@/modules/restaurant';
+import { staffRoutes } from '@/modules/staff';
 import { categoryRoutes, menuItemRoutes, publicMenuRoutes, modifierRoutes } from '@/modules/menu';
-import { orderRoutes } from '@/modules/order';
 import { tableRoutes } from '@/modules/table';
 import { ApiLogController } from '@/modules/analytics/api-log.controller';
 import { AuthMiddleware } from '@/modules/staff';
@@ -26,13 +25,8 @@ router.get(
 );
 router.use('/restaurants', restaurantRoutes);
 router.use('/staff', staffRoutes);
-router.use('/roles', roleRoutes);
-router.use('/staff-type-permissions', staffTypePermissionRoutes);
 
-// Branch Management
-router.use('/restaurants/:restaurantId/branches', branchRoutes);
-
-// Table Management (can be accessed via restaurant or branch)
+// Table Management
 router.use('/restaurants/:restaurantId/tables', tableRoutes);
 router.use('/tables', tableRoutes); // For QR code access
 
@@ -47,9 +41,6 @@ router.use('/restaurants/:restaurantId/modifiers', modifierRoutes);
 
 // Tax Management
 router.use('/restaurants/:restaurantId/taxes', taxRoutes);
-
-// Order Management (nested under restaurants)
-router.use('/restaurants/:restaurantId/orders', orderRoutes);
 
 // QR Config Management (nested under restaurants)
 router.use('/restaurants/:restaurantId/qr-config', qrConfigRoutes);

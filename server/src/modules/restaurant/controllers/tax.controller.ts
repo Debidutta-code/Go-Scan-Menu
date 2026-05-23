@@ -39,14 +39,12 @@ export class TaxController {
 
   getTaxesByRestaurant = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const scope = (req.query.scope as 'restaurant' | 'branch') || 'restaurant';
     const category = req.query.category as string | undefined;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
 
     const result = await this.taxService.getTaxesByRestaurant(
       restaurantId!,
-      scope,
       category,
       page,
       limit
@@ -58,27 +56,12 @@ export class TaxController {
     });
   });
 
-  getTaxesByBranch = catchAsync(async (req: Request, res: Response) => {
-    const { branchId } = req.params;
-    const category = req.query.category as string | undefined;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
-
-    const result = await this.taxService.getTaxesByBranch(branchId, category, page, limit);
-
-    sendResponse(res, 200, {
-      message: 'Taxes retrieved successfully',
-      data: result,
-    });
-  });
-
   getApplicableTaxes = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const { branchId, orderType, orderAmount } = req.query;
+    const { orderType, orderAmount } = req.query;
 
     const taxes = await this.taxService.getApplicableTaxes(
       restaurantId!,
-      branchId as string | undefined,
       orderType as 'dine-in' | 'takeaway' | undefined,
       orderAmount ? parseFloat(orderAmount as string) : undefined
     );

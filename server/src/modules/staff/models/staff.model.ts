@@ -3,13 +3,11 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IStaff extends Document {
   restaurantId: Types.ObjectId;
-  branchId?: Types.ObjectId; // Primary branch
   roleId: Types.ObjectId; // Reference to Role model
   name: string;
   email: string;
   phone: string;
   password: string;
-  allowedBranchIds: Types.ObjectId[]; // For multi-branch access
   isActive: boolean;
   preferences?: {
     timePreference?: string;
@@ -28,10 +26,6 @@ const staffSchema = new Schema<IStaff>(
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
       required: true,
-    },
-    branchId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Branch',
     },
     roleId: {
       type: Schema.Types.ObjectId,
@@ -58,12 +52,6 @@ const staffSchema = new Schema<IStaff>(
       type: String,
       required: true,
     },
-    allowedBranchIds: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Branch',
-      },
-    ],
     isActive: {
       type: Boolean,
       default: true,
@@ -83,7 +71,7 @@ const staffSchema = new Schema<IStaff>(
 
 // Indexes
 staffSchema.index({ restaurantId: 1, email: 1 }, { unique: true });
-staffSchema.index({ restaurantId: 1, branchId: 1, roleId: 1 });
+staffSchema.index({ restaurantId: 1, roleId: 1 });
 staffSchema.index({ roleId: 1 });
 
 export const Staff = mongoose.model<IStaff>('Staff', staffSchema);

@@ -64,7 +64,6 @@ export class MenuItemController {
     const limit = parseInt(req.query.limit as string) || 50;
 
     const filter: any = {};
-    if (req.query.scope) filter.scope = req.query.scope;
     if (req.query.isAvailable) filter.isAvailable = req.query.isAvailable === 'true';
 
     const result = await this.menuItemService.getMenuItemsByRestaurant(
@@ -80,28 +79,14 @@ export class MenuItemController {
     });
   });
 
-  getMenuItemsByBranch = catchAsync(async (req: Request, res: Response) => {
-    const branchId = ParamsUtil.getString(req.params.branchId);
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
-
-    const result = await this.menuItemService.getMenuItemsByBranch(branchId, page, limit);
-
-    sendResponse(res, 200, {
-      message: 'Menu items retrieved successfully',
-      data: result,
-    });
-  });
-
   getAllMenuItemsForMenu = catchAsync(async (req: Request, res: Response) => {
     let restaurantId = req.params.restaurantId || (req.user as any)?.restaurantId;
 
     if (restaurantId && typeof restaurantId !== 'string') {
       restaurantId = restaurantId.toString();
     }
-    const branchId = req.query.branchId as string | undefined;
 
-    const menuItems = await this.menuItemService.getAllMenuItemsForMenu(restaurantId!, branchId);
+    const menuItems = await this.menuItemService.getAllMenuItemsForMenu(restaurantId!);
 
     sendResponse(res, 200, {
       message: 'Menu items retrieved successfully',
@@ -154,35 +139,6 @@ export class MenuItemController {
     });
   });
 
-  updateBranchPricing = catchAsync(async (req: Request, res: Response) => {
-    let restaurantId =
-      ParamsUtil.getString(req.params.restaurantId) || (req.user as any)?.restaurantId;
-
-    if (restaurantId && typeof restaurantId !== 'string') {
-      restaurantId = restaurantId.toString();
-    }
-    const branchId = ParamsUtil.getString(req.params.branchId);
-    const { price, discountPrice, isAvailable } = req.body;
-
-    if (!price || isAvailable === undefined) {
-      sendResponse(res, 400, {
-        message: 'price and isAvailable are required',
-      });
-      return;
-    }
-
-    const menuItem = await this.menuItemService.updateBranchPricing(
-      ParamsUtil.getString(req.params.id),
-      restaurantId!,
-      branchId,
-      { price, discountPrice, isAvailable }
-    );
-
-    sendResponse(res, 200, {
-      message: 'Branch pricing updated successfully',
-      data: menuItem,
-    });
-  });
 
   deleteMenuItem = catchAsync(async (req: Request, res: Response) => {
     let restaurantId = req.params.restaurantId || (req.user as any)?.restaurantId;

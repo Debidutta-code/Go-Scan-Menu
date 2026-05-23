@@ -6,11 +6,9 @@ import { ProtectedAdminRoute, ProtectedStaffRoute } from '@/modules/auth/guards'
 
 import { authRoutes } from '@/modules/auth/routes';
 import { restaurantRoutes } from '@/modules/restaurant/routes';
-import { branchRoutes } from '@/modules/branch/routes';
 import { staffRoutes } from '@/modules/staff/routes';
 import { menuRoutes } from '@/modules/menu/routes';
 import { tableRoutes } from '@/modules/table/routes';
-import { orderRoutes } from '@/modules/order/routes';
 import { dashboardRoutes } from '@/modules/dashboard/routes';
 import { settingsRoutes } from '@/modules/settings/routes';
 import NotFound from '@/shared/components/NotFound/NotFound';
@@ -35,11 +33,9 @@ export const AppRouter = () => {
             <Route element={<ProtectedStaffRoute><StaffLayout /></ProtectedStaffRoute>}>
                 {[
                     ...dashboardRoutes.filter(r => r.path !== '/dashboard'),
-                    ...branchRoutes,
                     ...staffRoutes,
                     ...menuRoutes,
                     ...tableRoutes,
-                    ...orderRoutes,
                     ...settingsRoutes,
                 ].map((route) => (
                     <Route key={route.path} path={route.path} element={route.element} />

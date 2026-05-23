@@ -4,7 +4,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 export interface IRestaurant extends Document {
   name: string;
   slug: string;
-  type: 'single' | 'branch-wise' | 'chain';
+  type: 'single';
   ownerId?: Types.ObjectId; // Reference to Staff model
   owner: {
     name: string;
@@ -17,8 +17,6 @@ export interface IRestaurant extends Document {
     startDate: Date;
     endDate: Date;
     isActive: boolean;
-    maxBranches: number;
-    currentBranches: number;
   };
   theme: {
     primaryColor: string;
@@ -38,7 +36,6 @@ export interface IRestaurant extends Document {
   };
   menuSettings: {
     centralizedMenu: boolean;
-    allowBranchSpecificItems: boolean;
   };
   googlePlaceId?: string;
   googleReviewRedirects: number;
@@ -64,8 +61,9 @@ const restaurantSchema = new Schema<IRestaurant>(
     },
     type: {
       type: String,
-      enum: ['single', 'branch-wise', 'chain'],
+      enum: ['single'],
       required: true,
+      default: 'single',
     },
     ownerId: {
       type: Schema.Types.ObjectId,
@@ -111,14 +109,6 @@ const restaurantSchema = new Schema<IRestaurant>(
       isActive: {
         type: Boolean,
         default: true,
-      },
-      maxBranches: {
-        type: Number,
-        required: true,
-      },
-      currentBranches: {
-        type: Number,
-        default: 0,
       },
     },
     theme: {
@@ -167,10 +157,6 @@ const restaurantSchema = new Schema<IRestaurant>(
       centralizedMenu: {
         type: Boolean,
         default: true,
-      },
-      allowBranchSpecificItems: {
-        type: Boolean,
-        default: false,
       },
     },
     googlePlaceId: {

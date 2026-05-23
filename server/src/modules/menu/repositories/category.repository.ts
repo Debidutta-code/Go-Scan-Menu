@@ -12,7 +12,7 @@ export class CategoryRepository {
     const query = Category.findById(id);
 
     if (populate) {
-      return query.populate('restaurantId').populate('branchId');
+      return query.populate('restaurantId');
     }
 
     return query;
@@ -20,12 +20,11 @@ export class CategoryRepository {
 
   async findByRestaurant(
     restaurantId: string,
-    scope: 'restaurant' | 'branch' = 'restaurant',
     page: number = 1,
     limit: number = 50
   ) {
     const skip = (page - 1) * limit;
-    const query = { restaurantId, scope, isActive: true };
+    const query = { restaurantId, isActive: true };
 
     const [categories, total] = await Promise.all([
       Category.find(query).skip(skip).limit(limit).sort({ displayOrder: 1, name: 1 }),
@@ -43,49 +42,18 @@ export class CategoryRepository {
     };
   }
 
-  async findByBranch(branchId: string, page: number = 1, limit: number = 50) {
-    const skip = (page - 1) * limit;
-    const query = { branchId, scope: 'branch', isActive: true };
-
-    const [categories, total] = await Promise.all([
-      Category.find(query)
-        .populate('restaurantId')
-        .populate('branchId')
-        .skip(skip)
-        .limit(limit)
-        .sort({ displayOrder: 1, name: 1 }),
-      Category.countDocuments(query),
-    ]);
-
-    return {
-      categories,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
-  }
-
-  async findAllForMenu(restaurantId: string, branchId?: string) {
+  async findAllForMenu(restaurantId: string) {
     const query: any = {
       restaurantId,
       isActive: true,
-      $or: [{ scope: 'restaurant', branchId: { $exists: false } }],
     };
-
-    if (branchId) {
-      query.$or.push({ scope: 'branch', branchId });
-    }
 
     return Category.find(query).sort({ displayOrder: 1, name: 1 });
   }
 
   async update(id: string, data: Partial<ICategory>): Promise<ICategory | null> {
     return Category.findByIdAndUpdate(id, data, { new: true })
-      .populate('restaurantId')
-      .populate('branchId');
+      .populate('restaurantId');
   }
 
   async updateDisplayOrder(id: string, displayOrder: number): Promise<ICategory | null> {
@@ -100,9 +68,8 @@ export class CategoryRepository {
     return Category.findByIdAndDelete(id);
   }
 
-  async countByRestaurant(restaurantId: string, scope?: 'restaurant' | 'branch'): Promise<number> {
+  async countByRestaurant(restaurantId: string): Promise<number> {
     const query: any = { restaurantId, isActive: true };
-    if (scope) query.scope = scope;
     return Category.countDocuments(query);
   }
 }

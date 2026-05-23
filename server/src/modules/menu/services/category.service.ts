@@ -1,7 +1,6 @@
 // src/services/category.service.ts
 import { CategoryRepository } from '../repositories/category.repository';
 import { RestaurantRepository } from '../../restaurant/repositories/restaurant.repository';
-import { BranchRepository } from '../../restaurant/repositories/branch.repository';
 import { ICategory } from '../models/category.model';
 import { AppError } from '@/utils/AppError';
 import { Types } from 'mongoose';
@@ -9,12 +8,10 @@ import { Types } from 'mongoose';
 export class CategoryService {
   private categoryRepo: CategoryRepository;
   private restaurantRepo: RestaurantRepository;
-  private branchRepo: BranchRepository;
 
   constructor() {
     this.categoryRepo = new CategoryRepository();
     this.restaurantRepo = new RestaurantRepository();
-    this.branchRepo = new BranchRepository();
   }
 
   /**
@@ -45,8 +42,6 @@ export class CategoryService {
       description?: string;
       image?: string;
       displayOrder?: number;
-      scope: 'restaurant' | 'branch';
-      branchId?: string;
     }
   ) {
     // Verify restaurant exists
@@ -55,33 +50,19 @@ export class CategoryService {
       throw new AppError('Restaurant not found or inactive', 404);
     }
 
-    // If scope is branch, verify branch exists and belongs to restaurant
-    if (data.scope === 'branch') {
-      if (!data.branchId) {
-        throw new AppError('Branch ID is required for branch-specific categories', 400);
-      }
-
-      const branch = await this.branchRepo.findByIdAndRestaurant(data.branchId, restaurantId);
-      if (!branch || !branch.isActive) {
-        throw new AppError('Branch not found or inactive', 404);
-      }
-    }
-
     // Auto-increment display order if not provided
     let displayOrder = data.displayOrder;
     if (displayOrder === undefined || displayOrder === null) {
-      const count = await this.categoryRepo.countByRestaurant(restaurantId, data.scope);
+      const count = await this.categoryRepo.countByRestaurant(restaurantId);
       displayOrder = count;
     }
 
     const categoryData: Partial<ICategory> = {
       restaurantId: new Types.ObjectId(restaurantId),
-      branchId: data.branchId ? new Types.ObjectId(data.branchId) : undefined,
       name: data.name,
       description: data.description,
       image: data.image,
       displayOrder,
-      scope: data.scope,
       isActive: true,
     };
 
@@ -99,23 +80,18 @@ export class CategoryService {
 
   async getCategoriesByRestaurant(
     restaurantId: string,
-    scope: 'restaurant' | 'branch' = 'restaurant',
     page: number = 1,
     limit: number = 50
   ) {
-    return this.categoryRepo.findByRestaurant(restaurantId, scope, page, limit);
+    return this.categoryRepo.findByRestaurant(restaurantId, page, limit);
   }
 
-  async getCategoriesByBranch(branchId: string, page: number = 1, limit: number = 50) {
-    return this.categoryRepo.findByBranch(branchId, page, limit);
+  async getAllCategoriesForMenu(restaurantId: string) {
+    return this.categoryRepo.findAllForMenu(restaurantId);
   }
 
-  async getAllCategoriesForMenu(restaurantId: string, branchId?: string) {
-    return this.categoryRepo.findAllForMenu(restaurantId, branchId);
-  }
-
-  async getCategoryCount(restaurantId: string, scope?: 'restaurant' | 'branch'): Promise<number> {
-    return this.categoryRepo.countByRestaurant(restaurantId, scope);
+  async getCategoryCount(restaurantId: string): Promise<number> {
+    return this.categoryRepo.countByRestaurant(restaurantId);
   }
 
   async updateCategory(
@@ -137,16 +113,9 @@ export class CategoryService {
       throw new AppError('Category does not belong to this restaurant', 403);
     }
 
-    // Don't allow changing scope after creation
-    if (data.scope && data.scope !== category.scope) {
-      throw new AppError('Cannot change category scope after creation', 400);
-    }
-
     // Don't allow changing critical fields
     const updateData = { ...data };
     delete (updateData as any).restaurantId;
-    delete (updateData as any).branchId;
-    delete (updateData as any).scope;
     delete (updateData as any).displayOrder;
 
     const updatedCategory = await this.categoryRepo.update(id, updateData);

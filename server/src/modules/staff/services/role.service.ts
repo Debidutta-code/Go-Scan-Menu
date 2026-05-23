@@ -169,14 +169,6 @@ export class RoleService {
   // Permission Templates
   private getSuperAdminPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        managePayment: true,
-        viewAllBranches: true,
-      },
       menu: {
         view: true,
         create: true,
@@ -195,14 +187,6 @@ export class RoleService {
 
   private getOwnerPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        managePayment: true,
-        viewAllBranches: true,
-      },
       menu: {
         view: true,
         create: true,
@@ -221,14 +205,6 @@ export class RoleService {
 
   private getBranchManagerPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: true,
-        managePayment: true,
-        viewAllBranches: false,
-      },
       menu: {
         view: true,
         create: true,
@@ -247,14 +223,6 @@ export class RoleService {
 
   private getManagerPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: false,
-        managePayment: true,
-        viewAllBranches: false,
-      },
       menu: {
         view: true,
         create: true,
@@ -273,14 +241,6 @@ export class RoleService {
 
   private getWaiterPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: true,
-        update: true,
-        delete: false,
-        managePayment: false,
-        viewAllBranches: false,
-      },
       menu: {
         view: true,
         create: false,
@@ -299,14 +259,6 @@ export class RoleService {
 
   private getKitchenStaffPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: false,
-        update: true,
-        delete: false,
-        managePayment: false,
-        viewAllBranches: false,
-      },
       menu: {
         view: true,
         create: false,
@@ -325,14 +277,6 @@ export class RoleService {
 
   private getCashierPermissions(): RolePermissions {
     return {
-      orders: {
-        view: true,
-        create: false,
-        update: false,
-        delete: false,
-        managePayment: true,
-        viewAllBranches: false,
-      },
       menu: {
         view: true,
         create: false,

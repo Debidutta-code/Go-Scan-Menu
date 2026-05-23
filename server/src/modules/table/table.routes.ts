@@ -25,8 +25,6 @@ router.post('/', ...canManageTables, tableController.createTable);
 // Bulk create tables
 router.post('/bulk', ...canManageTables, tableController.createBulkTables);
 
-// Get all tables by branch
-router.get('/branch/:branchId', tableController.getTablesByBranch);
 
 // Get all tables by restaurant
 router.get('/', tableController.getTablesByRestaurant);

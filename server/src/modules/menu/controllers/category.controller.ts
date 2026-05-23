@@ -39,13 +39,11 @@ export class CategoryController {
 
   getCategoriesByRestaurant = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const scope = (req.query.scope as 'restaurant' | 'branch') || 'restaurant';
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
 
     const result = await this.categoryService.getCategoriesByRestaurant(
       restaurantId!,
-      scope,
       page,
       limit
     );
@@ -56,24 +54,10 @@ export class CategoryController {
     });
   });
 
-  getCategoriesByBranch = catchAsync(async (req: Request, res: Response) => {
-    const branchId = ParamsUtil.getString(req.params.branchId);
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
-
-    const result = await this.categoryService.getCategoriesByBranch(branchId, page, limit);
-
-    sendResponse(res, 200, {
-      message: 'Categories retrieved successfully',
-      data: result,
-    });
-  });
-
   getAllCategoriesForMenu = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = req.params.restaurantId || req.user?.restaurantId;
-    const branchId = req.query.branchId as string | undefined;
 
-    const categories = await this.categoryService.getAllCategoriesForMenu(restaurantId!, branchId);
+    const categories = await this.categoryService.getAllCategoriesForMenu(restaurantId!);
 
     sendResponse(res, 200, {
       message: 'Categories retrieved successfully',
@@ -123,7 +107,6 @@ export class CategoryController {
 
   getPublicCategories = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = req.params.restaurantId;
-    const branchId = req.query.branchId as string | undefined;
 
     if (!restaurantId) {
       sendResponse(res, 400, {
@@ -132,7 +115,7 @@ export class CategoryController {
       return;
     }
 
-    const categories = await this.categoryService.getAllCategoriesForMenu(restaurantId, branchId);
+    const categories = await this.categoryService.getAllCategoriesForMenu(restaurantId);
 
     sendResponse(res, 200, {
       message: 'Categories retrieved successfully',
@@ -142,7 +125,6 @@ export class CategoryController {
 
   getPublicCategoryCount = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = req.params.restaurantId;
-    const scope = (req.query.scope as 'restaurant' | 'branch') || 'restaurant';
 
     if (!restaurantId) {
       sendResponse(res, 400, {
@@ -151,7 +133,7 @@ export class CategoryController {
       return;
     }
 
-    const count = await this.categoryService.getCategoryCount(restaurantId, scope);
+    const count = await this.categoryService.getCategoryCount(restaurantId);
 
     sendResponse(res, 200, {
       message: 'Category count retrieved successfully',

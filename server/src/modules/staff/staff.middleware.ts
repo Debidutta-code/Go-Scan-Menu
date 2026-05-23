@@ -41,8 +41,6 @@ export class AuthMiddleware {
         role: decoded.role as StaffRole,
         roleId: decoded.roleId,
         restaurantId: decoded.restaurantId,
-        branchId: decoded.branchId,
-        allowedBranchIds: decoded.allowedBranchIds,
         permissions: permissions,
         accessScope: (decoded as any).accessScope,
       };
@@ -252,8 +250,6 @@ export class AuthMiddleware {
         role: decoded.role as StaffRole,
         roleId: decoded.roleId,
         restaurantId: decoded.restaurantId,
-        branchId: decoded.branchId,
-        allowedBranchIds: decoded.allowedBranchIds,
         permissions: permissions,
       };
 

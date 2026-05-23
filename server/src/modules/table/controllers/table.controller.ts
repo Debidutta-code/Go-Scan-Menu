@@ -13,16 +13,15 @@ export class TableController {
 
   createTable = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
-    const branchId = ParamsUtil.getString(req.params.branchId) || req.body.branchId;
 
-    if (!restaurantId || !branchId) {
+    if (!restaurantId) {
       sendResponse(res, 400, {
-        message: 'Restaurant ID and Branch ID are required',
+        message: 'Restaurant ID is required',
       });
       return;
     }
 
-    const table = await this.tableService.createTable(restaurantId, branchId, req.body);
+    const table = await this.tableService.createTable(restaurantId, req.body);
 
     sendResponse(res, 201, {
       message: 'Table created successfully',
@@ -32,16 +31,15 @@ export class TableController {
 
   createBulkTables = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;
-    const branchId = ParamsUtil.getString(req.params.branchId) || req.body.branchId;
 
-    if (!restaurantId || !branchId) {
+    if (!restaurantId) {
       sendResponse(res, 400, {
-        message: 'Restaurant ID and Branch ID are required',
+        message: 'Restaurant ID is required',
       });
       return;
     }
 
-    const tables = await this.tableService.createBulkTables(restaurantId, branchId, req.body);
+    const tables = await this.tableService.createBulkTables(restaurantId, req.body);
 
     sendResponse(res, 201, {
       message: `${tables.length} tables created successfully`,
@@ -71,19 +69,6 @@ export class TableController {
     });
   });
 
-  getTablesByBranch = catchAsync(async (req: Request, res: Response) => {
-    const branchId = ParamsUtil.getString(req.params.branchId);
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const filter = req.query.status ? { status: req.query.status } : {};
-
-    const result = await this.tableService.getTablesByBranch(branchId, page, limit, filter);
-
-    sendResponse(res, 200, {
-      message: 'Tables retrieved successfully',
-      data: result,
-    });
-  });
 
   getTablesByRestaurant = catchAsync(async (req: Request, res: Response) => {
     const restaurantId = ParamsUtil.getString(req.params.restaurantId) || req.user?.restaurantId;

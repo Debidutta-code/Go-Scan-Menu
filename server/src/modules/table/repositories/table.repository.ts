@@ -13,21 +13,24 @@ export class TableRepository {
   }
 
   async findById(id: string): Promise<ITable | null> {
-    return Table.findById(id).populate('restaurantId').populate('branchId');
+    return Table.findById(id).populate('restaurantId');
   }
 
   async findByQrCode(qrCode: string): Promise<ITable | null> {
-    return Table.findOne({ qrCode }).populate('restaurantId').populate('branchId');
+    return Table.findOne({ qrCode }).populate('restaurantId');
   }
 
-  async findByBranch(branchId: string, filter: any = {}, page: number = 1, limit: number = 10) {
+  async findByRestaurant(
+    restaurantId: string,
+    filter: any = {},
+    page: number = 1,
+    limit: number = 10
+  ) {
     const skip = (page - 1) * limit;
-    const query = { branchId, isActive: true, ...filter };
+    const query = { restaurantId, isActive: true, ...filter };
 
     const [tables, total] = await Promise.all([
       Table.find(query)
-        .populate('restaurantId')
-        .populate('branchId')
         .skip(skip)
         .limit(limit)
         .sort({ tableNumber: 1 }),
@@ -45,43 +48,13 @@ export class TableRepository {
     };
   }
 
-  async findByRestaurant(
-    restaurantId: string,
-    filter: any = {},
-    page: number = 1,
-    limit: number = 10
-  ) {
-    const skip = (page - 1) * limit;
-    const query = { restaurantId, isActive: true, ...filter };
-
-    const [tables, total] = await Promise.all([
-      Table.find(query)
-        .populate('branchId')
-        .skip(skip)
-        .limit(limit)
-        .sort({ branchId: 1, tableNumber: 1 }),
-      Table.countDocuments(query),
-    ]);
-
-    return {
-      tables,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
-  }
-
-  async findByTableNumber(branchId: string, tableNumber: string): Promise<ITable | null> {
-    return Table.findOne({ branchId, tableNumber });
+  async findByTableNumber(restaurantId: string, tableNumber: string): Promise<ITable | null> {
+    return Table.findOne({ restaurantId, tableNumber });
   }
 
   async update(id: string, data: Partial<ITable>): Promise<ITable | null> {
     return Table.findByIdAndUpdate(id, data, { new: true })
-      .populate('restaurantId')
-      .populate('branchId');
+      .populate('restaurantId');
   }
 
   async updateStatus(id: string, status: ITable['status']): Promise<ITable | null> {
@@ -96,7 +69,4 @@ export class TableRepository {
     return Table.findByIdAndDelete(id);
   }
 
-  async countByBranch(branchId: string, filter: any = {}): Promise<number> {
-    return Table.countDocuments({ branchId, isActive: true, ...filter });
-  }
 }

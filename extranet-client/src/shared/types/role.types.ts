@@ -26,14 +26,6 @@ export enum AccessScope {
 }
 
 export interface RolePermissions {
-  orders: {
-    view: boolean;
-    create: boolean;
-    update: boolean;
-    delete: boolean;
-    managePayment: boolean;
-    viewAllBranches: boolean;
-  };
   menu: {
     view: boolean;
     create: boolean;

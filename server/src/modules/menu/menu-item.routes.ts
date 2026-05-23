@@ -28,8 +28,6 @@ router.get('/', menuItemController.getMenuItemsByRestaurant);
 // Get all menu items by category
 router.get('/category/:categoryId', menuItemController.getMenuItemsByCategory);
 
-// Get all menu items by branch
-router.get('/branch/:branchId', menuItemController.getMenuItemsByBranch);
 
 // Get single menu item
 router.get('/:id', menuItemController.getMenuItem);
@@ -49,12 +47,6 @@ router.patch(
   menuItemController.updateAvailability
 );
 
-// Update branch-specific pricing
-router.put(
-  '/:id/branch/:branchId/pricing',
-  ...canManageMenu,
-  menuItemController.updateBranchPricing
-);
 
 // Delete menu item
 router.delete('/:id', ...canManageMenu, menuItemController.deleteMenuItem);

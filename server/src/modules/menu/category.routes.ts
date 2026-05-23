@@ -35,8 +35,6 @@ router.post('/', ...canManageMenu, categoryController.createCategory);
 // Get all categories by restaurant
 router.get('/', categoryController.getCategoriesByRestaurant);
 
-// Get all categories by branch
-router.get('/branch/:branchId', categoryController.getCategoriesByBranch);
 
 // Get single category
 router.get('/:id', categoryController.getCategory);

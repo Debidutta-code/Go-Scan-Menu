@@ -2,7 +2,6 @@
 import { MenuItemRepository } from '../repositories/menu-item.repository';
 import { CategoryRepository } from '../repositories/category.repository';
 import { RestaurantRepository } from '../../restaurant/repositories/restaurant.repository';
-import { BranchRepository } from '@/modules/restaurant/repositories/branch.repository';
 import {
   IMenuItem,
   DietaryType,
@@ -19,13 +18,11 @@ export class MenuItemService {
   private menuItemRepo: MenuItemRepository;
   private categoryRepo: CategoryRepository;
   private restaurantRepo: RestaurantRepository;
-  private branchRepo: BranchRepository;
 
   constructor() {
     this.menuItemRepo = new MenuItemRepository();
     this.categoryRepo = new CategoryRepository();
     this.restaurantRepo = new RestaurantRepository();
-    this.branchRepo = new BranchRepository();
   }
 
   /**
@@ -49,8 +46,6 @@ export class MenuItemService {
       images?: string[];
       price: number;
       discountPrice?: number;
-      scope: 'restaurant' | 'branch';
-      branchId?: string;
       preparationTime?: number;
       calories?: number;
       spiceLevel?: IMenuItem['spiceLevel'];
@@ -77,7 +72,7 @@ export class MenuItemService {
       throw new AppError('Restaurant not found or inactive', 404);
     }
 
-    // Verify category exists and check scope compatibility
+    // Verify category exists
     const category = await this.categoryRepo.findById(data.categoryId);
     if (!category || !category.isActive) {
       throw new AppError('Category not found or inactive', 404);
@@ -86,37 +81,6 @@ export class MenuItemService {
     // Validate item type specific fields
     if (data.itemType === 'food' && !data.dietaryType) {
       throw new AppError('Dietary type is required for food items', 400);
-    }
-
-    // Enforce scope rules
-    if (data.scope === 'branch') {
-      if (!data.branchId) {
-        throw new AppError('Branch ID is required for branch-specific items', 400);
-      }
-
-      // Category must be branch-scoped with same branchId
-      if (category.scope !== 'branch' || category.branchId?.toString() !== data.branchId) {
-        throw new AppError(
-          'Branch-specific items must belong to a branch-specific category in the same branch',
-          400
-        );
-      }
-
-      // Verify branch exists
-      const branch = await this.branchRepo.findByIdAndRestaurant(data.branchId, restaurantId);
-      if (!branch || !branch.isActive) {
-        throw new AppError('Branch not found or inactive', 404);
-      }
-    } else {
-      // Restaurant-scoped items
-      if (category.scope !== 'restaurant') {
-        throw new AppError('Restaurant-wide items must belong to a restaurant-wide category', 400);
-      }
-
-      // Should not have branchId
-      if (data.branchId) {
-        throw new AppError('Restaurant-wide items cannot have a branchId', 400);
-      }
     }
 
     // Get next display order if not provided
@@ -128,7 +92,6 @@ export class MenuItemService {
 
     const menuItemData: Partial<IMenuItem> = {
       restaurantId: new Types.ObjectId(restaurantId),
-      branchId: data.branchId ? new Types.ObjectId(data.branchId) : undefined,
       categoryId: new Types.ObjectId(data.categoryId),
       name: data.name,
       description: data.description,
@@ -136,8 +99,6 @@ export class MenuItemService {
       images: data.images || [],
       price: data.price,
       discountPrice: data.discountPrice,
-      scope: data.scope,
-      branchPricing: [],
       preparationTime: data.preparationTime,
       calories: data.calories,
       spiceLevel: data.spiceLevel,
@@ -192,47 +153,8 @@ export class MenuItemService {
     };
   }
 
-  async getMenuItemsByBranch(
-    branchId: string,
-    filter: any = {},
-    page: number = 1,
-    limit: number = 50
-  ) {
-    const restaurantId = await this.branchRepo.findById(branchId).then((b) => b?.restaurantId.toString());
-
-    const [menuData, categories] = await Promise.all([
-      this.menuItemRepo.findByBranch(branchId, filter, page, limit),
-      restaurantId ? this.categoryRepo.findAllForMenu(restaurantId, branchId) : [],
-    ]);
-
-    return {
-      ...menuData,
-      categories,
-    };
-  }
-
-  async getAllMenuItemsForMenu(restaurantId: string, branchId?: string) {
-    const items = await this.menuItemRepo.findAllForMenu(restaurantId, branchId);
-
-    if (branchId) {
-      return items.map((item: any) => {
-        const branchPrice = item.branchPricing.find(
-          (bp: any) => bp.branchId.toString() === branchId
-        );
-
-        if (branchPrice) {
-          return {
-            ...item.toObject(),
-            price: branchPrice.price,
-            discountPrice: branchPrice.discountPrice,
-            isAvailable: branchPrice.isAvailable,
-          };
-        }
-
-        return item;
-      });
-    }
-
+  async getAllMenuItemsForMenu(restaurantId: string) {
+    const items = await this.menuItemRepo.findAllForMenu(restaurantId);
     return items;
   }
 
@@ -293,52 +215,6 @@ export class MenuItemService {
     return updatedMenuItem;
   }
 
-  async updateBranchPricing(
-    id: string,
-    restaurantId: string,
-    branchId: string,
-    pricing: { price: number; discountPrice?: number; isAvailable: boolean }
-  ): Promise<IMenuItem> {
-    const menuItem = await this.menuItemRepo.findById(id);
-    if (!menuItem || !menuItem.isActive) {
-      throw new AppError('Menu item not found', 404);
-    }
-
-    const itemRestaurantId = this.extractRestaurantId(menuItem.restaurantId);
-    const requestRestaurantId = restaurantId.toString();
-
-    if (itemRestaurantId !== requestRestaurantId) {
-      throw new AppError('Menu item does not belong to this restaurant', 403);
-    }
-
-    if (menuItem.scope !== 'restaurant') {
-      throw new AppError('Only restaurant-wide items can have branch-specific pricing', 400);
-    }
-
-    const branch = await this.branchRepo.findByIdAndRestaurant(branchId, restaurantId);
-    if (!branch || !branch.isActive) {
-      throw new AppError('Branch not found or inactive', 404);
-    }
-
-    if (pricing.price < 0) {
-      throw new AppError('Price cannot be negative', 400);
-    }
-
-    if (pricing.discountPrice !== undefined && pricing.discountPrice < 0) {
-      throw new AppError('Discount price cannot be negative', 400);
-    }
-
-    if (pricing.discountPrice !== undefined && pricing.discountPrice > pricing.price) {
-      throw new AppError('Discount price cannot be higher than regular price', 400);
-    }
-
-    const updatedMenuItem = await this.menuItemRepo.updateBranchPricing(id, branchId, pricing);
-    if (!updatedMenuItem) {
-      throw new AppError('Failed to update branch pricing', 500);
-    }
-
-    return updatedMenuItem;
-  }
 
   async deleteMenuItem(id: string, restaurantId: string): Promise<IMenuItem> {
     const menuItem = await this.menuItemRepo.findById(id);

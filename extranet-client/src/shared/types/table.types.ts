@@ -3,7 +3,6 @@
 export interface Table {
   _id: string;
   restaurantId: string;
-  branchId: string;
   tableNumber: string;
   qrCode: string;
   capacity: number;

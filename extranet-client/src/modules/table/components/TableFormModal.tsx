@@ -12,7 +12,6 @@ type Location = 'indoor' | 'outdoor' | 'balcony' | 'rooftop' | 'private room';
 // ── Create mode props ──────────────────────────────────────────
 interface CreateProps {
   mode: 'create';
-  branchId: string;
   table?: never;
   onClose: () => void;
   onSuccess: () => void;
@@ -22,7 +21,6 @@ interface CreateProps {
 interface EditProps {
   mode: 'edit';
   table: Table;
-  branchId?: never;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -75,7 +73,6 @@ export const TableFormModal: React.FC<TableFormModalProps> = (props) => {
         const response = await TableService.createTable(
           token,
           staff.restaurantId,
-          props.branchId,
           formData
         );
         if (response.success) {

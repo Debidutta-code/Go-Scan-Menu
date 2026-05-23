@@ -7,10 +7,8 @@ import { StaffPermissionsService } from '@/modules/staff/services/staffPermissio
 import { InputField } from '@/shared/components/InputField';
 import { Button } from '@/shared/components/Button';
 import { StaffRole, Role, RoleLevel } from '@/shared/types/role.types';
-import { ArrowLeft, Users, Building2 } from 'lucide-react';
-import { BranchService } from '@/modules/branch/services/branch.service';
-import { Branch } from '@/shared/types/table.types';
-import { SharedDropdown, DropdownOption } from '@/shared/components/SharedDropdown/SharedDropdown';
+import { ArrowLeft, Users } from 'lucide-react';
+import { SharedDropdown } from '@/shared/components/SharedDropdown/SharedDropdown';
 import './AddStaff.css';
 
 export const AddStaff: React.FC = () => {
@@ -28,7 +26,6 @@ export const AddStaff: React.FC = () => {
   });
 
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
-  const [availableBranches, setAvailableBranches] = useState<Branch[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -42,19 +39,10 @@ export const AddStaff: React.FC = () => {
     if (!token || !currentStaff?.restaurantId) return;
     try {
       setFetchLoading(true);
-      const [rolesRes, branchesRes] = await Promise.all([
-        StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId),
-        BranchService.getBranches(currentStaff.restaurantId)
-      ]);
+      const rolesRes = await StaffPermissionsService.getAllRestaurantRoles(token, currentStaff.restaurantId);
 
       if (rolesRes.data) {
         setAvailableRoles(rolesRes.data);
-      }
-      if (branchesRes.data) {
-          const branchData = Array.isArray(branchesRes.data)
-              ? branchesRes.data
-              : (branchesRes.data as any).branches || [];
-          setAvailableBranches(branchData);
       }
     } catch (err: any) {
       setServerError(err.message || 'Failed to fetch initial data');
@@ -308,28 +296,6 @@ export const AddStaff: React.FC = () => {
                     testId="staff-type-select"
                   />
                   {errors.staffType && <p className="error-text">{errors.staffType}</p>}
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Assigned Branch</label>
-                  <SharedDropdown
-                    variant="compact"
-                    value={formData.branchId}
-                    options={[
-                      { value: '', label: 'All Branches / Main' },
-                      ...availableBranches.map(branch => ({
-                        value: branch._id,
-                        label: branch.name
-                      }))
-                    ]}
-                    trigger={{
-                      label: availableBranches.find(b => b._id === formData.branchId)?.name || 'All Branches / Main',
-                      icon: <Building2 size={18} />
-                    }}
-                    onChange={(val) => handleChange('branchId', val)}
-                    loading={fetchLoading}
-                    testId="branch-select"
-                  />
                 </div>
               </div>
               <p className="form-helper-text">

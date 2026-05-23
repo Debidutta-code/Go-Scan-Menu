@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MenuItem, ModifierGroup, ModifierOption } from '@/public-app/types/menu.types';
 import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '@/public-app/utils/formatters';
 import './MenuItemDetail.css';
@@ -7,39 +7,22 @@ interface MenuItemDetailProps {
   item: MenuItem;
   currency: string;
   isOpen: boolean;
-  mode?: 'view' | 'customize';
   onClose: () => void;
-  onAddToCart: (
-    item: MenuItem,
-    quantity: number,
-    selectedModifiers: Array<{
-      groupId: string;
-      groupName: string;
-      options: Array<{
-        optionId: string;
-        name: string;
-        price: number;
-      }>;
-    }>
-  ) => void;
 }
 
 export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
   item,
   currency,
   isOpen,
-  mode = 'view',
   onClose,
-  onAddToCart,
 }) => {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, ModifierOption[]>>({});
   const [selectedVariant, setSelectedVariant] = useState<string>('');
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [selectedCustomizations, setSelectedCustomizations] = useState<Record<string, string>>({});
-  const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Reset state when item or mode changes
+  // Reset state when item changes
   useEffect(() => {
     if (isOpen) {
       setSelectedOptions({});
@@ -47,10 +30,9 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
       setSelectedVariant(defaultVariant);
       setSelectedAddons([]);
       setSelectedCustomizations({});
-      setQuantity(1);
       setCurrentImageIndex(0);
     }
-  }, [item._id, isOpen, mode]);
+  }, [item._id, isOpen]);
 
   const images =
     item.images && item.images.length > 0 ? item.images : item.image ? [item.image] : [];
@@ -86,79 +68,7 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
     });
   };
 
-  const isAddDisabled = useMemo(() => {
-    if (!item.isAvailable) return true;
 
-    const modifierDisabled = (item.modifierGroups || []).some((group) => {
-      const selections = selectedOptions[group._id] || [];
-      return group.isRequired && selections.length < (group.minSelections || 1);
-    });
-
-    const customizationDisabled = (item.customizations || []).some(cust => {
-      return cust.isRequired && !selectedCustomizations[cust._id];
-    });
-
-    const variantDisabled = (item.variants || []).length > 0 && !selectedVariant;
-
-    return modifierDisabled || customizationDisabled || variantDisabled;
-  }, [item.isAvailable, item.modifierGroups, item.customizations, item.variants, selectedOptions, selectedCustomizations, selectedVariant]);
-
-  const handleAddToCart = () => {
-    const modifiers = (item.modifierGroups || []).map((group) => ({
-      groupId: group._id,
-      groupName: group.name,
-      options: (selectedOptions[group._id] || []).map((opt) => ({
-        optionId: opt._id,
-        name: opt.name,
-        price: opt.price,
-      })),
-    })).filter(g => g.options.length > 0);
-
-    // Merge legacy options into modifiers format for consistency if needed,
-    // but the current addItem in CartContext seems to handle any[] for selectedModifiers.
-    // Let's create a combined structure.
-
-    const legacyModifiers: any[] = [];
-
-    if (selectedVariant) {
-        const variant = item.variants?.find(v => v._id === selectedVariant);
-        if (variant) {
-            legacyModifiers.push({
-                groupId: 'variant',
-                groupName: 'Variant',
-                options: [{ optionId: variant._id, name: variant.name, price: variant.price }]
-            });
-        }
-    }
-
-    selectedAddons.forEach(addonId => {
-        const addon = item.addons?.find(a => a._id === addonId);
-        if (addon) {
-            legacyModifiers.push({
-                groupId: 'addon',
-                groupName: 'Addon',
-                options: [{ optionId: addon._id, name: addon.name, price: addon.price }]
-            });
-        }
-    });
-
-    Object.entries(selectedCustomizations).forEach(([custId, option]) => {
-        const cust = item.customizations?.find(c => c._id === custId);
-        if (cust) {
-            legacyModifiers.push({
-                groupId: cust._id,
-                groupName: cust.name,
-                options: [{ optionId: option, name: option, price: 0 }]
-            });
-        }
-    });
-
-    onAddToCart(item, quantity, [...modifiers, ...legacyModifiers]);
-    onClose();
-  };
-
-  const incrementQuantity = () => setQuantity((q) => q + 1);
-  const decrementQuantity = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
 
   const getCurrentPrice = () => {
     let price = item.discountPrice || item.price;
@@ -188,21 +98,18 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
 
   if (!isOpen) return null;
 
-  const isCustomizeMode = mode === 'customize';
-
   return (
     <>
       <div className="menu-item-details-overlay" onClick={onClose}></div>
-      <div className={`menu-item-details-drawer ${isOpen ? 'open' : ''} ${isCustomizeMode ? 'customize-mode' : ''}`}>
+      <div className={`menu-item-details-drawer ${isOpen ? 'open' : ''}`}>
         <div className="menu-item-details-header">
           <button className="menu-item-details-close-btn" onClick={onClose} aria-label="Close">
             ✕
           </button>
-          {isCustomizeMode && <h2 className="menu-item-details-header-title">Customize Item</h2>}
         </div>
 
         <div className="menu-item-details-content">
-          {!isCustomizeMode && images.length > 0 && (
+          {images.length > 0 && (
             <div className="menu-item-details-image-section">
               <img src={images[currentImageIndex]} alt={item.name} className="menu-item-details-image" />
             </div>
@@ -220,7 +127,7 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
               </div>
             </div>
 
-            {!isCustomizeMode && item.description && <p className="menu-item-details-description">{item.description}</p>}
+            {item.description && <p className="menu-item-details-description">{item.description}</p>}
 
             {/* Render Variants */}
             {(item.variants || []).length > 0 && (
@@ -342,23 +249,13 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
         </div>
 
         <div className="menu-item-details-footer">
-          <div className="menu-item-details-quantity-selector">
-            <button className="menu-item-details-quantity-btn" onClick={decrementQuantity}>−</button>
-            <span className="menu-item-details-quantity-value">{quantity}</span>
-            <button className="menu-item-details-quantity-btn" onClick={incrementQuantity}>+</button>
-          </div>
-
-          <button
-            className="menu-item-details-add-to-cart-btn"
-            onClick={handleAddToCart}
-            disabled={isAddDisabled}
-          >
+          <div className="menu-item-details-price-display">
             {item.isAvailable ? (
-              <>Add to Cart • {formatPrice(getCurrentPrice() * quantity, currency)}</>
+              <span className="current-price">Price: {formatPrice(getCurrentPrice(), currency)}</span>
             ) : (
-              'Not Available'
+              <span className="not-available">Not Available</span>
             )}
-          </button>
+          </div>
         </div>
       </div>
     </>

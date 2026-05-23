@@ -201,12 +201,7 @@ export const QRTemplateRenderer: React.FC<QRTemplateRendererProps> = ({
         ? 'Restaurant'
         : (table.restaurantId as any)?.name || 'Restaurant';
 
-    const branchName =
-      typeof table.branchId === 'string'
-        ? restaurantName
-        : (table.branchId as any)?.name || restaurantName;
-
-    ctx.fillText(branchName, centerX, infoY);
+    ctx.fillText(restaurantName, centerX, infoY);
 
     ctx.font = `50px ${template.bodyFont}`;
     ctx.fillText(`Table ${table.tableNumber}`, centerX, infoY + 80);

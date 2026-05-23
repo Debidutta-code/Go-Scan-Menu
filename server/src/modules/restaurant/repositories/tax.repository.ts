@@ -11,7 +11,6 @@ export class TaxRepository {
   async findById(id: string): Promise<ITax | null> {
     return Tax.findById(id)
       .populate('restaurantId')
-      .populate('branchId')
       .populate('parentId')
       .populate('conditions.specificItems')
       .populate('conditions.specificCategories');
@@ -19,13 +18,12 @@ export class TaxRepository {
 
   async findByRestaurant(
     restaurantId: string,
-    scope: 'restaurant' | 'branch' = 'restaurant',
     category?: string,
     page: number = 1,
     limit: number = 100 // Increased default for reordering view
   ) {
     const skip = (page - 1) * limit;
-    const query: any = { restaurantId, scope, isActive: true };
+    const query: any = { restaurantId, isActive: true };
 
     if (category) {
       query.category = category;
@@ -33,7 +31,6 @@ export class TaxRepository {
 
     const [taxes, total] = await Promise.all([
       Tax.find(query)
-        .populate('branchId')
         .populate('parentId')
         .populate('conditions.specificItems')
         .populate('conditions.specificCategories')
@@ -54,48 +51,11 @@ export class TaxRepository {
     };
   }
 
-  async findByBranch(branchId: string, category?: string, page: number = 1, limit: number = 100) {
-    const skip = (page - 1) * limit;
-    const query: any = { branchId, scope: 'branch', isActive: true };
-
-    if (category) {
-      query.category = category;
-    }
-
-    const [taxes, total] = await Promise.all([
-      Tax.find(query)
-        .populate('restaurantId')
-        .populate('branchId')
-        .populate('parentId')
-        .populate('conditions.specificItems')
-        .populate('conditions.specificCategories')
-        .skip(skip)
-        .limit(limit)
-        .sort({ displayOrder: 1, createdAt: 1 }),
-      Tax.countDocuments(query),
-    ]);
-
-    return {
-      taxes,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
-  }
-
-  async findApplicableTaxes(restaurantId: string, branchId?: string) {
+  async findApplicableTaxes(restaurantId: string) {
     const query: any = {
       restaurantId,
       isActive: true,
-      $or: [{ scope: 'restaurant', branchId: { $exists: false } }],
     };
-
-    if (branchId) {
-      query.$or.push({ scope: 'branch', branchId });
-    }
 
     return Tax.find(query)
       .populate('conditions.specificItems')
@@ -106,7 +66,6 @@ export class TaxRepository {
   async update(id: string, data: Partial<ITax>): Promise<ITax | null> {
     return Tax.findByIdAndUpdate(id, data, { new: true })
       .populate('restaurantId')
-      .populate('branchId')
       .populate('parentId')
       .populate('conditions.specificItems')
       .populate('conditions.specificCategories');
@@ -135,9 +94,8 @@ export class TaxRepository {
     }
   }
 
-  async countByRestaurant(restaurantId: string, scope?: 'restaurant' | 'branch'): Promise<number> {
+  async countByRestaurant(restaurantId: string): Promise<number> {
     const query: any = { restaurantId, isActive: true };
-    if (scope) query.scope = scope;
     return Tax.countDocuments(query);
   }
 

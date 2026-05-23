@@ -27,16 +27,6 @@ export enum AccessScope {
 
 // Enhanced Granular Permissions (Industry Standard)
 export interface RolePermissions {
-  // Order Management
-  orders: {
-    view: boolean;
-    create: boolean;
-    update: boolean;
-    delete: boolean;
-    managePayment: boolean;
-    viewAllBranches: boolean;
-  };
-
   // Menu Management
   menu: {
     view: boolean;

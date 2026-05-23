@@ -9,8 +9,6 @@ export interface JWTPayload {
   role: StaffRole;
   roleId?: string;
   restaurantId?: string;
-  branchId?: string;
-  allowedBranchIds?: string[];
   permissions: RolePermissions;
 }
 

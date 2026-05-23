@@ -9,13 +9,11 @@ import './BulkCreateTableModal.css';
 type Location = 'indoor' | 'outdoor' | 'balcony' | 'rooftop' | 'private room';
 
 interface BulkCreateTableModalProps {
-  branchId: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
-  branchId,
   onClose,
   onSuccess,
 }) => {
@@ -55,7 +53,6 @@ export const BulkCreateTableModal: React.FC<BulkCreateTableModalProps> = ({
       const response = await TableService.createBulkTables(
         token,
         staff.restaurantId,
-        branchId,
         formData
       );
       if (response.success) {

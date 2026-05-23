@@ -7,14 +7,12 @@ interface CategorySectionProps {
   category: Category;
   currency: string;
   onItemClick: (item: MenuItem) => void;
-  onAddClick: (item: MenuItem) => void;
 }
 
 export const CategorySection: React.FC<CategorySectionProps> = ({
   category,
   currency,
   onItemClick,
-  onAddClick,
 }) => {
   return (
     <section id={`category-${category._id}`} className="category-section-container">
@@ -32,7 +30,6 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             item={item}
             currency={currency}
             onItemClick={onItemClick}
-            onAddClick={onAddClick}
           />
         ))}
       </div>

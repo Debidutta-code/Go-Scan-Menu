@@ -19,13 +19,12 @@ export const CreateRestaurant: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
-    type: 'single' as 'single' | 'branch-wise' | 'chain',
+    type: 'single' as 'single',
     ownerName: '',
     ownerEmail: '',
     ownerPhone: '',
     ownerPassword: '',
     plan: 'trial' as 'trial' | 'basic' | 'premium' | 'enterprise',
-    maxBranches: 1,
     primaryColor: '#3498db',
     secondaryColor: '#95a5a6',
     accentColor: '#e74c3c',
@@ -39,18 +38,9 @@ export const CreateRestaurant: React.FC = () => {
   const [generalError, setGeneralError] = useState('');
 
   const handleInputChange = (field: keyof typeof formData, value: any) => {
-    // Auto-set max branches based on type
-    let newMaxBranches = formData.maxBranches;
-    if (field === 'type') {
-      if (value === 'single') newMaxBranches = 1;
-      else if (value === 'branch-wise') newMaxBranches = 5;
-      else if (value === 'chain') newMaxBranches = 10;
-    }
-
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-      maxBranches: field === 'type' ? newMaxBranches : prev.maxBranches,
     }));
     // Clear error for this field
     if (errors[field]) {
@@ -97,7 +87,7 @@ export const CreateRestaurant: React.FC = () => {
       },
       subscription: {
         plan: formData.plan,
-        maxBranches: formData.maxBranches,
+        maxBranches: 1,
       },
       theme: {
         primaryColor: formData.primaryColor,
@@ -197,23 +187,6 @@ export const CreateRestaurant: React.FC = () => {
               </button>
             </div>
 
-            <div className="form-field">
-              <label className="field-label">Restaurant Type</label>
-              <select
-                value={formData.type}
-                onChange={(e) =>
-                  handleInputChange('type', e.target.value as 'single' | 'branch-wise' | 'chain')
-                }
-                className="select-input"
-                disabled={loading}
-                data-testid="restaurant-type-select"
-              >
-                <option value="single">Single Restaurant (Outlet)</option>
-                <option value="branch-wise">Branch-wise</option>
-                <option value="chain">Chain</option>
-              </select>
-              {errors['type'] && <span className="field-error">{errors['type']}</span>}
-            </div>
           </div>
         </div>
 
@@ -284,17 +257,6 @@ export const CreateRestaurant: React.FC = () => {
                 <option value="enterprise">Enterprise</option>
               </select>
             </div>
-
-            <InputField
-              label="Maximum Branches"
-              type="number"
-              value={formData.maxBranches}
-              onChange={(e) => handleInputChange('maxBranches', parseInt(e.target.value) || 1)}
-              error={errors['subscription.maxBranches']}
-              disabled={loading}
-              min="1"
-              data-testid="max-branches-input"
-            />
           </div>
         </div>
 

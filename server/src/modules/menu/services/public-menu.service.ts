@@ -1,5 +1,4 @@
 import { RestaurantRepository } from '../../restaurant/repositories/restaurant.repository';
-import { BranchRepository } from '../../restaurant/repositories/branch.repository';
 import { TableRepository } from '../../table/repositories/table.repository';
 import { CategoryRepository } from '../repositories/category.repository';
 import { MenuItemRepository } from '../repositories/menu-item.repository';
@@ -8,14 +7,12 @@ import mongoose from 'mongoose';
 
 export class PublicMenuService {
   private restaurantRepo: RestaurantRepository;
-  private branchRepo: BranchRepository;
   private tableRepo: TableRepository;
   private categoryRepo: CategoryRepository;
   private menuItemRepo: MenuItemRepository;
 
   constructor() {
     this.restaurantRepo = new RestaurantRepository();
-    this.branchRepo = new BranchRepository();
     this.tableRepo = new TableRepository();
     this.categoryRepo = new CategoryRepository();
     this.menuItemRepo = new MenuItemRepository();
@@ -23,44 +20,30 @@ export class PublicMenuService {
 
   /**
    * Get complete menu data when customer scans QR code
-   * Returns everything needed to display menu and start ordering
+   * Returns everything needed to display menu
    */
-  async getCompleteMenuByQrCode(restaurantSlug: string, branchCode: string, qrCode: string) {
+  async getCompleteMenuByQrCode(restaurantSlug: string, qrCode: string) {
     // 1. Get restaurant by slug
     const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
     if (!restaurant || !restaurant.isActive) {
       throw new AppError('Restaurant not found', 404);
     }
 
-    // 2. Get branch by code
-    const branch = await this.branchRepo.findByCodeAndRestaurant(
-      branchCode,
-      restaurant._id.toString()
-    );
-    if (!branch || !branch.isActive) {
-      throw new AppError('Branch not found', 404);
-    }
-
-    // 3. Verify QR code and get table
+    // 2. Verify QR code and get table
     const table = await this.tableRepo.findByQrCode(qrCode);
     if (!table || !table.isActive) {
       throw new AppError('Invalid QR code', 404);
     }
 
-    // Verify table belongs to this branch
-    if (table.branchId._id.toString() !== branch._id.toString()) {
-      throw new AppError('QR code does not belong to this branch', 400);
+    // Verify table belongs to this restaurant
+    if (table.restaurantId.toString() !== restaurant._id.toString()) {
+      throw new AppError('QR code does not belong to this restaurant', 400);
     }
 
-    // Verify branch is accepting orders
-    if (!branch.settings.acceptOrders) {
-      throw new AppError('This branch is currently not accepting orders', 400);
-    }
+    // 3. Get menu (categories + items) grouped by category
+    const menu = await this.getGroupedMenu(restaurant._id.toString());
 
-    // 4. Get menu (categories + items) grouped by category
-    const menu = await this.getGroupedMenu(restaurant._id.toString(), branch._id.toString());
-
-    // 5. Return complete data
+    // 4. Return complete data
     return {
       restaurant: {
         id: restaurant._id,
@@ -70,20 +53,9 @@ export class PublicMenuService {
         theme: restaurant.theme,
         googlePlaceId: restaurant.googlePlaceId,
         googleReviewEnabled: restaurant.googleReviewEnabled,
-      },
-      branch: {
-        id: branch._id,
-        _id: branch._id,
-        name: branch.name,
-        code: branch.code,
-        address: branch.address,
-        phone: branch.phone,
         settings: {
-          currency: branch.settings.currency,
-          minOrderAmount: branch.settings.minOrderAmount,
-          deliveryAvailable: branch.settings.deliveryAvailable,
-          takeawayAvailable: branch.settings.takeawayAvailable,
-        },
+           currency: restaurant.defaultSettings.currency
+        }
       },
       table: {
         id: table._id,
@@ -98,28 +70,19 @@ export class PublicMenuService {
   }
 
   /**
-   * Get menu without specific table (for browsing or takeaway)
+   * Get menu without specific table (for browsing)
    */
-  async getCompleteMenuByBranch(restaurantSlug: string, branchCode: string) {
+  async getCompleteMenuByBranch(restaurantSlug: string) {
     // 1. Get restaurant by slug
     const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
     if (!restaurant || !restaurant.isActive) {
       throw new AppError('Restaurant not found', 404);
     }
 
-    // 2. Get branch by code
-    const branch = await this.branchRepo.findByCodeAndRestaurant(
-      branchCode,
-      restaurant._id.toString()
-    );
-    if (!branch || !branch.isActive) {
-      throw new AppError('Branch not found', 404);
-    }
+    // 2. Get menu
+    const menu = await this.getGroupedMenu(restaurant._id.toString());
 
-    // 3. Get menu
-    const menu = await this.getGroupedMenu(restaurant._id.toString(), branch._id.toString());
-
-    // 4. Return data (without table info)
+    // 3. Return data (without table info)
     return {
       restaurant: {
         id: restaurant._id,
@@ -129,20 +92,9 @@ export class PublicMenuService {
         theme: restaurant.theme,
         googlePlaceId: restaurant.googlePlaceId,
         googleReviewEnabled: restaurant.googleReviewEnabled,
-      },
-      branch: {
-        id: branch._id,
-        _id: branch._id,
-        name: branch.name,
-        code: branch.code,
-        address: branch.address,
-        phone: branch.phone,
         settings: {
-          currency: branch.settings.currency,
-          minOrderAmount: branch.settings.minOrderAmount,
-          deliveryAvailable: branch.settings.deliveryAvailable,
-          takeawayAvailable: branch.settings.takeawayAvailable,
-        },
+           currency: restaurant.defaultSettings.currency
+        }
       },
       menu,
     };
@@ -171,12 +123,12 @@ export class PublicMenuService {
    * Helper: Get menu items grouped by categories
    * Returns structured data ready for frontend display
    */
-  private async getGroupedMenu(restaurantId: string, branchId: string) {
-    // Get all categories for this branch
-    const categories = await this.categoryRepo.findAllForMenu(restaurantId, branchId);
+  private async getGroupedMenu(restaurantId: string) {
+    // Get all categories
+    const categories = await this.categoryRepo.findAllForMenu(restaurantId);
 
-    // Get all menu items for this branch
-    const rawItems = await this.menuItemRepo.findAllForMenu(restaurantId, branchId);
+    // Get all menu items
+    const rawItems = await this.menuItemRepo.findAllForMenu(restaurantId);
 
     // Optimization: Bulk fetch all referenced modifier groups and options to avoid N+1
     const groupIds = new Set<string>();

@@ -51,7 +51,6 @@ export enum DrinkCaffeineContent {
 
 export interface IMenuItem extends Document {
   restaurantId: Types.ObjectId;
-  branchId?: Types.ObjectId;
   categoryId: Types.ObjectId;
   name: string;
   description?: string;
@@ -59,13 +58,6 @@ export interface IMenuItem extends Document {
   images: string[];
   price: number;
   discountPrice?: number;
-  scope: 'restaurant' | 'branch';
-  branchPricing: Array<{
-    branchId: Types.ObjectId;
-    price: number;
-    discountPrice?: number;
-    isAvailable: boolean;
-  }>;
   preparationTime?: number;
   calories?: number;
   spiceLevel?: 'mild' | 'medium' | 'hot' | 'extra_hot';
@@ -124,10 +116,6 @@ const menuItemSchema = new Schema<IMenuItem>(
       ref: 'Restaurant',
       required: true,
     },
-    branchId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Branch',
-    },
     categoryId: {
       type: Schema.Types.ObjectId,
       ref: 'Category',
@@ -161,33 +149,6 @@ const menuItemSchema = new Schema<IMenuItem>(
       type: Number,
       min: 0,
     },
-    scope: {
-      type: String,
-      enum: ['restaurant', 'branch'],
-      default: 'restaurant',
-    },
-    branchPricing: [
-      {
-        branchId: {
-          type: Schema.Types.ObjectId,
-          ref: 'Branch',
-          required: true,
-        },
-        price: {
-          type: Number,
-          required: true,
-          min: 0,
-        },
-        discountPrice: {
-          type: Number,
-          min: 0,
-        },
-        isAvailable: {
-          type: Boolean,
-          default: true,
-        },
-      },
-    ],
     preparationTime: {
       type: Number,
       min: 0,
@@ -352,24 +313,11 @@ const menuItemSchema = new Schema<IMenuItem>(
 );
 
 // Indexes
-menuItemSchema.index({ restaurantId: 1, categoryId: 1, scope: 1, isActive: 1 });
-menuItemSchema.index({ branchId: 1, isAvailable: 1 });
+menuItemSchema.index({ restaurantId: 1, categoryId: 1, isActive: 1 });
 
-// Validation: Ensure scope consistency and pricing logic
+// Validation: Ensure consistency and pricing logic
 menuItemSchema.pre('save', async function (this: IMenuItem) {
   const item = this;
-
-  if (item.scope === 'branch' && !item.branchId) {
-    throw new Error('Branch-scoped menu items must have a branchId');
-  }
-
-  if (item.scope === 'restaurant' && item.branchId) {
-    throw new Error('Restaurant-scoped menu items cannot have a branchId');
-  }
-
-  if (item.scope === 'branch' && item.branchPricing?.length) {
-    throw new Error('Branch-scoped items should not have branchPricing array');
-  }
 
   // Validate item type specific fields
   if (item.itemType === 'food') {
@@ -386,25 +334,12 @@ menuItemSchema.pre('save', async function (this: IMenuItem) {
     item.spiceLevel = undefined;
   }
 
-  if (item.isModified('categoryId') || item.isModified('scope') || item.isNew) {
+  if (item.isModified('categoryId') || item.isNew) {
     const Category = mongoose.model('Category');
     const category: any = await Category.findById(item.categoryId);
 
     if (!category) {
       throw new Error('Category not found');
-    }
-
-    if (
-      item.scope === 'branch' &&
-      (category.scope !== 'branch' || category.branchId?.toString() !== item.branchId?.toString())
-    ) {
-      throw new Error(
-        'Branch-scoped items must belong to a branch-scoped category in the same branch'
-      );
-    }
-
-    if (item.scope === 'restaurant' && category.scope !== 'restaurant') {
-      throw new Error('Restaurant-scoped items must belong to a restaurant-scoped category');
     }
   }
 });

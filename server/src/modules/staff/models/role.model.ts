@@ -56,14 +56,6 @@ const roleSchema = new Schema<IRole>(
       default: null, // null means system-wide role
     },
     permissions: {
-      orders: {
-        view: { type: Boolean, default: false },
-        create: { type: Boolean, default: false },
-        update: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-        managePayment: { type: Boolean, default: false },
-        viewAllBranches: { type: Boolean, default: false },
-      },
       menu: {
         view: { type: Boolean, default: false },
         create: { type: Boolean, default: false },

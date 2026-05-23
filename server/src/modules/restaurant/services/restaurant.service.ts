@@ -2,7 +2,6 @@
 import { RestaurantRepository } from '../repositories/restaurant.repository';
 import { StaffRepository } from '@/modules/staff/repositories/staff.repository';
 import { RoleRepository } from '@/modules/staff/repositories/role.repository';
-import { BranchRepository } from '../repositories/branch.repository';
 import { IRestaurant } from '../models/restaurant.model';
 import { BcryptUtil } from '@/utils';
 import { AppError } from '@/utils/AppError';
@@ -15,20 +14,18 @@ export class RestaurantService {
   private staffRepo: StaffRepository;
   private taxRepo: TaxRepository;
   private roleRepo: RoleRepository;
-  private branchRepo: BranchRepository;
 
   constructor() {
     this.restaurantRepo = new RestaurantRepository();
     this.staffRepo = new StaffRepository();
     this.taxRepo = new TaxRepository();
     this.roleRepo = new RoleRepository();
-    this.branchRepo = new BranchRepository();
   }
 
   async createRestaurant(data: {
     name: string;
     slug: string;
-    type: 'single' | 'branch-wise' | 'chain';
+    type: 'single';
     owner: {
       name: string;
       email: string;
@@ -71,8 +68,6 @@ export class RestaurantService {
         startDate,
         endDate,
         isActive: true,
-        maxBranches: data.type === 'single' ? 1 : data.type === 'branch-wise' ? 5 : 10,
-        currentBranches: 0,
         ...data.subscription,
       },
       theme: { ...defaultTheme, ...data.theme }, // ← Merge
@@ -96,7 +91,6 @@ export class RestaurantService {
       email: data.owner.email,
       phone: data.owner.phone,
       password: hashedPassword,
-      allowedBranchIds: [],
       isActive: true,
     });
 
@@ -104,61 +98,6 @@ export class RestaurantService {
     await this.restaurantRepo.update(restaurant._id.toString(), {
       ownerId: ownerStaff._id,
     });
-
-    // AUTO-CREATE MAIN BRANCH for all restaurants
-    try {
-      const defaultBranch = await this.branchRepo.create({
-        restaurantId: restaurant._id,
-        name: `${data.name} - Main Branch`,
-        code: 'MAIN',
-        email: data.owner.email,
-        phone: data.owner.phone,
-        address: {
-          street: 'Main Street',
-          city: 'City',
-          state: 'State',
-          zipCode: '00000',
-          country: 'Country',
-          coordinates: {
-            latitude: 0,
-            longitude: 0,
-          },
-        },
-        settings: {
-          currency: restaurantData.defaultSettings?.currency || 'USD',
-          taxIds: [],
-          serviceChargePercentage: restaurantData.defaultSettings?.serviceChargePercentage || 0,
-          acceptOrders: true,
-          operatingHours: [
-            { day: 'monday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'tuesday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'wednesday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'thursday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'friday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'saturday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-            { day: 'sunday', isOpen: true, openTime: '09:00', closeTime: '22:00' },
-          ],
-          minOrderAmount: 0,
-          deliveryAvailable: false,
-          takeawayAvailable: true,
-        },
-        isMain: true,
-        isActive: true,
-      });
-
-      // Update restaurant's currentBranches count
-      await this.restaurantRepo.update(restaurant._id.toString(), {
-        subscription: {
-          ...restaurant.subscription,
-          currentBranches: 1,
-        },
-      });
-
-      console.log(`✅ Auto-created main branch for restaurant: ${defaultBranch.name}`);
-    } catch (error) {
-      console.error('⚠️  Failed to auto-create main branch:', error);
-      // Don't throw error - restaurant is already created
-    }
 
     return { restaurant, ownerStaff };
   }
