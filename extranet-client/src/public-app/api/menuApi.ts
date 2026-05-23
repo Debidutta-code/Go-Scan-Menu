@@ -4,12 +4,11 @@ import { MenuResponse } from '@/public-app/types/menu.types';
 export const menuApi = {
   getMenu: async (
     restaurantSlug: string,
-    branchCode: string,
     qrCode?: string
   ): Promise<MenuResponse> => {
     const endpoint = qrCode
-      ? `/public/menu/${restaurantSlug}/${branchCode}/${qrCode}`
-      : `/public/menu/${restaurantSlug}/${branchCode}`;
+      ? `/public/menu/${restaurantSlug}/${qrCode}`
+      : `/public/menu/${restaurantSlug}`;
 
     const response = await axiosInstance.get(endpoint);
     return response.data;
