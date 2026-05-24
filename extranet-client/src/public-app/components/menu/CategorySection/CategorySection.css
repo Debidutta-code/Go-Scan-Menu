@@ -1,6 +1,9 @@
 .category-section-container {
   margin-bottom: 2.5rem;
   scroll-margin-top: 80px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+  contain: paint;
 }
 
 .category-section-header {

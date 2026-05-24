@@ -27,6 +27,9 @@
   flex-direction: column;
   overscroll-behavior-y: contain;
   /* Allow internal scroll but contain it */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 .game-back-button {

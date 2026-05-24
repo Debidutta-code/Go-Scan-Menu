@@ -43,7 +43,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
       className={`menu-item-card-horizontal ${!item.isAvailable ? 'unavailable' : ''}`}
       onClick={() => onItemClick(item)}
     >
-      <div className="menu-item-card-image-wrapper">
+      <div className={`menu-item-card-image-wrapper ${!imageLoaded && item.image ? 'skeleton' : ''}`}>
         {item.image ? (
           <img
             src={item.image}
@@ -76,39 +76,53 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
       <div className="menu-item-card-info-horizontal">
         <div className="menu-item-card-top-row">
           <div className="menu-item-card-text-content">
-            <h3 className="menu-item-card-name-horizontal">{item.name}</h3>
-            {item.description && (
-              <p className="menu-item-card-description-horizontal">
-                {item.description}
-              </p>
-            )}
+            {!imageLoaded && item.image ? (
+              <>
+                <div className="skeleton skeleton-text skeleton-name" />
+                <div className="skeleton skeleton-text skeleton-desc" />
+                <div className="skeleton skeleton-text skeleton-desc" style={{ width: '70%' }} />
+              </>
+            ) : (
+              <>
+                <h3 className="menu-item-card-name-horizontal">{item.name}</h3>
+                {item.description && (
+                  <p className="menu-item-card-description-horizontal">
+                    {item.description}
+                  </p>
+                )}
 
-            <div className="menu-item-card-meta-horizontal">
-              {item.preparationTime && (
-                <span className="menu-item-card-meta-badge">
-                  ⏱️ {item.preparationTime}min
-                </span>
-              )}
-              {item.calories && (
-                <span className="menu-item-card-meta-badge">
-                  {item.calories} cal
-                </span>
-              )}
-              {item.spiceLevel && (
-                <span className="menu-item-card-meta-badge">
-                  {getSpiceLevelEmoji(item.spiceLevel)}
-                </span>
-              )}
-            </div>
+                <div className="menu-item-card-meta-horizontal">
+                  {item.preparationTime && (
+                    <span className="menu-item-card-meta-badge">
+                      ⏱️ {item.preparationTime}min
+                    </span>
+                  )}
+                  {item.calories && (
+                    <span className="menu-item-card-meta-badge">
+                      {item.calories} cal
+                    </span>
+                  )}
+                  {item.spiceLevel && (
+                    <span className="menu-item-card-meta-badge">
+                      {getSpiceLevelEmoji(item.spiceLevel)}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
         <div className="menu-item-card-bottom-row">
           <div className="menu-item-card-price-horizontal">
-            <span className="menu-item-card-current-price-horizontal">
-              {hasMultiplePrices && <span className="price-from" style={{ fontSize: '0.8em', opacity: 0.8 }}>from </span>}
-              {formatPrice(minPrice, currency)}
-            </span>
+            {!imageLoaded && item.image ? (
+              <div className="skeleton skeleton-price" />
+            ) : (
+              <span className="menu-item-card-current-price-horizontal">
+                {hasMultiplePrices && <span className="price-from" style={{ fontSize: '0.8em', opacity: 0.8 }}>from </span>}
+                {formatPrice(minPrice, currency)}
+              </span>
+            )}
           </div>
         </div>
       </div>
