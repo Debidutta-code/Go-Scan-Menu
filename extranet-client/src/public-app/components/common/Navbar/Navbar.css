@@ -1,8 +1,7 @@
 .pub-nav-container {
   background-color: var(--white);
   border-bottom: 1px solid #e2e8f0;
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 100;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }

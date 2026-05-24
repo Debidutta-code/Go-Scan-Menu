@@ -1,13 +1,12 @@
 .public-category-filter-container {
   background-color: hsl(0, 0%, 100%);
-  position: fixed;
-  top: 68px;
+  position: sticky;
+  top: 0;
   z-index: 90;
   padding: 0rem 0;
   margin: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   width: 100%;
-  /* margin-bottom: 100px; */
 }
 
 .public-category-filter-scroll {
@@ -88,7 +87,7 @@
 
 @media (max-width: 768px) {
   .public-category-filter-container {
-    top: 57px; /* Matches mobile navbar height */
+    top: 0;
   }
 
   .public-category-filter-icon {

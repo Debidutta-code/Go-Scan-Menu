@@ -12,7 +12,12 @@ export const CategoryGrid: React.FC<CategoryGridProps> = React.memo(({
   categories,
   onCategoryClick,
 }) => {
+  const [loadedImages, setLoadedImages] = React.useState<Record<string, boolean>>({});
   const pattern = useMemo(() => generateCategoryMasonryPattern(categories.length), [categories.length]);
+
+  const handleImageLoad = (id: string) => {
+    setLoadedImages(prev => ({ ...prev, [id]: true }));
+  };
 
   return (
     <div className="public-category-grid-section">
@@ -29,9 +34,10 @@ export const CategoryGrid: React.FC<CategoryGridProps> = React.memo(({
               <img
                 src={category.image}
                 alt={category.name}
-                className="public-category-grid-card-image"
+                className={`public-category-grid-card-image ${!loadedImages[category._id] ? 'loading' : ''}`}
                 loading="lazy"
                 decoding="async"
+                onLoad={() => handleImageLoad(category._id)}
               />
             ) : (
               <div className="public-category-grid-card-placeholder">

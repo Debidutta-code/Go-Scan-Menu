@@ -14,6 +14,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
   currency,
   onItemClick,
 }) => {
+  const [imageLoaded, setImageLoaded] = React.useState(false);
   const minPrice = useMemo(() => {
     let price = item.discountPrice || item.price;
 
@@ -46,11 +47,12 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
           <img
             src={item.image}
             alt={item.name}
-            className="menu-item-card-image-horizontal"
+            className={`menu-item-card-image-horizontal ${!imageLoaded ? 'loading' : ''}`}
             loading="lazy"
             decoding="async"
             width="100"
             height="100"
+            onLoad={() => setImageLoaded(true)}
           />
         ) : (
           <div className="menu-item-card-image-placeholder-horizontal">

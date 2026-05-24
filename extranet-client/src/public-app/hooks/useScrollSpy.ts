@@ -25,7 +25,10 @@ export const useScrollSpy = (ids: string[], offset: number = 0) => {
         // Find the first ID in the ordered 'ids' array that is currently intersecting
         const firstIntersectingId = ids.find((id) => intersectingIds.current.has(id));
         if (firstIntersectingId && firstIntersectingId !== activeId) {
-          setActiveId(firstIntersectingId);
+          // Use requestAnimationFrame to avoid layout thrashing during scroll
+          window.requestAnimationFrame(() => {
+            setActiveId(firstIntersectingId);
+          });
         }
       },
       {
