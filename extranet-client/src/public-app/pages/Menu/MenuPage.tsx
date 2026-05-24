@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { CategoryFilter } from '@/public-app/components/menu/CategoryFilter/CategoryFilter';
 import { CategoryGrid } from '@/public-app/components/menu/CategoryGrid/CategoryGrid';
 import { CategorySection } from '@/public-app/components/menu/CategorySection/CategorySection';
@@ -13,7 +13,6 @@ export const MenuPage: React.FC = () => {
   const { menuData } = usePublicApp();
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES_ID);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const spyIds = useMemo(
     () => [ALL_CATEGORIES_ID, ...menuData.menu.map((cat) => `category-${cat._id}`)],
@@ -61,7 +60,7 @@ export const MenuPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="wrapper-menu-page" ref={scrollContainerRef}>
+    <div className="wrapper-menu-page">
       <CategoryFilter
         categories={menuData.menu}
         activeCategory={activeCategory}

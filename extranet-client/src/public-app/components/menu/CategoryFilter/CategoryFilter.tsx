@@ -18,9 +18,20 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
 
   useEffect(() => {
     if (scrollContainerRef.current) {
-      const activeButton = scrollContainerRef.current.querySelector('.public-category-filter-btn.active');
+      const container = scrollContainerRef.current;
+      const activeButton = container.querySelector('.public-category-filter-btn.active') as HTMLElement;
+
       if (activeButton) {
-        activeButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const containerWidth = container.offsetWidth;
+        const buttonOffsetLeft = activeButton.offsetLeft;
+        const buttonWidth = activeButton.offsetWidth;
+
+        const scrollTarget = buttonOffsetLeft - (containerWidth / 2) + (buttonWidth / 2);
+
+        container.scrollTo({
+          left: scrollTarget,
+          behavior: 'smooth'
+        });
       }
     }
   }, [activeCategory]);

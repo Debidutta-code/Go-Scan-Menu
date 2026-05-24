@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 export const useScrollSpy = (ids: string[], offset: number = 0) => {
   const [activeId, setActiveId] = useState<string>('');
   const observer = useRef<IntersectionObserver | null>(null);
+  const intersectingIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (observer.current) {
@@ -15,14 +16,17 @@ export const useScrollSpy = (ids: string[], offset: number = 0) => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveId((currentId) => {
-              if (currentId !== entry.target.id) {
-                return entry.target.id;
-              }
-              return currentId;
-            });
+            intersectingIds.current.add(entry.target.id);
+          } else {
+            intersectingIds.current.delete(entry.target.id);
           }
         });
+
+        // Find the first ID in the ordered 'ids' array that is currently intersecting
+        const firstIntersectingId = ids.find((id) => intersectingIds.current.has(id));
+        if (firstIntersectingId) {
+          setActiveId(firstIntersectingId);
+        }
       },
       {
         root: root,
