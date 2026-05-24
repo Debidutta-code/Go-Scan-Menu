@@ -4,8 +4,8 @@
   padding: 1rem 1rem;
   background-color: var(--white);
   position: relative;
-  top: 80px;
-  overflow-y: auto;
+  margin-top: 80px;
+  /* Remove overflow-y: auto to prevent nested scroll performance issues */
 }
 
 .wrapper-menu-page {

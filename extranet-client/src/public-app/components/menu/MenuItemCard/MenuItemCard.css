@@ -27,9 +27,10 @@
   flex-shrink: 0;
   width: 100px;
   height: 100px;
+  aspect-ratio: 1 / 1;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  background-color: #f7fafc;
+  background-color: #edf2f7;
 }
 
 .menu-item-card-image-horizontal {

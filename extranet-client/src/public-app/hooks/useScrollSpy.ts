@@ -9,15 +9,23 @@ export const useScrollSpy = (ids: string[], offset: number = 0) => {
       observer.current.disconnect();
     }
 
+    const root = document.querySelector('.public-main');
+
     observer.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
+            setActiveId((currentId) => {
+              if (currentId !== entry.target.id) {
+                return entry.target.id;
+              }
+              return currentId;
+            });
           }
         });
       },
       {
+        root: root,
         rootMargin: `-${offset}px 0px -70% 0px`,
         threshold: 0,
       }

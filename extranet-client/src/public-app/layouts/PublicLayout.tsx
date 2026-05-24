@@ -6,7 +6,6 @@ import { Loading } from '@/public-app/components/common/Loading/Loading';
 import { Error } from '@/public-app/components/common/Error/Error';
 import { useMenu } from '../hooks/useMenu';
 import { PublicAppProvider } from '../contexts/PublicAppContext';
-import { CartProvider, useCart } from '../contexts/CartContext';
 import { ChevronLeft } from 'lucide-react';
 import './PublicLayout.css';
 
@@ -47,33 +46,6 @@ export const PublicLayout: React.FC = () => {
     document.documentElement.style.height = '100dvh';
     document.documentElement.style.overscrollBehavior = 'none';
 
-    // Prevent default touchmove behavior globally to stop "bounce" effect
-    const preventDefault = (e: TouchEvent) => {
-      // Find the scroller (public-main)
-      const target = e.target as HTMLElement;
-      const scroller = target.closest('.public-main');
-
-      if (!scroller) {
-        // If we're not touching a scroller, prevent scrolling
-        if (e.cancelable) e.preventDefault();
-        return;
-      }
-
-      // If we are in a scroller, we only want to prevent if we're at the edges
-      // and trying to scroll further (which causes the bounce)
-      const { scrollTop, scrollHeight, clientHeight } = scroller;
-      const isAtTop = scrollTop <= 0;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight;
-
-      // This is a bit simplified, but blocks the bounce effectively
-      // if (isAtTop || isAtBottom) {
-      //   if (e.cancelable) e.preventDefault();
-      // }
-    };
-
-    // Use passive: false to allow preventDefault
-    window.addEventListener('touchmove', preventDefault, { passive: false });
-
     return () => {
       // Restore original styles
       document.body.style.overflow = originalStyles.overflow;
@@ -83,8 +55,6 @@ export const PublicLayout: React.FC = () => {
       document.documentElement.style.overflow = originalStyles.htmlOverflow;
       document.documentElement.style.height = originalStyles.htmlHeight;
       document.documentElement.style.overscrollBehavior = originalStyles.htmlOverscrollBehavior;
-
-      window.removeEventListener('touchmove', preventDefault);
     };
   }, []);
 
