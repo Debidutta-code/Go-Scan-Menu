@@ -91,6 +91,9 @@ export interface Restaurant {
   logo?: string;
   googlePlaceId?: string;
   googleReviewEnabled?: boolean;
+  settings?: {
+    currency: string;
+  };
 }
 
 export interface Address {
@@ -133,7 +136,6 @@ export interface Table {
 
 export interface MenuData {
   restaurant: Restaurant;
-  branch: Branch;
   table?: Table;
   menu: Category[];
 }

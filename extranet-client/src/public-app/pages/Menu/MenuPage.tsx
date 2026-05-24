@@ -52,7 +52,7 @@ export const MenuPage: React.FC = () => {
             <CategorySection
               key={category._id}
               category={category}
-              currency={menuData.branch.settings.currency}
+              currency={menuData.restaurant.settings?.currency || 'USD'}
               onItemClick={handleItemClick}
             />
           ))
@@ -62,7 +62,7 @@ export const MenuPage: React.FC = () => {
       {selectedItem && (
         <MenuItemDetail
           item={selectedItem}
-          currency={menuData.branch.settings.currency}
+          currency={menuData.restaurant.settings?.currency || 'USD'}
           isOpen={!!selectedItem}
           onClose={() => setSelectedItem(null)}
         />
