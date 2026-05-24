@@ -37,24 +37,23 @@ export const MenuPage: React.FC = () => {
   const handleCategoryChange = useCallback((categoryId: string) => {
     setActiveCategory(categoryId);
 
-    // Find the actual scrollable container (from PublicLayout)
     const scroller = document.querySelector('.public-main');
+    if (!scroller) return;
 
     if (categoryId === ALL_CATEGORIES_ID) {
-      if (scroller) {
-        scroller.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+      scroller.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       const element = document.getElementById(`category-${categoryId}`);
       if (element) {
-        const offsetPosition = element.offsetTop - SCROLL_OFFSET;
-        if (scroller) {
-          scroller.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-        } else {
-          window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-        }
+        const scrollerRect = scroller.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+        const relativeTop = elementRect.top - scrollerRect.top;
+        const scrollTarget = scroller.scrollTop + relativeTop - SCROLL_OFFSET;
+
+        scroller.scrollTo({
+          top: scrollTarget,
+          behavior: 'smooth'
+        });
       }
     }
   }, []);
@@ -68,6 +67,7 @@ export const MenuPage: React.FC = () => {
       />
 
       <div className="menu-page-content">
+        {/* Always render everything to avoid re-mounting flickers */}
         <div id={ALL_CATEGORIES_ID}>
           <CategoryGrid
             categories={menuData.menu}

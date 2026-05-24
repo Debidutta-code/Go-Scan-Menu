@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Category } from '@/public-app/types/menu.types';
 import { generateCategoryMasonryPattern } from '@/public-app/utils/categoryMasonryPattern';
 import './CategoryGrid.css';
@@ -8,11 +8,11 @@ interface CategoryGridProps {
   onCategoryClick: (categoryId: string) => void;
 }
 
-export const CategoryGrid: React.FC<CategoryGridProps> = ({
+export const CategoryGrid: React.FC<CategoryGridProps> = React.memo(({
   categories,
   onCategoryClick,
 }) => {
-  const pattern = generateCategoryMasonryPattern(categories.length);
+  const pattern = useMemo(() => generateCategoryMasonryPattern(categories.length), [categories.length]);
 
   return (
     <div className="public-category-grid-section">
@@ -30,6 +30,8 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
                 src={category.image}
                 alt={category.name}
                 className="public-category-grid-card-image"
+                loading="lazy"
+                decoding="async"
               />
             ) : (
               <div className="public-category-grid-card-placeholder">
@@ -49,4 +51,4 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
       </div>
     </div>
   );
-};
+});

@@ -24,14 +24,14 @@ export const useScrollSpy = (ids: string[], offset: number = 0) => {
 
         // Find the first ID in the ordered 'ids' array that is currently intersecting
         const firstIntersectingId = ids.find((id) => intersectingIds.current.has(id));
-        if (firstIntersectingId) {
+        if (firstIntersectingId && firstIntersectingId !== activeId) {
           setActiveId(firstIntersectingId);
         }
       },
       {
         root: root,
         rootMargin: `-${offset}px 0px -70% 0px`,
-        threshold: 0,
+        threshold: [0, 0.1],
       }
     );
 

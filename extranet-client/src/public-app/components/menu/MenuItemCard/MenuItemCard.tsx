@@ -49,6 +49,8 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
             className="menu-item-card-image-horizontal"
             loading="lazy"
             decoding="async"
+            width="100"
+            height="100"
           />
         ) : (
           <div className="menu-item-card-image-placeholder-horizontal">

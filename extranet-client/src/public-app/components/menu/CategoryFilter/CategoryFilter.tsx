@@ -9,7 +9,7 @@ interface CategoryFilterProps {
   onCategoryChange: (categoryId: string) => void;
 }
 
-export const CategoryFilter: React.FC<CategoryFilterProps> = ({
+export const CategoryFilter: React.FC<CategoryFilterProps> = React.memo(({
   categories,
   activeCategory,
   onCategoryChange,
@@ -72,4 +72,4 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
       </div>
     </div>
   );
-};
+});
