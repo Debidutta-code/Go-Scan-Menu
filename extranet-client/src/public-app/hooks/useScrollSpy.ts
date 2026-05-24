@@ -24,8 +24,10 @@ export const useScrollSpy = (ids: string[], offset: number = 0) => {
 
         // Find the first ID in the ordered 'ids' array that is currently intersecting
         const firstIntersectingId = ids.find((id) => intersectingIds.current.has(id));
+
+        // Ensure we always have an active ID, defaulting to the first one if none are intersecting
+        // or keeping the last known if we are between sections
         if (firstIntersectingId && firstIntersectingId !== activeId) {
-          // Use requestAnimationFrame to avoid layout thrashing during scroll
           window.requestAnimationFrame(() => {
             setActiveId(firstIntersectingId);
           });

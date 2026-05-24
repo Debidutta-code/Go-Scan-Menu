@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { MenuItem } from '@/public-app/types/menu.types';
 import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '@/public-app/utils/formatters';
+import { isImageCached, markImageAsCached } from '@/public-app/utils/image-cache';
 import './MenuItemCard.css';
 
 interface MenuItemCardProps {
@@ -14,7 +15,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
   currency,
   onItemClick,
 }) => {
-  const [imageLoaded, setImageLoaded] = React.useState(false);
+  const [imageLoaded, setImageLoaded] = React.useState(item.image ? isImageCached(item.image) : false);
   const minPrice = useMemo(() => {
     let price = item.discountPrice || item.price;
 
@@ -52,7 +53,10 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
             decoding="async"
             width="100"
             height="100"
-            onLoad={() => setImageLoaded(true)}
+            onLoad={() => {
+              if (item.image) markImageAsCached(item.image);
+              setImageLoaded(true);
+            }}
           />
         ) : (
           <div className="menu-item-card-image-placeholder-horizontal">

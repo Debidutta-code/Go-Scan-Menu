@@ -45,6 +45,7 @@ export const MenuPage: React.FC = () => {
     } else {
       const element = document.getElementById(`category-${categoryId}`);
       if (element) {
+        // We use scroll-margin-top in CSS, so scrollTo should just work with offset
         const scrollerRect = scroller.getBoundingClientRect();
         const elementRect = element.getBoundingClientRect();
         const relativeTop = elementRect.top - scrollerRect.top;
