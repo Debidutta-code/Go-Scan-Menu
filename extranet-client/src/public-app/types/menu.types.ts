@@ -43,6 +43,7 @@ export interface ModifierGroup {
   id: string;
   name: string;
   description?: string;
+  type: 'modifier' | 'size';
   minSelections: number;
   maxSelections: number;
   isRequired: boolean;

@@ -357,14 +357,73 @@ export const AddEditMenuItem: React.FC = () => {
               <InputField label="Discount Price" type="number" name="discountPrice" value={formData.discountPrice} onChange={handleChange} disabled={loading} step="0.01" />
             </div>
 
+            {/* Sizes Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Available Sizes</h3>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <select className="form-select" style={{ width: 'auto' }} onChange={(e) => { if (e.target.value) { addModifierGroup(e.target.value); e.target.value = ''; } }}>
+                        <option value="">Link Size Group...</option>
+                        {globalModifierGroups.filter(g => g.type === 'size' && !selectedModifierGroups.find(sg => sg.groupId === g._id)).map(g => (
+                            <option key={g._id} value={g._id}>{g.name}</option>
+                        ))}
+                    </select>
+                </div>
+              </div>
+              <div className="linked-modifier-groups">
+                {selectedModifierGroups.filter(mg => globalModifierGroups.find(g => g._id === mg.groupId)?.type === 'size').map((mg) => {
+                    const groupIndex = selectedModifierGroups.findIndex(s => s.groupId === mg.groupId);
+                    const globalGroup = globalModifierGroups.find(g => g._id === mg.groupId);
+                    if (!globalGroup) return null;
+                    return (
+                        <div key={mg.groupId} className="modifier-group-edit-card">
+                            <div className="modifier-group-header">
+                                <h4>{globalGroup.name}</h4>
+                                <Button variant="ghost" onClick={() => removeModifierGroup(groupIndex)}>Remove</Button>
+                            </div>
+                            <div className="option-overrides-list">
+                                {(globalGroup.options as ModifierOption[]).map(option => {
+                                    const override = mg.overrides.find((o: any) => o.optionId === option._id);
+                                    return (
+                                        <div key={option._id} className="option-override-row">
+                                            <div className="option-name-info">
+                                                <span className="option-name">{option.name}</span>
+                                            </div>
+                                            <div className="override-inputs">
+                                                <div className="price-override-wrap">
+                                                    <span className="input-prefix">$</span>
+                                                    <input
+                                                        type="number"
+                                                        placeholder={option.price.toString()}
+                                                        value={override?.price || ''}
+                                                        onChange={(e) => updateOptionOverride(groupIndex, option._id, 'price', e.target.value)}
+                                                        className="form-input small override-input"
+                                                        step="0.01"
+                                                    />
+                                                </div>
+                                                <label className="switch" title="Available for this item">
+                                                    <input type="checkbox" checked={override?.isAvailable !== undefined ? override.isAvailable : option.isAvailable} onChange={(e) => updateOptionOverride(groupIndex, option._id, 'isAvailable', e.target.checked)} />
+                                                    <span className="slider round"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    );
+                })}
+              </div>
+            </div>
+
             {/* Modifiers Section */}
             <div className="form-section">
               <div className="section-header">
-                <h3 className="section-title">Modifiers (Toppings, Sizes, etc.)</h3>
+                <h3 className="section-title">Modifiers (Toppings, Addons, etc.)</h3>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <select className="form-select" style={{ width: 'auto' }} onChange={(e) => { if (e.target.value) { addModifierGroup(e.target.value); e.target.value = ''; } }}>
-                        <option value="">Link Existing Group...</option>
-                        {globalModifierGroups.filter(g => !selectedModifierGroups.find(sg => sg.groupId === g._id)).map(g => (
+                        <option value="">Link Modifier Group...</option>
+                        {globalModifierGroups.filter(g => g.type !== 'size' && !selectedModifierGroups.find(sg => sg.groupId === g._id)).map(g => (
                             <option key={g._id} value={g._id}>{g.name}</option>
                         ))}
                     </select>
@@ -373,12 +432,16 @@ export const AddEditMenuItem: React.FC = () => {
                 </div>
               </div>
               <div className="linked-modifier-groups">
-                {selectedModifierGroups.map((mg, groupIndex) => {
+                {selectedModifierGroups.filter(mg => globalModifierGroups.find(g => g._id === mg.groupId)?.type !== 'size').map((mg) => {
+                    const groupIndex = selectedModifierGroups.findIndex(s => s.groupId === mg.groupId);
                     const globalGroup = globalModifierGroups.find(g => g._id === mg.groupId);
                     if (!globalGroup) return null;
                     return (
                         <div key={mg.groupId} className="modifier-group-edit-card">
-                            <div className="modifier-group-header"><h4>{globalGroup.name}</h4><Button variant="ghost" onClick={() => removeModifierGroup(groupIndex)}>Remove</Button></div>
+                            <div className="modifier-group-header">
+                                <h4>{globalGroup.name}</h4>
+                                <Button variant="ghost" onClick={() => removeModifierGroup(groupIndex)}>Remove</Button>
+                            </div>
                             <div className="modifier-group-settings" style={{ borderBottom: '1px solid var(--gray-100)', paddingBottom: '12px', marginBottom: '12px' }}>
                                 <div style={{ display: 'flex', gap: '20px' }}>
                                     <label className="checkbox-label-inline">
@@ -398,34 +461,6 @@ export const AddEditMenuItem: React.FC = () => {
                                         <span>Allow Multi-select</span>
                                     </label>
                                 </div>
-
-                                {mg.isMultiSelect && (
-                                    <div style={{ display: 'flex', gap: '12px', marginTop: '12px', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <span style={{ fontSize: '12px', color: 'var(--gray-600)' }}>Min:</span>
-                                            <input
-                                                type="number"
-                                                className="form-input small"
-                                                value={mg.minSelections || 0}
-                                                onChange={(e) => {
-                                                    const val = parseInt(e.target.value) || 0;
-                                                    updateModifierGroupOverride(groupIndex, 'minSelections', val);
-                                                    if (val > 0) updateModifierGroupOverride(groupIndex, 'isRequired', true);
-                                                    else updateModifierGroupOverride(groupIndex, 'isRequired', false);
-                                                }}
-                                            />
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <span style={{ fontSize: '12px', color: 'var(--gray-600)' }}>Max:</span>
-                                            <input
-                                                type="number"
-                                                className="form-input small"
-                                                value={mg.maxSelections || 1}
-                                                onChange={(e) => updateModifierGroupOverride(groupIndex, 'maxSelections', parseInt(e.target.value) || 1)}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                             <div className="option-overrides-list">
                                 {(globalGroup.options as ModifierOption[]).map(option => {

@@ -342,6 +342,7 @@ export interface ModifierGroup {
   restaurantId: string;
   name: string;
   description?: string;
+  type: 'modifier' | 'size';
   minSelections: number;
   maxSelections: number;
   isRequired: boolean;

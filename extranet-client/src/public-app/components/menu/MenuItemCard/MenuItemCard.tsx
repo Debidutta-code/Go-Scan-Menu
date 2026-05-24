@@ -14,6 +14,27 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
   currency,
   onItemClick,
 }) => {
+  const getMinPrice = () => {
+    let minPrice = item.discountPrice || item.price;
+
+    if (item.modifierGroups && item.modifierGroups.length > 0) {
+      // Find all groups that have options and pick the minimum price
+      item.modifierGroups.forEach((mg: any) => {
+        // We look for 'size' type groups primarily, but check all for min price
+        const options = mg.options || [];
+        options.forEach((opt: any) => {
+          if (opt.price !== undefined && opt.price < minPrice && opt.price > 0) {
+            minPrice = opt.price;
+          }
+        });
+      });
+    }
+
+    return minPrice;
+  };
+
+  const minPrice = getMinPrice();
+  const hasMultiplePrices = minPrice !== (item.discountPrice || item.price);
 
   return (
     <div
@@ -75,20 +96,10 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
         <div className="menu-item-card-bottom-row">
           <div className="menu-item-card-price-horizontal">
-            {item.discountPrice ? (
-              <>
-                <span className="menu-item-card-discount-price-horizontal">
-                  {formatPrice(item.discountPrice, currency)}
-                </span>
-                <span className="menu-item-card-original-price-horizontal">
-                  {formatPrice(item.price, currency)}
-                </span>
-              </>
-            ) : (
-              <span className="menu-item-card-current-price-horizontal">
-                {formatPrice(item.price, currency)}
-              </span>
-            )}
+            <span className="menu-item-card-current-price-horizontal">
+              {hasMultiplePrices && <span className="price-from" style={{ fontSize: '0.8em', opacity: 0.8 }}>from </span>}
+              {formatPrice(minPrice, currency)}
+            </span>
           </div>
         </div>
       </div>

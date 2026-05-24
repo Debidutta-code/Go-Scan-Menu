@@ -78,3 +78,31 @@
   color: var(--text-primary);
   font-size: 1.125rem !important;
 }
+
+.modifier-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.group-type-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.group-type-badge.size {
+  background-color: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.group-type-badge.modifier {
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.modifier-card.type-size {
+  border-left: 4px solid var(--primary-500);
+}

@@ -4,6 +4,7 @@ export interface IModifierGroup extends Document {
   restaurantId: Types.ObjectId;
   name: string;
   description?: string;
+  type: 'modifier' | 'size';
   minSelections: number;
   maxSelections: number;
   isRequired: boolean;
@@ -29,6 +30,11 @@ const modifierGroupSchema = new Schema<IModifierGroup>(
     description: {
       type: String,
       trim: true,
+    },
+    type: {
+      type: String,
+      enum: ['modifier', 'size'],
+      default: 'modifier',
     },
     minSelections: {
       type: Number,

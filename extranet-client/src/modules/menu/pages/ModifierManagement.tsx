@@ -80,13 +80,18 @@ export const ModifierManagement: React.FC = () => {
           <h2>Modifier Groups</h2>
           <div className="modifier-grid">
             {groups.map(group => (
-              <div key={group._id} className="modifier-card" onClick={() => setGroupModal({ open: true, data: group })}>
-                <h3>{group.name}</h3>
+              <div key={group._id} className={`modifier-card type-${group.type}`} onClick={() => setGroupModal({ open: true, data: group })}>
+                <div className="modifier-card-header">
+                  <h3>{group.name}</h3>
+                  <span className={`group-type-badge ${group.type}`}>
+                    {group.type === 'size' ? 'Size' : 'Modifier'}
+                  </span>
+                </div>
                 <p>{group.description || 'No description'}</p>
                 <div className="modifier-stats">
                   <span>{group.isRequired ? 'Required' : 'Optional'}</span>
                   <span>{group.isMultiSelect ? 'Multi-select' : 'Single-select'}</span>
-                  <span>Options: {group.options.length}</span>
+                  <span>Options: {(group.options as any[]).length}</span>
                 </div>
               </div>
             ))}

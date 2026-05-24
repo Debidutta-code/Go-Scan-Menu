@@ -519,3 +519,38 @@
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
 }
+
+.modifier-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: var(--gray-50);
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+}
+
+.menu-item-details-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9375rem;
+}
+
+.info-item-name {
+  color: var(--gray-700);
+  font-weight: 500;
+}
+
+.info-item-price {
+  color: var(--gray-900);
+  font-weight: 600;
+}
+
+.type-info-badge {
+  font-size: 0.7rem;
+  background-color: var(--primary-50);
+  color: var(--primary-600);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}

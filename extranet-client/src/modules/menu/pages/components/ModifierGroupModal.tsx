@@ -22,6 +22,7 @@ export const ModifierGroupModal: React.FC<ModifierGroupModalProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    type: 'modifier' as 'modifier' | 'size',
     isRequired: false,
     isMultiSelect: false,
     minSelections: 0,
@@ -35,6 +36,7 @@ export const ModifierGroupModal: React.FC<ModifierGroupModalProps> = ({
       setFormData({
         name: initialData.name,
         description: initialData.description || '',
+        type: initialData.type || 'modifier',
         isRequired: initialData.isRequired,
         isMultiSelect: initialData.isMultiSelect,
         minSelections: initialData.minSelections,
@@ -42,7 +44,7 @@ export const ModifierGroupModal: React.FC<ModifierGroupModalProps> = ({
         options: (initialData.options as any[]).map(o => typeof o === 'string' ? o : o._id)
       });
     } else {
-      setFormData({ name: '', description: '', isRequired: false, isMultiSelect: false, minSelections: 0, maxSelections: 1, options: [] });
+      setFormData({ name: '', description: '', type: 'modifier', isRequired: false, isMultiSelect: false, minSelections: 0, maxSelections: 1, options: [] });
     }
   }, [initialData, isOpen]);
 
@@ -76,6 +78,19 @@ export const ModifierGroupModal: React.FC<ModifierGroupModalProps> = ({
         <h2>{initialData ? 'Edit Group' : 'Add New Group'}</h2>
         <form onSubmit={handleSubmit}>
           <InputField label="Group Name (e.g. Toppings)" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
+
+          <div className="form-group" style={{ marginBottom: '15px' }}>
+            <label className="form-label">Group Type</label>
+            <select
+                className="form-select"
+                value={formData.type}
+                onChange={(e) => setFormData({...formData, type: e.target.value as any})}
+            >
+                <option value="modifier">Modifier (Toppings, Addons, etc.)</option>
+                <option value="size">Sizes (Small, Medium, Large, etc.)</option>
+            </select>
+          </div>
+
           <InputField label="Description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
 
           <div className="options-selection-list" style={{ marginTop: '15px', maxHeight: '200px', overflowY: 'auto' }}>
