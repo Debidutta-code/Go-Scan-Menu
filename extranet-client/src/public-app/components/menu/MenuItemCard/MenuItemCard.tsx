@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { MenuItem } from '@/public-app/types/menu.types';
 import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '@/public-app/utils/formatters';
 import './MenuItemCard.css';
@@ -9,32 +9,32 @@ interface MenuItemCardProps {
   onItemClick: (item: MenuItem) => void;
 }
 
-export const MenuItemCard: React.FC<MenuItemCardProps> = ({
+export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
   item,
   currency,
   onItemClick,
 }) => {
-  const getMinPrice = () => {
-    let minPrice = item.discountPrice || item.price;
+  const minPrice = useMemo(() => {
+    let price = item.discountPrice || item.price;
 
     if (item.modifierGroups && item.modifierGroups.length > 0) {
-      // Find all groups that have options and pick the minimum price
       item.modifierGroups.forEach((mg: any) => {
-        // We look for 'size' type groups primarily, but check all for min price
         const options = mg.options || [];
         options.forEach((opt: any) => {
-          if (opt.price !== undefined && opt.price < minPrice && opt.price > 0) {
-            minPrice = opt.price;
+          if (opt.price !== undefined && opt.price < price && opt.price > 0) {
+            price = opt.price;
           }
         });
       });
     }
 
-    return minPrice;
-  };
+    return price;
+  }, [item.discountPrice, item.price, item.modifierGroups]);
 
-  const minPrice = getMinPrice();
-  const hasMultiplePrices = minPrice !== (item.discountPrice || item.price);
+  const hasMultiplePrices = useMemo(() =>
+    minPrice !== (item.discountPrice || item.price),
+    [minPrice, item.discountPrice, item.price]
+  );
 
   return (
     <div
@@ -105,4 +105,4 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
       </div>
     </div>
   );
-};
+});

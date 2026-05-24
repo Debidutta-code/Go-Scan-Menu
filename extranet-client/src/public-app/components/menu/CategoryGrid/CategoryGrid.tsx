@@ -12,20 +12,10 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
   categories,
   onCategoryClick,
 }) => {
-  const handleClick = (categoryId: string) => {
-    onCategoryClick(categoryId);
-    const element = document.getElementById(`category-${categoryId}`);
-    if (element) {
-      const offsetPosition = element.offsetTop - 150;
-      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-    }
-  };
-
   const pattern = generateCategoryMasonryPattern(categories.length);
 
   return (
     <div className="public-category-grid-section">
-      {/* <h2 className="public-category-grid-title">Categories</h2> */}
       <div className="public-category-grid">
         {categories.map((category, index) => (
           <div
@@ -33,7 +23,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
             className={`public-category-grid-card ${
               pattern[index] ? 'large' : 'small'
             }`}
-            onClick={() => handleClick(category._id)}
+            onClick={() => onCategoryClick(category._id)}
           >
             {category.image ? (
               <img

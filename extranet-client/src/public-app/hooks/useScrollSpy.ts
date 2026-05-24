@@ -1,32 +1,41 @@
-import { useState, useEffect } from 'react';
-import { SCROLL_OFFSET } from '../utils/constants';
+import { useState, useEffect, useRef } from 'react';
 
-export const useScrollSpy = (categoryIds: string[]) => {
-  const [activeCategory, setActiveCategory] = useState<string>('');
+export const useScrollSpy = (ids: string[], offset: number = 0) => {
+  const [activeId, setActiveId] = useState<string>('');
+  const observer = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + SCROLL_OFFSET + 50;
+    if (observer.current) {
+      observer.current.disconnect();
+    }
 
-      for (let i = categoryIds.length - 1; i >= 0; i--) {
-        const element = document.getElementById(categoryIds[i]);
-        if (element && element.offsetTop <= scrollPosition) {
-          setActiveCategory(categoryIds[i]);
-          return;
-        }
+    observer.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: `-${offset}px 0px -70% 0px`,
+        threshold: 0,
       }
+    );
 
-      // If scrolled to top, clear active category
-      if (window.scrollY < 200) {
-        setActiveCategory('');
+    ids.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        observer.current?.observe(element);
+      }
+    });
+
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
       }
     };
+  }, [ids, offset]);
 
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [categoryIds]);
-
-  return activeCategory;
+  return activeId;
 };

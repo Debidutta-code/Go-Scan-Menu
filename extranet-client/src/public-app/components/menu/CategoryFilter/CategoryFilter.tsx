@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Category } from '@/public-app/types/menu.types';
-import { ALL_CATEGORIES_ID, ALL_CATEGORIES_NAME, SCROLL_OFFSET } from '@/public-app/utils/constants';
+import { ALL_CATEGORIES_ID, ALL_CATEGORIES_NAME } from '@/public-app/utils/constants';
 import './CategoryFilter.css';
 
 interface CategoryFilterProps {
@@ -25,26 +25,12 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
     }
   }, [activeCategory]);
 
-  const handleCategoryClick = (categoryId: string) => {
-    onCategoryChange(categoryId);
-
-    if (categoryId === ALL_CATEGORIES_ID) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      const element = document.getElementById(`category-${categoryId}`);
-      if (element) {
-        const offsetPosition = element.offsetTop - SCROLL_OFFSET;
-        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-      }
-    }
-  };
-
   return (
     <div className="public-category-filter-container">
       <div className="public-category-filter-scroll" ref={scrollContainerRef}>
         <button
           className={`public-category-filter-btn ${activeCategory === ALL_CATEGORIES_ID ? 'active' : ''}`}
-          onClick={() => handleCategoryClick(ALL_CATEGORIES_ID)}
+          onClick={() => onCategoryChange(ALL_CATEGORIES_ID)}
         >
           <div className="public-category-filter-icon">
             <span className="public-category-filter-emoji">🍽️</span>
@@ -56,7 +42,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           <button
             key={category._id}
             className={`public-category-filter-btn ${activeCategory === category._id ? 'active' : ''}`}
-            onClick={() => handleCategoryClick(category._id)}
+            onClick={() => onCategoryChange(category._id)}
           >
             <div className="public-category-filter-icon">
               {category.image ? (

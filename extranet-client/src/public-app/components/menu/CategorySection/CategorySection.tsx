@@ -9,7 +9,7 @@ interface CategorySectionProps {
   onItemClick: (item: MenuItem) => void;
 }
 
-export const CategorySection: React.FC<CategorySectionProps> = ({
+export const CategorySection: React.FC<CategorySectionProps> = React.memo(({
   category,
   currency,
   onItemClick,
@@ -35,4 +35,4 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
       </div>
     </section>
   );
-};
+});
