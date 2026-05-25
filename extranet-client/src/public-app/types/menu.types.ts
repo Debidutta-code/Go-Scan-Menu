@@ -81,6 +81,7 @@ export interface RestaurantTheme {
   secondaryColor: string;
   accentColor: string;
   font: string;
+  logo?: string;
 }
 
 export interface Restaurant {
@@ -135,10 +136,33 @@ export interface Table {
   status: string;
 }
 
+export interface PublicInitData {
+  restaurant: Restaurant;
+  table: Table | null;
+}
+
 export interface MenuData {
   restaurant: Restaurant;
   table?: Table;
   menu: Category[];
+}
+
+export interface PublicInitResponse {
+  success: boolean;
+  message: string;
+  data: PublicInitData;
+}
+
+export interface PublicCategoriesResponse {
+  success: boolean;
+  message: string;
+  data: Category[];
+}
+
+export interface PublicMenuResponse {
+  success: boolean;
+  message: string;
+  data: Category[];
 }
 
 export interface MenuResponse {

@@ -4,7 +4,7 @@ import { Navbar } from '@/public-app/components/common/Navbar/Navbar';
 import { BottomNav } from '@/public-app/components/common/BottomNav/BottomNav';
 import { Loading } from '@/public-app/components/common/Loading/Loading';
 import { Error } from '@/public-app/components/common/Error/Error';
-import { useMenu } from '../hooks/useMenu';
+import { usePublicInit } from '../hooks/usePublicInit';
 import { PublicAppProvider } from '../contexts/PublicAppContext';
 import { ChevronLeft } from 'lucide-react';
 import './PublicLayout.css';
@@ -60,7 +60,7 @@ export const PublicLayout: React.FC = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { menuData, loading, error } = useMenu(restaurantSlug!, qrCode);
+  const { data, loading, error } = usePublicInit(restaurantSlug!, qrCode);
 
   if (loading) {
     return <Loading />;
@@ -70,20 +70,21 @@ export const PublicLayout: React.FC = () => {
     return <Error message={error} />;
   }
 
-  if (!menuData) {
+  if (!data) {
     return <Error message="Restaurant not available" />;
   }
 
   return (
     <PublicAppProvider
       value={{
-        menuData,
+        restaurant: data.restaurant,
+        table: data.table,
         restaurantSlug: restaurantSlug!,
         qrCode,
       }}
     >
         <div className="public-layout">
-          <Navbar restaurant={menuData.restaurant} table={menuData.table} />
+          <Navbar restaurant={data.restaurant} table={data.table || undefined} />
 
           <main className="public-main">
             <Outlet />

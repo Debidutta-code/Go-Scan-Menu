@@ -5,7 +5,7 @@ import { Heart } from 'lucide-react';
 import './FeedbackPage.css';
 
 export const FeedbackPage: React.FC = () => {
-  const { menuData } = usePublicApp();
+  const { restaurant } = usePublicApp();
 
   return (
     <div className="feedback-page-wrapper">
@@ -15,7 +15,7 @@ export const FeedbackPage: React.FC = () => {
             <Heart size={40} fill="#ef4444" color="#ef4444" />
           </div>
           <h1>We'd love to hear from you</h1>
-          <p>Tell us about your experience at {menuData.restaurant.name}</p>
+          <p>Tell us about your experience at {restaurant.name}</p>
         </div>
 
         <div className="feedback-form-card">

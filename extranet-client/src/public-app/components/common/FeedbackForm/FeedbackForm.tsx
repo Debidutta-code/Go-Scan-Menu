@@ -9,8 +9,8 @@ interface FeedbackFormProps {
 }
 
 export const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
-  const { menuData } = usePublicApp();
-  const restaurantId = menuData.restaurant._id;
+  const { restaurant } = usePublicApp();
+  const restaurantId = restaurant._id;
 
   const [ratings, setRatings] = useState({
     food: 5,
@@ -57,7 +57,7 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
     try {
       await FeedbackService.trackGoogleRedirect(restaurantId);
       // Redirect to Google Maps review page
-      const placeId = menuData.restaurant.googlePlaceId;
+      const placeId = restaurant.googlePlaceId;
       if (placeId) {
         window.open(`https://search.google.com/local/writereview?placeid=${placeId}`, '_blank');
       }
@@ -73,7 +73,7 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
         <h3>Thank you!</h3>
         <p>Your feedback helps us improve our service.</p>
 
-        {menuData.restaurant.googleReviewEnabled && (
+        {restaurant.googleReviewEnabled && (
           <div className="google-cta">
             <p>Would you mind sharing your experience on Google too?</p>
             <button className="google-btn" onClick={handleGoogleRedirect}>
