@@ -42,6 +42,7 @@ export interface RestaurantTheme {
   secondaryColor: string;
   accentColor: string;
   font: string;
+  logo?: string;
 }
 
 export interface Restaurant {
@@ -62,16 +63,51 @@ export interface CategoryListData {
   categories: CategorySummary[];
 }
 
-export interface CategoryListResponse {
-  success: boolean;
-  message: string;
-  data: CategoryListData;
+export interface Branch {
+  id: string;
+  _id: string;
+  name: string;
+  code: string;
+  address?: Address;
+  phone?: string;
+  settings: BranchSettings;
 }
 
-/** Returned by GET /public/menu/:restaurantSlug */
+export interface Table {
+  id: string;
+  _id: string;
+  tableNumber: string;
+  capacity: number;
+  location: string;
+  status: string;
+}
+
+export interface PublicInitData {
+  restaurant: Restaurant;
+  table: Table | null;
+}
+
 export interface MenuData {
   restaurant: Restaurant;
   menu: Category[];
+}
+
+export interface PublicInitResponse {
+  success: boolean;
+  message: string;
+  data: PublicInitData;
+}
+
+export interface PublicCategoriesResponse {
+  success: boolean;
+  message: string;
+  data: Category[];
+}
+
+export interface PublicMenuResponse {
+  success: boolean;
+  message: string;
+  data: Category[];
 }
 
 export interface MenuResponse {

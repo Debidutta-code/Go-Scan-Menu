@@ -1,8 +1,9 @@
 import React, { createContext, useContext } from 'react';
-import { Restaurant } from '@/public-app/types/menu.types';
+import { Restaurant, Table } from '@/public-app/types/menu.types';
 
 interface PublicAppContextType {
-  restaurant: Restaurant;       // basic restaurant info from the categories call
+  restaurant: Restaurant;
+  table: Table | null;
   restaurantSlug: string;
 }
 
