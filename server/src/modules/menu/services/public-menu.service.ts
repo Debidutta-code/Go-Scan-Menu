@@ -20,34 +20,29 @@ export class PublicMenuService {
   }
 
   /**
-   * Get complete menu data when customer scans QR code
-   * Returns everything needed to display menu
+   * Get initial public data (restaurant and table info)
    */
-  async getCompleteMenuByQrCode(restaurantSlug: string, qrCode: string) {
-    // 1. Get restaurant by slug
+  async getPublicInitData(restaurantSlug: string, qrCode?: string) {
     const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
     if (!restaurant || !restaurant.isActive) {
       throw new AppError('Restaurant not found', 404);
     }
 
-    // 2. Verify QR code and get table
-    const table = await this.tableRepo.findByQrCode(qrCode);
-    if (!table || !table.isActive) {
-      throw new AppError('Invalid QR code', 404);
+    let table = null;
+    if (qrCode) {
+      table = await this.tableRepo.findByQrCode(qrCode);
+      if (!table || !table.isActive) {
+        throw new AppError('Invalid QR code', 404);
+      }
+
+      const tableRestaurantId = ParamsUtil.extractId(table.restaurantId);
+      const actualRestaurantId = ParamsUtil.extractId(restaurant._id);
+
+      if (tableRestaurantId !== actualRestaurantId) {
+        throw new AppError('QR code does not belong to this restaurant', 400);
+      }
     }
 
-    // Verify table belongs to this restaurant
-    const tableRestaurantId = ParamsUtil.extractId(table.restaurantId);
-    const actualRestaurantId = ParamsUtil.extractId(restaurant._id);
-
-    if (tableRestaurantId !== actualRestaurantId) {
-      throw new AppError('QR code does not belong to this restaurant', 400);
-    }
-
-    // 3. Get menu (categories + items) grouped by category
-    const menu = await this.getGroupedMenu(restaurant._id.toString());
-
-    // 4. Return complete data
     return {
       restaurant: {
         id: restaurant._id,
@@ -55,51 +50,82 @@ export class PublicMenuService {
         name: restaurant.name,
         slug: restaurant.slug,
         theme: restaurant.theme,
+        logo: restaurant.theme?.logo,
         googlePlaceId: restaurant.googlePlaceId,
         googleReviewEnabled: restaurant.googleReviewEnabled,
         settings: {
-           currency: restaurant.defaultSettings.currency
+          currency: restaurant.defaultSettings?.currency || 'USD'
         }
       },
-      table: {
+      table: table ? {
         id: table._id,
         _id: table._id,
         tableNumber: table.tableNumber,
         capacity: table.capacity,
         location: table.location,
         status: table.status,
-      },
+      } : null
+    };
+  }
+
+  /**
+   * Get only categories for a restaurant
+   */
+  async getPublicCategories(restaurantSlug: string) {
+    const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
+    if (!restaurant || !restaurant.isActive) {
+      throw new AppError('Restaurant not found', 404);
+    }
+
+    const categories = await this.categoryRepo.findAllForMenu(restaurant._id.toString());
+
+    return categories.map(cat => ({
+      id: cat._id,
+      _id: cat._id,
+      name: cat.name,
+      description: cat.description,
+      image: cat.image,
+      displayOrder: cat.displayOrder
+    }));
+  }
+
+  /**
+   * Get complete menu data (categories with items)
+   */
+  async getPublicMenu(restaurantSlug: string) {
+    const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
+    if (!restaurant || !restaurant.isActive) {
+      throw new AppError('Restaurant not found', 404);
+    }
+
+    return this.getGroupedMenu(restaurant._id.toString());
+  }
+
+  /**
+   * Get complete menu data when customer scans QR code
+   * Returns everything needed to display menu
+   * @deprecated Use granular methods
+   */
+  async getCompleteMenuByQrCode(restaurantSlug: string, qrCode: string) {
+    const initData = await this.getPublicInitData(restaurantSlug, qrCode);
+    const menu = await this.getPublicMenu(restaurantSlug);
+
+    return {
+      ...initData,
       menu,
     };
   }
 
   /**
    * Get menu without specific table (for browsing)
+   * @deprecated Use granular methods
    */
   async getCompleteMenuByBranch(restaurantSlug: string) {
-    // 1. Get restaurant by slug
-    const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
-    if (!restaurant || !restaurant.isActive) {
-      throw new AppError('Restaurant not found', 404);
-    }
+    const initData = await this.getPublicInitData(restaurantSlug);
+    const menu = await this.getPublicMenu(restaurantSlug);
 
-    // 2. Get menu
-    const menu = await this.getGroupedMenu(restaurant._id.toString());
-
-    // 3. Return data (without table info)
     return {
-      restaurant: {
-        id: restaurant._id,
-        _id: restaurant._id,
-        name: restaurant.name,
-        slug: restaurant.slug,
-        theme: restaurant.theme,
-        googlePlaceId: restaurant.googlePlaceId,
-        googleReviewEnabled: restaurant.googleReviewEnabled,
-        settings: {
-           currency: restaurant.defaultSettings.currency
-        }
-      },
+      ...initData,
       menu,
     };
   }

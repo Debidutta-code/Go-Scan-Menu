@@ -3,7 +3,8 @@ import { Router } from 'express';
 import { authRoutes } from '@/modules/auth';
 import { restaurantRoutes, taxRoutes, qrConfigRoutes, feedbackRoutes } from '@/modules/restaurant';
 import { staffRoutes } from '@/modules/staff';
-import { categoryRoutes, menuItemRoutes, publicMenuRoutes, modifierRoutes } from '@/modules/menu';
+import { categoryRoutes, menuItemRoutes, modifierRoutes } from '@/modules/menu';
+import publicMenuRoutes from '../modules/menu/public-menu.routes'; // Direct import to avoid alias/index issues
 import { tableRoutes } from '@/modules/table';
 import { ApiLogController } from '@/modules/analytics/api-log.controller';
 import { AuthMiddleware } from '@/modules/staff';
@@ -12,6 +13,9 @@ import healthRoutes from './health.route';
 
 const router = Router();
 const apiLogController = new ApiLogController();
+
+// Register public routes at the top level of api/v1 to ensure priority
+router.use('/public', publicMenuRoutes);
 
 router.use('/health', healthRoutes);
 router.use('/superadmin/auth', authRoutes);
@@ -47,8 +51,5 @@ router.use('/restaurants/:restaurantId/qr-config', qrConfigRoutes);
 
 // Feedback Management
 router.use('/restaurants/:restaurantId/feedback', feedbackRoutes);
-
-// Register public routes (no auth required)
-router.use('/public', publicMenuRoutes);
 
 export default router;

@@ -10,8 +10,52 @@ export class PublicMenuController {
   }
 
   /**
+   * Get initial public data (restaurant and table info)
+   */
+  getInitData = catchAsync(async (req: Request, res: Response) => {
+    const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
+    const qrCode = req.params.qrCode ? ParamsUtil.getString(req.params.qrCode) : undefined;
+
+    const initData = await this.menuService.getPublicInitData(restaurantSlug, qrCode);
+
+    sendResponse(res, 200, {
+      message: 'Initial data retrieved successfully',
+      data: initData,
+    });
+  });
+
+  /**
+   * Get categories list
+   */
+  getCategories = catchAsync(async (req: Request, res: Response) => {
+    const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
+
+    const categories = await this.menuService.getPublicCategories(restaurantSlug);
+
+    sendResponse(res, 200, {
+      message: 'Categories retrieved successfully',
+      data: categories,
+    });
+  });
+
+  /**
+   * Get full menu (categories with items)
+   */
+  getMenu = catchAsync(async (req: Request, res: Response) => {
+    const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
+
+    const menu = await this.menuService.getPublicMenu(restaurantSlug);
+
+    sendResponse(res, 200, {
+      message: 'Menu retrieved successfully',
+      data: menu,
+    });
+  });
+
+  /**
    * Get complete menu for a specific table (QR code scan)
    * Returns: restaurant theme, table, menu grouped by categories
+   * @deprecated
    */
   getMenuByQrCode = catchAsync(async (req: Request, res: Response) => {
     const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
@@ -31,6 +75,7 @@ export class PublicMenuController {
   /**
    * Get menu (without specific table)
    * Useful for takeaway/delivery or browsing without sitting
+   * @deprecated
    */
   getMenuByBranch = catchAsync(async (req: Request, res: Response) => {
     const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
