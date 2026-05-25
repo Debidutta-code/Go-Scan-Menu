@@ -1,3 +1,14 @@
+// ─── Lightweight category (used on the grid/landing page) ───────────────────
+export interface CategorySummary {
+  id: string;
+  _id: string;
+  name: string;
+  image?: string;
+  displayOrder: number;
+  itemCount: number;
+}
+
+// ─── Full category with items (used on the menu-list page) ──────────────────
 export interface MenuItem {
   id: string;
   _id: string;
@@ -11,59 +22,8 @@ export interface MenuItem {
   calories?: number;
   spiceLevel?: string;
   tags?: string[];
-  allergens?: string[];
-  variants?: Variant[];
-  addons?: Addon[];
-  customizations?: Customization[];
-  modifierGroups?: ModifierGroup[];
   isAvailable: boolean;
-  availableQuantity?: number;
   dietaryType?: 'VEG' | 'NON_VEG' | 'EGG' | 'JAIN' | 'VEGAN' | 'GLUTEN_FREE';
-}
-
-export interface Variant {
-  name: string;
-  price: number;
-  isDefault: boolean;
-  id: string;
-  _id: string;
-}
-
-export interface ModifierOption {
-  _id: string;
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  isAvailable: boolean;
-}
-
-export interface ModifierGroup {
-  _id: string;
-  id: string;
-  name: string;
-  description?: string;
-  type: 'modifier' | 'size';
-  minSelections: number;
-  maxSelections: number;
-  isRequired: boolean;
-  isMultiSelect: boolean;
-  options: ModifierOption[];
-}
-
-export interface Addon {
-  name: string;
-  price: number;
-  id: string;
-  _id: string;
-}
-
-export interface Customization {
-  name: string;
-  options: string[];
-  isRequired: boolean;
-  id: string;
-  _id: string;
 }
 
 export interface Category {
@@ -76,6 +36,7 @@ export interface Category {
   items: MenuItem[];
 }
 
+// ─── Restaurant ──────────────────────────────────────────────────────────────
 export interface RestaurantTheme {
   primaryColor: string;
   secondaryColor: string;
@@ -90,54 +51,26 @@ export interface Restaurant {
   slug: string;
   theme?: RestaurantTheme;
   logo?: string;
-  googlePlaceId?: string;
-  googleReviewEnabled?: boolean;
-  settings?: {
-    currency: string;
-  };
+  currency?: string;
 }
 
-export interface Address {
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
+// ─── API response shapes ─────────────────────────────────────────────────────
+
+/** Returned by GET /public/categories/:restaurantSlug */
+export interface CategoryListData {
+  restaurant: Restaurant;
+  categories: CategorySummary[];
 }
 
-export interface BranchSettings {
-  currency: string;
-  minOrderAmount: number;
-  deliveryAvailable: boolean;
-  takeawayAvailable: boolean;
+export interface CategoryListResponse {
+  success: boolean;
+  message: string;
+  data: CategoryListData;
 }
 
-export interface Branch {
-  id: string;
-  _id: string;
-  name: string;
-  code: string;
-  address?: Address;
-  phone?: string;
-  settings: BranchSettings;
-}
-
-export interface Table {
-  id: string;
-  _id: string;
-  tableNumber: string;
-  capacity: number;
-  location: string;
-  status: string;
-}
-
+/** Returned by GET /public/menu/:restaurantSlug */
 export interface MenuData {
   restaurant: Restaurant;
-  table?: Table;
   menu: Category[];
 }
 

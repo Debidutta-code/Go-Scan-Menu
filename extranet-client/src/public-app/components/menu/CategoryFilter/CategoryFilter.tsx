@@ -1,18 +1,20 @@
 import React, { useRef, useEffect } from 'react';
 import { Category } from '@/public-app/types/menu.types';
-import { ALL_CATEGORIES_ID, ALL_CATEGORIES_NAME } from '@/public-app/utils/constants';
+import { ALL_CATEGORIES_NAME } from '@/public-app/utils/constants';
 import './CategoryFilter.css';
 
 interface CategoryFilterProps {
   categories: Category[];
-  activeCategory: string;
+  activeCategory: string;           // category._id of the highlighted tab
   onCategoryChange: (categoryId: string) => void;
+  onBackToGrid: () => void;         // "All" button goes back to the grid page
 }
 
 export const CategoryFilter: React.FC<CategoryFilterProps> = ({
   categories,
   activeCategory,
   onCategoryChange,
+  onBackToGrid,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -28,11 +30,10 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
   return (
     <div className="public-category-filter-container">
       <div className="public-category-filter-scroll" ref={scrollContainerRef}>
+        {/* "All" button returns to the category grid */}
         <button
-          className={`public-category-filter-btn ${
-            activeCategory === ALL_CATEGORIES_ID ? 'active' : ''
-          }`}
-          onClick={() => onCategoryChange(ALL_CATEGORIES_ID)}
+          className="public-category-filter-btn"
+          onClick={onBackToGrid}
         >
           <div className="public-category-filter-icon">
             <span className="public-category-filter-emoji">🍽️</span>

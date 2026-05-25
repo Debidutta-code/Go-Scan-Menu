@@ -9,51 +9,24 @@ export class PublicMenuController {
     this.menuService = new PublicMenuService();
   }
 
-  /**
-   * Get complete menu for a specific table (QR code scan)
-   * Returns: restaurant theme, table, menu grouped by categories
-   */
-  getMenuByQrCode = catchAsync(async (req: Request, res: Response) => {
+  /** GET /public/categories/:restaurantSlug — lightweight category list */
+  getCategoriesBySlug = catchAsync(async (req: Request, res: Response) => {
     const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
-    const qrCode = ParamsUtil.getString(req.params.qrCode);
-
-    const menuData = await this.menuService.getCompleteMenuByQrCode(
-      restaurantSlug,
-      qrCode
-    );
-
-    sendResponse(res, 200, {
-      message: 'Menu retrieved successfully',
-      data: menuData,
-    });
+    const data = await this.menuService.getCategoriesBySlug(restaurantSlug);
+    sendResponse(res, 200, { message: 'Categories retrieved successfully', data });
   });
 
-  /**
-   * Get menu (without specific table)
-   * Useful for takeaway/delivery or browsing without sitting
-   */
-  getMenuByBranch = catchAsync(async (req: Request, res: Response) => {
+  /** GET /public/menu/:restaurantSlug — full menu with items */
+  getMenuBySlug = catchAsync(async (req: Request, res: Response) => {
     const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
-
-    const menuData = await this.menuService.getCompleteMenuByBranch(restaurantSlug);
-
-    sendResponse(res, 200, {
-      message: 'Menu retrieved successfully',
-      data: menuData,
-    });
+    const data = await this.menuService.getMenuBySlug(restaurantSlug);
+    sendResponse(res, 200, { message: 'Menu retrieved successfully', data });
   });
 
-  /**
-   * Get restaurant info (for landing pages, etc.)
-   */
+  /** GET /public/restaurant/:restaurantSlug */
   getRestaurantInfo = catchAsync(async (req: Request, res: Response) => {
     const restaurantSlug = ParamsUtil.getString(req.params.restaurantSlug);
-
-    const restaurantInfo = await this.menuService.getRestaurantInfo(restaurantSlug);
-
-    sendResponse(res, 200, {
-      message: 'Restaurant info retrieved successfully',
-      data: restaurantInfo,
-    });
+    const data = await this.menuService.getRestaurantInfo(restaurantSlug);
+    sendResponse(res, 200, { message: 'Restaurant info retrieved successfully', data });
   });
 }

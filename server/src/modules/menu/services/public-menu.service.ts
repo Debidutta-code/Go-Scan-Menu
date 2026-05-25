@@ -1,204 +1,128 @@
 import { RestaurantRepository } from '../../restaurant/repositories/restaurant.repository';
-import { TableRepository } from '../../table/repositories/table.repository';
 import { CategoryRepository } from '../repositories/category.repository';
 import { MenuItemRepository } from '../repositories/menu-item.repository';
 import { AppError } from '@/utils/AppError';
-import { ParamsUtil } from '@/utils';
-import mongoose from 'mongoose';
 
 export class PublicMenuService {
   private restaurantRepo: RestaurantRepository;
-  private tableRepo: TableRepository;
   private categoryRepo: CategoryRepository;
   private menuItemRepo: MenuItemRepository;
 
   constructor() {
     this.restaurantRepo = new RestaurantRepository();
-    this.tableRepo = new TableRepository();
     this.categoryRepo = new CategoryRepository();
     this.menuItemRepo = new MenuItemRepository();
   }
 
-  /**
-   * Get complete menu data when customer scans QR code
-   * Returns everything needed to display menu
-   */
-  async getCompleteMenuByQrCode(restaurantSlug: string, qrCode: string) {
-    // 1. Get restaurant by slug
+  // ─── GET /public/categories/:restaurantSlug ───────────────────────────────
+  // Lightweight — returns only category summaries with item counts.
+  // Used by the landing/grid page.
+  async getCategoriesBySlug(restaurantSlug: string) {
     const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
     if (!restaurant || !restaurant.isActive) {
       throw new AppError('Restaurant not found', 404);
     }
 
-    // 2. Verify QR code and get table
-    const table = await this.tableRepo.findByQrCode(qrCode);
-    if (!table || !table.isActive) {
-      throw new AppError('Invalid QR code', 404);
+    const restaurantId = restaurant._id.toString();
+    const categories = await this.categoryRepo.findAllForMenu(restaurantId);
+    const items = await this.menuItemRepo.findAllForMenu(restaurantId);
+
+    // Build a count map: categoryId → item count
+    const countMap: Record<string, number> = {};
+    for (const item of items) {
+      const catId = (item.categoryId as any)._id.toString();
+      countMap[catId] = (countMap[catId] ?? 0) + 1;
     }
 
-    // Verify table belongs to this restaurant
-    const tableRestaurantId = ParamsUtil.extractId(table.restaurantId);
-    const actualRestaurantId = ParamsUtil.extractId(restaurant._id);
+    const categorySummaries = categories
+      .map((cat: any) => ({
+        id: cat._id,
+        _id: cat._id,
+        name: cat.name,
+        image: cat.image,
+        displayOrder: cat.displayOrder,
+        itemCount: countMap[cat._id.toString()] ?? 0,
+      }))
+      .filter((cat) => cat.itemCount > 0);
 
-    if (tableRestaurantId !== actualRestaurantId) {
-      throw new AppError('QR code does not belong to this restaurant', 400);
-    }
-
-    // 3. Get menu (categories + items) grouped by category
-    const menu = await this.getGroupedMenu(restaurant._id.toString());
-
-    // 4. Return complete data
     return {
       restaurant: {
         id: restaurant._id,
         _id: restaurant._id,
         name: restaurant.name,
         slug: restaurant.slug,
+        logo: (restaurant as any).logo,
         theme: restaurant.theme,
-        googlePlaceId: restaurant.googlePlaceId,
-        googleReviewEnabled: restaurant.googleReviewEnabled,
-        settings: {
-           currency: restaurant.defaultSettings.currency
-        }
+        currency: restaurant.defaultSettings.currency,
       },
-      table: {
-        id: table._id,
-        _id: table._id,
-        tableNumber: table.tableNumber,
-        capacity: table.capacity,
-        location: table.location,
-        status: table.status,
-      },
-      menu,
+      categories: categorySummaries,
     };
   }
 
-  /**
-   * Get menu without specific table (for browsing)
-   */
-  async getCompleteMenuByBranch(restaurantSlug: string) {
-    // 1. Get restaurant by slug
+  // ─── GET /public/menu/:restaurantSlug ─────────────────────────────────────
+  // Full menu — categories + all items grouped under each category.
+  // Used by the menu-list page.
+  async getMenuBySlug(restaurantSlug: string) {
     const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
     if (!restaurant || !restaurant.isActive) {
       throw new AppError('Restaurant not found', 404);
     }
 
-    // 2. Get menu
     const menu = await this.getGroupedMenu(restaurant._id.toString());
 
-    // 3. Return data (without table info)
     return {
       restaurant: {
         id: restaurant._id,
         _id: restaurant._id,
         name: restaurant.name,
         slug: restaurant.slug,
+        logo: (restaurant as any).logo,
         theme: restaurant.theme,
-        googlePlaceId: restaurant.googlePlaceId,
-        googleReviewEnabled: restaurant.googleReviewEnabled,
-        settings: {
-           currency: restaurant.defaultSettings.currency
-        }
+        currency: restaurant.defaultSettings.currency,
       },
       menu,
     };
   }
 
-  /**
-   * Get basic restaurant info (for landing pages)
-   */
+  // ─── GET /public/restaurant/:restaurantSlug ───────────────────────────────
   async getRestaurantInfo(restaurantSlug: string) {
     const restaurant = await this.restaurantRepo.findBySlug(restaurantSlug);
     if (!restaurant || !restaurant.isActive) {
       throw new AppError('Restaurant not found', 404);
     }
-
     return {
       id: restaurant._id,
       _id: restaurant._id,
       name: restaurant.name,
       slug: restaurant.slug,
-      type: restaurant.type,
       theme: restaurant.theme,
     };
   }
 
-  /**
-   * Helper: Get menu items grouped by categories
-   * Returns structured data ready for frontend display
-   */
+  // ─── Helper ───────────────────────────────────────────────────────────────
   private async getGroupedMenu(restaurantId: string) {
-    // Get all categories
     const categories = await this.categoryRepo.findAllForMenu(restaurantId);
-
-    // Get all menu items
     const rawItems = await this.menuItemRepo.findAllForMenu(restaurantId);
 
-    // Optimization: Bulk fetch all referenced modifier groups and options to avoid N+1
-    const groupIds = new Set<string>();
-    rawItems.forEach((item: any) => {
-        item.modifierGroups?.forEach((mg: any) => groupIds.add(mg.groupId.toString()));
-    });
-
-    const ModifierGroup = mongoose.model('ModifierGroup');
-    const ModifierOption = mongoose.model('ModifierOption');
-
-    const allGroups = await ModifierGroup.find({ _id: { $in: Array.from(groupIds) } }).populate('options').lean() as any[];
-    const groupsMap = new Map(allGroups.map(g => [g._id.toString(), g]));
-
-    // Group items by category and transform
-    const menuByCategory = categories.map((category: any) => {
-      const categoryItems = rawItems
+    const grouped = categories.map((category: any) => {
+      const items = rawItems
         .filter((item: any) => item.categoryId._id.toString() === category._id.toString())
-        .map((item: any) => {
-            // Process modifiers for this item
-            const populatedModifierGroups = (item.modifierGroups || []).map((mg: any) => {
-                const globalGroup = groupsMap.get(mg.groupId.toString());
-                if (!globalGroup) return null;
-
-                const options = (globalGroup.options as any[]).map((opt: any) => {
-                    const override = mg.overrides.find((o: any) => o.optionId.toString() === opt._id.toString());
-                    return {
-                        ...opt,
-                        price: override && override.price !== undefined ? override.price : opt.price,
-                        isAvailable: override && override.isAvailable !== undefined ? override.isAvailable : opt.isAvailable
-                    };
-                });
-
-                return {
-                    ...globalGroup,
-                    options,
-                    isRequired: mg.isRequired !== undefined ? mg.isRequired : globalGroup.isRequired,
-                    isMultiSelect: mg.isMultiSelect !== undefined ? mg.isMultiSelect : globalGroup.isMultiSelect,
-                    minSelections: mg.minSelections !== undefined ? mg.minSelections : globalGroup.minSelections,
-                    maxSelections: mg.maxSelections !== undefined ? mg.maxSelections : globalGroup.maxSelections,
-                    displayOrder: mg.displayOrder
-                };
-            }).filter(Boolean);
-
-            return {
-                id: item._id,
-                _id: item._id,
-                name: item.name,
-                description: item.description,
-                image: item.image,
-                images: item.images,
-                price: item.price,
-                discountPrice: item.discountPrice,
-                preparationTime: item.preparationTime,
-                calories: item.calories,
-                spiceLevel: item.spiceLevel,
-                tags: item.tags,
-                allergens: item.allergens,
-                modifierGroups: populatedModifierGroups,
-                variants: item.variants,
-                addons: item.addons,
-                customizations: item.customizations,
-                isAvailable: item.isAvailable,
-                availableQuantity: item.availableQuantity,
-                dietaryType: item.dietaryType,
-            };
-        });
+        .map((item: any) => ({
+          id: item._id,
+          _id: item._id,
+          name: item.name,
+          description: item.description,
+          image: item.image,
+          images: item.images,
+          price: item.price,
+          discountPrice: item.discountPrice,
+          preparationTime: item.preparationTime,
+          calories: item.calories,
+          spiceLevel: item.spiceLevel,
+          itemType: item.itemType,
+          dietaryType: item.dietaryType,
+          isAvailable: item.isAvailable,
+        }));
 
       return {
         id: category._id,
@@ -207,10 +131,10 @@ export class PublicMenuService {
         description: category.description,
         image: category.image,
         displayOrder: category.displayOrder,
-        items: categoryItems,
+        items,
       };
     });
 
-    return menuByCategory.filter((cat) => cat.items.length > 0);
+    return grouped.filter((cat) => cat.items.length > 0);
   }
 }

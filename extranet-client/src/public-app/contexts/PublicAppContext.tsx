@@ -1,10 +1,9 @@
 import React, { createContext, useContext } from 'react';
-import { MenuData } from '@/public-app/types/menu.types';
+import { Restaurant } from '@/public-app/types/menu.types';
 
 interface PublicAppContextType {
-  menuData: MenuData;
+  restaurant: Restaurant;       // basic restaurant info from the categories call
   restaurantSlug: string;
-  qrCode?: string;
 }
 
 const PublicAppContext = createContext<PublicAppContextType | null>(null);
@@ -12,18 +11,12 @@ const PublicAppContext = createContext<PublicAppContextType | null>(null);
 export const PublicAppProvider: React.FC<{
   children: React.ReactNode;
   value: PublicAppContextType;
-}> = ({ children, value }) => {
-  return (
-    <PublicAppContext.Provider value={value}>
-      {children}
-    </PublicAppContext.Provider>
-  );
-};
+}> = ({ children, value }) => (
+  <PublicAppContext.Provider value={value}>{children}</PublicAppContext.Provider>
+);
 
 export const usePublicApp = () => {
   const context = useContext(PublicAppContext);
-  if (!context) {
-    throw new Error('usePublicApp must be used within PublicAppProvider');
-  }
+  if (!context) throw new Error('usePublicApp must be used within PublicAppProvider');
   return context;
 };

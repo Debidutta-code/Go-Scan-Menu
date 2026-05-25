@@ -2,17 +2,15 @@ import { Router } from 'express';
 import { PublicMenuController } from './controllers/public-menu.controller';
 
 const router = Router();
-const publicMenuController = new PublicMenuController();
+const ctrl = new PublicMenuController();
 
-// Public routes - no authentication required
+// Lightweight category list (used by the grid/landing page)
+router.get('/categories/:restaurantSlug', ctrl.getCategoriesBySlug);
 
-// Get complete menu by QR code scan (restaurant + table + menu)
-router.get('/menu/:restaurantSlug/:qrCode', publicMenuController.getMenuByQrCode);
+// Full menu with items (used by the menu-list page)
+router.get('/menu/:restaurantSlug', ctrl.getMenuBySlug);
 
-// Get menu (without specific table)
-router.get('/menu/:restaurantSlug', publicMenuController.getMenuByBranch);
-
-// Get restaurant basic info
-router.get('/restaurant/:restaurantSlug', publicMenuController.getRestaurantInfo);
+// Basic restaurant info
+router.get('/restaurant/:restaurantSlug', ctrl.getRestaurantInfo);
 
 export default router;
