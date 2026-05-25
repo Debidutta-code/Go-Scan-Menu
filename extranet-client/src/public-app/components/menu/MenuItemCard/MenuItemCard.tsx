@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { MenuItem } from '@/public-app/types/menu.types';
 import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '@/public-app/utils/formatters';
 import { isImageCached, markImageAsCached } from '@/public-app/utils/image-cache';
@@ -8,12 +9,14 @@ interface MenuItemCardProps {
   item: MenuItem;
   currency: string;
   onItemClick: (item: MenuItem) => void;
+  index?: number;
 }
 
 export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
   item,
   currency,
   onItemClick,
+  index = 0,
 }) => {
   const [imageLoaded, setImageLoaded] = React.useState(item.image ? isImageCached(item.image) : false);
   const minPrice = useMemo(() => {
@@ -39,9 +42,13 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
   );
 
   return (
-    <div
+    <motion.div
       className={`menu-item-card-horizontal ${!item.isAvailable ? 'unavailable' : ''}`}
       onClick={() => onItemClick(item)}
+      initial={{ opacity: 0, x: -10 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.3) }}
     >
       <div className="menu-item-card-image-wrapper">
         {item.image ? (
@@ -112,6 +119,6 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 });
