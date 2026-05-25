@@ -1,3 +1,4 @@
 .wrapper-menu-page {
   padding-bottom: 100px;
+  scroll-behavior: smooth;
 }
