@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { MenuItem, ModifierGroup, ModifierOption } from '@/public-app/types/menu.types';
 import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '@/public-app/utils/formatters';
 import './MenuItemDetail.css';
@@ -34,11 +35,9 @@ export const MenuItemDetail: React.FC<MenuItemDetailProps> = ({
     <>
       <div className="menu-item-details-overlay" onClick={onClose}></div>
       <div className={`menu-item-details-drawer ${isOpen ? 'open' : ''}`}>
-        <div className="menu-item-details-header">
-          <button className="menu-item-details-close-btn" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
-        </div>
+        <button className="menu-item-details-close-btn" onClick={onClose} aria-label="Close">
+          <X size={20} />
+        </button>
 
         <div className="menu-item-details-content">
           {images.length > 0 && (

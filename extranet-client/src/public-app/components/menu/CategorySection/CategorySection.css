@@ -27,7 +27,7 @@
 .category-section-accent {
   flex: 1;
   height: 2px;
-  background: linear-gradient(to right, #e2e8f0, transparent);
+  background: linear-gradient(to right, var(--gray-200), transparent);
   border-radius: 2px;
 }
 

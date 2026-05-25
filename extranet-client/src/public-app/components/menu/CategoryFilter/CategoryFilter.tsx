@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { Utensils } from 'lucide-react';
 import { Category } from '@/public-app/types/menu.types';
 import { ALL_CATEGORIES_ID, ALL_CATEGORIES_NAME } from '@/public-app/utils/constants';
 import './CategoryFilter.css';
@@ -46,7 +47,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           onClick={() => onCategoryChange(ALL_CATEGORIES_ID)}
         >
           <div className="public-category-filter-icon">
-            <span className="public-category-filter-emoji">🍽️</span>
+            <Utensils size={20} className="public-category-filter-lucide" />
           </div>
           <span className="public-category-filter-name">{ALL_CATEGORIES_NAME}</span>
         </button>
@@ -67,7 +68,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                   className="public-category-filter-img"
                 />
               ) : (
-                <span className="public-category-filter-emoji">🍴</span>
+                <Utensils size={20} className="public-category-filter-lucide" />
               )}
             </div>
             <span className="public-category-filter-name">{category.name}</span>

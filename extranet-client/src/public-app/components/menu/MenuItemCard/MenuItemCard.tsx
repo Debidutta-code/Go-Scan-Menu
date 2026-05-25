@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { MenuItem } from '@/public-app/types/menu.types';
 import { formatPrice, getSpiceLevelEmoji, getDietaryIcon } from '@/public-app/utils/formatters';
 import { isImageCached, markImageAsCached } from '@/public-app/utils/image-cache';
+import { Skeleton } from '@/public-app/components/common/Skeleton/Skeleton';
 import './MenuItemCard.css';
 
 interface MenuItemCardProps {
@@ -52,19 +53,28 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(({
     >
       <div className="menu-item-card-image-wrapper">
         {item.image ? (
-          <img
-            src={item.image}
-            alt={item.name}
-            className={`menu-item-card-image-horizontal ${!imageLoaded ? 'loading' : ''}`}
-            loading="lazy"
-            decoding="async"
-            width="100"
-            height="100"
-            onLoad={() => {
-              if (item.image) markImageAsCached(item.image);
-              setImageLoaded(true);
-            }}
-          />
+          <>
+            {!imageLoaded && (
+              <Skeleton
+                width="100%"
+                height="100%"
+                className="menu-item-card-image-skeleton"
+              />
+            )}
+            <img
+              src={item.image}
+              alt={item.name}
+              className={`menu-item-card-image-horizontal ${!imageLoaded ? 'loading' : ''}`}
+              loading="lazy"
+              decoding="async"
+              width="100"
+              height="100"
+              onLoad={() => {
+                if (item.image) markImageAsCached(item.image);
+                setImageLoaded(true);
+              }}
+            />
+          </>
         ) : (
           <div className="menu-item-card-image-placeholder-horizontal">
             <span>🍽️</span>
