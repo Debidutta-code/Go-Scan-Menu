@@ -73,7 +73,7 @@ export interface Category {
   description: string;
   image?: string;
   displayOrder: number;
-  items: MenuItem[];
+  items?: MenuItem[];
 }
 
 export interface RestaurantTheme {

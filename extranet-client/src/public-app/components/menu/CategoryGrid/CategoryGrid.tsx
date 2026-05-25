@@ -59,7 +59,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = React.memo(({
                 {category.name}
               </h3>
               <p className="public-category-grid-card-count">
-                {category.items.length} items
+                {category.items?.length || 0} items
               </p>
             </div>
           </div>

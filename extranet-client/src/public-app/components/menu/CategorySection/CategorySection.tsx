@@ -24,7 +24,7 @@ export const CategorySection: React.FC<CategorySectionProps> = React.memo(({
       </div>
 
       <div className="category-section-items-list">
-        {category.items.map((item) => (
+        {category.items?.map((item) => (
           <MenuItemCard
             key={item._id}
             item={item}
