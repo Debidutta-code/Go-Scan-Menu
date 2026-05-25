@@ -22,7 +22,18 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
     const activeBtn = scrollContainerRef.current.querySelector<HTMLElement>(
       '.public-category-filter-btn.active'
     );
-    activeBtn?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    if (activeBtn) {
+      const container = scrollContainerRef.current;
+      const scrollLeft =
+        activeBtn.offsetLeft -
+        container.offsetWidth / 2 +
+        activeBtn.offsetWidth / 2;
+
+      container.scrollTo({
+        left: scrollLeft,
+        behavior: 'smooth',
+      });
+    }
   }, [activeCategory]);
 
   return (

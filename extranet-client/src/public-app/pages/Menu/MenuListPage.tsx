@@ -1,24 +1,20 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CategoryFilter } from '@/public-app/components/menu/CategoryFilter/CategoryFilter';
 import { CategorySection } from '@/public-app/components/menu/CategorySection/CategorySection';
 import { MenuItemDetail } from '@/public-app/components/menu/MenuItemDetail/MenuItemDetail';
-import { SkeletonCategoryFilter } from '@/public-app/components/common/Skeleton/SkeletonCategoryFilter';
 import { SkeletonMenuItemList } from '@/public-app/components/common/Skeleton/SkeletonMenuItemList';
 import { usePublicApp } from '@/public-app/contexts/PublicAppContext';
-import { useMenuItems } from '@/public-app/hooks/useMenuItems';
+import { useMenu } from '@/public-app/contexts/MenuContext';
+import { useScrollSpy } from '@/public-app/hooks/useScrollSpy';
 import { MenuItem } from '@/public-app/types/menu.types';
 import { ALL_CATEGORIES_ID, SCROLL_OFFSET } from '@/public-app/utils/constants';
 import { Error } from '@/public-app/components/common/Error/Error';
 import './MenuListPage.css';
 
 export const MenuListPage: React.FC = () => {
-  const { restaurantSlug, restaurant } = usePublicApp();
+  const { restaurant } = usePublicApp();
+  const { menu, loading, error, setActiveCategory } = useMenu();
   const [searchParams] = useSearchParams();
-  const initialCategoryId = searchParams.get('category') || ALL_CATEGORIES_ID;
-
-  const { menu, loading, error } = useMenuItems(restaurantSlug);
-  const [activeCategory, setActiveCategory] = useState<string>(initialCategoryId);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
   const isFirstLoad = useRef(true);
@@ -31,9 +27,10 @@ export const MenuListPage: React.FC = () => {
         isFirstLoad.current = false;
         setTimeout(() => {
           const element = document.getElementById(`category-${categoryId}`);
-          if (element) {
+          const scrollContainer = document.querySelector('.public-main');
+          if (element && scrollContainer) {
             const top = element.offsetTop - SCROLL_OFFSET;
-            window.scrollTo({ top, behavior: 'auto' });
+            scrollContainer.scrollTo({ top, behavior: 'auto' });
             setActiveCategory(categoryId);
           }
         }, 100);
@@ -41,74 +38,36 @@ export const MenuListPage: React.FC = () => {
         isFirstLoad.current = false;
       }
     }
-  }, [loading, menu, searchParams]);
+  }, [loading, menu, searchParams, setActiveCategory]);
 
-  // Scroll spy
+  const categoryIds = useMemo(() => menu.map((cat) => `category-${cat._id}`), [menu]);
+  const scrolledCategoryId = useScrollSpy(categoryIds, SCROLL_OFFSET + 10);
+
   useEffect(() => {
-    if (loading) return;
-
-    const handleScroll = () => {
-      const scrollY = window.scrollY + SCROLL_OFFSET + 50;
-
-      for (let i = menu.length - 1; i >= 0; i--) {
-        const cat = menu[i];
-        const el = document.getElementById(`category-${cat._id}`);
-        if (el && el.offsetTop <= scrollY) {
-          setActiveCategory(cat._id);
-          return;
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [loading, menu]);
-
-  const handleFilterCategoryChange = useCallback((categoryId: string) => {
-    if (categoryId === ALL_CATEGORIES_ID) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setActiveCategory(ALL_CATEGORIES_ID);
-    } else {
-      setActiveCategory(categoryId);
-      const element = document.getElementById(`category-${categoryId}`);
-      if (element) {
-        const top = element.offsetTop - SCROLL_OFFSET;
-        window.scrollTo({ top, behavior: 'smooth' });
-      }
+    if (scrolledCategoryId) {
+      const id = scrolledCategoryId.replace('category-', '');
+      setActiveCategory(id);
     }
-  }, []);
+  }, [scrolledCategoryId, setActiveCategory]);
 
   if (error) {
     return <Error message={error} />;
   }
 
-  return (
-    <div className="wrapper-menu-page">
-      {loading ? (
-        <>
-          <SkeletonCategoryFilter />
-          <SkeletonMenuItemList />
-        </>
-      ) : (
-        <>
-          <CategoryFilter
-            categories={menu}
-            activeCategory={activeCategory}
-            onCategoryChange={handleFilterCategoryChange}
-          />
+  if (loading) {
+    return <SkeletonMenuItemList />;
+  }
 
-          <div className="menu-page-content">
-            {menu.map((category) => (
-              <CategorySection
-                key={category._id}
-                category={category}
-                currency={restaurant.settings?.currency || 'USD'}
-                onItemClick={setSelectedItem}
-              />
-            ))}
-          </div>
-        </>
-      )}
+  return (
+    <div className="menu-page-content">
+      {menu.map((category) => (
+        <CategorySection
+          key={category._id}
+          category={category}
+          currency={restaurant.settings?.currency || 'USD'}
+          onItemClick={setSelectedItem}
+        />
+      ))}
 
       {selectedItem && (
         <MenuItemDetail

@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { CategoryGrid } from '@/public-app/components/menu/CategoryGrid/CategoryGrid';
 import { SkeletonCategoryGrid } from '@/public-app/components/common/Skeleton/SkeletonCategoryGrid';
 import { usePublicApp } from '@/public-app/contexts/PublicAppContext';
-import { useCategories } from '@/public-app/hooks/useCategories';
+import { useMenu } from '@/public-app/contexts/MenuContext';
 import { Error } from '@/public-app/components/common/Error/Error';
 import './CategoryPage.css';
 
 export const CategoryPage: React.FC = () => {
   const { restaurantSlug, qrCode } = usePublicApp();
+  const { menu, loading, error } = useMenu();
   const navigate = useNavigate();
-  const { categories, loading, error } = useCategories(restaurantSlug);
 
   const handleCategoryClick = (categoryId: string) => {
     const basePath = qrCode
@@ -29,7 +29,7 @@ export const CategoryPage: React.FC = () => {
         <SkeletonCategoryGrid />
       ) : (
         <CategoryGrid
-          categories={categories}
+          categories={menu}
           onCategoryClick={handleCategoryClick}
         />
       )}
