@@ -9,38 +9,29 @@ interface CategoryFilterProps {
   onCategoryChange: (categoryId: string) => void;
 }
 
-export const CategoryFilter: React.FC<CategoryFilterProps> = React.memo(({
+export const CategoryFilter: React.FC<CategoryFilterProps> = ({
   categories,
   activeCategory,
   onCategoryChange,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Keep the active tab scrolled into view inside the filter bar
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const activeButton = container.querySelector('.public-category-filter-btn.active') as HTMLElement;
-
-      if (activeButton) {
-        const containerWidth = container.offsetWidth;
-        const buttonOffsetLeft = activeButton.offsetLeft;
-        const buttonWidth = activeButton.offsetWidth;
-
-        const scrollTarget = buttonOffsetLeft - (containerWidth / 2) + (buttonWidth / 2);
-
-        container.scrollTo({
-          left: scrollTarget,
-          behavior: 'smooth'
-        });
-      }
-    }
+    if (!scrollContainerRef.current) return;
+    const activeBtn = scrollContainerRef.current.querySelector<HTMLElement>(
+      '.public-category-filter-btn.active'
+    );
+    activeBtn?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, [activeCategory]);
 
   return (
     <div className="public-category-filter-container">
       <div className="public-category-filter-scroll" ref={scrollContainerRef}>
         <button
-          className={`public-category-filter-btn ${activeCategory === ALL_CATEGORIES_ID ? 'active' : ''}`}
+          className={`public-category-filter-btn ${
+            activeCategory === ALL_CATEGORIES_ID ? 'active' : ''
+          }`}
           onClick={() => onCategoryChange(ALL_CATEGORIES_ID)}
         >
           <div className="public-category-filter-icon">
@@ -52,7 +43,9 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = React.memo(({
         {categories.map((category) => (
           <button
             key={category._id}
-            className={`public-category-filter-btn ${activeCategory === category._id ? 'active' : ''}`}
+            className={`public-category-filter-btn ${
+              activeCategory === category._id ? 'active' : ''
+            }`}
             onClick={() => onCategoryChange(category._id)}
           >
             <div className="public-category-filter-icon">
@@ -72,4 +65,4 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = React.memo(({
       </div>
     </div>
   );
-});
+};

@@ -1,89 +1,121 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CategoryFilter } from '@/public-app/components/menu/CategoryFilter/CategoryFilter';
 import { CategoryGrid } from '@/public-app/components/menu/CategoryGrid/CategoryGrid';
 import { CategorySection } from '@/public-app/components/menu/CategorySection/CategorySection';
 import { MenuItemDetail } from '@/public-app/components/menu/MenuItemDetail/MenuItemDetail';
 import { usePublicApp } from '@/public-app/contexts/PublicAppContext';
-import { useScrollSpy } from '@/public-app/hooks/useScrollSpy';
 import { MenuItem } from '@/public-app/types/menu.types';
 import { ALL_CATEGORIES_ID, SCROLL_OFFSET } from '@/public-app/utils/constants';
 import './MenuPage.css';
 
+type View = 'grid' | 'list';
+
 export const MenuPage: React.FC = () => {
   const { menuData } = usePublicApp();
-  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [view, setView] = useState<View>('grid');
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES_ID);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
-  const spyIds = useMemo(
-    () => [ALL_CATEGORIES_ID, ...menuData.menu.map((cat) => `category-${cat._id}`)],
-    [menuData.menu]
-  );
+  // Used to know which category to scroll to after the list view mounts
+  const pendingScrollRef = useRef<string | null>(null);
 
-  const scrollSpyCategory = useScrollSpy(spyIds, SCROLL_OFFSET);
-
+  // After switching to list view, scroll to the target category
   useEffect(() => {
-    if (scrollSpyCategory) {
-      const categoryId = scrollSpyCategory === ALL_CATEGORIES_ID
-        ? ALL_CATEGORIES_ID
-        : scrollSpyCategory.replace('category-', '');
-      setActiveCategory(categoryId);
-    }
-  }, [scrollSpyCategory]);
+    if (view === 'list' && pendingScrollRef.current) {
+      const targetId = pendingScrollRef.current;
+      pendingScrollRef.current = null;
 
-  const handleItemClick = useCallback((item: MenuItem) => {
-    setSelectedItem(item);
+      // Small timeout lets the DOM paint before we measure offsetTop
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`category-${targetId}`);
+        if (element) {
+          const top = element.offsetTop - SCROLL_OFFSET;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      }, 50);
+
+      return () => clearTimeout(timer);
+    }
+  }, [view]);
+
+  // Scroll spy — only active in list view
+  useEffect(() => {
+    if (view !== 'list') return;
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY + SCROLL_OFFSET + 50;
+
+      for (let i = menuData.menu.length - 1; i >= 0; i--) {
+        const cat = menuData.menu[i];
+        const el = document.getElementById(`category-${cat._id}`);
+        if (el && el.offsetTop <= scrollY) {
+          setActiveCategory(cat._id);
+          return;
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [view, menuData.menu]);
+
+  // Called when a category card in the grid is clicked
+  const handleGridCategoryClick = useCallback((categoryId: string) => {
+    pendingScrollRef.current = categoryId;
+    setActiveCategory(categoryId);
+    setView('list');
   }, []);
 
-  const handleCategoryChange = useCallback((categoryId: string) => {
-    setActiveCategory(categoryId);
-
-    const scroller = document.querySelector('.public-main');
-    if (!scroller) return;
-
+  // Called when the category filter bar tab is clicked
+  const handleFilterCategoryChange = useCallback((categoryId: string) => {
     if (categoryId === ALL_CATEGORIES_ID) {
-      scroller.scrollTo({ top: 0, behavior: 'smooth' });
+      // Go back to the grid
+      setView('grid');
+      setActiveCategory(ALL_CATEGORIES_ID);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      const element = document.getElementById(`category-${categoryId}`);
-      if (element) {
-        // We use scroll-margin-top in CSS, so scrollTo should just work with offset
-        const scrollerRect = scroller.getBoundingClientRect();
-        const elementRect = element.getBoundingClientRect();
-        const relativeTop = elementRect.top - scrollerRect.top;
-        const scrollTarget = scroller.scrollTop + relativeTop - SCROLL_OFFSET;
-
-        scroller.scrollTo({
-          top: scrollTarget,
-          behavior: 'smooth'
-        });
+      if (view !== 'list') {
+        // Coming from grid — switch to list first, then scroll
+        pendingScrollRef.current = categoryId;
+        setActiveCategory(categoryId);
+        setView('list');
+      } else {
+        // Already in list — just scroll to the section
+        setActiveCategory(categoryId);
+        const element = document.getElementById(`category-${categoryId}`);
+        if (element) {
+          const top = element.offsetTop - SCROLL_OFFSET;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
       }
     }
-  }, []);
+  }, [view]);
 
   return (
     <div className="wrapper-menu-page">
       <CategoryFilter
         categories={menuData.menu}
         activeCategory={activeCategory}
-        onCategoryChange={handleCategoryChange}
+        onCategoryChange={handleFilterCategoryChange}
       />
 
       <div className="menu-page-content">
-        {/* Always render everything to avoid re-mounting flickers */}
-        <div id={ALL_CATEGORIES_ID}>
+        {view === 'grid' ? (
           <CategoryGrid
             categories={menuData.menu}
-            onCategoryClick={handleCategoryChange}
+            onCategoryClick={handleGridCategoryClick}
           />
-        </div>
-
-        {menuData.menu.map((category) => (
-          <CategorySection
-            key={category._id}
-            category={category}
-            currency={menuData.restaurant.settings?.currency || 'USD'}
-            onItemClick={handleItemClick}
-          />
-        ))}
+        ) : (
+          menuData.menu.map((category) => (
+            <CategorySection
+              key={category._id}
+              category={category}
+              currency={menuData.restaurant.settings?.currency || 'USD'}
+              onItemClick={setSelectedItem}
+            />
+          ))
+        )}
       </div>
 
       {selectedItem && (
