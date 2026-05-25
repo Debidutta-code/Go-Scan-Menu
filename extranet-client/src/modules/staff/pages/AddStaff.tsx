@@ -22,7 +22,6 @@ export const AddStaff: React.FC = () => {
     password: '',
     confirmPassword: '',
     staffType: '' as any,
-    branchId: '',
   });
 
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
@@ -153,7 +152,6 @@ export const AddStaff: React.FC = () => {
         password: formData.password,
         staffType: formData.staffType,
         roleId: selectedRole?._id,
-        branchId: formData.branchId || undefined,
       });
 
       navigate('/staff/team');
