@@ -19,17 +19,6 @@ export const FeedbackPage: React.FC = () => {
 
   return (
     <div className="feedback-page-wrapper">
-      <motion.div
-        className="feedback-header-nav"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <button onClick={handleBack} className="back-to-menu-btn">
-          <ArrowLeft size={20} />
-          <span>Menu</span>
-        </button>
-      </motion.div>
-
       <div className="feedback-content">
         <motion.div
           className="feedback-hero"
