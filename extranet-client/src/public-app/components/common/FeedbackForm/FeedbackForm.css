@@ -5,7 +5,8 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   max-width: 500px;
   margin: 0 auto;
-  margin-bottom: 200px;
+  /* margin-bottom: 200px; */
+  bottom: 60px;
 }
 
 .form-header {
