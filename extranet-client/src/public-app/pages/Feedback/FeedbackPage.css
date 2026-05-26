@@ -69,10 +69,6 @@
   color: var(--primary-600);
 }
 
-.feedback-form-card {
-  /* The container itself has background and shadow */
-}
-
 @media (max-width: 480px) {
   .feedback-hero h1 {
     font-size: 1.5rem;
