@@ -2,6 +2,8 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IFeedback extends Document {
   restaurantId: Types.ObjectId;
+  customerName?: string;
+  customerPhone?: string;
   food: number;
   service: number;
   cleanliness: number;
@@ -18,6 +20,14 @@ const feedbackSchema = new Schema<IFeedback>(
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
       required: true,
+    },
+    customerName: {
+      type: String,
+      trim: true,
+    },
+    customerPhone: {
+      type: String,
+      trim: true,
     },
     food: {
       type: Number,

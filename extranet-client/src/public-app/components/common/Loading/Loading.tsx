@@ -3,7 +3,7 @@ import './Loading.css';
 
 export const Loading: React.FC = () => {
   return (
-    <div className="loading-screen">
+    <div className="loading-screen" data-testid="loading-screen">
       <div className="spinner"></div>
       <p>Loading menu...</p>
     </div>
